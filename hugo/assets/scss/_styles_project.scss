@@ -1,0 +1,10 @@
+// SPDX-FileCopyrightText: 2023 Siemens AG
+// SPDX-License-Identifier: Apache-2.0
+
+.td-page-meta--view,
+.td-page-meta--edit,
+.td-page-meta--child,
+.td-page-meta--issue,
+.td-page-meta--project-issue {
+  display: none !important;
+}

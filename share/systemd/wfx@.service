@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: 2023 Siemens AG
+#
+# SPDX-License-Identifier: Apache-2.0
+[Unit]
+Description=wfx@%I
+Documentation=man:wfx(1)
+Requires=wfx@%i.socket
+After=wfx@%i.socket
+
+[Service]
+Type=simple
+ExecStartPre=/usr/bin/mkdir -p /var/lib/wfx/%i
+ExecStart=/usr/bin/wfx
+Restart=always
+RestartSec=3
+User=wfx
+Group=wfx
+WorkingDirectory=-/var/lib/wfx/%i
+UMask=007
+
+# Hardening
+PrivateTmp=yes
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/lib/wfx
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+PrivateDevices=yes
+RestrictSUIDSGID=true
+RestrictNamespaces=yes

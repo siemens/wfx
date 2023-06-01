@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: 2023 Siemens AG
+#
+# SPDX-License-Identifier: Apache-2.0
+[Unit]
+Description=wfx@%I sockets
+
+[Socket]
+# do not change the order; first socket is always the client socket
+ListenStream=/run/wfx/%i/client.sock
+ListenStream=/run/wfx/%i/mgmt.sock
+SocketUser=wfx
+SocketGroup=wfx
+SocketMode=0660
+
+[Install]
+WantedBy=sockets.target

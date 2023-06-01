@@ -1,0 +1,114 @@
+# SPDX-FileCopyrightText: 2023 Siemens AG
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Author: Michael Adler <michael.adler@siemens.com>
+---
+workflow:
+  rules:
+    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH
+
+stages:
+  - build
+  - lint
+  - test
+  - deploy
+
+build:
+  stage: build
+  image: archlinux:latest
+  variables:
+    GOPATH: /tmp/go
+  before_script:
+    - pacman -Sy --noconfirm go git gcc zig make just
+    - if [ -d go ]; then mv go "$GOPATH"; else mkdir -p "$GOPATH"; fi
+    - go mod download
+  script:
+    - env CC=gcc make test
+    - env CC=$(pwd)/.ci/zcc make STATIC=1
+  after_script:
+    - mv "$GOPATH" .
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - wfx
+      - wfxctl
+      - wfx-viewer
+      - wfx-loadtest
+  cache:
+    key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
+    paths:
+      - go/
+
+lint:
+  stage: lint
+  needs: []
+  image: archlinux:latest
+  before_script:
+    - pacman -Sy --noconfirm go just staticcheck reuse
+    - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /usr/local/bin v1.52.2
+  script:
+    - just lint
+
+generate:
+  stage: lint
+  needs: []
+  image: golang:bullseye
+  before_script:
+    - apt-get update -q && apt-get install -y git-lfs python3-yaml
+    - git lfs install && git submodule update
+    - .ci/setup/just.sh
+    - .ci/setup/swagger.sh
+  script:
+    - just generate
+    - git diff --exit-code
+
+test-postgres:
+  stage: test
+  image: archlinux:latest
+  services:
+    - postgres:14
+  needs: []
+  variables:
+    CGO_ENABLED: 1
+
+    # see https://docs.gitlab.com/ee/ci/services/postgres.html
+    POSTGRES_HOST: postgres
+    POSTGRES_PORT: 5432
+    POSTGRES_DB: $POSTGRES_DB
+    POSTGRES_USER: $POSTGRES_USER
+    POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+    POSTGRES_HOST_AUTH_METHOD: trust
+
+    PGHOST: postgres
+    PGPORT: 5432
+    PGDATABASE: $POSTGRES_DB
+    PGUSER: $POSTGRES_USER
+    PGPASSWORD: $POSTGRES_PASSWORD
+    PGSSLMODE: disable
+  before_script:
+    - pacman -Sy --noconfirm go gcc git just
+  script:
+    - just postgres-integration-test
+
+test-mysql:
+  stage: test
+  image: archlinux:latest
+  services:
+    - mysql:8-debian
+  needs: []
+  variables:
+    CGO_ENABLED: 1
+
+    # see https://docs.gitlab.com/ee/ci/services/mysql.html
+    # Configure mysql service (https://hub.docker.com/_/mysql/)
+    MYSQL_DATABASE: wfx
+    MYSQL_ROOT_PASSWORD: root
+    MYSQL_USER: wfx
+    MYSQL_PASSWORD: secret
+    MYSQL_HOST: mysql
+  before_script:
+    - pacman -Sy --noconfirm go gcc git just
+  script:
+    - just mysql-integration-test

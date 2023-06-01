@@ -1,0 +1,256 @@
+# SPDX-FileCopyrightText: 2023 Siemens AG
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Author: Michael Adler <michael.adler@siemens.com>
+---
+project_name: wfx
+
+before:
+  hooks:
+    - go mod download
+
+builds:
+  - id: wfx
+    binary: wfx
+    main: ./cmd/wfx
+    tags:
+      - sqlite
+      - postgres
+      - mysql
+    flags:
+      - -trimpath
+      - -mod=readonly
+    ldflags:
+      - -s -w -linkmode external -extldflags '-static'
+      - -X github.com/siemens/wfx/cmd/wfx/metadata.Version={{.Version}}
+      - -X github.com/siemens/wfx/cmd/wfx/metadata.Commit={{.Commit}}
+      - -X github.com/siemens/wfx/cmd/wfx/metadata.Date={{.CommitDate}}
+    env:
+      - CGO_ENABLED=1
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    mod_timestamp: "{{ .CommitTimestamp }}"
+    hooks:
+      post:
+        - |
+          {{ if and (eq .Os "linux") (eq .Arch "amd64") -}}
+          .ci/goreleaser/hook.sh '{{ .Path }}'
+          {{ else -}}
+          true
+          {{ end }}
+
+  - id: wfxctl
+    binary: wfxctl
+    main: ./cmd/wfxctl
+    flags:
+      - -trimpath
+      - -mod=readonly
+    ldflags:
+      - -s -w -linkmode external -extldflags '-static'
+      - -X github.com/siemens/wfxctl/cmd/wfx/metadata.Version={{.Version}}
+      - -X github.com/siemens/wfxctl/cmd/wfx/metadata.Commit={{.Commit}}
+      - -X github.com/siemens/wfxctl/cmd/wfx/metadata.Date={{.CommitDate}}
+    env:
+      - CGO_ENABLED=1
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    mod_timestamp: "{{ .CommitTimestamp }}"
+    hooks:
+      post:
+        - |
+          {{ if and (eq .Os "linux") (eq .Arch "amd64") -}}
+          .ci/goreleaser/hook.sh '{{ .Path }}'
+          {{ else -}}
+          true
+          {{ end }}
+
+  - id: wfx-viewer
+    binary: wfx-viewer
+    main: ./cmd/wfx-viewer
+    flags:
+      - -trimpath
+      - -mod=readonly
+    ldflags:
+      - -s -w -linkmode external -extldflags '-static'
+      - -X github.com/siemens/wfx/cmd/wfx-viewer/metadata.Version={{.Version}}
+      - -X github.com/siemens/wfx/cmd/wfx-viewer/metadata.Commit={{.Commit}}
+      - -X github.com/siemens/wfx/cmd/wfx-viewer/metadata.Date={{.CommitDate}}
+    env:
+      - CGO_ENABLED=1
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    mod_timestamp: "{{ .CommitTimestamp }}"
+    hooks:
+      post:
+        - |
+          {{ if and (eq .Os "linux") (eq .Arch "amd64") -}}
+          .ci/goreleaser/hook.sh '{{ .Path }}'
+          {{ else -}}
+          true
+          {{ end }}
+
+archives:
+  - id: wfx
+    builds:
+      - wfx
+    name_template: >-
+      {{.Binary}}-{{.Version}}-{{.Os}}-{{- if eq .Arch "amd64" }}x86_64{{ else }}{{.Arch}}{{ end }}{{ if .Arm }}v{{.Arm }}{{ end }}
+    format: tar.xz
+    rlcp: true
+
+  - id: wfxctl
+    builds:
+      - wfxctl
+    name_template: >-
+      {{.Binary}}-{{.Version}}-{{.Os}}-{{- if eq .Arch "amd64" }}x86_64{{ else }}{{.Arch}}{{ end }}{{ if .Arm }}v{{.Arm }}{{ end }}
+    format: tar.xz
+    rlcp: true
+
+  - id: wfx-viewer
+    builds:
+      - wfx-viewer
+    name_template: >-
+      {{.Binary}}-{{.Version}}-{{.Os}}-{{- if eq .Arch "amd64" }}x86_64{{ else }}{{.Arch}}{{ end }}{{ if .Arm }}v{{.Arm }}{{ end }}
+    format: tar.xz
+    rlcp: true
+
+nfpms:
+  - id: wfx
+    package_name: wfx
+    builds:
+      - wfx
+    vendor: Siemens AG
+    homepage: https://github.com/siemens/wfx
+    maintainer: Michael Adler <michael.adler@siemens.com>
+    description: |-
+      Workflow Executor Reference Implementation.
+    license: Apache-2.0
+    formats:
+      - deb
+      - rpm
+    bindir: /usr/bin
+    version_metadata: git
+    section: default
+    priority: extra
+    scripts:
+      postinstall: .ci/goreleaser/postinstall.sh
+      postremove: .ci/goreleaser/postremove.sh
+    contents:
+      # it's the same content for all architectures
+      - src: dist/wfx_linux_amd64_v1/wfx.bash
+        dst: /usr/share/bash-completion/completions/wfx
+      - src: dist/wfx_linux_amd64_v1/_wfx
+        dst: /usr/share/zsh/vendor-completions/_wfx
+      - src: dist/wfx_linux_amd64_v1/wfx.fish
+        dst: /usr/share/fish/completions/wfx.fish
+      - src: dist/wfx_linux_amd64_v1/wfx.1.gz
+        dst: /usr/share/man/man1/wfx.1.gz
+      - src: share/systemd/wfx.service
+        dst: /lib/systemd/system/wfx.service
+      - src: share/systemd/wfx@.socket
+        dst: /lib/systemd/system/wfx@.socket
+      - src: share/systemd/wfx@.service
+        dst: /lib/systemd/system/wfx@.service
+    recommends:
+      - bash-completion
+
+  - id: wfxctl
+    package_name: wfxctl
+    builds:
+      - wfxctl
+    vendor: Siemens AG
+    homepage: https://github.com/siemens/wfx
+    maintainer: Michael Adler <michael.adler@siemens.com>
+    description: wfx client
+    license: Apache-2.0
+    formats:
+      - deb
+    bindir: /usr/bin
+    version_metadata: git
+    section: default
+    priority: extra
+    contents:
+      # it's the same content for all architectures
+      - src: dist/wfxctl_linux_amd64_v1/wfxctl.bash
+        dst: /usr/share/bash-completion/completions/wfxctl
+      - src: dist/wfxctl_linux_amd64_v1/_wfxctl
+        dst: /usr/share/zsh/vendor-completions/_wfxctl
+      - src: dist/wfxctl_linux_amd64_v1/wfxctl.fish
+        dst: /usr/share/fish/completions/wfxctl.fish
+      - src: dist/wfxctl_linux_amd64_v1/wfxctl.1.gz
+        dst: /usr/share/man/man1/wfxctl.1.gz
+    recommends:
+      - bash-completion
+
+  - id: wfx-viewer
+    package_name: wfx-viewer
+    builds:
+      - wfx-viewer
+    vendor: Siemens AG
+    homepage: https://github.com/siemens/wfx
+    maintainer: Michael Adler <michael.adler@siemens.com>
+    description: |-
+      Workflow Executor viewer.
+    license: Apache-2.0
+    formats:
+      - deb
+    bindir: /usr/bin
+    version_metadata: git
+    section: default
+    priority: extra
+    contents:
+      # it's the same content for all architectures
+      - src: dist/wfx-viewer_linux_amd64_v1/wfx-viewer.bash
+        dst: /usr/share/bash-completion/completions/wfx-viewer
+      - src: dist/wfx-viewer_linux_amd64_v1/_wfx-viewer
+        dst: /usr/share/zsh/vendor-completions/_wfx-viewer
+      - src: dist/wfx-viewer_linux_amd64_v1/wfx-viewer.fish
+        dst: /usr/share/fish/completions/wfx-viewer.fish
+      - src: dist/wfx-viewer_linux_amd64_v1/wfx-viewer.1.gz
+        dst: /usr/share/man/man1/wfx-viewer.1.gz
+
+dockers:
+  - id: wfx
+
+    ids:
+      - wfx
+
+    image_templates:
+      - "gcr.io/siemens/wfx:latest"
+      - "gcr.io/siemens/wfx:{{ .Tag }}"
+
+    build_flag_templates:
+      - "--pull"
+
+checksum:
+  name_template: "{{.ProjectName}}_{{.Version}}_SHA256SUMS"
+  algorithm: sha256
+
+snapshot:
+  name_template: "{{ .Tag }}-next"
+
+changelog:
+  sort: asc
+  groups:
+    - title: Features
+      regexp: "^.*feat[(\\w)]*:+.*$"
+      order: 0
+    - title: "Bug fixes"
+      regexp: "^.*fix[(\\w)]*:+.*$"
+      order: 1
+    - title: Others
+      order: 999
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"

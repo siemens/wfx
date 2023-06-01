@@ -1,0 +1,100 @@
+# SPDX-FileCopyrightText: 2023 Siemens AG
+#
+# SPDX-License-Identifier: Apache-2.0
+---
+name: wfx.workflow.kanban
+
+groups:
+  - name: OPEN
+    description: The task is ready for the client(s).
+    states:
+      - NEW
+      - PROGRESS
+      - VALIDATE
+
+  - name: CLOSED
+    description: The task is in a final state, i.e. it cannot progress any further.
+    states:
+      - DONE
+      - DISCARDED
+
+states:
+  - name: BACKLOG
+    description: Task is created
+
+  - name: NEW
+    description: task is ready to be pulled
+
+  - name: PROGRESS
+    description: task is being worked on
+
+  - name: VALIDATE
+    description: task is validated
+
+  - name: DONE
+    description: task is done according to the definition of done
+
+  - name: DISCARDED
+    description: task is discarded
+
+transitions:
+  - from: BACKLOG
+    to: NEW
+    eligible: WFX
+    action: IMMEDIATE
+    description: |
+      Immediately transition to "NEW" upon a task hitting the backlog,
+      conveniently done by wfx "on behalf of" the Product Owner.
+
+  - from: NEW
+    to: PROGRESS
+    eligible: CLIENT
+    description: |
+      A Developer pulls the task or
+      the Product Owner discards it (see below transition),
+      whoever comes first.
+
+  - from: NEW
+    to: DISCARDED
+    eligible: WFX
+    description: |
+      The Product Owner discards the task or
+      a Developer pulls it (see preceding transition),
+      whoever comes first.
+
+  - from: PROGRESS
+    to: VALIDATE
+    eligible: CLIENT
+    description: |
+      The Developer has completed the task, it's ready for validation.
+
+  - from: PROGRESS
+    to: PROGRESS
+    eligible: CLIENT
+    description: |
+      The Developer reports task completion progress percentage.
+
+  - from: VALIDATE
+    to: DISCARDED
+    eligible: WFX
+    description: |
+      The task result has no customer value.
+
+  - from: VALIDATE
+    to: DISCARDED
+    eligible: CLIENT
+    description: |
+      The task result cannot be integrated into Production software.
+
+  - from: VALIDATE
+    to: DONE
+    eligible: CLIENT
+    description: |
+      A Developer has validated the task result as useful.
+
+  - from: VALIDATE
+    to: DONE
+    eligible: WFX
+    action: WAIT
+    description: |
+      The Product Owner has validated the task result as useful

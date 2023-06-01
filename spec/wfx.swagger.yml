@@ -1,0 +1,1026 @@
+# SPDX-FileCopyrightText: 2023 Siemens AG
+#
+# SPDX-License-Identifier: Apache-2.0
+---
+# see https://github.com/OAI/OpenAPI-Specification/blob/main/versions/2.0.md
+swagger: "2.0"
+basePath: /api/wfx/v1
+info:
+  title: "Workflow Executor"
+  version: "1.0.0"
+  license:
+    name: Apache 2.0
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+  x-visibility: "external"
+schemes:
+  # possible values: http, https, unix
+  - http
+
+x-definitions-templates:
+  Limits:
+    maxStateCount: &maxStateCount
+      maxItems: 4096
+    maxGroupCount: &maxGroupCount
+      maxItems: 1024
+    maxTransitionCount: &maxTransitionCount
+      maxItems: 16384
+    maxTagsCount: &maxTagsCount
+      maxItems: 16
+    maxHistoryCount: &maxHistoryCount
+      maxItems: 8192
+    maxErrorCount: &maxErrorCount
+      maxItems: 128
+    maxItemsCount: &maxItemsCount
+      maxItems: 1024
+
+  Pagination: &pageProperties
+    pagination:
+      type: object
+      properties:
+        limit:
+          type: integer
+          format: int32
+          description: the maximum number of items to return
+          example: 20
+        offset:
+          type: integer
+          format: int64
+          description: the number of items to skip before starting to return results
+          example: 0
+        total:
+          type: integer
+          format: int64
+          description: the total number of items
+          example: 1000
+
+definitions:
+  PaginatedWorkflowList:
+    type: object
+    description: Paginated list of workflows
+    properties:
+      content:
+        type: array
+        items:
+          $ref: "#/definitions/Workflow"
+      <<: *pageProperties
+
+  Workflow:
+    type: object
+    required:
+      - name
+      - states
+      - transitions
+    properties:
+      name:
+        type: string
+        minLength: 1
+        maxLength: 64
+        pattern: "^[a-zA-Z0-9\\-\\.]+$"
+        description: User provided unique workflow name
+        example: wfx.workflow.dau.direct
+        x-nullable: false
+      states:
+        type: array
+        minItems: 1
+        <<: *maxStateCount
+        items:
+          $ref: "#/definitions/State"
+      groups:
+        type: array
+        <<: *maxGroupCount
+        items:
+          $ref: "#/definitions/Group"
+      transitions:
+        type: array
+        minItems: 1
+        <<: *maxTransitionCount
+        items:
+          $ref: "#/definitions/Transition"
+
+  State:
+    type: object
+    required:
+      - name
+    properties:
+      name:
+        type: string
+        example: START
+        x-nullable: false
+      description:
+        type: string
+        example: Description of the state
+
+  Group:
+    type: object
+    required:
+      - name
+      - states
+    properties:
+      name:
+        type: string
+        example: OPEN
+        x-nullable: false
+      description:
+        type: string
+        example: Description of the group
+      states:
+        type: array
+        description: A list of states belonging to this group
+        minItems: 1
+        <<: *maxStateCount
+        items:
+          type: string
+
+  Transition:
+    type: object
+    required:
+      - from
+      - to
+      - eligible
+    properties:
+      from:
+        type: string
+        example: START
+        x-nullable: false
+      to:
+        type: string
+        example: END
+        x-nullable: false
+      description:
+        type: string
+        example: Description of the transition
+      eligible:
+        description: The entity that may execute the transition
+        $ref: "#/definitions/EligibleEnum"
+        example: CLIENT
+      action:
+        description: "The transition execution action (default: WAIT)"
+        $ref: "#/definitions/ActionEnum"
+        example: WAIT
+
+  EligibleEnum:
+    type: string
+    x-nullable: false
+    enum:
+      - CLIENT
+      - WFX
+
+  ActionEnum:
+    type: string
+    enum:
+      - IMMEDIATE
+      - WAIT
+
+  JobRequest:
+    type: object
+    required:
+      - clientId
+      - workflow
+    properties:
+      clientId:
+        type: string
+        description: Create job for the given client ID
+        example: client42
+        x-nullable: false
+      workflow:
+        type: string
+        description: Workflow name
+        example: wfx.workflow.dau.direct
+        x-nullable: false
+      tags:
+        type: array
+        items:
+          type: string
+          example: EUROPE_WEST
+        <<: *maxTagsCount
+      definition:
+        description: The existing job definition will be replaced with this if this property is not empty.
+        type: object
+        additionalProperties:
+          type: object
+        example: |
+          { "userDefined": {} }
+
+  JobStatus:
+    type: object
+    description: Job status information
+    required:
+      - state
+    properties:
+      state:
+        type: string
+        x-nullable: false
+        example: END
+        description: Name of the new workflow state
+      clientId:
+        type: string
+        x-nullable: false
+        example: client42
+        description: Client which sent the status update
+      progress:
+        description: Current job progress percentage
+        type: number
+        format: int32
+        maximum: 100
+      message:
+        type: string
+        description: Reason message/info, free text from client
+        maxLength: 1024
+      definitionHash:
+        type: string
+        description: Job definition hash
+        readOnly: true
+        maxLength: 64
+      context:
+        type: object
+        description: Client-specific JSON object to report additional context information such as error details, stack traces, etc
+        minLength: 0
+        maxLength: 20000
+        additionalProperties:
+          type: object
+        example: |
+          {
+            "lines": [ "line1", "line2" ]
+          }
+
+  Job:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique job ID (wfx-generated)
+        example: "3307e5cb-074c-49b7-99d4-5e61839a4c2d"
+        readOnly: true
+        x-nullable: false
+        maxLength: 36
+      clientId:
+        type: string
+        example: client42
+        x-nullable: false
+      workflow:
+        $ref: "#/definitions/Workflow"
+      tags:
+        type: array
+        items:
+          type: string
+          <<: *maxTagsCount
+      definition:
+        type: object
+        additionalProperties:
+          type: object
+        example: |
+          { "userDefined": {} }
+      status:
+        $ref: "#/definitions/JobStatus"
+      stime:
+        description: Date and time (ISO8601) when the job was created (set by wfx)
+        type: string
+        format: date-time
+        readOnly: true
+      mtime:
+        description: Date and time (ISO8601) when the job was last modified (set by wfx)
+        type: string
+        format: date-time
+        readOnly: true
+      history:
+        description: The job's history. Last in, first out (LIFO). Array is truncated if its length exceeds the maximum allowed length.
+        type: array
+        <<: *maxHistoryCount
+        items:
+          $ref: "#/definitions/History"
+
+  History:
+    type: object
+    properties:
+      mtime:
+        description: Date and time (ISO8601) when the job was modified (set by wfx)
+        type: string
+        format: date-time
+        readOnly: true
+      status:
+        $ref: "#/definitions/JobStatus"
+        description: A previous job status
+      definition:
+        type: object
+        additionalProperties:
+          type: object
+        example: |
+          { "userDefined": {} }
+
+  PaginatedJobList:
+    type: object
+    description: Paginated list of jobs
+    properties:
+      content:
+        type: array
+        items:
+          $ref: "#/definitions/Job"
+      <<: *pageProperties
+
+  ErrorResponse:
+    type: object
+    properties:
+      errors:
+        type: array
+        <<: *maxErrorCount
+        items:
+          $ref: "#/definitions/Error"
+
+  Error:
+    type: object
+    properties:
+      code:
+        type: string
+        description: Identifier code for the reason of the error
+      logref:
+        type: string
+        description: Log correlation ID
+      message:
+        type: string
+        description: Error message
+
+parameters:
+  state:
+    name: state
+    in: query
+    description: Filter jobs based on the current state value
+    required: false
+    type: string
+  group:
+    name: group
+    in: query
+    description: Filter jobs based on the group they are in
+    required: false
+    type: array
+    items:
+      type: string
+  clientId:
+    name: clientId
+    in: query
+    description: Filter jobs belonging to a specific client with clientId
+    required: false
+    type: string
+  workflow:
+    name: workflow
+    in: query
+    description: Filter jobs matching by workflow
+    required: false
+    type: string
+  history:
+    name: history
+    in: query
+    description: Boolean flag to include the transition history of the job
+    required: false
+    type: boolean
+  jobId:
+    name: id
+    in: path
+    description: Job ID
+    required: true
+    type: string
+  tag:
+    name: tag
+    in: query
+    description: Filter jobs by tags
+    required: false
+    type: array
+    items:
+      type: string
+  sort:
+    name: sort
+    in: query
+    type: string
+    enum: [asc, desc]
+    default: asc
+    required: false
+    description: the order of returned elements
+  limit:
+    name: limit
+    in: query
+    type: integer
+    format: int32
+    description: the maximum number of items to return
+    default: 10
+    <<: *maxItemsCount
+  offset:
+    name: offset
+    in: query
+    type: integer
+    format: int64
+    default: 0
+    description: the number of items to skip before starting to return results
+
+x-paths-templates:
+  Errors:
+    invalidRequestError: &invalidRequestError
+      code: wfx.invalidRequest
+      logref: 96a37ea1f7d205ffbfa12334c6812727
+      message: The request was invalid and could not be completed by the storage
+
+    jobNotFoundError: &jobNotFoundError
+      code: wfx.jobNotFound
+      logref: 11cc67762090e15b79a1387eca65ba65
+      message: Job ID was not found
+
+    workflowNotFoundError: &workflowNotFoundError
+      code: wfx.workflowNotFound
+      logref: c452719774086b6e803bb8f6ecea9899
+      message: Workflow not found for given name
+
+    workflowNotUniqueError: &workflowNotUniqueError
+      code: wfx.workflowNotUnique
+      logref: e1ee1f2aea859b9dd34579610e386da6
+      message: Workflow with name already exists
+
+    workflowInvalidError: &workflowInvalidError
+      code: wfx.workflowInvalid
+      logref: 18f57adc70dd79c7fb4f1246be8a6e04
+      message: Workflow validation failed
+
+paths:
+  /workflows:
+    get:
+      summary: List of available workflows
+      description: List of available workflows
+      tags:
+        - workflows
+        - northbound
+        - southbound
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: "#/parameters/limit"
+        - $ref: "#/parameters/offset"
+        - $ref: "#/parameters/sort"
+      responses:
+        "default":
+          description: Other error with any status code and response body format.
+        "200":
+          description: A list of workflows
+          schema:
+            $ref: "#/definitions/PaginatedWorkflowList"
+
+    post:
+      summary: Add a new workflow
+      description: Add a new workflow
+      tags:
+        - workflows
+        - northbound
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: Workflow
+          description: Workflow object to be added
+          required: true
+          schema:
+            $ref: "#/definitions/Workflow"
+      responses:
+        "default":
+          description: Other error with any status code and response body format.
+        "201":
+          description: Workflow was created
+          schema:
+            $ref: "#/definitions/Workflow"
+        "400":
+          description: Bad Request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            Error responses occurring at this operation for invalid requests:
+              errors:
+                - <<: *workflowNotUniqueError
+                - <<: *workflowInvalidError
+
+  /workflows/{name}:
+    get:
+      summary: Workflow description for a given name
+      description: Workflow description for a given name
+      tags:
+        - workflows
+        - northbound
+        - southbound
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: name
+          in: path
+          description: Unique name for the workflow
+          required: true
+          type: string
+      responses:
+        "default":
+          description: Other error with any status code and response body format.
+        "200":
+          description: Workflow description with the provided key
+          schema:
+            $ref: "#/definitions/Workflow"
+        "400":
+          description: If request is invalid
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            Error responses occurring at this operation for invalid requests:
+              errors:
+                - <<: *invalidRequestError
+        "404":
+          description: Not Found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            Error responses occurring at this operation while querying a non-existent workflow:
+              errors:
+                - <<: *workflowNotFoundError
+
+    delete:
+      summary: Delete an existing workflow
+      description: >
+        Delete an existing workflow
+      tags:
+        - workflows
+        - northbound
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: name
+          in: path
+          description: Workflow name
+          required: true
+          type: string
+      responses:
+        "default":
+          description: Other error with any status code and response body format.
+        "204":
+          description: The workflow has been deleted.
+        "404":
+          description: Not Found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            Error responses occurring at this operation while querying a non-existent workflow:
+              errors:
+                - <<: *workflowNotFoundError
+
+  /jobs:
+    post:
+      summary: Add a new job
+      description: >
+        Add a new job
+      tags:
+        - jobs
+        - northbound
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: Job
+          description: Job which shall be created
+          required: true
+          schema:
+            $ref: "#/definitions/JobRequest"
+      responses:
+        "default":
+          description: Other error with any status code and response body format.
+        "201":
+          description: Job was created
+          schema:
+            $ref: "#/definitions/Job"
+        "400":
+          description: Bad Request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            Error responses occurring at this operation for invalid requests:
+              errors:
+                - <<: *invalidRequestError
+
+    get:
+      summary: List of job descriptions
+      description: >
+        List of job descriptions
+
+        By default, this endpoint returns the list of jobs in a specific
+        order and predetermined paging properties.
+
+        These defaults are:
+          - Ascending sort on stime
+          - 10 entries per page
+
+      tags:
+        - jobs
+        - southbound
+        - northbound
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: "#/parameters/offset"
+        - $ref: "#/parameters/limit"
+        - $ref: "#/parameters/sort"
+
+        # filtering
+        - $ref: "#/parameters/state"
+        - $ref: "#/parameters/group"
+        - $ref: "#/parameters/clientId"
+        - $ref: "#/parameters/workflow"
+        - $ref: "#/parameters/tag"
+      responses:
+        "default":
+          description: Other error with any status code and response body format.
+        "200":
+          description: A paginated job list.
+          schema:
+            $ref: "#/definitions/PaginatedJobList"
+        "400":
+          description: If request is invalid
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            Error responses occurring at this operation for invalid requests:
+              errors:
+                - <<: *invalidRequestError
+
+  /jobs/{id}:
+    get:
+      summary: Job description for a given ID
+      description: >
+        Job description for a given ID
+      tags:
+        - jobs
+        - southbound
+        - northbound
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: "#/parameters/jobId"
+        - $ref: "#/parameters/history"
+      responses:
+        "default":
+          description: Other error with any status code and response body format.
+        "200":
+          description: Job description for for a given ID
+          schema:
+            $ref: "#/definitions/Job"
+        "400":
+          description: Bad Request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            Error responses occurring at this operation for invalid requests:
+              errors:
+                - <<: *invalidRequestError
+        "404":
+          description: Not Found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            Error responses occurring at this operation while querying a non-existent job:
+              errors:
+                - <<: *jobNotFoundError
+
+    delete:
+      summary: Delete an existing job
+      description: >
+        Delete an existing job
+      tags:
+        - jobs
+        - northbound
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: "#/parameters/jobId"
+      responses:
+        "default":
+          description: Other error with any status code and response body format.
+        "204":
+          description: The job has been deleted.
+        "404":
+          description: Not Found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            Error responses occurring at this operation while querying a non-existent workflow:
+              errors:
+                - <<: *workflowNotFoundError
+
+  /jobs/{id}/status:
+    get:
+      summary: Get job status
+      description: Retrieve the job status
+      tags:
+        - jobs
+        - northbound
+        - southbound
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: "#/parameters/jobId"
+      responses:
+        "default":
+          description: Other error with any status code and response body format.
+        "200":
+          description: Job status
+          schema:
+            $ref: "#/definitions/JobStatus"
+        "404":
+          description: Not Found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            Error responses occurring at this operation while updating a non-existent job:
+              errors:
+                - <<: *jobNotFoundError
+
+    put:
+      summary: Modify status of an existing job
+      description: >
+        Modify status of an existing job
+      tags:
+        - jobs
+        - southbound
+        - northbound
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: "#/parameters/jobId"
+        - in: body
+          name: New job status
+          description: This contains the new job status
+          required: true
+          schema:
+            $ref: "#/definitions/JobStatus"
+      responses:
+        "default":
+          description: Other error with any status code and response body format.
+        "200":
+          description: Job modified successfully
+          schema:
+            $ref: "#/definitions/JobStatus"
+        "400":
+          description: Bad Request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            Error responses occurring at this operation for invalid requests:
+              errors:
+                - <<: *invalidRequestError
+        "404":
+          description: Not Found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            Error responses occurring at this operation while updating a non-existent job:
+              errors:
+                - <<: *jobNotFoundError
+
+  /jobs/{id}/definition:
+    get:
+      summary: Get job definition
+      description: Retrieve the job definition
+      tags:
+        - jobs
+        - northbound
+        - southbound
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: "#/parameters/jobId"
+      responses:
+        "default":
+          description: Other error with any status code and response body format.
+        "200":
+          description: Job definition
+          schema:
+            type: object
+            additionalProperties:
+              type: object
+            example: |
+              { "userDefined": {} }
+        "404":
+          description: Not Found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            Error responses occurring at this operation while updating a non-existent job:
+              errors:
+                - <<: *jobNotFoundError
+
+    put:
+      summary: Modify job definition
+      description: >
+        Modify the job definition of an existing job
+      tags:
+        - jobs
+        - southbound
+        - northbound
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: "#/parameters/jobId"
+        - in: body
+          name: JobDefinition
+          description: How to modify the job
+          required: true
+          schema:
+            type: object
+            additionalProperties:
+              type: object
+            example: |
+              { "userDefined": {} }
+
+      responses:
+        "default":
+          description: Other error with any status code and response body format.
+        "200":
+          description: Job modified successfully
+          schema:
+            type: object
+            additionalProperties:
+              type: object
+            example: |
+              { "userDefined": {} }
+        "400":
+          description: Bad Request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            Error responses occurring at this operation for invalid requests:
+              errors:
+                - <<: *invalidRequestError
+        "404":
+          description: Not Found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            Error responses occurring at this operation while updating a non-existent job:
+              errors:
+                - <<: *jobNotFoundError
+
+  /jobs/{id}/tags:
+    get:
+      summary: Get tags
+      description: Get the tags of a job
+      tags:
+        - jobs
+        - northbound
+        - southbound
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: "#/parameters/jobId"
+      responses:
+        "default":
+          description: Other error with any status code and response body format.
+        "200":
+          description: Job tags
+          schema:
+            type: array
+            items:
+              type: string
+              example: EUROPE_WEST
+        "404":
+          description: Not Found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            Error responses occurring at this operation while updating a non-existent job:
+              errors:
+                - <<: *jobNotFoundError
+
+    post:
+      summary: Add a tag
+      description: >
+        Add a tag to an existing job
+      tags:
+        - jobs
+        - northbound
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: "#/parameters/jobId"
+        - in: body
+          name: Tags
+          description: Tags to add
+          required: true
+          schema:
+            type: array
+            minItems: 1
+            <<: *maxTagsCount
+            items:
+              type: string
+      responses:
+        "default":
+          description: Other error with any status code and response body format.
+        "200":
+          description: Successfully added tag to job
+          schema:
+            type: array
+            items:
+              type: string
+              example: EUROPE_WEST
+        "400":
+          description: Bad Request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            Error responses occurring at this operation for invalid requests:
+              errors:
+                - <<: *invalidRequestError
+        "404":
+          description: Not Found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            Error responses occurring at this operation while updating a non-existent job:
+              errors:
+                - <<: *jobNotFoundError
+
+    delete:
+      summary: Delete a tag
+      description: >
+        Delete a tag from an existing job
+      tags:
+        - jobs
+        - northbound
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: "#/parameters/jobId"
+        - in: body
+          name: Tags
+          description: Tags to add
+          required: true
+          schema:
+            type: array
+            minItems: 1
+            <<: *maxTagsCount
+            items:
+              type: string
+      responses:
+        "default":
+          description: Other error with any status code and response body format.
+        "200":
+          description: Successfully deleted tag
+          schema:
+            type: array
+            items:
+              type: string
+              example: EUROPE_WEST
+        "400":
+          description: Bad Request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            Error responses occurring at this operation for invalid requests:
+              errors:
+                - <<: *invalidRequestError
+        "404":
+          description: Not Found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            Error responses occurring at this operation while updating a non-existent job:
+              errors:
+                - <<: *jobNotFoundError
+
+tags:
+  - name: workflows
+    description: Workflows used to instantiate jobs
+
+  - name: jobs
+    description: Jobs derived from workflows and executed by a client
+
+  - name: southbound
+    description: All southbound API endpoints
+
+  - name: northbound
+    description: All northbound API endpoints

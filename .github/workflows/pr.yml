@@ -1,0 +1,43 @@
+# SPDX-FileCopyrightText: 2023 Siemens AG
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Author: Michael Adler <michael.adler@siemens.com>
+---
+name: PR checks
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+permissions:
+  contents: read
+  # needed to comment on the PR
+  pull-requests: write
+
+jobs:
+  check-sign-off:
+    name: Write comment if commits are not signed-off
+    env:
+      FORCE_COLOR: 1
+    runs-on: ubuntu-latest
+    steps:
+      - uses: live627/check-pr-signoff-action@v1
+
+  check-conventional-commit:
+    name: Check commit messages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: "${{ github.event.pull_request.head.ref }}"
+          repository: "${{ github.event.pull_request.head.repo.full_name }}"
+          fetch-depth: 0
+      - uses: actions/setup-python@v4
+        with:
+          cache: "pip" # caching pip dependencies
+      - run: pip install commitizen
+      - name: Check commit messages
+        run: cz check --rev-range origin/${GITHUB_BASE_REF}..

@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: 2023 Siemens AG
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Author: Michael Adler <michael.adler@siemens.com>
+root = true
+
+[*]
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+indent_size = 2
+
+[*.sh]
+indent_size = 4
+
+[justfile]
+indent_size = 4
+
+[*.go]
+# ultimately, we use gofumpt though
+indent_style = tab
+indent_size = 4
+
+[Makefile]
+indent_style = tab
+indent_size = 8
+
+[test/test_helper/**]
+ignore = true

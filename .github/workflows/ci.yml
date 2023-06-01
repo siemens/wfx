@@ -1,0 +1,159 @@
+# SPDX-FileCopyrightText: 2023 Siemens AG
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Author: Michael Adler <michael.adler@siemens.com>
+---
+name: CI
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go: ["stable", "1.18"]
+    name: Build (Go ${{ matrix.go }})
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.go }}
+      - uses: korandoru/setup-zig@v1
+        with:
+          zig-version: 0.10.1
+      - run: |
+          # goreleaser requires an absolute path to the compiler
+          install -m0755 .ci/zcc /usr/local/bin/zcc
+      - name: build
+        uses: goreleaser/goreleaser-action@v4
+        with:
+          distribution: goreleaser
+          version: latest
+          args: build --clean --single-target --snapshot
+        env:
+          CC: /usr/local/bin/zcc
+
+  test:
+    runs-on: ubuntu-latest
+    name: Test
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version: stable
+      - run: make test
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.out
+
+  test-postgres:
+    runs-on: ubuntu-latest
+    name: Test PostgreSQL
+    container: golang:latest
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          # see https://hub.docker.com/_/postgres
+          POSTGRES_HOST: postgres
+          POSTGRES_PORT: 5432
+          POSTGRES_DB: wfx
+          POSTGRES_USER: wfx
+          POSTGRES_PASSWORD: secret
+          POSTGRES_HOST_AUTH_METHOD: trust
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 3s
+          --health-timeout 5s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v3
+      - run: go test -race -coverprofile=coverage.out -covermode=atomic -tags testing,integration,postgres,sqlite ./...
+        env:
+          PGHOST: postgres
+          PGPORT: 5432
+          PGDATABASE: wfx
+          PGUSER: wfx
+          PGPASSWORD: secret
+          PGSSLMODE: disable
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.out
+
+  test-mysql:
+    runs-on: ubuntu-latest
+    name: Test MySQL
+    container: golang:latest
+    services:
+      mysql:
+        image: mysql:8-debian
+        env:
+          # see https://hub.docker.com/_/mysql
+          MYSQL_DATABASE: wfx
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_USER: wfx
+          MYSQL_PASSWORD: secret
+          MYSQL_HOST: mysql
+        # Set health checks to wait until mysql has started
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval 3s
+          --health-timeout 5s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v3
+      - run: go test -race -coverprofile=coverage.out -covermode=atomic -tags testing,integration,mysql,sqlite ./...
+        env:
+          MYSQL_DATABASE: wfx
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_USER: wfx
+          MYSQL_PASSWORD: secret
+          MYSQL_HOST: mysql
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.out
+
+  lint:
+    runs-on: ubuntu-latest
+    name: Lint
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version: stable
+      - name: "Install staticcheck"
+        run: .ci/setup/staticcheck.sh
+      - name: "Run staticcheck"
+        run: staticcheck -tags=sqlite,testing ./...
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: "v1.52.2"
+          args: --build-tags=sqlite,testing
+          skip-cache: true
+
+  generate:
+    runs-on: ubuntu-latest
+    name: Generate Code
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: stable
+      - name: "Install just"
+        run: .ci/setup/just.sh
+      - name: "Install go-swagger"
+        run: .ci/setup/swagger.sh
+      - run: sudo apt-get update -q && sudo apt-get install -y python3-yaml
+      - run: just generate
+      - run: git diff --exit-code

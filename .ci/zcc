@@ -1,0 +1,25 @@
+#!/bin/sh
+# SPDX-FileCopyrightText: 2023 Siemens AG
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Author: Michael Adler <michael.adler@siemens.com>
+set -eu
+
+target=x86_64-linux-musl
+case ${GOOS:-linux} in
+    windows)
+        target=x86_64-windows-gnu
+        ;;
+    linux)
+        case "${GOARCH:-amd64}" in
+            amd64)
+                target=x86_64-linux-musl
+                ;;
+            arm64)
+                target=aarch64-linux-musl
+                ;;
+        esac
+        ;;
+esac
+zig cc -target "$target" "$@"

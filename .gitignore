@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: 2023 Siemens AG
+#
+# SPDX-License-Identifier: Apache-2.0
+/wfx
+/wfxctl
+/wfx-loadtest
+/wfx-viewer
+*.pem
+*.generated
+cmd/wfx-viewer/wfx-viewer
+/public
+/result
+/dist
+/files
+coverage*
+*.log
+/results
+generated/wfx.swagger.yml
+/out
+*.cov
+/wfx.db*

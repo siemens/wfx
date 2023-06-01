@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: 2023 Siemens AG
+#
+# SPDX-License-Identifier: Apache-2.0
+---
+DirectoryPath: "public"
+IgnoreURLs:
+  - "^https://github.com/siemens/wfx.*"
+  - "^http://127.0.0.1.*"
+  - "^http://localhost.*"
+  - "^https://www.mysql.com"
+  - "^https://microsoft.com"

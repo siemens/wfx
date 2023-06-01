@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: 2023 Siemens AG
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+# Author: Michael Adler <michael.adler@siemens.com>
+generate OUTFILE:
+    #!/usr/bin/env python3
+    import sys
+    import yaml
+
+    try:
+        from yaml import CLoader as Loader, CDumper as Dumper
+    except ImportError:
+        from yaml import Loader, Dumper
+
+    with open('{{ justfile_directory() }}/wfx.swagger.yml', 'r') as f:
+        with open('{{ OUTFILE }}', 'w') as g:
+            yaml.dump(yaml.load(f, Loader=Loader), stream=g, Dumper=Dumper)

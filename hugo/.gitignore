@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: 2023 Siemens AG
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Author: Michael Adler <michael.adler@siemens.com>
+
+# general stuff
+*.lock
+public
+_gen
+node_modules
+
+# generated content
+content/docs/configuration.md
+content/docs/installation.md
+content/docs/operations.md
+content/docs/workflows/_index.md
+content/docs/workflows/dau.md
+
+static/benchmark.png
+static/favicons/
+static/wfx.swagger.yml
+static/wfx.workflow.dau.direct.yml
+static/wfx.workflow.dau.phased.yml
