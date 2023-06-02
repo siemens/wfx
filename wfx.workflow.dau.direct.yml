@@ -1,0 +1,103 @@
+# SPDX-FileCopyrightText: 2023 Siemens AG
+# SPDX-License-Identifier: Apache-2.0
+---
+name: wfx.workflow.dau.direct
+
+groups:
+  - name: OPEN
+    description: regular workflow-advancing states
+    states:
+      - INSTALL
+      - INSTALLING
+      - INSTALLED
+      - ACTIVATE
+      - ACTIVATING
+
+  - name: CLOSED
+    description: a successful update's terminal states
+    states:
+      - ACTIVATED
+
+  - name: FAILED
+    description: a failed update's terminal states
+    states:
+      - TERMINATED
+
+states:
+  - name: INSTALL
+    description: instruct client to start installation
+
+  - name: INSTALLING
+    description: installation progress update from client
+
+  - name: INSTALLED
+    description: client signaled installation success
+
+  - name: ACTIVATE
+    description: instruct client to start activation
+
+  - name: ACTIVATING
+    description: client activates update
+
+  - name: ACTIVATED
+    description: client signaled activation success
+
+  - name: TERMINATED
+    description: client aborted update with error
+
+transitions:
+  - from: INSTALL
+    to: INSTALLING
+    eligible: CLIENT
+    description: Installation preparation successful
+
+  - from: INSTALL
+    to: TERMINATED
+    eligible: CLIENT
+    description: Installation preparation failed
+
+  - from: INSTALLING
+    to: INSTALLING
+    eligible: CLIENT
+    description: Installation in progress
+
+  - from: INSTALLING
+    to: TERMINATED
+    eligible: CLIENT
+    description: Update installation failed
+
+  - from: INSTALLING
+    to: INSTALLED
+    eligible: CLIENT
+    description: Update installation has been successful
+
+  - from: INSTALLED
+    to: ACTIVATE
+    eligible: WFX
+    action: IMMEDIATE
+    description: Continue with activation stage
+
+  - from: ACTIVATE
+    to: ACTIVATING
+    eligible: CLIENT
+    description: Activation preparation successful
+
+  - from: ACTIVATE
+    to: TERMINATED
+    eligible: CLIENT
+    description: Activation preparation failed
+
+  - from: ACTIVATING
+    to: ACTIVATING
+    eligible: CLIENT
+    description: Activation in progress
+
+  - from: ACTIVATING
+    to: TERMINATED
+    eligible: CLIENT
+    description: Update activation failed
+
+  - from: ACTIVATING
+    to: ACTIVATED
+    eligible: CLIENT
+    description: Update activation has been successful

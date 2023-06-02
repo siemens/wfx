@@ -1,0 +1,496 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>– Documentation</title><link>https://siemens.github.io/wfx/docs/</link><description>Recent content in Documentation on</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="https://siemens.github.io/wfx/docs/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs: Build and Installation</title><link>https://siemens.github.io/wfx/docs/installation/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://siemens.github.io/wfx/docs/installation/</guid><description>
+&lt;p>Pre-built binaries, as well as Debian and RPM packages, are available
+&lt;a href="https://github.com/siemens/wfx/releases" target="_blank">here&lt;/a>
+for Linux, specifically
+&lt;a href="https://github.com/golang/go/wiki/MinimumRequirements#amd64" target="_blank">x86_64&lt;/a> and
+&lt;a href="https://github.com/golang/go/wiki/MinimumRequirements#arm64" target="_blank">arm64&lt;/a> architectures.&lt;/p>
+&lt;p>If pre-built binaries are not available (refer to &lt;code>go tool dist list&lt;/code> for alternative platforms and architectures, such
+as Windows or macOS), or if specific features need to be disabled during compilation, building wfx from source is
+necessary.&lt;/p>
+&lt;h2 id="building-wfx">Building wfx&lt;/h2>
+&lt;p>A recent
+&lt;a href="https://go.dev/" target="_blank">Go compiler&lt;/a> &amp;gt;= 1.18 as well as
+&lt;a href="https://www.gnu.org/software/make/" target="_blank">GNU make&lt;/a> wrapping the
+&lt;code>go build&lt;/code> commands is required to build wfx and its associated tools.&lt;/p>
+&lt;p>wfx requires a persistent storage to save workflows and jobs. Go
+&lt;a href="https://pkg.go.dev/go/build" target="_blank">Build Tags&lt;/a> are used to
+select compiled-in support for different persistent storage options. The following persistent storage selection build
+tags are available:&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th style="text-align:left">Build Tag&lt;/th>
+&lt;th style="text-align:left">Description&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td style="text-align:left">&lt;code>sqlite&lt;/code>&lt;/td>
+&lt;td style="text-align:left">Enable built-in
+&lt;a href="https://www.sqlite.org/" target="_blank">SQLite&lt;/a> support&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">&lt;code>libsqlite3&lt;/code>&lt;/td>
+&lt;td style="text-align:left">Dynamically link against &lt;code>libsqlite3&lt;/code>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">&lt;code>postgres&lt;/code>&lt;/td>
+&lt;td style="text-align:left">Enable built-in
+&lt;a href="https://www.postgresql.org" target="_blank">PostgreSQL&lt;/a> support&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">&lt;code>mysql&lt;/code>&lt;/td>
+&lt;td style="text-align:left">Enable built-in
+&lt;a href="https://www.mysql.com/" target="_blank">MySQL&lt;/a> support&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>By default, all built-in persistent storage options are enabled.&lt;/p>
+&lt;p>Note that the selection of build tags can impact the size of the &lt;code>wfx&lt;/code> binary file and may as well have implications for
+the software clearing process, including obligations that must be met.&lt;/p>
+&lt;p>Building wfx via&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>make
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>results in the following binaries:&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>wfx&lt;/code>: The server component providing the RESTful APIs for managing workflows and jobs.&lt;/li>
+&lt;li>&lt;code>wfxctl&lt;/code>: Command line client for interacting with the wfx.&lt;/li>
+&lt;li>&lt;code>wfx-loadtest&lt;/code>: Command line tool for load-testing a wfx instance.&lt;/li>
+&lt;li>&lt;code>wfx-viewer&lt;/code>: Convenience tool to visualize workflows in PlantUML or SVG format.&lt;/li>
+&lt;/ul>
+&lt;p>All binaries have extensive help texts when invoked with &lt;code>--help&lt;/code>.&lt;/p>
+&lt;p>To build and compile-in, e.g., SQLite persistent storage support only, according &lt;code>GO_TAGS&lt;/code> must be given:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>make &lt;span style="color:#008080">GO_TAGS&lt;/span>&lt;span style="color:#000;font-weight:bold">=&lt;/span>sqlite
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="installing-wfx">Installing wfx&lt;/h2>
+&lt;p>wfx&amp;rsquo;s release binaries are statically linked and self-contained. Hence, an installation isn&amp;rsquo;t strictly necessary,
+although if available, it&amp;rsquo;s recommended to pick the distro packages (e.g. &lt;code>*.deb&lt;/code> for Debian-based distros).&lt;/p>
+&lt;p>Nevertheless, for convenience on UNIXy systems,&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>make &lt;span style="color:#008080">DESTDIR&lt;/span>&lt;span style="color:#000;font-weight:bold">=&lt;/span> &lt;span style="color:#008080">prefix&lt;/span>&lt;span style="color:#000;font-weight:bold">=&lt;/span> install
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>installs the binaries to &lt;code>/bin&lt;/code>. Giving a different &lt;code>DESTDIR&lt;/code> and/or &lt;code>prefix&lt;/code> allows to adjust to other locations.&lt;/p>
+&lt;p>Alternatively, a pre-built
+&lt;a href="https://www.debian.org" target="_blank">Debian&lt;/a> package is
+&lt;a href="https://github.com/siemens/wfx/releases" target="_blank">provided&lt;/a>.&lt;/p>
+&lt;p>For convenience and ease of use, all binaries come with shell completions available for
+&lt;a href="https://www.gnu.org/software/bash/" target="_blank">Bash&lt;/a>,
+&lt;a href="https://fishshell.com" target="_blank">Fish&lt;/a> and
+&lt;a href="https://www.zsh.org" target="_blank">Zsh&lt;/a>. To install the
+completions, refer to the binary&amp;rsquo;s &lt;code>completion --help&lt;/code> output, e.g. &lt;code>wfx completion bash --help&lt;/code>.&lt;/p></description></item><item><title>Docs: Configuration</title><link>https://siemens.github.io/wfx/docs/configuration/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://siemens.github.io/wfx/docs/configuration/</guid><description>
+&lt;p>wfx is configured in the following order of precedence using&lt;/p>
+&lt;ol>
+&lt;li>command line parameters (e.g. &lt;code>--log-level&lt;/code>),&lt;/li>
+&lt;li>environment variables (prefixed with &lt;code>WFX_&lt;/code>, e.g. &lt;code>WFX_LOG_LEVEL&lt;/code>),&lt;/li>
+&lt;li>configuration files in
+&lt;a href="https://github.com/go-yaml/yaml#compatibility" target="_blank">YAML&lt;/a> format (either via the &lt;code>--config&lt;/code>
+command line parameter or present in one of the default search locations, see &lt;code>wfx --help&lt;/code>).&lt;/li>
+&lt;/ol>
+&lt;p>Note that wfx supports configuration file live reloading so that a running wfx instance can be reconfigured without the
+need for restarting it.&lt;/p>
+&lt;p>Without configuration,&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>/usr/bin/wfx
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>starts wfx using the built-in SQLite-based persistent storage. The northbound (management) API is available at
+&lt;a href="http://127.0.0.1:8081/api/wfx/v1/" target="_blank">
+&lt;a href="http://127.0.0.1:8081/api/wfx/v1/" target="_blank">http://127.0.0.1:8081/api/wfx/v1/&lt;/a>&lt;/a>, whereas the southbound (client) API is
+available at a different port:
+&lt;a href="http://127.0.0.1:8080/api/wfx/v1" target="_blank">
+&lt;a href="http://127.0.0.1:8080/api/wfx/v1" target="_blank">http://127.0.0.1:8080/api/wfx/v1&lt;/a>&lt;/a>.&lt;/p>
+&lt;h2 id="systemd-integration">Systemd Integration&lt;/h2>
+&lt;p>For production deployments, it&amp;rsquo;s recommended to run wfx under a service supervisor such as
+&lt;a href="https://systemd.io" target="_blank">systemd&lt;/a>. The &lt;code>share/systemd&lt;/code> directory provides pre-configured systemd service units. These units
+are also included in the distribution packages available with wfx releases.&lt;/p>
+&lt;pre>&lt;code>systemctl enable --now wfx@foo.socket
+# you can have multiple instances of wfx running at the same time, e.g.
+systemctl enable --now wfx@bar.socket
+&lt;/code>&lt;/pre>
+&lt;p>The wfx services launch on-demand, i.e., they start when a client connects, such as when retrieving the wfx version:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>wfxctl --client-unix-socket /var/run/wfx/foo/client.sock version
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="persistent-storage">Persistent Storage&lt;/h2>
+&lt;p>wfx requires a persistent storage to save workflows and jobs. The default persistent storage is
+&lt;a href="#SQLite">SQLite&lt;/a> and
+requires no further configuration.&lt;/p>
+&lt;p>The command line argument &lt;code>--storage={sqlite,postgres,mysql}&lt;/code> is available to choose a persistent storage backend out of
+the compiled-in available ones at run-time. Each persistent storage allows further individual configuration via
+&lt;code>--storage-opt=&amp;lt;options&amp;gt;&lt;/code>.&lt;/p>
+&lt;p>Note that wfx needs to manage the database schema and hence needs appropriate permissions to, e.g., create tables. This
+is in particular important for the PostgreSQL and MySQL persistent storage options as they&amp;rsquo;re connecting to an external
+database service which has to be setup accordingly.&lt;/p>
+&lt;h3 id="sqlite">SQLite&lt;/h3>
+&lt;p>
+&lt;a href="https://www.sqlite.org/" target="_blank">SQLite&lt;/a> is the default persistent storage and automatically selected if no other persistent
+storage option is given. It can be further configured with the &lt;code>--storage-opt&lt;/code> configuration option, see the
+&lt;a href="https://github.com/mattn/go-sqlite3/wiki/DSN" target="_blank">go-sqlite3
+Wiki&lt;/a> for available Data Source Name (DSN) options.&lt;/p>
+&lt;p>As an example, the following command runs a wfx instance with an ephemeral in-memory SQLite database:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>wfx --storage sqlite --storage-opt &lt;span style="color:#d14">&amp;#34;file:wfx?mode=memory&amp;amp;cache=shared&amp;amp;_fk=1&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Note that all state is lost on wfx exiting so it&amp;rsquo;s advised to use it for testing purposes only.&lt;/p>
+&lt;h3 id="postgresql">PostgreSQL&lt;/h3>
+&lt;p>
+&lt;a href="https://www.postgresql.org/" target="_blank">PostgreSQL&lt;/a> is a well-known open source object-relational database. Via environment
+variables or a Data Source Name (DSN) passed as &lt;code>--storage-opt&lt;/code>, the link to a PostgreSQL instance is configured, see
+PostgreSQL&amp;rsquo;s
+&lt;a href="https://www.postgresql.org/docs/11/libpq-connect.html#LIBPQ-PARAMKEYWORDS" target="_blank">parameter key word names&lt;/a> for
+DSN and
+&lt;a href="http://www.postgresql.org/docs/11/static/libpq-envars.html" target="_blank">environment variables&lt;/a> documentation for details
+and available options.&lt;/p>
+&lt;p>As an example, the following two commands each run a wfx instance connecting to the same PostgreSQL instance but with
+different configuration means:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#998;font-style:italic"># Configuration via DSN key=value string&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>wfx --storage postgres &lt;span style="color:#d14">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#d14">&lt;/span> --storage-opt &lt;span style="color:#d14">&amp;#34;host=localhost port=5432 user=wfx password=secret database=wfx&amp;#34;&lt;/span> &amp;amp;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#998;font-style:italic"># Configuration using environment variables&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>env &lt;span style="color:#008080">PGHOST&lt;/span>&lt;span style="color:#000;font-weight:bold">=&lt;/span>localhost &lt;span style="color:#d14">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#d14">&lt;/span> &lt;span style="color:#008080">PGPORT&lt;/span>&lt;span style="color:#000;font-weight:bold">=&lt;/span>&lt;span style="color:#099">5432&lt;/span> &lt;span style="color:#d14">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#d14">&lt;/span> &lt;span style="color:#008080">PGUSER&lt;/span>&lt;span style="color:#000;font-weight:bold">=&lt;/span>wfx &lt;span style="color:#d14">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#d14">&lt;/span> &lt;span style="color:#008080">PGPASSWORD&lt;/span>&lt;span style="color:#000;font-weight:bold">=&lt;/span>secret &lt;span style="color:#d14">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#d14">&lt;/span> &lt;span style="color:#008080">PGDATABASE&lt;/span>&lt;span style="color:#000;font-weight:bold">=&lt;/span>wfx &lt;span style="color:#d14">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#d14">&lt;/span> wfx --storage postgres
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="mysql">MySQL&lt;/h3>
+&lt;p>
+&lt;a href="https://www.mysql.com/" target="_blank">MySQL&lt;/a> is another well-known open source relational database.&lt;/p>
+&lt;p>Note that
+&lt;a href="https://mariadb.org" target="_blank">MariaDB&lt;/a> is currently unsupported due to the lack of certain JSON features (specifically
+the inability to directly index JSON data).&lt;/p>
+&lt;p>With the Data Source Name (DSN) passed as &lt;code>--storage-opt&lt;/code>, the link to a MySQL instance is configured, see
+&lt;a href="https://github.com/go-sql-driver/mysql#dsn-data-source-name" target="_blank">Go&amp;rsquo;s SQL
+Driver&lt;/a> for available options and as reference.&lt;/p>
+&lt;p>As an example, the following command runs a wfx instance connecting to a MySQL instance using similar configuration
+options as for PostgreSQL:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#998;font-style:italic"># Configuration via DSN URL string&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>wfx --storage mysql &lt;span style="color:#d14">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#d14">&lt;/span> --storage-opt &lt;span style="color:#d14">&amp;#34;wfx:secret@tcp(localhost:3306)/wfx&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="communication-channels">Communication Channels&lt;/h2>
+&lt;p>wfx currently supports the following network communication channels:&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>http&lt;/code>: Unencrypted HTTP&lt;/li>
+&lt;li>&lt;code>https&lt;/code>: HTTP over TLS (Transport Layer Security)&lt;/li>
+&lt;li>&lt;code>unix&lt;/code>: Unix-domain sockets&lt;/li>
+&lt;/ul>
+&lt;p>With the &lt;code>--scheme&lt;/code> configuration option, one or multiple from the preceding list are enabled. For instance, to use wfx
+in HTTPS-only mode:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>wfx --scheme&lt;span style="color:#000;font-weight:bold">=&lt;/span>https &lt;span style="color:#d14">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#d14">&lt;/span> --tls-certificate&lt;span style="color:#000;font-weight:bold">=&lt;/span>localhost/cert.pem &lt;span style="color:#d14">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#d14">&lt;/span> --tls-key&lt;span style="color:#000;font-weight:bold">=&lt;/span>localhost/key.pem
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>To enable both, HTTP and HTTPS, simultaneously, bound to different hosts:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>wfx --scheme&lt;span style="color:#000;font-weight:bold">=&lt;/span>http,https &lt;span style="color:#d14">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#d14">&lt;/span> --client-host&lt;span style="color:#000;font-weight:bold">=&lt;/span>localhost &lt;span style="color:#d14">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#d14">&lt;/span> --client-tls-host&lt;span style="color:#000;font-weight:bold">=&lt;/span>0.0.0.0 &lt;span style="color:#d14">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#d14">&lt;/span> --tls-certificate&lt;span style="color:#000;font-weight:bold">=&lt;/span>localhost/cert.pem &lt;span style="color:#d14">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#d14">&lt;/span> --tls-key&lt;span style="color:#000;font-weight:bold">=&lt;/span>localhost/key.pem
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>To exclusively use Unix-domain sockets:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>wfx --scheme unix &lt;span style="color:#d14">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#d14">&lt;/span> --client-unix-socket /tmp/wfx-client.sock &lt;span style="color:#d14">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#d14">&lt;/span> --mgmt-unix-socket /tmp/wfx-mgmt.sock
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The following connectivity parameters are available:&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th style="text-align:left">Parameter&lt;/th>
+&lt;th style="text-align:left">Description&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td style="text-align:left">&lt;code>--scheme&lt;/code>&lt;/td>
+&lt;td style="text-align:left">One or multiple communication schemes to be used for client-server communication.&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">&lt;code>--client-host&lt;/code>&lt;/td>
+&lt;td style="text-align:left">The address to listen on for client HTTP requests&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">&lt;code>--client-port&lt;/code>&lt;/td>
+&lt;td style="text-align:left">The port to listen on for client HTTP requests&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">&lt;code>--client-tls-host&lt;/code>&lt;/td>
+&lt;td style="text-align:left">Same as &lt;code>--client-host&lt;/code> but for HTTP over TLS&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">&lt;code>--client-tls-port&lt;/code>&lt;/td>
+&lt;td style="text-align:left">Same as &lt;code>--client-port&lt;/code> but for HTTP over TLS&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">&lt;code>--mgmt-host&lt;/code>&lt;/td>
+&lt;td style="text-align:left">The address to listen on for wfx management / operator HTTP requests&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">&lt;code>--mgmt-port&lt;/code>&lt;/td>
+&lt;td style="text-align:left">The port to listen on for wfx management /operator HTTP requests&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">&lt;code>--mgmt-tls-host&lt;/code>&lt;/td>
+&lt;td style="text-align:left">Same as &lt;code>--mgmt-host&lt;/code> but for HTTP over TLS&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">&lt;code>--mgmt-tls-port&lt;/code>&lt;/td>
+&lt;td style="text-align:left">Same as &lt;code>--mgmt-port&lt;/code> but for HTTP over TLS&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">&lt;code>--tls-certificate&lt;/code>&lt;/td>
+&lt;td style="text-align:left">The location of the TLS certificate file&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">&lt;code>--tls-key&lt;/code>&lt;/td>
+&lt;td style="text-align:left">The location of the TLS key file&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">&lt;code>--tls-ca&lt;/code>&lt;/td>
+&lt;td style="text-align:left">The certificate authority certificate file for mutual TLS authentication&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h2 id="file-server">File Server&lt;/h2>
+&lt;p>wfx comes with a built-in file server that serves artifacts at &lt;code>http://&amp;lt;wfx host:{client,mgmt} port&amp;gt;/download/&lt;/code>. This
+feature is particularly useful for dynamic deployments or when an external file storage solution is unavailable. To
+configure the directory that backs the file server URL&amp;rsquo;s contents, use the &lt;code>--simple-fileserver=/path/to/folder&lt;/code> option.&lt;/p>
+&lt;p>Note that this feature is disabled by default and must be explicitly enabled at run-time using this option.&lt;/p></description></item><item><title>Docs: Device Artifact Update (DAU)</title><link>https://siemens.github.io/wfx/docs/workflows/dau/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://siemens.github.io/wfx/docs/workflows/dau/</guid><description>
+&lt;p>The Device Artifact Update Workflow Family has been specifically designed for updating software on devices.&lt;/p>
+&lt;h2 id="workflows">Workflows&lt;/h2>
+&lt;p>Currently, the DAU Workflow Family comprises two workflows that model the software update process for devices:&lt;/p>
+&lt;p>The
+&lt;a href="https://siemens.github.io/wfx/wfx.workflow.dau.direct.yml">&lt;code>wfx.workflow.dau.direct&lt;/code>&lt;/a> workflow caters for the fully automated software update
+use case while the
+&lt;a href="https://siemens.github.io/wfx/wfx.workflow.dau.phased.yml">&lt;code>wfx.workflow.dau.phased&lt;/code>&lt;/a> workflow operates in distinct phases
+requiring external input to advance the workflow.&lt;/p>
+&lt;p>Both workflows operate in &lt;strong>stages&lt;/strong>, each of which follows the Command, Feedback, and Completion (CFC) scheme. These
+stages consist of:&lt;/p>
+&lt;ol>
+&lt;li>a &lt;em>command&lt;/em> state which instructs the device to start the update process,&lt;/li>
+&lt;li>an &lt;em>action + feedback&lt;/em> state during which the device performs the necessary work and provides progress updates to
+wfx, and&lt;/li>
+&lt;li>a &lt;em>completion&lt;/em> state in which the device signals the completion of the stage.&lt;/li>
+&lt;/ol>
+&lt;p>A sequence of such CFC loops constitutes the particular workflow. In case of &lt;code>wfx.workflow.dau.direct&lt;/code>, the wfx
+transitions to the next stage automatically while in case of &lt;code>wfx.workflow.dau.phased&lt;/code>, wfx waits for external input,
+e.g., from an operator.&lt;/p>
+&lt;h3 id="wfxworkflowdaudirect">wfx.workflow.dau.direct&lt;/h3>
+&lt;p>The
+&lt;a href="https://siemens.github.io/wfx/wfx.workflow.dau.direct.yml">&lt;code>wfx.workflow.dau.direct&lt;/code>&lt;/a> workflow consists of the two stages &lt;em>installation&lt;/em> and
+&lt;em>activation&lt;/em>: During the installation stage, the device downloads and installs the update artifacts. In the subsequent
+activation stage, the device takes action to activate the update. Depending on the type of artifact(s), this activation
+action varies as, e.g., container images need a different activation action than firmware disk images (see below Section
+&lt;a href="#job-definition">Job Definition&lt;/a>).&lt;/p>
+&lt;p>The graph representation of the &lt;code>wfx.workflow.dau.direct&lt;/code> workflow is depicted in the following figure, omitting state
+descriptions and transition eligibles for legibility:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-txt" data-lang="txt">&lt;span style="display:flex;">&lt;span> INSTALL ────────┐
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │ │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ├─◀─┐ │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ▼ │ │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>INSTALLING ──────┤
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │ │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ▼ │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>INSTALLED │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │ │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ▼ │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ACTIVATE ───────┤
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │ │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ├─◀─┐ │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ▼ │ │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ACTIVATING ──────┤
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │ │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ▼ ▼
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ACTIVATED TERMINATED
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="wfxworkflowdauphased">wfx.workflow.dau.phased&lt;/h3>
+&lt;p>The
+&lt;a href="https://siemens.github.io/wfx/wfx.workflow.dau.phased.yml">&lt;code>wfx.workflow.dau.phased&lt;/code>&lt;/a> workflow is similar to the &lt;code>wfx.workflow.dau.direct&lt;/code>
+workflow but starts in the &lt;code>CREATED&lt;/code> state instead and introduces another &lt;em>download&lt;/em> stage in between installation and
+activation to decouple artifact download from its installation: The initial state &lt;code>CREATED&lt;/code> serves as an anchor to
+actually kickstart the external input-driven CFC scheme. With the additional download stage, a maintenance window could
+be realized prior to which the artifact is downloaded but only installed when wfx commands the begin of the installation
+phase (e.g. a certain time window has been reached).&lt;/p>
+&lt;p>Consequently ― and in contrast to the &lt;code>wfx.workflow.dau.direct&lt;/code> ― wfx doesn&amp;rsquo;t transition to the next stage automatically
+but waits for external input to do so, e.g., by an operator.&lt;/p>
+&lt;p>The graph representation of the &lt;code>wfx.workflow.dau.phased&lt;/code> workflow is depicted in the following figure, again omitting
+state descriptions and transition eligibles for legibility:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-txt" data-lang="txt">&lt;span style="display:flex;">&lt;span> CREATED
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ▼
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> DOWNLOAD ───────┐
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │ │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ├─◀─┐ │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ▼ │ │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>DOWNLOADING ──────┤
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │ │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ▼ │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> DOWNLOADED │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │ │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ▼ │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> INSTALL ────────┤
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │ │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ├─◀─┐ │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ▼ │ │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> INSTALLING ──────┤
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │ │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ▼ │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> INSTALLED │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │ │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ▼ │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ACTIVATE ───────┤
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │ │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ├─◀─┐ │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ▼ │ │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ACTIVATING ──────┤
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │ │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ▼ ▼
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ACTIVATED TERMINATED
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="job-definition">Job Definition&lt;/h2>
+&lt;p>As being general purpose, wfx doesn&amp;rsquo;t impose a particular schema on the information conveyed to the device describing
+its action(s) to perform, except that it&amp;rsquo;s in JSON format. Instead, the job definition is a contract between the
+operator creating jobs, each possibly following a different workflow, and the client(s) executing those jobs in
+lock-step with the wfx. The same is true for the type of update artifacts that are specified in the job definition and
+that can be of any form such as, e.g., firmware disk images, container images, or configurations: The operator has to
+has to take care to only assign jobs to devices that are known to be able to digest this type of update artifact. wfx
+doesn&amp;rsquo;t exercise any checks on compatibility.&lt;/p>
+&lt;p>An exemplary job definition using the
+&lt;a href="https://siemens.github.io/wfx/docs/configuration/#file-server">built-in simple file server&lt;/a> may look
+like the following JSON document:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-json" data-lang="json">&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#000080">&amp;#34;version&amp;#34;&lt;/span>: &lt;span style="color:#d14">&amp;#34;1.0&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#000080">&amp;#34;type&amp;#34;&lt;/span>: [&lt;span style="color:#d14">&amp;#34;firmware&amp;#34;&lt;/span>, &lt;span style="color:#d14">&amp;#34;dummy&amp;#34;&lt;/span>],
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#000080">&amp;#34;artifacts&amp;#34;&lt;/span>: [
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#000080">&amp;#34;name&amp;#34;&lt;/span>: &lt;span style="color:#d14">&amp;#34;Example Device Firmware Artifact&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#000080">&amp;#34;version&amp;#34;&lt;/span>: &lt;span style="color:#d14">&amp;#34;1.1&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#000080">&amp;#34;uri&amp;#34;&lt;/span>: &lt;span style="color:#d14">&amp;#34;http://wfx.host:8080/download/example_artifact.swu&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The &lt;code>type&lt;/code> list field allows to label update jobs. Labels may be used by wfx&amp;rsquo;s on-device counterpart to determine the
+activation action(s) to execute since, e.g., container images need a different activation action than firmware disk
+images or a configuration change.&lt;/p>
+&lt;p>In the preceding example, the presence of the &lt;code>firmware&lt;/code> label may be used to instruct the on-device client to
+test-reboot into the new firmware.&lt;/p>
+&lt;p>Since wfx isn&amp;rsquo;t concerned with the job definition except for conveying it to the device, it can be adapted to specific
+needs by feeding in a different job definition into the wfx on job creation and having a client on the device that can
+digest it.&lt;/p></description></item><item><title>Docs: Operations</title><link>https://siemens.github.io/wfx/docs/operations/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://siemens.github.io/wfx/docs/operations/</guid><description>
+&lt;h2 id="api">API&lt;/h2>
+&lt;p>wfx provides two RESTful APIs to interact with it: the northbound operator/management interface and the southbound
+interface used by clients as illustrated in the following figure:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-txt" data-lang="txt">&lt;span style="display:flex;">&lt;span> Management
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ▼ Northbound API
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>┌──────────────────┐
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ wfx │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>└──────────────────┘
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ▲ Southbound API
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Device
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The northbound API is used to create jobs and execute server-side state transitions, whereas the southbound API is used
+for client-side transitions.&lt;/p>
+&lt;p>The complete
+&lt;a href="https://siemens.github.io/wfx/wfx.swagger.yml">wfx API specification&lt;/a> is accessible at runtime via the &lt;code>/swagger.json&lt;/code> endpoint.
+Clients may inspect this specification at run-time so to obey the various limits imposed, e.g, for parameter value
+ranges and array lengths.&lt;/p>
+&lt;p>For convenience, wfx includes a built-in Swagger UI accessible at runtime via
+&lt;a href="http://localhost:8080/api/wfx/v1/docs" target="_blank">http://localhost:8080/api/wfx/v1/docs&lt;/a>,
+assuming default listening host and port
+&lt;a href="https://siemens.github.io/wfx/docs/configuration/">configuration&lt;/a>.&lt;/p>
+&lt;h3 id="response-filters">Response Filters&lt;/h3>
+&lt;p>wfx allows server-side response content filtering prior to sending the response to the client so to tailor it to client
+information needs. For example, if a client isn&amp;rsquo;t interested in the job&amp;rsquo;s history, it may request to omit it in wfx
+responses ― which also saves bandwidth. To this end, clients send a custom HTTP header, &lt;code>X-Response-Filter&lt;/code>, with a
+&lt;a href="https://stedolan.github.io/jq/" target="_blank">&lt;code>jq&lt;/code>&lt;/a>-like expression value. For example, assuming a job with ID 1 exists,&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>curl -s -f http://localhost:8080/api/wfx/v1/jobs/1/status &lt;span style="color:#d14">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#d14">&lt;/span> -H &lt;span style="color:#d14">&amp;#34;X-Response-Filter: .state&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>returns the current &lt;code>state&lt;/code> of the job as a string.&lt;/p>
+&lt;p>Note that the (filtered) response might no longer be a valid JSON expression as is the case in this example. It&amp;rsquo;s the
+client&amp;rsquo;s responsibility to handle the filtered response properly ― which it asked for being filtered in the first place.&lt;/p>
+&lt;h3 id="health-check">Health Check&lt;/h3>
+&lt;p>wfx includes an internal health check service that&amp;rsquo;s accessible at &lt;code>/health&lt;/code>, e.g., via&lt;/p>
+&lt;pre>&lt;code>curl http://localhost:8080/health
+&lt;/code>&lt;/pre>
+&lt;p>in standard
+&lt;a href="https://siemens.github.io/wfx/docs/configuration/">configuration&lt;/a> or, alternatively,&lt;/p>
+&lt;pre>&lt;code>wfxctl health
+&lt;/code>&lt;/pre>
+&lt;h3 id="wfx-version">wfx Version&lt;/h3>
+&lt;p>The version of wfx running is accessible at &lt;code>/version&lt;/code>, e.g., via&lt;/p>
+&lt;pre>&lt;code>curl http://localhost:8080/version
+&lt;/code>&lt;/pre>
+&lt;p>in standard
+&lt;a href="https://siemens.github.io/wfx/docs/configuration/">configuration&lt;/a> or, alternatively,&lt;/p>
+&lt;pre>&lt;code>wfxctl version
+&lt;/code>&lt;/pre>
+&lt;h2 id="deployment">Deployment&lt;/h2>
+&lt;p>To assist a secure deployment, both, the northbound operator/management interface and the southbound client interface,
+are isolated from each other by being bound to distinct ports so that, e.g., a firewall can be used to steer and
+restrict access.&lt;/p>
+&lt;p>While this separation provides a basic level of security, it doesn&amp;rsquo;t prevent clients interfering with each other: For
+example, there is no mechanism in place to prevent a client &lt;code>A&lt;/code> from updating the jobs of another client &lt;code>B&lt;/code>. This is a
+deliberate design choice following the Unix philosophy of &amp;ldquo;Make each program do one thing well&amp;rdquo;. It allows for flexible
+integration of wfx into existing or new infrastructure. Existing infrastructure most probably has request authentication
+and authorization measures in place. For new infrastructure, such a feature is likely better provided by specialized
+components/services supporting the overall deployment security architecture.&lt;/p>
+&lt;p>Thus, for productive deployments, a deployment along the lines of the following figure is recommended with an &lt;em>API
+Gateway&lt;/em> subsuming the discussed security requirements and performing access steering with regard to, e.g., client
+access.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-txt" data-lang="txt">&lt;span style="display:flex;">&lt;span>┌──────────────────┐
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ Operator / │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ Management │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>└──────────────────┘
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │ Request Authentication &amp;amp; Authorization
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ▼
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>┌──────────────────┐
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ API Gateway │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>└──────────────────┘
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │ Northbound: Management API
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ▼
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>┌──────────────────┐
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ wfx │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>└──────────────────┘
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ▲
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │ Southbound: Client API
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>┌──────────────────┐
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ API Gateway │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>└──────────────────┘
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ▲
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │ Request Authentication &amp;amp; Authorization
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ┌──────────────────┐
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>┌┴─────────────────┐│
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ Client ├┘
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>└──────────────────┘
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="telemetry">Telemetry&lt;/h2>
+&lt;p>No telemetry or user data is collected or processed by wfx.&lt;/p>
+&lt;p>Note that there is an indirect dependency on &lt;code>go.opentelemetry.io/otel&lt;/code> via
+&lt;a href="https://github.com/go-openapi" target="_blank">Go OpenAPI&lt;/a>
+by the &lt;strong>client runtime&lt;/strong> (as used by &lt;code>wfxctl&lt;/code>). Telemetry is deliberately turned off in wfx. See
+&lt;a href="https://github.com/go-openapi/runtime/pull/254" target="_blank">Add support for
+tracing via OpenTelemetry&lt;/a> for details.&lt;/p>
+&lt;h2 id="performance--benchmarking">Performance / Benchmarking&lt;/h2>
+&lt;p>wfx has been designed with performance and horizontal scalability in mind.&lt;/p>
+&lt;p>To regress-test and gauge the performance of wfx in particular scenarios, the &lt;code>wfx-loadtest&lt;/code> tool stressing the REST API
+can be helpful. It&amp;rsquo;s build by default alongside the other wfx binaries, see Section
+&lt;a href="https://siemens.github.io/wfx/docs/installation/#building-wfx">Building
+wfx&lt;/a>.&lt;/p>
+&lt;p>As an example, the following commands execute a benchmark of the default SQLite persistent storage:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>wfx --log-format json --log-level warn &amp;amp;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>wfx-loadtest --log-level warn --duration 60s
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Note: In the above example, the log format is JSON since pretty-printing is an expensive operation.&lt;/p>
+&lt;p>The benchmark result including statistics is printed to the terminal after 60 seconds and also available in the
+&lt;code>results&lt;/code> directory for further inspection.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-text" data-lang="text">&lt;span style="display:flex;">&lt;span>*******************************************************************************
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Summary
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>*******************************************************************************
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Requests [total, rate, throughput] 6000, 100.02, 100.02
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Duration [total, attack, wait] 59.987s, 59.986s, 792.516µs
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Latencies [min, mean, 50, 90, 95, 99, max] 187.363µs, 612.69µs, 602.423µs, 744.281µs, 809.622µs, 1.062ms, 7.242ms
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Bytes In [total, mean] 4041243, 673.54
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Bytes Out [total, mean] 81693, 13.62
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Success [ratio] 100.00%
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Status Codes [code:count] 200:5625 201:375
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Error Set:
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>and is to be interpreted as follows: There were 6,000 total requests at a rate of 100.02 requests per second. In terms
+of latency, the minimum response time was 187.363 microseconds, the mean was 612.69 microseconds, and the 99th
+percentile was 1.062 milliseconds. All requests were successful with a success ratio of 100%. The status codes indicate
+that a total of 5,625 status updates were sent with HTTP error code 200 and 375 jobs were created with HTTP error code
+201. No errors were reported.&lt;/p>
+&lt;p>The latency over time distribution is illustrated in the following figure:
+&lt;a href="https://siemens.github.io/wfx/benchmark.png">&lt;img src="https://siemens.github.io/wfx/benchmark.png" alt="benchmark
+plot" />&lt;/a>&lt;/p></description></item></channel></rss>
