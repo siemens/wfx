@@ -32,6 +32,12 @@ jobs:
       - run: |
           # goreleaser requires an absolute path to the compiler
           install -m0755 .ci/zcc /usr/local/bin/zcc
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.PACKAGE_DEPLOY_USER }}
+          password: ${{ secrets.PACKAGE_DEPLOY_TOKEN }}
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4
         with:
@@ -39,5 +45,5 @@ jobs:
           version: latest
           args: release --clean
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PACKAGE_DEPLOY_TOKEN }}
           CC: /usr/local/bin/zcc

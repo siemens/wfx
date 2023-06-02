@@ -226,8 +226,8 @@ dockers:
       - wfx
 
     image_templates:
-      - "gcr.io/siemens/wfx:latest"
-      - "gcr.io/siemens/wfx:{{ .Tag }}"
+      - "ghcr.io/siemens/wfx:latest"
+      - "ghcr.io/siemens/wfx:{{ .Tag }}"
 
     build_flag_templates:
       - "--pull"
