@@ -107,6 +107,11 @@ archives:
       {{.Binary}}-{{.Version}}-{{.Os}}-{{- if eq .Arch "amd64" }}x86_64{{ else }}{{.Arch}}{{ end }}{{ if .Arm }}v{{.Arm }}{{ end }}
     format: tar.xz
     rlcp: true
+    files:
+      - LICENSE
+      - README.md
+      - CHANGELOG.md
+      - docs/*.md
 
   - id: wfxctl
     builds:
@@ -115,6 +120,8 @@ archives:
       {{.Binary}}-{{.Version}}-{{.Os}}-{{- if eq .Arch "amd64" }}x86_64{{ else }}{{.Arch}}{{ end }}{{ if .Arm }}v{{.Arm }}{{ end }}
     format: tar.xz
     rlcp: true
+    files:
+      - LICENSE
 
   - id: wfx-viewer
     builds:
@@ -123,6 +130,8 @@ archives:
       {{.Binary}}-{{.Version}}-{{.Os}}-{{- if eq .Arch "amd64" }}x86_64{{ else }}{{.Arch}}{{ end }}{{ if .Arm }}v{{.Arm }}{{ end }}
     format: tar.xz
     rlcp: true
+    files:
+      - LICENSE
 
 nfpms:
   - id: wfx
