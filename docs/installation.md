@@ -2,6 +2,16 @@
 
 Pre-built binaries, as well as Debian and RPM packages, are available [here](https://github.com/siemens/wfx/releases) for Linux, specifically [x86_64](https://github.com/golang/go/wiki/MinimumRequirements#amd64) and [arm64](https://github.com/golang/go/wiki/MinimumRequirements#arm64) architectures.
 
+To start a container hosting wfx, follow these commands:
+
+```bash
+# create a named volume to persist data (only needed the first time)
+docker volume create wfx-db
+docker run --rm -v wfx-db:/home/nonroot \
+    -p 8080:8080 -p 8081:8081 \
+    ghcr.io/siemens/wfx:latest
+```
+
 If pre-built binaries are not available (refer to `go tool dist list` for alternative platforms and architectures, such
 as Windows or macOS), or if specific features need to be disabled during compilation, building wfx from source is
 necessary.
