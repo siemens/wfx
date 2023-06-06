@@ -132,8 +132,7 @@ nfpms:
     vendor: Siemens AG
     homepage: https://github.com/siemens/wfx
     maintainer: Michael Adler <michael.adler@siemens.com>
-    description: |-
-      Workflow Executor Reference Implementation.
+    description: a lightweight, general-purpose workflow executor
     license: Apache-2.0
     formats:
       - deb
