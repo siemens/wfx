@@ -4,7 +4,13 @@
 for Linux, specifically
 &lt;a href="https://github.com/golang/go/wiki/MinimumRequirements#amd64" target="_blank">x86_64&lt;/a> and
 &lt;a href="https://github.com/golang/go/wiki/MinimumRequirements#arm64" target="_blank">arm64&lt;/a> architectures.&lt;/p>
-&lt;p>If pre-built binaries are not available (refer to &lt;code>go tool dist list&lt;/code> for alternative platforms and architectures, such
+&lt;p>To start a container hosting wfx, follow these commands:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#998;font-style:italic"># create a named volume to persist data (only needed the first time)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>docker volume create wfx-db
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>docker run --rm -v wfx-db:/home/nonroot &lt;span style="color:#d14">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#d14">&lt;/span> -p 8080:8080 -p 8081:8081 &lt;span style="color:#d14">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#d14">&lt;/span> ghcr.io/siemens/wfx:latest
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>If pre-built binaries are not available (refer to &lt;code>go tool dist list&lt;/code> for alternative platforms and architectures, such
 as Windows or macOS), or if specific features need to be disabled during compilation, building wfx from source is
 necessary.&lt;/p>
 &lt;h2 id="building-wfx">Building wfx&lt;/h2>
