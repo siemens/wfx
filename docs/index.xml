@@ -250,6 +250,12 @@ feature is particularly useful for dynamic deployments or when an external file 
 configure the directory that backs the file server URL&amp;rsquo;s contents, use the &lt;code>--simple-fileserver=/path/to/folder&lt;/code> option.&lt;/p>
 &lt;p>Note that this feature is disabled by default and must be explicitly enabled at run-time using this option.&lt;/p></description></item><item><title>Docs: Device Artifact Update (DAU)</title><link>https://siemens.github.io/wfx/docs/workflows/dau/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://siemens.github.io/wfx/docs/workflows/dau/</guid><description>
 &lt;p>The Device Artifact Update Workflow Family has been specifically designed for updating software on devices.&lt;/p>
+&lt;p>The following clients have support for the Device Artifact Update Workflow Family:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;a href="https://github.com/sbabic/swupdate/blob/master/doc/source/suricatta.rst#support-for-wfx" target="_blank">SWUpdate&lt;/a> - Software Update
+for Embedded Linux Devices.&lt;/li>
+&lt;/ul>
 &lt;h2 id="workflows">Workflows&lt;/h2>
 &lt;p>Currently, the DAU Workflow Family comprises two workflows that model the software update process for devices:&lt;/p>
 &lt;p>The
