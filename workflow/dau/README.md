@@ -2,6 +2,10 @@
 
 The Device Artifact Update Workflow Family has been specifically designed for updating software on devices.
 
+The following clients have support for the Device Artifact Update Workflow Family:
+
+- [SWUpdate](https://github.com/sbabic/swupdate/blob/master/doc/source/suricatta.rst#support-for-wfx) - Software Update for Embedded Linux Devices.
+
 ## Workflows
 
 Currently, the DAU Workflow Family comprises two workflows that model the software update process for devices:

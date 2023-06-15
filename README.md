@@ -69,9 +69,9 @@ An exemplary [Kanban](https://en.wikipedia.org/wiki/Kanban)-inspired [workflow](
 
 **wfx Clients**
 
-Currently, the following client have support for wfx:
+Currently, the following clients have support for wfx:
 
-- [SWUpdate](https://github.com/sbabic/swupdate) - Software Update for Embedded Linux Devices implementing support for the [Device Artifact Update Workflow Family](workflow/dau/README.md) [[PENDING](https://patchwork.ozlabs.org/project/swupdate/list/?submitter=72180)]
+- [SWUpdate](https://github.com/sbabic/swupdate) - Software Update for Embedded Linux Devices implementing support for the [Device Artifact Update Workflow Family](workflow/dau/README.md)
 
 ## Documentation
 
