@@ -1,0 +1,32 @@
+---
+name: Feature request
+description: Request an enhancement for wfx
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before requesting: search [existing issues](https://github.com/siemens/wfx/labels/enhancement).
+
+  - type: textarea
+    attributes:
+      label: "Description"
+      description: "Describe the feature you're requesting."
+      placeholder: "This feature adds functionality to ..."
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Motivation"
+      description: "Describe additional context such as examples or use cases helping in understanding the feature request."
+      placeholder: "This feature would be helpful because ... so that the following use case is addressed: ..."
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Proposed Solution (optional)"
+      description: "Sketch an implementation idea, possibly considering multiple approaches."
+    validations:
+      required: false
