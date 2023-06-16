@@ -59,7 +59,7 @@ func extractErrors(val any) []*model.Error {
 // Note: This function will terminate the program if the error is not nil. Use with caution.
 func Must[T any](value T, err error) T {
 	if err != nil {
-		log.Fatal().Err(err).Msg("A fatal error has occured")
+		log.Fatal().Err(err).Msg("A fatal error has occurred")
 	}
 	return value
 }
