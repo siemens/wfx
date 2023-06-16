@@ -68,7 +68,7 @@ test-postgres:
   stage: test
   image: archlinux:latest
   services:
-    - postgres:14
+    - postgres:15
   needs: []
   variables:
     CGO_ENABLED: 1

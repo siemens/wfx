@@ -63,7 +63,7 @@ Note that all state is lost on wfx exiting so it's advised to use it for testing
 ### PostgreSQL
 
 [PostgreSQL](https://www.postgresql.org/) is a well-known open source object-relational database.
-Via environment variables or a Data Source Name (DSN) passed as `--storage-opt`, the link to a PostgreSQL instance is configured, see PostgreSQL's [parameter key word names](https://www.postgresql.org/docs/11/libpq-connect.html#LIBPQ-PARAMKEYWORDS) for DSN and [environment variables](http://www.postgresql.org/docs/11/static/libpq-envars.html) documentation for details and available options.
+Via environment variables or a Data Source Name (DSN) passed as `--storage-opt`, the link to a PostgreSQL instance is configured, see PostgreSQL's [parameter key word names](https://www.postgresql.org/docs/15/libpq-connect.html#LIBPQ-PARAMKEYWORDS) for DSN and [environment variables](http://www.postgresql.org/docs/15/static/libpq-envars.html) documentation for details and available options.
 
 As an example, the following two commands each run a wfx instance connecting to the same PostgreSQL instance but with different configuration means:
 

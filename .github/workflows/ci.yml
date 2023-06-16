@@ -56,7 +56,7 @@ jobs:
     container: golang:latest
     services:
       postgres:
-        image: postgres:14
+        image: postgres:15
         env:
           # see https://hub.docker.com/_/postgres
           POSTGRES_HOST: postgres
