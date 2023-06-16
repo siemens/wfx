@@ -83,11 +83,11 @@ generate:
     go mod tidy
 
 # Start PostgreSQL container
-postgres-start:
+postgres-start VERSION="15":
     #!/usr/bin/env bash
     count=`{{ DOCKER }} container ls --quiet --noheading --filter name=wfx-postgres --filter "health=healthy" | wc -l`
     if [[ $count -eq 0 ]]; then
-        echo "Starting PostgreSQL"
+        echo "Starting PostgreSQL {{ VERSION }}"
         {{ DOCKER }} run -d --rm \
             --name wfx-postgres \
             -e "POSTGRES_USER=$PGUSER" \
@@ -98,7 +98,7 @@ postgres-start:
             --health-interval 3s \
             --health-timeout 5s \
             --health-retries 20 \
-            docker.io/library/postgres:14-alpine
+            docker.io/library/postgres:{{ VERSION }}-alpine
     else
         echo "PostgreSQL is already running"
     fi

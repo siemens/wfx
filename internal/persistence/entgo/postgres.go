@@ -17,12 +17,12 @@ import (
 	"time"
 
 	"github.com/Southclaws/fault"
-	migrate_pgx "github.com/golang-migrate/migrate/v4/database/pgx"
+	migrate_pgx "github.com/golang-migrate/migrate/v4/database/pgx/v5"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 
-	// using the same version as in https://github.com/golang-migrate/migrate/blob/v4.15.2/database/pgx/pgx.go
-	"github.com/jackc/pgx/v4"
-	"github.com/jackc/pgx/v4/stdlib"
+	// using the same version as in https://github.com/golang-migrate/migrate/blob/v4.16.2/database/pgx/v5/pgx.go
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/stdlib"
 
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
