@@ -36,9 +36,9 @@ Wiki</a> for available Data Source Name (DSN) options.</p><p>As an example, the 
 </span></span></code></pre></div><p>Note that all state is lost on wfx exiting so it&rsquo;s advised to use it for testing purposes only.</p><h3 id=postgresql>PostgreSQL</h3><p><a href=https://www.postgresql.org/ target=_blank>PostgreSQL</a> is a well-known open source object-relational database. Via environment
 variables or a Data Source Name (DSN) passed as <code>--storage-opt</code>, the link to a PostgreSQL instance is configured, see
 PostgreSQL&rsquo;s
-<a href=https://www.postgresql.org/docs/11/libpq-connect.html#LIBPQ-PARAMKEYWORDS target=_blank>parameter key word names</a> for
+<a href=https://www.postgresql.org/docs/15/libpq-connect.html#LIBPQ-PARAMKEYWORDS target=_blank>parameter key word names</a> for
 DSN and
-<a href=http://www.postgresql.org/docs/11/static/libpq-envars.html target=_blank>environment variables</a> documentation for details
+<a href=http://www.postgresql.org/docs/15/static/libpq-envars.html target=_blank>environment variables</a> documentation for details
 and available options.</p><p>As an example, the following two commands each run a wfx instance connecting to the same PostgreSQL instance but with
 different configuration means:</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#998;font-style:italic># Configuration via DSN key=value string</span>
 </span></span><span style=display:flex><span>wfx --storage postgres <span style=color:#d14>\

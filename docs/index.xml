@@ -132,9 +132,9 @@ Wiki&lt;/a> for available Data Source Name (DSN) options.&lt;/p>
 &lt;a href="https://www.postgresql.org/" target="_blank">PostgreSQL&lt;/a> is a well-known open source object-relational database. Via environment
 variables or a Data Source Name (DSN) passed as &lt;code>--storage-opt&lt;/code>, the link to a PostgreSQL instance is configured, see
 PostgreSQL&amp;rsquo;s
-&lt;a href="https://www.postgresql.org/docs/11/libpq-connect.html#LIBPQ-PARAMKEYWORDS" target="_blank">parameter key word names&lt;/a> for
+&lt;a href="https://www.postgresql.org/docs/15/libpq-connect.html#LIBPQ-PARAMKEYWORDS" target="_blank">parameter key word names&lt;/a> for
 DSN and
-&lt;a href="http://www.postgresql.org/docs/11/static/libpq-envars.html" target="_blank">environment variables&lt;/a> documentation for details
+&lt;a href="http://www.postgresql.org/docs/15/static/libpq-envars.html" target="_blank">environment variables&lt;/a> documentation for details
 and available options.&lt;/p>
 &lt;p>As an example, the following two commands each run a wfx instance connecting to the same PostgreSQL instance but with
 different configuration means:&lt;/p>
