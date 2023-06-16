@@ -1,0 +1,70 @@
+---
+name: Bug report
+description: File a new bug
+labels: [bug, triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before requesting: search [existing issues](https://github.com/siemens/wfx/labels/bug).
+
+  - type: textarea
+    attributes:
+      label: Current Behavior
+      description: "Description of the current behavior."
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Expected Behavior
+      description: "Description of the expected behavior."
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Steps To Reproduce
+      description: "Example steps to reproduce the behavior:"
+      placeholder: |
+        1. In this environment...
+        2. With this config...
+        3. Run '...'
+        4. See error...
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Environment - OS
+      description: "e.g. Debian Bullseye, Ubuntu 18.04, Mac OS X High Sierra, Windows 10, ..."
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: OS version
+      description: "Output of uname -a (if applicable)"
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: wfx Version
+      description: "Output of wfx --version"
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Installation method
+      description: "e.g. from source or via package manager"
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Anything else
+      description: "Further hints, links, or references? Any additional information probably helping in root cause analysis."
+    validations:
+      required: false
