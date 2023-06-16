@@ -7,9 +7,11 @@
 !/generated/**/configure_workflow_executor.go
 !/generated/ent/schema/**
 !/generated/ent/migrate/main.go
-go.sum
+*.sum
 go.mod
 public
 _gen
 *.cast
 test/test_helper
+package-lock.json
+*.svg
