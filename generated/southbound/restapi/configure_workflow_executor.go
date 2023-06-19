@@ -12,7 +12,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/siemens/wfx/generated/southbound/restapi/operations"
-	"github.com/siemens/wfx/internal/jsonutil"
+	"github.com/siemens/wfx/internal/producer"
 )
 
 func ConfigureAPI(api *operations.WorkflowExecutorAPI) http.Handler {
@@ -28,7 +28,7 @@ func ConfigureAPI(api *operations.WorkflowExecutorAPI) http.Handler {
 
 	api.JSONConsumer = runtime.JSONConsumer()
 
-	api.JSONProducer = jsonutil.JSONProducer()
+	api.JSONProducer = producer.JSONProducer()
 
 	api.PreServerShutdown = func() {}
 

@@ -1,4 +1,4 @@
-package jsonutil
+package producer
 
 /*
  * SPDX-FileCopyrightText: 2023 Siemens AG
