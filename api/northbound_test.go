@@ -21,7 +21,7 @@ import (
 	"github.com/Southclaws/fault/ftag"
 	"github.com/siemens/wfx/generated/model"
 	"github.com/siemens/wfx/generated/northbound/restapi/operations/northbound"
-	"github.com/siemens/wfx/internal/jsonutil"
+	"github.com/siemens/wfx/internal/producer"
 	"github.com/siemens/wfx/persistence"
 	"github.com/siemens/wfx/workflow/dau"
 	"github.com/stretchr/testify/assert"
@@ -105,7 +105,7 @@ func TestNorthboundGetJobsIDStatusHandler_NotFound(t *testing.T) {
 	resp := api.NorthboundGetJobsIDStatusHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
-	resp.WriteResponse(recorder, jsonutil.JSONProducer())
+	resp.WriteResponse(recorder, producer.JSONProducer())
 	response := recorder.Result()
 
 	assert.Equal(t, http.StatusNotFound, response.StatusCode)
@@ -120,7 +120,7 @@ func TestNorthboundPutJobsIDStatusHandler_NotFound(t *testing.T) {
 	resp := api.NorthboundPutJobsIDStatusHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
-	resp.WriteResponse(recorder, jsonutil.JSONProducer())
+	resp.WriteResponse(recorder, producer.JSONProducer())
 	response := recorder.Result()
 
 	assert.Equal(t, http.StatusNotFound, response.StatusCode)
@@ -134,7 +134,7 @@ func TestNorthboundGetJobsHandler_InternalError(t *testing.T) {
 	resp := api.NorthboundGetJobsHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
-	resp.WriteResponse(recorder, jsonutil.JSONProducer())
+	resp.WriteResponse(recorder, producer.JSONProducer())
 	response := recorder.Result()
 
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
@@ -148,7 +148,7 @@ func TestNorthboundGetJobsIDHandler_NotFound(t *testing.T) {
 	resp := api.NorthboundGetJobsIDHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
-	resp.WriteResponse(recorder, jsonutil.JSONProducer())
+	resp.WriteResponse(recorder, producer.JSONProducer())
 	response := recorder.Result()
 
 	assert.Equal(t, http.StatusNotFound, response.StatusCode)
@@ -164,7 +164,7 @@ func TestNorthboundGetJobsIDHandler_InternalError(t *testing.T) {
 	resp := api.NorthboundGetJobsIDHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
-	resp.WriteResponse(recorder, jsonutil.JSONProducer())
+	resp.WriteResponse(recorder, producer.JSONProducer())
 	response := recorder.Result()
 
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
@@ -178,7 +178,7 @@ func TestNorthboundGetJobsIDStatusHandler_InternalError(t *testing.T) {
 	resp := api.NorthboundGetJobsIDStatusHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
-	resp.WriteResponse(recorder, jsonutil.JSONProducer())
+	resp.WriteResponse(recorder, producer.JSONProducer())
 	response := recorder.Result()
 
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
@@ -192,7 +192,7 @@ func TestNorthboundPutJobsIDStatusHandler_InternalError(t *testing.T) {
 	resp := api.NorthboundPutJobsIDStatusHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
-	resp.WriteResponse(recorder, jsonutil.JSONProducer())
+	resp.WriteResponse(recorder, producer.JSONProducer())
 	response := recorder.Result()
 
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
@@ -206,7 +206,7 @@ func TestNorthboundGetJobsIDDefinitionHandler_NotFound(t *testing.T) {
 	resp := api.NorthboundGetJobsIDDefinitionHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
-	resp.WriteResponse(recorder, jsonutil.JSONProducer())
+	resp.WriteResponse(recorder, producer.JSONProducer())
 	response := recorder.Result()
 
 	assert.Equal(t, http.StatusNotFound, response.StatusCode)
@@ -220,7 +220,7 @@ func TestNorthboundGetJobsIDDefinitionHandler_InternalError(t *testing.T) {
 	resp := api.NorthboundGetJobsIDDefinitionHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
-	resp.WriteResponse(recorder, jsonutil.JSONProducer())
+	resp.WriteResponse(recorder, producer.JSONProducer())
 	response := recorder.Result()
 
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
@@ -234,7 +234,7 @@ func TestNorthboundPutJobsIDDefinitionHandler_NotFound(t *testing.T) {
 	resp := api.NorthboundPutJobsIDDefinitionHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
-	resp.WriteResponse(recorder, jsonutil.JSONProducer())
+	resp.WriteResponse(recorder, producer.JSONProducer())
 	response := recorder.Result()
 
 	assert.Equal(t, http.StatusNotFound, response.StatusCode)
@@ -248,7 +248,7 @@ func TestNorthboundPutJobsIDDefinitionHandler_InternalError(t *testing.T) {
 	resp := api.NorthboundPutJobsIDDefinitionHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
-	resp.WriteResponse(recorder, jsonutil.JSONProducer())
+	resp.WriteResponse(recorder, producer.JSONProducer())
 	response := recorder.Result()
 
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
@@ -262,7 +262,7 @@ func TestNorthboundGetWorkflowsNameHandler_InternalError(t *testing.T) {
 	resp := api.NorthboundGetWorkflowsNameHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
-	resp.WriteResponse(recorder, jsonutil.JSONProducer())
+	resp.WriteResponse(recorder, producer.JSONProducer())
 	response := recorder.Result()
 
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
@@ -276,7 +276,7 @@ func TestNorthboundGetWorkflowsHandler_InternalError(t *testing.T) {
 	resp := api.NorthboundGetWorkflowsHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
-	resp.WriteResponse(recorder, jsonutil.JSONProducer())
+	resp.WriteResponse(recorder, producer.JSONProducer())
 	response := recorder.Result()
 
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
@@ -290,7 +290,7 @@ func TestNorthboundGetWorkflowsHandler_Empty(t *testing.T) {
 	resp := api.NorthboundGetWorkflowsHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
-	resp.WriteResponse(recorder, jsonutil.JSONProducer())
+	resp.WriteResponse(recorder, producer.JSONProducer())
 	response := recorder.Result()
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
@@ -304,7 +304,7 @@ func TestNorthboundDeleteWorkflowsNameHandle_NotFound(t *testing.T) {
 	resp := api.NorthboundDeleteWorkflowsNameHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
-	resp.WriteResponse(recorder, jsonutil.JSONProducer())
+	resp.WriteResponse(recorder, producer.JSONProducer())
 	response := recorder.Result()
 
 	assert.Equal(t, http.StatusNotFound, response.StatusCode)
@@ -318,7 +318,7 @@ func TestNorthboundDeleteWorkflowsNameHandle_InternalError(t *testing.T) {
 	resp := api.NorthboundDeleteWorkflowsNameHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
-	resp.WriteResponse(recorder, jsonutil.JSONProducer())
+	resp.WriteResponse(recorder, producer.JSONProducer())
 	response := recorder.Result()
 
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
@@ -333,7 +333,7 @@ func TestNorthboundPostWorkflowsHandler_InternalError(t *testing.T) {
 	resp := api.NorthboundPostWorkflowsHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
-	resp.WriteResponse(recorder, jsonutil.JSONProducer())
+	resp.WriteResponse(recorder, producer.JSONProducer())
 	response := recorder.Result()
 
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
@@ -348,7 +348,7 @@ func TestNorthboundPostWorkflowsHandler_AlreadyExists(t *testing.T) {
 	resp := api.NorthboundPostWorkflowsHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
-	resp.WriteResponse(recorder, jsonutil.JSONProducer())
+	resp.WriteResponse(recorder, producer.JSONProducer())
 	response := recorder.Result()
 
 	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
@@ -363,7 +363,7 @@ func TestNorthboundPostWorkflowsHandler_InvalidWorkflow(t *testing.T) {
 	resp := api.NorthboundPostWorkflowsHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
-	resp.WriteResponse(recorder, jsonutil.JSONProducer())
+	resp.WriteResponse(recorder, producer.JSONProducer())
 	response := recorder.Result()
 
 	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
@@ -378,7 +378,7 @@ func TestNorthboundPostJobsHandler_NotFound(t *testing.T) {
 	resp := api.NorthboundPostJobsHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
-	resp.WriteResponse(recorder, jsonutil.JSONProducer())
+	resp.WriteResponse(recorder, producer.JSONProducer())
 	response := recorder.Result()
 
 	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
@@ -393,7 +393,7 @@ func TestNorthboundPostJobsHandler_InternalError(t *testing.T) {
 	resp := api.NorthboundPostJobsHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
-	resp.WriteResponse(recorder, jsonutil.JSONProducer())
+	resp.WriteResponse(recorder, producer.JSONProducer())
 	response := recorder.Result()
 
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
@@ -407,7 +407,7 @@ func TestNorthboundDeleteJobsIDHandler_NotFound(t *testing.T) {
 	resp := api.NorthboundDeleteJobsIDHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
-	resp.WriteResponse(recorder, jsonutil.JSONProducer())
+	resp.WriteResponse(recorder, producer.JSONProducer())
 	response := recorder.Result()
 
 	assert.Equal(t, http.StatusNotFound, response.StatusCode)
@@ -421,7 +421,7 @@ func TestNorthboundDeleteJobsIDHandler_InternalError(t *testing.T) {
 	resp := api.NorthboundDeleteJobsIDHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
-	resp.WriteResponse(recorder, jsonutil.JSONProducer())
+	resp.WriteResponse(recorder, producer.JSONProducer())
 	response := recorder.Result()
 
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
@@ -435,7 +435,7 @@ func TestNorthboundGetJobsIDTagsHandler_NotFound(t *testing.T) {
 	resp := api.NorthboundGetJobsIDTagsHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
-	resp.WriteResponse(recorder, jsonutil.JSONProducer())
+	resp.WriteResponse(recorder, producer.JSONProducer())
 	response := recorder.Result()
 
 	assert.Equal(t, http.StatusNotFound, response.StatusCode)
@@ -449,7 +449,7 @@ func TestNorthboundGetJobsIDTagsHandler_InternalError(t *testing.T) {
 	resp := api.NorthboundGetJobsIDTagsHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
-	resp.WriteResponse(recorder, jsonutil.JSONProducer())
+	resp.WriteResponse(recorder, producer.JSONProducer())
 	response := recorder.Result()
 
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
@@ -463,7 +463,7 @@ func TestNorthboundPostJobsIDTagsHandler_NotFound(t *testing.T) {
 	resp := api.NorthboundPostJobsIDTagsHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
-	resp.WriteResponse(recorder, jsonutil.JSONProducer())
+	resp.WriteResponse(recorder, producer.JSONProducer())
 	response := recorder.Result()
 
 	assert.Equal(t, http.StatusNotFound, response.StatusCode)
@@ -477,7 +477,7 @@ func TestNorthboundPostJobsIDTagsHandler_InternalError(t *testing.T) {
 	resp := api.NorthboundPostJobsIDTagsHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
-	resp.WriteResponse(recorder, jsonutil.JSONProducer())
+	resp.WriteResponse(recorder, producer.JSONProducer())
 	response := recorder.Result()
 
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
@@ -491,7 +491,7 @@ func TestNorthboundDeleteJobsIDTagsHandler_NotFound(t *testing.T) {
 	resp := api.NorthboundDeleteJobsIDTagsHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
-	resp.WriteResponse(recorder, jsonutil.JSONProducer())
+	resp.WriteResponse(recorder, producer.JSONProducer())
 	response := recorder.Result()
 
 	assert.Equal(t, http.StatusNotFound, response.StatusCode)
@@ -505,7 +505,7 @@ func TestNorthboundDeleteJobsIDTagsHandler_InternalError(t *testing.T) {
 	resp := api.NorthboundDeleteJobsIDTagsHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
-	resp.WriteResponse(recorder, jsonutil.JSONProducer())
+	resp.WriteResponse(recorder, producer.JSONProducer())
 	response := recorder.Result()
 
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
