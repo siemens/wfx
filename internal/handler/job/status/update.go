@@ -84,11 +84,28 @@ func Update(ctx context.Context, storage persistence.Storage, jobID string, newS
 		log.Error().Err(err).Msg("Failed to persist job update")
 		return nil, fault.Wrap(err)
 	}
+	// NOTE: at this point, the job status has been updated successfully;
+	// there's always the possibility that we are unable to send the response
+	// to the clients or update subscribers
 
 	if from != to {
 		contextLogger.Info().Msg("Updated job status")
 	} else {
 		contextLogger.Debug().Msg("Updated job status")
 	}
+
+	// notify subscribers about the update
+	if topic, ok := topics.Get(jobID); ok {
+		status := *result.Status
+		go func() {
+			topic.Publish(status)
+			if workflow.IsTerminal(job.Workflow, result.Status.State) {
+				contextLogger.Debug().Str("state", result.Status.State).
+					Msg("Job has reached a terminal state. Shutting down associated topic.")
+				topic.Shutdown()
+			}
+		}()
+	}
+
 	return result.Status, nil
 }

@@ -38,3 +38,11 @@ func TestWriter(t *testing.T) {
 
 	assert.Equal(t, "hello world", string(body))
 }
+
+func TestWriterImplementsFlusher(t *testing.T) {
+	recorder := httptest.NewRecorder()
+	var w http.ResponseWriter = newMyResponseWriter(recorder)
+	flusher, ok := w.(http.Flusher)
+	assert.True(t, ok)
+	flusher.Flush()
+}

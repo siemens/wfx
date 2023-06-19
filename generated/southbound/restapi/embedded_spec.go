@@ -536,6 +536,68 @@ func init() {
         }
       }
     },
+    "/jobs/{id}/status/subscribe": {
+      "get": {
+        "description": "Obtain instant notifications when there is a change in the job status. This endpoint utilizes server-sent events (SSE), where responses are \"chunked\" with double newline breaks. For example, a single event might look like this:\n  data: {\"clientId\":\"example_client\",\"state\":\"INSTALLING\"}\\n\\n\n\nNote: The first event is always the current job status, i.e. equivalent to calling GET on /jobs/{id}/status.\n",
+        "produces": [
+          "application/json",
+          "text/event-stream"
+        ],
+        "tags": [
+          "jobs",
+          "northbound",
+          "southbound"
+        ],
+        "summary": "Subscribe to job status updates",
+        "parameters": [
+          {
+            "$ref": "#/parameters/jobId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A stream of server-sent events"
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            },
+            "examples": {
+              "Error responses occurring at this operation for invalid requests": {
+                "errors": [
+                  {
+                    "code": "wfx.jobTerminalState",
+                    "logref": "916f0a913a3e4a52a96bd271e029c201",
+                    "message": "The request was invalid because the job is in a terminal state"
+                  }
+                ]
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            },
+            "examples": {
+              "Error responses occurring at this operation while updating a non-existent job": {
+                "errors": [
+                  {
+                    "code": "wfx.jobNotFound",
+                    "logref": "11cc67762090e15b79a1387eca65ba65",
+                    "message": "Job ID was not found"
+                  }
+                ]
+              }
+            }
+          },
+          "default": {
+            "description": "Other error with any status code and response body format."
+          }
+        }
+      }
+    },
     "/jobs/{id}/tags": {
       "get": {
         "description": "Get the tags of a job",
@@ -1530,6 +1592,11 @@ func init() {
         "logref": "11cc67762090e15b79a1387eca65ba65",
         "message": "Job ID was not found"
       },
+      "jobTerminalStateError": {
+        "code": "wfx.jobTerminalState",
+        "logref": "916f0a913a3e4a52a96bd271e029c201",
+        "message": "The request was invalid because the job is in a terminal state"
+      },
       "workflowInvalidError": {
         "code": "wfx.workflowInvalid",
         "logref": "18f57adc70dd79c7fb4f1246be8a6e04",
@@ -2101,6 +2168,72 @@ func init() {
                     "code": "wfx.invalidRequest",
                     "logref": "96a37ea1f7d205ffbfa12334c6812727",
                     "message": "The request was invalid and could not be completed by the storage"
+                  }
+                ]
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            },
+            "examples": {
+              "Error responses occurring at this operation while updating a non-existent job": {
+                "errors": [
+                  {
+                    "code": "wfx.jobNotFound",
+                    "logref": "11cc67762090e15b79a1387eca65ba65",
+                    "message": "Job ID was not found"
+                  }
+                ]
+              }
+            }
+          },
+          "default": {
+            "description": "Other error with any status code and response body format."
+          }
+        }
+      }
+    },
+    "/jobs/{id}/status/subscribe": {
+      "get": {
+        "description": "Obtain instant notifications when there is a change in the job status. This endpoint utilizes server-sent events (SSE), where responses are \"chunked\" with double newline breaks. For example, a single event might look like this:\n  data: {\"clientId\":\"example_client\",\"state\":\"INSTALLING\"}\\n\\n\n\nNote: The first event is always the current job status, i.e. equivalent to calling GET on /jobs/{id}/status.\n",
+        "produces": [
+          "application/json",
+          "text/event-stream"
+        ],
+        "tags": [
+          "jobs",
+          "northbound",
+          "southbound"
+        ],
+        "summary": "Subscribe to job status updates",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Job ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A stream of server-sent events"
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            },
+            "examples": {
+              "Error responses occurring at this operation for invalid requests": {
+                "errors": [
+                  {
+                    "code": "wfx.jobTerminalState",
+                    "logref": "916f0a913a3e4a52a96bd271e029c201",
+                    "message": "The request was invalid because the job is in a terminal state"
                   }
                 ]
               }
@@ -3199,6 +3332,11 @@ func init() {
         "code": "wfx.jobNotFound",
         "logref": "11cc67762090e15b79a1387eca65ba65",
         "message": "Job ID was not found"
+      },
+      "jobTerminalStateError": {
+        "code": "wfx.jobTerminalState",
+        "logref": "916f0a913a3e4a52a96bd271e029c201",
+        "message": "The request was invalid because the job is in a terminal state"
       },
       "workflowInvalidError": {
         "code": "wfx.workflowInvalid",

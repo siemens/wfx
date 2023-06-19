@@ -422,6 +422,11 @@ x-paths-templates:
       logref: 11cc67762090e15b79a1387eca65ba65
       message: Job ID was not found
 
+    jobTerminalStateError: &jobTerminalStateError
+      code: wfx.jobTerminalState
+      logref: 916f0a913a3e4a52a96bd271e029c201
+      message: The request was invalid because the job is in a terminal state
+
     workflowNotFoundError: &workflowNotFoundError
       code: wfx.workflowNotFound
       logref: c452719774086b6e803bb8f6ecea9899
@@ -783,6 +788,47 @@ paths:
             Error responses occurring at this operation for invalid requests:
               errors:
                 - <<: *invalidRequestError
+        "404":
+          description: Not Found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            Error responses occurring at this operation while updating a non-existent job:
+              errors:
+                - <<: *jobNotFoundError
+
+  /jobs/{id}/status/subscribe:
+    get:
+      summary: Subscribe to job status updates
+      description: >
+        Obtain instant notifications when there is a change in the job status.
+        This endpoint utilizes server-sent events (SSE), where responses are "chunked" with double newline breaks.
+        For example, a single event might look like this:
+          data: {"clientId":"example_client","state":"INSTALLING"}\n\n
+
+        Note: The first event is always the current job status, i.e. equivalent to calling GET on /jobs/{id}/status.
+      tags:
+        - jobs
+        - northbound
+        - southbound
+      produces:
+        - application/json
+        - text/event-stream
+      parameters:
+        - $ref: "#/parameters/jobId"
+      responses:
+        "default":
+          description: Other error with any status code and response body format.
+        "200":
+          description: A stream of server-sent events
+        "400":
+          description: Bad Request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            Error responses occurring at this operation for invalid requests:
+              errors:
+                - <<: *jobTerminalStateError
         "404":
           description: Not Found
           schema:

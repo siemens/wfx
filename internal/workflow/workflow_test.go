@@ -18,8 +18,14 @@ import (
 
 func TestFindStateGroup(t *testing.T) {
 	workflow := dau.PhasedWorkflow()
-	group := FindStateGroup(workflow, "DOWNLOAD")
-	assert.Equal(t, "OPEN", group)
+	{
+		group := FindStateGroup(workflow, "DOWNLOAD")
+		assert.Equal(t, "OPEN", group)
+	}
+	{
+		group := FindStateGroup(workflow, "FOO")
+		assert.Equal(t, "", group)
+	}
 }
 
 func TestFollowTransitions(t *testing.T) {
@@ -38,4 +44,12 @@ func TestFollowTransitions(t *testing.T) {
 
 	actual := FollowImmediateTransitions(&model.Workflow{Transitions: transitions}, "a")
 	assert.Equal(t, d, actual, "should warp from a to d")
+}
+
+func TestIsTerminal(t *testing.T) {
+	wf := dau.DirectWorkflow()
+	assert.True(t, IsTerminal(wf, "ACTIVATED"))
+	assert.True(t, IsTerminal(wf, "TERMINATED"))
+	assert.False(t, IsTerminal(wf, "INSTALL"))
+	assert.False(t, IsTerminal(wf, "INSTALLING"))
 }

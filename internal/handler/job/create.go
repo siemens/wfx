@@ -26,7 +26,6 @@ import (
 func CreateJob(ctx context.Context, storage persistence.Storage, request *model.JobRequest) (*model.Job, error) {
 	log := logging.LoggerFromCtx(ctx)
 	contextLogger := log.With().Str("clientId", request.ClientID).Str("name", request.Workflow).Logger()
-	contextLogger.Debug().Msg("Creating new job")
 
 	wf, err := storage.GetWorkflow(ctx, request.Workflow)
 	if err != nil {
