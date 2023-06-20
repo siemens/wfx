@@ -100,6 +100,7 @@ func createSouthboundServer(storage persistence.Storage, kind serverKind) (*mySe
 			tlsSettings.TLSCertificateKey = k.String(tlsKeyFlag)
 			tlsSettings.TLSCACertificate = k.String(tlsCaFlag)
 		})
+		err := server.ConfigureTLS(srv, &tlsSettings)
 		if err != nil {
 			return nil, fault.Wrap(err)
 		}
