@@ -35,9 +35,17 @@ teardown_file() {
   wfx --scheme unix \
     --client-unix-socket "$BATS_TEST_TMPDIR/wfx-client.sock" \
     --mgmt-unix-socket "$BATS_TEST_TMPDIR/wfx-mgmt.sock" &
-  local count
-  count=$(wait_wfx_running)
-  assert_equal "$count" 2
+  local i=0
+  while [[ $i -lt 30 ]]; do
+    RC=0
+    wfxctl --client-unix-socket "$BATS_TEST_TMPDIR/wfx-client.sock" version || RC=$?
+    if [[ $RC -eq 0 ]]; then
+      return 0
+    fi
+    sleep 1
+    i=$((i+1))
+  done
+  return 1
 }
 
 @test "TLS mixed-mode" {
