@@ -122,6 +122,69 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: coverage.out
 
+  cli-tests:
+    name: CLI Tests
+    runs-on: ubuntu-latest
+    container: debian:bookworm-slim
+    services:
+      mysql:
+        image: mysql:8-debian
+        env:
+          # see https://hub.docker.com/_/mysql
+          MYSQL_DATABASE: wfx
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_USER: wfx
+          MYSQL_PASSWORD: secret
+          MYSQL_HOST: mysql
+        # Set health checks to wait until mysql has started
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval 3s
+          --health-timeout 5s
+          --health-retries 20
+      postgres:
+        image: postgres:15
+        env:
+          # see https://hub.docker.com/_/postgres
+          POSTGRES_HOST: postgres
+          POSTGRES_PORT: 5432
+          POSTGRES_DB: wfx
+          POSTGRES_USER: wfx
+          POSTGRES_PASSWORD: secret
+          POSTGRES_HOST_AUTH_METHOD: trust
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 3s
+          --health-timeout 5s
+          --health-retries 20
+    steps:
+      - name: Install packages
+        run: apt-get update -q && apt-get install -y --no-install-recommends bats make gcc libc6-dev golang git curl openssl jq systemd ca-certificates procps
+      - uses: actions/checkout@v3
+        with:
+          submodules: "true"
+      - name: Disable git security features
+        run: git config --global safe.directory '*'
+      - name: build wfx
+        run: make
+      - name: install wfx
+        run: make install
+      - name: run tests
+        env:
+          PGHOST: postgres
+          PGPORT: 5432
+          PGUSER: wfx
+          PGPASSWORD: secret
+          PGDATABASE: wfx
+          MYSQL_DATABASE: wfx
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_USER: wfx
+          MYSQL_PASSWORD: secret
+          MYSQL_HOST: mysql
+        working-directory: test
+        run: bats .
+
   lint:
     runs-on: ubuntu-latest
     name: Lint
