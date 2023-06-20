@@ -33,18 +33,18 @@ teardown() {
 
 @test "PostgreSQL storage using cli args" {
     wfx --storage postgres \
-        --storage-opt "host=localhost port=5432 user=wfx password=secret database=wfx" &
+        --storage-opt "host=${PGHOST:-localhost} port=${PGPORT:-5432} user=${PGUSER:-wfx} password=${PGPASSWORD:-secret} database=${PGDATABASE:-wfx}" &
     local count
     count=$(wait_wfx_running)
     assert_equal "$count" 2
 }
 
 @test "PostgreSQL storage using env variables" {
-    env PGHOST=localhost \
-        PGPORT=5432 \
-        PGUSER=wfx \
-        PGPASSWORD=secret \
-        PGDATABASE=wfx \
+    env PGHOST=${PGHOST:-localhost} \
+        PGPORT=${PGPORT:-5432} \
+        PGUSER=${PGUSER:-wfx} \
+        PGPASSWORD=${PGPASSWORD:-secret} \
+        PGDATABASE=${PGDATABASE:-wfx} \
         wfx --storage postgres &
     local count
     count=$(wait_wfx_running)
@@ -53,7 +53,7 @@ teardown() {
 
 @test "MySQL storage" {
     wfx --storage mysql \
-        --storage-opt "root:root@tcp(localhost:3306)/wfx" &
+        --storage-opt "${MYSQL_USER:-root}:${MYSQL_PASSWORD:-root}@tcp(${MYSQL_HOST:-localhost}:${MYSQL_PORT:-3306})/${MYSQL_DATABASE:-wfx}" &
     local count
     count=$(wait_wfx_running)
     assert_equal "$count" 2
