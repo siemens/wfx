@@ -46,8 +46,8 @@ func NewFileServerMiddleware(k *config.ThreadSafeKoanf, next http.Handler) (http
 			})
 			if rootDir != "" {
 				http.StripPrefix("/download", http.FileServer(http.Dir(rootDir))).ServeHTTP(w, r)
+				return
 			}
-			return
 		}
 		next.ServeHTTP(w, r)
 	}), nil
