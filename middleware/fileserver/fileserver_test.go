@@ -100,3 +100,18 @@ func TestFileServerMiddleware_DirIsFile(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.ErrorContains(t, err, "not a directory")
 }
+
+func TestFileServerMiddleware_404(t *testing.T) {
+	k := config.New()
+	handler, err := NewFileServerMiddleware(k, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+	}))
+	require.Nil(t, err)
+
+	req := httptest.NewRequest(http.MethodGet, "/download", nil)
+	w := httptest.NewRecorder()
+	handler.ServeHTTP(w, req)
+
+	res := w.Result()
+	assert.Equal(t, http.StatusNotFound, res.StatusCode)
+}
