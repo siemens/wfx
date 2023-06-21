@@ -129,12 +129,13 @@ The same is true for the type of update artifacts that are specified in the job 
 The operator has to has to take care to only assign jobs to devices that are known to be able to digest this type of update artifact.
 wfx doesn't exercise any checks on compatibility.
 
-An exemplary job definition using the [built-in simple file server](../../docs/configuration.md#file-server) may look like the following JSON document:
+An exemplary job for a device called `example` (utilizing the [built-in simple file server](../../docs/configuration.md#file-server)) may be created as follows:
 
 ```json
+cat <<EOF | wfxctl job create --client-id example --workflow wfx.workflow.dau.direct -
 {
   "version": "1.0",
-  "type": ["firmware", "dummy"],
+  "type": ["firmware"],
   "artifacts": [
     {
       "name": "Example Device Firmware Artifact",
@@ -143,6 +144,7 @@ An exemplary job definition using the [built-in simple file server](../../docs/c
     }
   ]
 }
+EOF
 ```
 
 The `type` list field allows to label update jobs. Labels may be used by wfx's on-device counterpart to determine the activation action(s) to execute since,
