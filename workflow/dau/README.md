@@ -13,6 +13,23 @@ Currently, the DAU Workflow Family comprises two workflows that model the softwa
 The [`wfx.workflow.dau.direct`](wfx.workflow.dau.direct.yml) workflow caters for the fully automated software update use case while the
 [`wfx.workflow.dau.phased`](wfx.workflow.dau.phased.yml) workflow operates in distinct phases requiring external input to advance the workflow.
 
+### Installation
+
+wfx does not come with any pre-loaded or pre-seeded workflows, thus requiring the creation of workflows either locally
+
+```bash
+wfxctl workflow create workflow/dau/*.yml
+```
+
+or remotely, e.g. using [curl](https://curl.se/):
+
+```bash
+curl -Ls https://github.com/siemens/wfx/raw/main/workflow/dau/wfx.workflow.dau.phased.yml | wfxctl workflow create -
+curl -Ls https://github.com/siemens/wfx/raw/main/workflow/dau/wfx.workflow.dau.direct.yml | wfxctl workflow create -
+```
+
+### Modus Operandi
+
 Both workflows operate in **stages**, each of which follows the Command, Feedback, and Completion (CFC) scheme.
 These stages consist of:
 
