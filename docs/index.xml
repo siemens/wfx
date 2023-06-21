@@ -103,7 +103,7 @@ available at a different port:
 &lt;a href="https://systemd.io" target="_blank">systemd&lt;/a>. The &lt;code>share/systemd&lt;/code> directory provides pre-configured systemd service units. These units
 are also included in the distribution packages available with wfx releases.&lt;/p>
 &lt;pre>&lt;code>systemctl enable --now wfx@foo.socket
-# you can have multiple instances of wfx running at the same time, e.g.
+# multiple instances of wfx can be running at the same time, e.g.
 systemctl enable --now wfx@bar.socket
 &lt;/code>&lt;/pre>
 &lt;p>The wfx services launch on-demand, i.e., they start when a client connects, such as when retrieving the wfx version:&lt;/p>
