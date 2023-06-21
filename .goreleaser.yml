@@ -250,6 +250,10 @@ checksum:
 snapshot:
   name_template: "{{ .Tag }}-next"
 
+release:
+  draft: true
+  replace_existing_draft: true
+
 changelog:
   sort: asc
   groups:
