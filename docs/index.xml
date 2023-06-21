@@ -263,6 +263,14 @@ for Embedded Linux Devices.&lt;/li>
 use case while the
 &lt;a href="https://siemens.github.io/wfx/wfx.workflow.dau.phased.yml">&lt;code>wfx.workflow.dau.phased&lt;/code>&lt;/a> workflow operates in distinct phases
 requiring external input to advance the workflow.&lt;/p>
+&lt;h3 id="installation">Installation&lt;/h3>
+&lt;p>wfx does not come with any pre-loaded or pre-seeded workflows, thus requiring the creation of workflows either locally&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>wfxctl workflow create workflow/dau/*.yml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>or remotely, e.g. using
+&lt;a href="https://curl.se/" target="_blank">curl&lt;/a>:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>curl -Ls https://github.com/siemens/wfx/raw/main/workflow/dau/wfx.workflow.dau.phased.yml | wfxctl workflow create -
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>curl -Ls https://github.com/siemens/wfx/raw/main/workflow/dau/wfx.workflow.dau.direct.yml | wfxctl workflow create -
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="modus-operandi">Modus Operandi&lt;/h3>
 &lt;p>Both workflows operate in &lt;strong>stages&lt;/strong>, each of which follows the Command, Feedback, and Completion (CFC) scheme. These
 stages consist of:&lt;/p>
 &lt;ol>
@@ -352,12 +360,13 @@ lock-step with the wfx. The same is true for the type of update artifacts that a
 that can be of any form such as, e.g., firmware disk images, container images, or configurations: The operator has to
 has to take care to only assign jobs to devices that are known to be able to digest this type of update artifact. wfx
 doesn&amp;rsquo;t exercise any checks on compatibility.&lt;/p>
-&lt;p>An exemplary job definition using the
-&lt;a href="https://siemens.github.io/wfx/docs/configuration/#file-server">built-in simple file server&lt;/a> may look
-like the following JSON document:&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-json" data-lang="json">&lt;span style="display:flex;">&lt;span>{
+&lt;p>An exemplary job for a device called &lt;code>example&lt;/code> (utilizing the
+&lt;a href="https://siemens.github.io/wfx/docs/configuration/#file-server">built-in simple file
+server&lt;/a>) may be created as follows:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-json" data-lang="json">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a61717;background-color:#e3d2d2">cat&lt;/span> &lt;span style="color:#a61717;background-color:#e3d2d2">&amp;lt;&amp;lt;EOF&lt;/span> &lt;span style="color:#a61717;background-color:#e3d2d2">|&lt;/span> &lt;span style="color:#a61717;background-color:#e3d2d2">wfxctl&lt;/span> &lt;span style="color:#a61717;background-color:#e3d2d2">job&lt;/span> &lt;span style="color:#a61717;background-color:#e3d2d2">create&lt;/span> &lt;span style="color:#a61717;background-color:#e3d2d2">--client-id&lt;/span> &lt;span style="color:#a61717;background-color:#e3d2d2">example&lt;/span> &lt;span style="color:#a61717;background-color:#e3d2d2">--workflow&lt;/span> &lt;span style="color:#a61717;background-color:#e3d2d2">wfx.workflow.dau.direct&lt;/span> &lt;span style="color:#a61717;background-color:#e3d2d2">-&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>{
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#000080">&amp;#34;version&amp;#34;&lt;/span>: &lt;span style="color:#d14">&amp;#34;1.0&amp;#34;&lt;/span>,
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#000080">&amp;#34;type&amp;#34;&lt;/span>: [&lt;span style="color:#d14">&amp;#34;firmware&amp;#34;&lt;/span>, &lt;span style="color:#d14">&amp;#34;dummy&amp;#34;&lt;/span>],
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#000080">&amp;#34;type&amp;#34;&lt;/span>: [&lt;span style="color:#d14">&amp;#34;firmware&amp;#34;&lt;/span>],
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#000080">&amp;#34;artifacts&amp;#34;&lt;/span>: [
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#000080">&amp;#34;name&amp;#34;&lt;/span>: &lt;span style="color:#d14">&amp;#34;Example Device Firmware Artifact&amp;#34;&lt;/span>,
@@ -366,6 +375,7 @@ like the following JSON document:&lt;/p>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ]
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a61717;background-color:#e3d2d2">EOF&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The &lt;code>type&lt;/code> list field allows to label update jobs. Labels may be used by wfx&amp;rsquo;s on-device counterpart to determine the
 activation action(s) to execute since, e.g., container images need a different activation action than firmware disk
 images or a configuration change.&lt;/p>
