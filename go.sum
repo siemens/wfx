@@ -16,8 +16,8 @@ github.com/PaesslerAG/jsonpath v0.1.1 h1:c1/AToHQMVsduPAa4Vh6xp2U0evy4t8SWp8imEs
 github.com/PaesslerAG/jsonpath v0.1.1/go.mod h1:lVboNxFGal/VwW6d9JzIy56bUsYAP6tH/x80vjnCseY=
 github.com/PuerkitoBio/purell v1.1.1/go.mod h1:c11w/QuzBsJSee3cPx9rAFu61PvFxuPbtSwDGJws/X0=
 github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578/go.mod h1:uGdkoq3SwY9Y+13GIhn11/XLaGBb4BfwItxLd5jeuXE=
-github.com/Southclaws/fault v0.5.1 h1:Y+xmg2+iVJm/XhvH4OpmGDAj2p4DVv9cChVFfqBe25w=
-github.com/Southclaws/fault v0.5.1/go.mod h1:ykAz97glbxwopwRqAPfQMy8/Y4O+s3c6YtXwaSbxnEg=
+github.com/Southclaws/fault v0.6.0 h1:DioPOnLB0rXH80eca65BmO6UTaemz0XwN0Lws4G3Kg4=
+github.com/Southclaws/fault v0.6.0/go.mod h1:ykAz97glbxwopwRqAPfQMy8/Y4O+s3c6YtXwaSbxnEg=
 github.com/agext/levenshtein v1.2.3 h1:YB2fHEn0UJagG8T1rrWknE3ZQzWM06O8AMAatNn7lmo=
 github.com/agext/levenshtein v1.2.3/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
 github.com/alecthomas/jsonschema v0.0.0-20180308105923-f2c93856175a/go.mod h1:qpebaTNSsyUn5rPSJMsfqEtDw71TTggXM6stUDI16HA=
