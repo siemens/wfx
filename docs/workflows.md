@@ -63,7 +63,7 @@ following semantic rules and constraints are checked and enforced by wfx upon lo
 - There are no cycles in the workflow graph _except_ for trivial cycles, i.e. transitions where `from` equals `to` (used for e.g. progress reporting).
 - Each state belongs to _at most one_ group.
 
-**Tip**: You can use `wfxctl` to validate workflows offline, e.g.
+**Tip**: `wfxctl` can be used to validate workflows offline, e.g.
 
 ```bash
 wfxctl workflow validate workflow/dau/wfx.workflow.dau.direct.yml
@@ -81,7 +81,7 @@ workflows to address them.
 
 ### Creating Jobs
 
-To create a new job, you need to send a `JobRequest` object (see [wfx OpenAPI Specification](../spec/wfx.swagger.yml)) to wfx's [northbound REST API](operations.md#API).
+A new job can be created by sending a `JobRequest` object (see [wfx OpenAPI Specification](../spec/wfx.swagger.yml)) to wfx's [northbound REST API](operations.md#API).
 A JobRequest consists of the following:
 
 - a non-empty `clientId` to assign the job to a specific client
@@ -101,13 +101,13 @@ When wfx accepts the `JobRequest`, a new `Job` entity is created, and the follow
 
 ### Updating Jobs
 
-After a job has been created, you can update its `definition`, `status`, and `tags` using wfx's REST APIs. If you update
-the job `definition` after a client has already started working on the job, this assumes that the client can handle the
-changes. To simplify things for client authors, wfx automatically updates the `status.definitionHash` whenever the
+After a job has been created, its `definition`, `status`, and `tags` can be updated using wfx's REST APIs. If a job
+`definition` is updated _after_ a client has already started working on the job, this assumes that the client can handle
+the changes. To simplify things for client authors, wfx automatically updates the `status.definitionHash` whenever the
 `definition` changes. This provides a mechanism for detecting changes in the `definition`.
 
 wfx stores the previous `status` of the job, as well as the previous `definition`, in the job `history` array. This
-allows you to review job updates later on and diagnose problems.
+allows reviewing job updates later on and diagnose problems.
 
 ### Deleting Jobs
 
@@ -278,7 +278,7 @@ wfxctl job update-status \
 
 and starts working on it.
 
-You can also use `curl` instead of `wfxctl` to achieve the same result:
+Traditional tools like `curl` can also be used instead of `wfxctl` to achieve the same result:
 
 ```sh
 curl -X PUT \

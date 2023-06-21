@@ -26,7 +26,7 @@ These units are also included in the distribution packages available with wfx re
 
 ```
 systemctl enable --now wfx@foo.socket
-# you can have multiple instances of wfx running at the same time, e.g.
+# multiple instances of wfx can be running at the same time, e.g.
 systemctl enable --now wfx@bar.socket
 ```
 
