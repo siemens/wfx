@@ -171,7 +171,7 @@ Examples of tasks are installation of firmware or other types of commands issued
 
 		signal.Notify(signalChannel, os.Interrupt, syscall.SIGTERM)
 
-		allServers := make([]myServer, 0, 2)
+		allServers := make([]myServer, 0, 6)
 		{
 			servers, err := createNorthboundServers(storage)
 			if err != nil {
