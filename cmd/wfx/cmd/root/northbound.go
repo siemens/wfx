@@ -25,7 +25,7 @@ import (
 )
 
 func createNorthboundServers(storage persistence.Storage) ([]myServer, error) {
-	result := make([]myServer, 0, 2)
+	result := make([]myServer, 0, 3)
 
 	var schemes []string
 	k.Read(func(k *koanf.Koanf) {
