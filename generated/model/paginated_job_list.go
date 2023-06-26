@@ -117,6 +117,11 @@ func (m *PaginatedJobList) contextValidateContent(ctx context.Context, formats s
 	for i := 0; i < len(m.Content); i++ {
 
 		if m.Content[i] != nil {
+
+			if swag.IsZero(m.Content[i]) { // not required
+				return nil
+			}
+
 			if err := m.Content[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("content" + "." + strconv.Itoa(i))
@@ -135,6 +140,11 @@ func (m *PaginatedJobList) contextValidateContent(ctx context.Context, formats s
 func (m *PaginatedJobList) contextValidatePagination(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Pagination != nil {
+
+		if swag.IsZero(m.Pagination) { // not required
+			return nil
+		}
+
 		if err := m.Pagination.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("pagination")

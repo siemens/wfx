@@ -230,6 +230,11 @@ func (m *Workflow) contextValidateGroups(ctx context.Context, formats strfmt.Reg
 	for i := 0; i < len(m.Groups); i++ {
 
 		if m.Groups[i] != nil {
+
+			if swag.IsZero(m.Groups[i]) { // not required
+				return nil
+			}
+
 			if err := m.Groups[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("groups" + "." + strconv.Itoa(i))
@@ -250,6 +255,11 @@ func (m *Workflow) contextValidateStates(ctx context.Context, formats strfmt.Reg
 	for i := 0; i < len(m.States); i++ {
 
 		if m.States[i] != nil {
+
+			if swag.IsZero(m.States[i]) { // not required
+				return nil
+			}
+
 			if err := m.States[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("states" + "." + strconv.Itoa(i))
@@ -270,6 +280,11 @@ func (m *Workflow) contextValidateTransitions(ctx context.Context, formats strfm
 	for i := 0; i < len(m.Transitions); i++ {
 
 		if m.Transitions[i] != nil {
+
+			if swag.IsZero(m.Transitions[i]) { // not required
+				return nil
+			}
+
 			if err := m.Transitions[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("transitions" + "." + strconv.Itoa(i))
