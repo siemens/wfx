@@ -72,6 +72,7 @@ linters:
     - dupword
     - errname
     - errorlint
+    - exhaustive
     - exportloopref
     - gocheckcompilerdirectives
     - goconst
@@ -94,3 +95,5 @@ linters-settings:
     checks: ["all", "-ST1000", "-SA1019"]
   misspell:
     locale: US
+  exhaustive:
+    default-signifies-exhaustive: true
