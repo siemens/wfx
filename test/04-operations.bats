@@ -59,3 +59,22 @@ teardown_file() {
     count=$(wait_wfx_running 4)
     assert_equal "$count" 4
 }
+
+@test "Socket-based activation" {
+  cd "$BATS_TEST_TMPDIR"
+  systemd-socket-activate \
+    --listen "$BATS_TEST_TMPDIR/wfx-client.sock" \
+    --listen "$BATS_TEST_TMPDIR/wfx-mgmt.sock" \
+    wfx --scheme unix &
+  local i=0
+  while [[ $i -lt 30 ]]; do
+    RC=0
+    wfxctl --client-unix-socket "$BATS_TEST_TMPDIR/wfx-client.sock" version || RC=$?
+    if [[ $RC -eq 0 ]]; then
+      return 0
+    fi
+    sleep 1
+    i=$((i+1))
+  done
+  return 1
+}
