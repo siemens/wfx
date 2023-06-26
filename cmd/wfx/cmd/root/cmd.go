@@ -171,16 +171,20 @@ Examples of tasks are installation of firmware or other types of commands issued
 
 		signal.Notify(signalChannel, os.Interrupt, syscall.SIGTERM)
 
+		var schemes []string
+		k.Read(func(k *koanf.Koanf) {
+			schemes = k.Strings(schemeFlag)
+		})
 		allServers := make([]myServer, 0, 6)
 		{
-			servers, err := createNorthboundServers(storage)
+			servers, err := createNorthboundServers(schemes, storage)
 			if err != nil {
 				return fault.Wrap(err)
 			}
 			allServers = append(allServers, servers...)
 		}
 		{
-			servers, err := createSouthboundServers(storage)
+			servers, err := createSouthboundServers(schemes, storage)
 			if err != nil {
 				return fault.Wrap(err)
 			}

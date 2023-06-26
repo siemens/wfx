@@ -16,6 +16,11 @@ import (
 )
 
 type HTTPSettings struct {
+	Host           string
+	Port           int
+	TLSHost        string
+	TLSPort        int
+	UDSPath        string
 	MaxHeaderSize  flagext.ByteSize
 	KeepAlive      time.Duration
 	ReadTimeout    time.Duration
