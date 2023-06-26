@@ -5,7 +5,7 @@
 #
 # Author: Michael Adler <michael.adler@siemens.com>
 set -eux
-VERSION="v0.30.4"
+VERSION="v0.30.5"
 echo "Installing swagger $VERSION"
 curl -Ls -o /usr/local/bin/swagger "https://github.com/go-swagger/go-swagger/releases/download/${VERSION}/swagger_linux_amd64"
 chmod +x /usr/local/bin/swagger

@@ -242,6 +242,11 @@ func (m *Job) contextValidateHistory(ctx context.Context, formats strfmt.Registr
 	for i := 0; i < len(m.History); i++ {
 
 		if m.History[i] != nil {
+
+			if swag.IsZero(m.History[i]) { // not required
+				return nil
+			}
+
 			if err := m.History[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("history" + "." + strconv.Itoa(i))
@@ -278,6 +283,11 @@ func (m *Job) contextValidateMtime(ctx context.Context, formats strfmt.Registry)
 func (m *Job) contextValidateStatus(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Status != nil {
+
+		if swag.IsZero(m.Status) { // not required
+			return nil
+		}
+
 		if err := m.Status.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("status")
@@ -303,6 +313,11 @@ func (m *Job) contextValidateStime(ctx context.Context, formats strfmt.Registry)
 func (m *Job) contextValidateWorkflow(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Workflow != nil {
+
+		if swag.IsZero(m.Workflow) { // not required
+			return nil
+		}
+
 		if err := m.Workflow.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("workflow")
