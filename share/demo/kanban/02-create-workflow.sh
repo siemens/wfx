@@ -52,5 +52,3 @@ VALIDATE ─────┤
     ▼         ▼
   DONE    DISCARDED
 EOF
-
-touch 02-create-workflow.sh.done
