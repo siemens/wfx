@@ -9,7 +9,6 @@ package root
  */
 
 import (
-	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
@@ -33,7 +32,7 @@ func TestAdoptSystemdSockets_InvalidFdCount(t *testing.T) {
 func TestAdoptSystemdSockets(t *testing.T) {
 	errChan := make(chan error)
 
-	tempDir, err := ioutil.TempDir("", "wfx-test-systemd")
+	tempDir, err := os.MkdirTemp("", "wfx-test-systemd")
 	require.NoError(t, err)
 	defer os.RemoveAll(tempDir)
 

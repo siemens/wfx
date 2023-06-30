@@ -9,7 +9,7 @@ package logging
  */
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -32,7 +32,7 @@ func TestWriter(t *testing.T) {
 	result := recorder.Result()
 	assert.Equal(t, http.StatusOK, result.StatusCode)
 
-	body, err := ioutil.ReadAll(result.Body)
+	body, err := io.ReadAll(result.Body)
 	require.NoError(t, err)
 	defer result.Body.Close()
 

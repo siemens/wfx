@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Minimum required Go version is 1.19
+
 ### Removed
 
 ## [0.1.0] - 2023-02-06

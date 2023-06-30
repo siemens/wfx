@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go: ["stable", "1.18"]
+        go: ["stable", "1.19"]
     name: Build (Go ${{ matrix.go }})
     steps:
       - uses: actions/checkout@v3
