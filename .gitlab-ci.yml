@@ -17,16 +17,22 @@ stages:
 
 build:
   stage: build
-  image: archlinux:latest
+  image: golang:alpine
   variables:
     GOPATH: /tmp/go
+    CC: gcc
   before_script:
-    - pacman -Sy --noconfirm go git gcc zig make just
-    - if [ -d go ]; then mv go "$GOPATH"; else mkdir -p "$GOPATH"; fi
-    - go mod download
+    - apk add --no-cache git gcc libc-dev make bash git
+    - |
+      if [[ -d go ]]; then
+        mv go "$GOPATH"
+      else
+        mkdir -p "$GOPATH"
+      fi
+      go mod download
   script:
-    - env CC=gcc make test
-    - env CC=$(pwd)/.ci/zcc make STATIC=1
+    - make test
+    - make STATIC=1
   after_script:
     - mv "$GOPATH" .
   artifacts:
@@ -44,29 +50,28 @@ build:
 lint:
   stage: lint
   needs: []
-  image: archlinux:latest
+  image: alpine:edge
   before_script:
-    - pacman -Sy --noconfirm go just staticcheck reuse
-    - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /usr/local/bin v1.52.2
+    - apk add --no-cache go just staticcheck reuse golangci-lint bash
   script:
     - just lint
 
 generate:
   stage: lint
   needs: []
-  image: golang:bullseye
+  image:
+    name: quay.io/goswagger/swagger
+    entrypoint: [""] # needed to get a shell
   before_script:
-    - apt-get update -q && apt-get install -y git-lfs python3-yaml
+    - apk add --no-cache py3-yaml git just bash go git-lfs
     - git lfs install && git submodule update
-    - .ci/setup/just.sh
-    - .ci/setup/swagger.sh
   script:
     - just generate
     - git diff --exit-code
 
 test-postgres:
   stage: test
-  image: archlinux:latest
+  image: golang:alpine
   services:
     - postgres:15
   needs: []
@@ -88,13 +93,13 @@ test-postgres:
     PGPASSWORD: $POSTGRES_PASSWORD
     PGSSLMODE: disable
   before_script:
-    - pacman -Sy --noconfirm go gcc git just
+    - apk add --no-cache gcc libc-dev git just bash
   script:
     - just postgres-integration-test
 
 test-mysql:
   stage: test
-  image: archlinux:latest
+  image: golang:alpine
   services:
     - mysql:8-debian
   needs: []
@@ -109,6 +114,6 @@ test-mysql:
     MYSQL_PASSWORD: secret
     MYSQL_HOST: mysql
   before_script:
-    - pacman -Sy --noconfirm go gcc git just
+    - apk add --no-cache gcc libc-dev git just bash
   script:
     - just mysql-integration-test
