@@ -73,7 +73,7 @@ jobs:
           --health-retries 20
     steps:
       - uses: actions/checkout@v3
-      - run: go test -race -coverprofile=coverage.out -covermode=atomic -tags testing,integration,postgres,sqlite ./...
+      - run: go test -timeout 180s -race -coverprofile=coverage.out -covermode=atomic -tags testing,integration,postgres,sqlite ./...
         env:
           PGHOST: postgres
           PGPORT: 5432
@@ -109,7 +109,7 @@ jobs:
           --health-retries 20
     steps:
       - uses: actions/checkout@v3
-      - run: go test -race -coverprofile=coverage.out -covermode=atomic -tags testing,integration,mysql,sqlite ./...
+      - run: go test -timeout 180s -race -coverprofile=coverage.out -covermode=atomic -tags testing,integration,mysql,sqlite ./...
         env:
           MYSQL_DATABASE: wfx
           MYSQL_ROOT_PASSWORD: root
@@ -193,30 +193,25 @@ jobs:
       - uses: actions/setup-go@v4
         with:
           go-version: stable
-      - name: "Install staticcheck"
-        run: .ci/setup/staticcheck.sh
-      - name: "Run staticcheck"
-        run: staticcheck -tags=sqlite,testing ./...
+      - uses: dominikh/staticcheck-action@v1.3.0
+        with:
+          build-tags: sqlite,testing
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
-          version: "v1.52.2"
+          version: latest
           args: --build-tags=sqlite,testing
           skip-cache: true
 
   generate:
-    runs-on: ubuntu-latest
     name: Generate Code
+    runs-on: ubuntu-latest
+    container:
+      image: quay.io/goswagger/swagger
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: stable
-      - name: "Install just"
-        run: .ci/setup/just.sh
-      - name: "Install go-swagger"
-        run: .ci/setup/swagger.sh
-      - run: sudo apt-get update -q && sudo apt-get install -y python3-yaml
+      - run: apk add --no-cache py3-yaml git just bash go
+      - name: Disable git security features
+        run: git config --global safe.directory '*'
       - run: just generate
       - run: git diff --exit-code
