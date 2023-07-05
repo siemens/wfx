@@ -30,7 +30,7 @@ teardown_file() {
     ID=$(echo '{ "title": "Expose Job API" }' |
            wfxctl job create --workflow wfx.workflow.kanban \
              --client-id Dana \
-             --filter='.id' --raw)
+             --filter='.id' --raw -)
 
     # update jobu using wfxctl
     wfxctl job update-status \
