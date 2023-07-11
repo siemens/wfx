@@ -31,7 +31,7 @@ const (
 func init() {
 	f := Command.Flags()
 	f.String(clientIDFlag, "", "Filter jobs belonging to a specific client with clientId")
-	f.String(groupFlag, "", "Filter jobs based on the group they belong to")
+	f.StringSlice(groupFlag, []string{}, "Filter jobs based on the group they belong to")
 	f.String(stateFlag, "", "Filter jobs based on the current state value")
 	f.String(workflowFlag, "", "Filter jobs based on workflow name")
 	f.StringSlice(tagFlag, []string{}, "Filter jobs by tags")
