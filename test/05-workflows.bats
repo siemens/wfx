@@ -32,7 +32,7 @@ teardown_file() {
              --client-id Dana \
              --filter='.id' --raw -)
 
-    # update jobu using wfxctl
+    # update job using wfxctl
     wfxctl job update-status \
         --actor=client \
         "--id=$ID" \
@@ -52,9 +52,41 @@ teardown_file() {
         --state=PROGRESS \
         --progress $((RANDOM % 100))
 
-    # update state
+    # update state to VALIDATE
     wfxctl job update-status \
         --actor=client \
         "--id=$ID" \
         --state=VALIDATE
+
+    # update state to DONE
+    wfxctl job update-status \
+        --actor=client \
+        "--id=$ID" \
+        --state=DONE
+}
+
+@test "query jobs by group" {
+    # NOTE: this test assumes a job whose state is in the CLOSED group;
+    # such a job is created by the previous test
+
+    # Create a second job in NEW state
+    wfxctl job create --workflow wfx.workflow.kanban \
+        --client-id Dana \
+        --filter='.id'
+
+    # Query all jobs
+    jobs_no_filter=$(wfxctl job query --filter ".content | length")
+    assert_equal "$jobs_no_filter" 2
+
+    # Query jobs only in group=OPEN states
+    jobs_open=$(wfxctl job query --group OPEN --filter ".content | length")
+    assert_equal "$jobs_open" 1
+
+    # Query jobs in OPEN or CLOSED states
+    jobs_open_closed=$(wfxctl job query --group OPEN,CLOSED --filter ".content | length")
+    assert_equal "$jobs_open_closed" 2
+
+    # Use alternative syntax
+    jobs_open_closed=$(wfxctl job query --group OPEN --group CLOSED --filter ".content | length")
+    assert_equal "$jobs_open_closed" 2
 }
