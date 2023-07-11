@@ -45,6 +45,8 @@ type ClientService interface {
 
 	GetJobsIDStatus(params *GetJobsIDStatusParams, opts ...ClientOption) (*GetJobsIDStatusOK, error)
 
+	GetJobsIDStatusSubscribe(params *GetJobsIDStatusSubscribeParams, opts ...ClientOption) (*GetJobsIDStatusSubscribeOK, error)
+
 	GetJobsIDTags(params *GetJobsIDTagsParams, opts ...ClientOption) (*GetJobsIDTagsOK, error)
 
 	PostJobs(params *PostJobsParams, opts ...ClientOption) (*PostJobsCreated, error)
@@ -294,6 +296,48 @@ func (a *Client) GetJobsIDStatus(params *GetJobsIDStatusParams, opts ...ClientOp
 	}
 	// unexpected success response
 	unexpectedSuccess := result.(*GetJobsIDStatusDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+	GetJobsIDStatusSubscribe subscribes to job status updates
+
+	Obtain instant notifications when there is a change in the job status. This endpoint utilizes server-sent events (SSE), where responses are "chunked" with double newline breaks. For example, a single event might look like this:
+	data: {"clientId":"example_client","state":"INSTALLING"}\n\n
+
+Note: The first event is always the current job status, i.e. equivalent to calling GET on /jobs/{id}/status.
+*/
+func (a *Client) GetJobsIDStatusSubscribe(params *GetJobsIDStatusSubscribeParams, opts ...ClientOption) (*GetJobsIDStatusSubscribeOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetJobsIDStatusSubscribeParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "GetJobsIDStatusSubscribe",
+		Method:             "GET",
+		PathPattern:        "/jobs/{id}/status/subscribe",
+		ProducesMediaTypes: []string{"application/json", "text/event-stream"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &GetJobsIDStatusSubscribeReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetJobsIDStatusSubscribeOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*GetJobsIDStatusSubscribeDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 

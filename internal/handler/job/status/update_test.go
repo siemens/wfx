@@ -143,6 +143,49 @@ func TestUpdateJobStatusNotAllowed(t *testing.T) {
 	assert.Nil(t, status)
 }
 
+func TestUpdateJob_NotifySubscribers(t *testing.T) {
+	db := newInMemoryDB(t)
+	wf := createDirectWorkflow(t, db)
+	job, err2 := db.CreateJob(context.Background(), &model.Job{
+		ClientID: "abc",
+		Workflow: wf,
+		Status:   &model.JobStatus{ClientID: "abc", State: "ACTIVATING"},
+	})
+	require.NoError(t, err2)
+	assert.Equal(t, "ACTIVATING", job.Status.State)
+
+	ch, err := AddSubscriber(context.Background(), db, job.ID)
+	require.NoError(t, err)
+
+	{
+		// first event is current job status
+		statusEvent := <-ch.Events()
+		require.NotNil(t, statusEvent)
+		assert.Equal(t, job.Status.State, statusEvent.State)
+	}
+
+	_, err = Update(context.Background(), db, job.ID, &model.JobStatus{
+		ClientID: "klaus",
+		State:    "ACTIVATED",
+		Progress: 100,
+	}, model.EligibleEnumCLIENT)
+	require.NoError(t, err)
+
+	{
+		// handler shall inform us about the status update we just did
+		statusEvent := <-ch.Events()
+		require.NotNil(t, statusEvent)
+		assert.Equal(t, "ACTIVATED", statusEvent.State)
+	}
+
+	// we've reached a terminal state, so our channel should be closed now
+	count := 0
+	for range ch.Events() {
+		count++
+	}
+	assert.Equal(t, 0, count)
+}
+
 func createDirectWorkflow(t *testing.T, db persistence.Storage) *model.Workflow {
 	wf, err := db.CreateWorkflow(context.Background(), dau.DirectWorkflow())
 	require.NoError(t, err)

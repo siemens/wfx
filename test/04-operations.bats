@@ -78,3 +78,25 @@ teardown_file() {
   done
   return 1
 }
+
+@test "Subscribe job status" {
+  wfxctl workflow create --filter=.transitions ../share/demo/kanban/wfx.workflow.kanban.yml
+  ID=$(echo '{ "title": "Expose Job API" }' |
+      wfxctl job create --workflow wfx.workflow.kanban \
+          --client-id Dana \
+          --filter='.id' --raw - 2>/dev/null)
+  (
+      sleep 1
+      for state in PROGRESS VALIDATE DONE; do
+          wfxctl job update-status \
+              --actor=client \
+              --id "$ID" \
+              --state "$state" 1>/dev/null 2>&1
+      done
+  ) &
+  run sh -c "wfxctl job subscribe-status --id $ID | jq -r .state"
+  assert_output "NEW
+PROGRESS
+VALIDATE
+DONE"
+}

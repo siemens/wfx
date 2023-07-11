@@ -41,3 +41,9 @@ var WorkflowInvalid = model.Error{
 	Logref:  "18f57adc70dd79c7fb4f1246be8a6e04",
 	Message: "Workflow validation failed",
 }
+
+var JobTerminalState = model.Error{
+	Code:    "wfx.jobTerminalState",
+	Logref:  "916f0a913a3e4a52a96bd271e029c201",
+	Message: "The request was invalid because the job is in a terminal state",
+}

@@ -18,6 +18,7 @@ import (
 	"github.com/siemens/wfx/cmd/wfxctl/cmd/job/getstatus"
 	"github.com/siemens/wfx/cmd/wfxctl/cmd/job/gettags"
 	"github.com/siemens/wfx/cmd/wfxctl/cmd/job/query"
+	"github.com/siemens/wfx/cmd/wfxctl/cmd/job/subscribestatus"
 	"github.com/siemens/wfx/cmd/wfxctl/cmd/job/updatedefinition"
 	"github.com/siemens/wfx/cmd/wfxctl/cmd/job/updatestatus"
 	"github.com/spf13/cobra"
@@ -43,4 +44,5 @@ func init() {
 	Command.AddCommand(addtags.Command)
 	Command.AddCommand(deltags.Command)
 	Command.AddCommand(gettags.Command)
+	Command.AddCommand(subscribestatus.Command)
 }

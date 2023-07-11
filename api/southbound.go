@@ -25,6 +25,8 @@ import (
 	"github.com/siemens/wfx/internal/handler/job/tags"
 	"github.com/siemens/wfx/internal/handler/workflow"
 	"github.com/siemens/wfx/middleware/logging"
+	"github.com/siemens/wfx/middleware/responder/sse"
+	"github.com/siemens/wfx/middleware/responder/util"
 	"github.com/siemens/wfx/persistence"
 )
 
@@ -174,6 +176,20 @@ func NewSouthboundAPI(storage persistence.Storage) (*operations.WorkflowExecutor
 				return southbound.NewGetJobsIDTagsDefault(http.StatusInternalServerError)
 			}
 			return southbound.NewGetJobsIDTagsOK().WithPayload(tags)
+		})
+
+	serverAPI.SouthboundGetJobsIDStatusSubscribeHandler = southbound.GetJobsIDStatusSubscribeHandlerFunc(
+		func(params southbound.GetJobsIDStatusSubscribeParams) middleware.Responder {
+			ctx := params.HTTPRequest.Context()
+			eventChan, err := status.AddSubscriber(ctx, storage, params.ID)
+			if ftag.Get(err) == ftag.NotFound {
+				return util.ForceJSONResponse(http.StatusNotFound,
+					&model.ErrorResponse{Errors: []*model.Error{&JobNotFound}})
+			} else if ftag.Get(err) == ftag.InvalidArgument {
+				return util.ForceJSONResponse(http.StatusBadRequest,
+					&model.ErrorResponse{Errors: []*model.Error{&JobTerminalState}})
+			}
+			return sse.Responder(ctx, eventChan)
 		})
 
 	return serverAPI, nil

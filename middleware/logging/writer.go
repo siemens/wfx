@@ -43,3 +43,9 @@ func (w *responseWriter) Write(b []byte) (int, error) {
 	n, err := w.bodyWriter.Write(b)
 	return n, fault.Wrap(err)
 }
+
+// Flush implements the http.Flusher interface. This is needed to implement server-sent events.
+func (w *responseWriter) Flush() {
+	flusher := w.httpWriter.(http.Flusher)
+	flusher.Flush()
+}

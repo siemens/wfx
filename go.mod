@@ -1,6 +1,6 @@
 module github.com/siemens/wfx
 
-go 1.18
+go 1.19
 
 require (
 	entgo.io/ent v0.12.3
@@ -30,6 +30,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.17
 	github.com/muesli/mango-cobra v1.2.0
 	github.com/muesli/roff v0.1.0
+	github.com/orcaman/concurrent-map/v2 v2.0.1
 	github.com/rs/cors v1.9.0
 	github.com/rs/zerolog v1.29.1
 	github.com/spf13/cobra v1.7.0
@@ -37,6 +38,7 @@ require (
 	github.com/steinfletcher/apitest v1.5.15
 	github.com/steinfletcher/apitest-jsonpath v1.7.2
 	github.com/stretchr/testify v1.8.4
+	github.com/tmaxmax/go-sse v0.4.2
 	github.com/tsenart/vegeta/v12 v12.8.4
 	github.com/yourbasic/graph v0.0.0-20210606180040-8ecfec1c2869
 	golang.org/x/term v0.9.0
@@ -87,6 +89,7 @@ require (
 )
 
 require (
+	github.com/cenkalti/backoff/v4 v4.1.2 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/go-openapi/analysis v0.21.4 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect

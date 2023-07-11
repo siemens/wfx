@@ -12,6 +12,7 @@ package operations
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 
@@ -48,6 +49,9 @@ func NewWorkflowExecutorAPI(spec *loads.Document) *WorkflowExecutorAPI {
 		JSONConsumer: runtime.JSONConsumer(),
 
 		JSONProducer: runtime.JSONProducer(),
+		TextEventStreamProducer: runtime.ProducerFunc(func(w io.Writer, data interface{}) error {
+			return errors.NotImplemented("textEventStream producer has not yet been implemented")
+		}),
 
 		NorthboundDeleteJobsIDHandler: northbound.DeleteJobsIDHandlerFunc(func(params northbound.DeleteJobsIDParams) middleware.Responder {
 			return middleware.NotImplemented("operation northbound.DeleteJobsID has not yet been implemented")
@@ -69,6 +73,9 @@ func NewWorkflowExecutorAPI(spec *loads.Document) *WorkflowExecutorAPI {
 		}),
 		NorthboundGetJobsIDStatusHandler: northbound.GetJobsIDStatusHandlerFunc(func(params northbound.GetJobsIDStatusParams) middleware.Responder {
 			return middleware.NotImplemented("operation northbound.GetJobsIDStatus has not yet been implemented")
+		}),
+		NorthboundGetJobsIDStatusSubscribeHandler: northbound.GetJobsIDStatusSubscribeHandlerFunc(func(params northbound.GetJobsIDStatusSubscribeParams) middleware.Responder {
+			return middleware.NotImplemented("operation northbound.GetJobsIDStatusSubscribe has not yet been implemented")
 		}),
 		NorthboundGetJobsIDTagsHandler: northbound.GetJobsIDTagsHandlerFunc(func(params northbound.GetJobsIDTagsParams) middleware.Responder {
 			return middleware.NotImplemented("operation northbound.GetJobsIDTags has not yet been implemented")
@@ -129,6 +136,9 @@ type WorkflowExecutorAPI struct {
 	// JSONProducer registers a producer for the following mime types:
 	//   - application/json
 	JSONProducer runtime.Producer
+	// TextEventStreamProducer registers a producer for the following mime types:
+	//   - text/event-stream
+	TextEventStreamProducer runtime.Producer
 
 	// NorthboundDeleteJobsIDHandler sets the operation handler for the delete jobs ID operation
 	NorthboundDeleteJobsIDHandler northbound.DeleteJobsIDHandler
@@ -144,6 +154,8 @@ type WorkflowExecutorAPI struct {
 	NorthboundGetJobsIDDefinitionHandler northbound.GetJobsIDDefinitionHandler
 	// NorthboundGetJobsIDStatusHandler sets the operation handler for the get jobs ID status operation
 	NorthboundGetJobsIDStatusHandler northbound.GetJobsIDStatusHandler
+	// NorthboundGetJobsIDStatusSubscribeHandler sets the operation handler for the get jobs ID status subscribe operation
+	NorthboundGetJobsIDStatusSubscribeHandler northbound.GetJobsIDStatusSubscribeHandler
 	// NorthboundGetJobsIDTagsHandler sets the operation handler for the get jobs ID tags operation
 	NorthboundGetJobsIDTagsHandler northbound.GetJobsIDTagsHandler
 	// NorthboundGetWorkflowsHandler sets the operation handler for the get workflows operation
@@ -236,6 +248,9 @@ func (o *WorkflowExecutorAPI) Validate() error {
 	if o.JSONProducer == nil {
 		unregistered = append(unregistered, "JSONProducer")
 	}
+	if o.TextEventStreamProducer == nil {
+		unregistered = append(unregistered, "TextEventStreamProducer")
+	}
 
 	if o.NorthboundDeleteJobsIDHandler == nil {
 		unregistered = append(unregistered, "northbound.DeleteJobsIDHandler")
@@ -257,6 +272,9 @@ func (o *WorkflowExecutorAPI) Validate() error {
 	}
 	if o.NorthboundGetJobsIDStatusHandler == nil {
 		unregistered = append(unregistered, "northbound.GetJobsIDStatusHandler")
+	}
+	if o.NorthboundGetJobsIDStatusSubscribeHandler == nil {
+		unregistered = append(unregistered, "northbound.GetJobsIDStatusSubscribeHandler")
 	}
 	if o.NorthboundGetJobsIDTagsHandler == nil {
 		unregistered = append(unregistered, "northbound.GetJobsIDTagsHandler")
@@ -330,6 +348,8 @@ func (o *WorkflowExecutorAPI) ProducersFor(mediaTypes []string) map[string]runti
 		switch mt {
 		case "application/json":
 			result["application/json"] = o.JSONProducer
+		case "text/event-stream":
+			result["text/event-stream"] = o.TextEventStreamProducer
 		}
 
 		if p, ok := o.customProducers[mt]; ok {
@@ -398,6 +418,10 @@ func (o *WorkflowExecutorAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/jobs/{id}/status"] = northbound.NewGetJobsIDStatus(o.context, o.NorthboundGetJobsIDStatusHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/jobs/{id}/status/subscribe"] = northbound.NewGetJobsIDStatusSubscribe(o.context, o.NorthboundGetJobsIDStatusSubscribeHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}

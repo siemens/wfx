@@ -9,12 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Instant job update notifications using server-sent events (see #11)
+
 ### Fixed
 
 - Send HTTP status code 404 when attempting to access the file server while it is disabled
 - Configure TLS for Southbound API (if requested via CLI)
 
 ### Changed
+
+- Minimum required Go version is 1.19
 
 ### Removed
 

@@ -10,7 +10,7 @@ package fileserver
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -44,7 +44,7 @@ func TestFileServerMiddleware_Fallback(t *testing.T) {
 
 	res := w.Result()
 	defer res.Body.Close()
-	b, _ := ioutil.ReadAll(res.Body)
+	b, _ := io.ReadAll(res.Body)
 	assert.Equal(t, "Hello, client\n", string(b))
 }
 
@@ -71,7 +71,7 @@ func TestFileServerMiddleware_Download(t *testing.T) {
 
 	res := w.Result()
 	defer res.Body.Close()
-	b, _ := ioutil.ReadAll(res.Body)
+	b, _ := io.ReadAll(res.Body)
 	assert.Equal(t, "world", string(b))
 }
 

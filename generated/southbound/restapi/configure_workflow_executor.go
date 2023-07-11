@@ -30,6 +30,8 @@ func ConfigureAPI(api *operations.WorkflowExecutorAPI) http.Handler {
 
 	api.JSONProducer = producer.JSONProducer()
 
+	api.TextEventStreamProducer = producer.TextEventStreamProducer()
+
 	api.PreServerShutdown = func() {}
 
 	return setupGlobalMiddleware(api.Serve(setupMiddlewares))

@@ -18,7 +18,7 @@ necessary.
 
 ## Building wfx
 
-A recent [Go compiler](https://go.dev/) >= 1.18 as well as [GNU make](https://www.gnu.org/software/make/) wrapping the `go build` commands is required to build wfx and its associated tools.
+A recent [Go compiler](https://go.dev/) >= 1.19 as well as [GNU make](https://www.gnu.org/software/make/) wrapping the `go build` commands is required to build wfx and its associated tools.
 
 wfx requires a persistent storage to save workflows and jobs.
 Go [Build Tags](https://pkg.go.dev/go/build) are used to select compiled-in support for different persistent storage options.

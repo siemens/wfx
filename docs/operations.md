@@ -28,6 +28,70 @@ Clients may inspect this specification at run-time so to obey the various limits
 
 For convenience, wfx includes a built-in Swagger UI accessible at runtime via <http://localhost:8080/api/wfx/v1/docs>, assuming default listening host and port [configuration](configuration.md).
 
+### Job Status Notifications
+
+Job status notifications inform clients of changes in job status instantly, avoiding the need for repeated server polling.
+This can be useful for UIs and applications requiring prompt status updates.
+
+The status notifications are built using [server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events) (SSE):
+
+```txt
+ ┌────────┐                            ┌─────┐
+ │ Client │                            │ wfx │
+ └────────┘                            └─────┘
+     |                                    |
+     |   GET /jobs/{id}/status/subscribe  |
+     |-----------------------------------►|
+     |                                    |
+     |                                    |
+     |            loop                    |
+ ┌───|────────────────────────────────────|───┐
+ │   |       [text/event-stream]          |   │
+ │   |                                    |   │
+ │   |            send event              |   │
+ │   |◄-----------------------------------|   │
+ │   |  e.g. data: {"state":"INSTALLING"} |   │
+ │   |                                    |   │
+ └───|────────────────────────────────────|───┘
+     |                                    |
+     ▼                                    ▼
+ ┌────────┐                            ┌─────┐
+ │ Client │                            │ wfx │
+ └────────┘                            └─────┘
+```
+
+1. The client sends a `GET` request to the endpoint `/jobs/{id}/status/subscribe`.
+2. The server sets the `Content-Type` set to `text/event-stream`.
+3. The response body contains a stream of job status updates, with **the first event being the current job status**.
+   Each event is terminated by a pair of newline characters `\n\n` (as required by the SSE spec).
+
+**Example:** `wfxctl` provides a reference client implementation, e.g.
+
+```bash
+# subscribe to a job with ID c28ef750-bdda-4d1c-a3fa-bb0ea1dca9d3
+wfxctl job subscribe-status --id c28ef750-bdda-4d1c-a3fa-bb0ea1dca9d3
+```
+
+**Client Notes**
+
+1. Subscribing to a non-existent job yields a 404 Not Found error.
+2. Subscribing to a job in a terminal state (a state without outgoing transitions) yields a 400 Bad Request error.
+3. The connection closes when the job reaches a terminal state (after the last status update has been sent).
+4. On issues (e.g., slow client), wfx closes connection. The client must reconnect if needed.
+
+**Caveats**
+
+1. Job status updates are dispatched asynchronously to prevent a subscriber from causing a delay in status updates.
+   Consequently, messages may be **delivered out-of-order**. This is typically not an issue; however, under
+   circumstances with high concurrency, such as multiple clients attempting to modify the same job or a single client
+   sending a burst of status updates, this behavior might occur.
+2. Server-Sent Events use unidirectional communication, which means that **message delivery is not guaranteed**. In
+   other words, there are scenarios where certain events may never reach the subscriber.
+3. When scaling out horizontally, the load balancer should consistently route job updates for a specific job ID to the same wfx instance.
+   Alternatively, the client can subscribe to updates from every wfx instance and subsequently aggregate the events it receives.
+4. Browsers typically limit SSE connections (6 per domain). HTTP/2 can be used instead (100 connections by default) or some kind of
+   aggregation service could be used.
+
 ### Response Filters
 
 wfx allows server-side response content filtering prior to sending the response to the client so to tailor it to client information needs.
