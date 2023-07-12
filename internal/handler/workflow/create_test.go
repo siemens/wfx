@@ -27,11 +27,12 @@ func TestCreateWorkflow(t *testing.T) {
 }
 
 func newInMemoryDB(t *testing.T) persistence.Storage {
-	var sqlite entgo.SQLite
-	err := sqlite.Initialize(context.Background(), "file:wfx?mode=memory&cache=shared&_fk=1")
+	var db entgo.SQLite
+	err := db.Initialize(context.Background(), "file:wfx?mode=memory&cache=shared&_fk=1")
 	require.NoError(t, err)
+	t.Cleanup(db.Shutdown)
 	t.Cleanup(func() {
-		_ = sqlite.DeleteWorkflow(context.Background(), "wfx.workflow.dau.direct")
+		_ = db.DeleteWorkflow(context.Background(), "wfx.workflow.dau.direct")
 	})
-	return &sqlite
+	return &db
 }

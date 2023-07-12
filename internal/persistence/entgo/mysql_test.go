@@ -21,11 +21,27 @@ import (
 	"testing"
 
 	"github.com/siemens/wfx/internal/persistence/tests"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/goleak"
 )
+
+func TestMySQL_Initialize(t *testing.T) {
+	defer goleak.VerifyNone(t)
+	db := setupMySQL(t)
+	db.Shutdown()
+}
+
+func TestMain_InitializeFail(t *testing.T) {
+	dsn := "foo:bar@tcp(localhost)/wfx"
+	var mysql MySQL
+	err := mysql.Initialize(context.Background(), dsn)
+	assert.NotNil(t, err)
+}
 
 func TestMySQL(t *testing.T) {
 	db := setupMySQL(t)
+	t.Cleanup(db.Shutdown)
 	for _, testFn := range tests.AllTests {
 		name := runtime.FuncForPC(reflect.ValueOf(testFn).Pointer()).Name()
 		name = strings.TrimPrefix(filepath.Ext(name), ".")

@@ -13,7 +13,10 @@ package entgo
 import (
 	"context"
 	"embed"
+	"net/url"
 
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
 	"github.com/Southclaws/fault"
 	"github.com/golang-migrate/migrate/v4/database/sqlite3"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
@@ -36,34 +39,41 @@ func init() {
 	persistence.RegisterStorage("sqlite", &SQLite{})
 }
 
-func (wrapper *SQLite) Initialize(_ context.Context, options string) error {
-	log.Debug().
-		Str("dsn", options).
-		Msg("Initializing SQLite storage")
-
-	src, err := iofs.New(sqliteMigrations, "migrations/sqlite")
+func (instance *SQLite) Initialize(_ context.Context, dsn string) error {
+	log.Debug().Str("dsn", dsn).Msg("Connecting to SQLite")
+	drv, err := sql.Open(dialect.SQLite, dsn)
 	if err != nil {
+		log.Error().Err(err).Msg("Failed opening connection to SQLite")
 		return fault.Wrap(err)
 	}
-
-	var sqlite sqlite3.Sqlite
-	driver, err := sqlite.Open(options)
-	if err != nil {
-		return fault.Wrap(err)
-	}
-
-	if err := runMigrations(src, "wfx", driver); err != nil {
-		return fault.Wrap(err)
-	}
-
-	log.Debug().Msg("Connecting to SQLite")
-	client, err := ent.Open("sqlite3", options)
-	if err != nil {
-		log.Error().Err(err).Msg("Failed opening connection to sqlite")
-		return fault.Wrap(err)
-	}
+	client := ent.NewClient(ent.Driver(drv))
 	log.Debug().Msg("Connected to SQLite")
+	instance.Database = Database{client: client}
 
-	wrapper.Database = Database{client: client}
+	{
+		// run schema migrations
+		src, err := iofs.New(sqliteMigrations, "migrations/sqlite")
+		if err != nil {
+			return fault.Wrap(err)
+		}
+
+		purl, err := url.Parse(dsn)
+		if err != nil {
+			return fault.Wrap(err)
+		}
+
+		driver, err := sqlite3.WithInstance(drv.DB(), &sqlite3.Config{
+			MigrationsTable: sqlite3.DefaultMigrationsTable,
+			DatabaseName:    purl.Path,
+			NoTxWrap:        false,
+		})
+		if err != nil {
+			return fault.Wrap(err)
+		}
+
+		if err := runMigrations(src, "wfx", driver); err != nil {
+			return fault.Wrap(err)
+		}
+	}
 	return nil
 }

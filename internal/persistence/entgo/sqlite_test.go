@@ -28,10 +28,18 @@ import (
 	"github.com/siemens/wfx/middleware/logging"
 	"github.com/siemens/wfx/persistence"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/goleak"
 )
+
+func TestSQLite_Initialize(t *testing.T) {
+	defer goleak.VerifyNone(t)
+	db := setupSQLite(t)
+	db.Shutdown()
+}
 
 func TestSQLite(t *testing.T) {
 	db := setupSQLite(t)
+	t.Cleanup(db.Shutdown)
 	var storage persistence.Storage = &db
 	for _, testFn := range tests.AllTests {
 		name := runtime.FuncForPC(reflect.ValueOf(testFn).Pointer()).Name()
