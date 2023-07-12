@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Send HTTP status code 404 when attempting to access the file server while it is disabled
 - Configure TLS for Southbound API (if requested via CLI)
+- Connection pool leak due to schema migrations (SQLite, MySQL)
 
 ### Changed
 

@@ -42,6 +42,7 @@ func newInMemoryDB(t *testing.T) persistence.Storage {
 	db := &entgo.SQLite{}
 	err := db.Initialize(context.Background(), "file:wfx?mode=memory&cache=shared&_fk=1")
 	require.NoError(t, err)
+	t.Cleanup(db.Shutdown)
 
 	require.NoError(t, err)
 	t.Cleanup(func() {
