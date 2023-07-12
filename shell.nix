@@ -35,8 +35,21 @@ mkShell {
   ];
 
   shellHook = ''
-    export GOFLAGS="-tags=sqlite,mysql,postgres,testing"
+    export GOFLAGS="-tags=sqlite,mysql,postgres,testing,integration"
     export LUA_PATH="$(pwd)/hugo/filters/?.lua;;"
     export PATH="$(pwd):$PATH"
+
+    export PGUSER=wfx \
+           PGPASSWORD=secret\
+           PGHOST=localhost \
+           PGPORT=5432      \
+           PGDATABASE=wfx   \
+           PGSSLMODE=disable
+
+    export MYSQL_USER=root \
+           MYSQL_PASSWORD=root \
+           MYSQL_ROOT_PASSWORD=root \
+           MYSQL_DATABASE=wfx \
+           MYSQL_HOST=localhost
   '';
 }
