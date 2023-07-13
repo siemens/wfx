@@ -180,7 +180,7 @@ func newInMemoryDB(t *testing.T) persistence.Storage {
 	db := &entgo.SQLite{}
 	err := db.Initialize(context.Background(), "file:wfx?mode=memory&cache=shared&_fk=1")
 	require.NoError(t, err)
-
+	t.Cleanup(db.Shutdown)
 	t.Cleanup(func() {
 		{
 			list, _ := db.QueryJobs(context.Background(), persistence.FilterParams{}, persistence.SortParams{}, persistence.PaginationParams{Limit: 100})

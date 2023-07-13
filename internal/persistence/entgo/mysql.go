@@ -58,22 +58,30 @@ func (wrapper *MySQL) Initialize(ctx context.Context, options string) error {
 
 	db := sql.OpenDB(connector)
 	if err := db.PingContext(ctx); err != nil {
-		log.Error().Err(err).Msg("Failed to ping PostgreSQL database")
+		log.Error().Err(err).Msg("Failed to ping MySQL database")
+		_ = db.Close()
 		return fault.Wrap(err)
 	}
 
-	log.Info().Msg("Applying migrations")
-	src, err := iofs.New(mysqlMigrations, "migrations/mysql")
-	if err != nil {
-		return fault.Wrap(err)
-	}
-
-	{ // run migrations
-		drv, err := mysql.WithInstance(db, &mysql.Config{})
+	{
+		log.Info().Msg("Applying migrations")
+		src, err := iofs.New(mysqlMigrations, "migrations/mysql")
 		if err != nil {
 			return fault.Wrap(err)
 		}
-		if err := runMigrations(src, cfg.DBName, drv); err != nil {
+
+		conn, err := db.Conn(ctx)
+		if err != nil {
+			return fault.Wrap(err)
+		}
+		defer conn.Close()
+
+		m, err := mysql.WithConnection(ctx, conn, &mysql.Config{})
+		if err != nil {
+			return fault.Wrap(err)
+		}
+
+		if err := runMigrations(src, cfg.DBName, m); err != nil {
 			return fault.Wrap(err)
 		}
 	}
