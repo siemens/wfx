@@ -65,6 +65,12 @@ lint:
         if [[ "$file_count" -gt 0 ]] && [[ "$test_count" -eq 0 ]]; then
             echo "WARN: package $pkg has $file_count file(s) but no tests"
         fi
+        if [[ "$test_count" -gt 0 ]]; then
+            grep -R -q goleak.VerifyTestMain "$pkg" || {
+                echo "ERROR: package $pkg does not use goleak"
+                exit 1
+            }
+        fi
     done
 
 # Format code
