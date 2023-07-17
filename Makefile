@@ -8,6 +8,7 @@ SHELL := bash
 .DELETE_ON_ERROR:
 MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
+MAKEFLAGS += --jobs=$(shell nproc)
 
 DESTDIR ?=
 prefix ?= /usr/local
@@ -26,7 +27,7 @@ ALL_TARGETS := wfx wfxctl wfx-viewer wfx-loadtest
 
 .PHONY: default
 default:
-	@make -s -j$(shell nproc) $(ALL_TARGETS)
+	@make -s $(ALL_TARGETS)
 
 .PHONY: test
 test:
