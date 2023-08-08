@@ -9,6 +9,7 @@ package root
  */
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -17,7 +18,29 @@ import (
 	"github.com/knadh/koanf/v2"
 	"github.com/rs/zerolog/log"
 	"github.com/siemens/wfx/internal/server"
+	"github.com/siemens/wfx/middleware"
 )
+
+type serverCollection struct {
+	// name of the collection
+	name string
+	// servers belonging to this collection
+	servers []myServer
+	// middleware shared between all servers
+	middleware *middleware.GlobalMW
+}
+
+func (collection serverCollection) Shutdown(ctx context.Context) {
+	contextLogger := log.With().Str("name", collection.name).Logger()
+	for _, server := range collection.servers {
+		contextLogger.Info().Str("kind", server.Kind.String()).Msg("Shutting down server")
+		if err := server.Srv.Shutdown(ctx); err != nil {
+			log.Err(err).Msg("Shutdown error")
+		}
+	}
+	collection.middleware.Shutdown()
+	contextLogger.Info().Msg("Shutdown successful")
+}
 
 type myServer struct {
 	Srv  *http.Server

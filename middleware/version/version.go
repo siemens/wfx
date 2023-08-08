@@ -23,7 +23,9 @@ type Version struct {
 	APIVersion string `json:"apiVersion"`
 }
 
-func NewVersionMiddleware(next http.Handler) http.Handler {
+type MW struct{}
+
+func (mw MW) Wrap(next http.Handler) http.Handler {
 	v := Version{
 		Version:    metadata.Version,
 		Commit:     metadata.Commit,
@@ -32,13 +34,14 @@ func NewVersionMiddleware(next http.Handler) http.Handler {
 	}
 	info, _ := json.MarshalIndent(v, "", "  ")
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !strings.HasPrefix(r.URL.Path, "/version") {
-			next.ServeHTTP(w, r)
+		if strings.HasPrefix(r.URL.Path, "/version") {
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write(info)
 			return
 		}
-
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write(info)
+		next.ServeHTTP(w, r)
 	})
 }
+
+func (mw MW) Shutdown() {}

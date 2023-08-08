@@ -21,7 +21,7 @@ import (
 )
 
 func TestVersion(t *testing.T) {
-	server := httptest.NewServer(version.NewVersionMiddleware(nil))
+	server := httptest.NewServer(version.MW{}.Wrap(nil))
 	defer server.Close()
 
 	parsedURL, _ := url.Parse(server.URL)

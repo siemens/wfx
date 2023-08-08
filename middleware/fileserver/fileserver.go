@@ -23,7 +23,11 @@ const (
 	SimpleFileServerFlag = "simple-fileserver"
 )
 
-func NewFileServerMiddleware(k *config.ThreadSafeKoanf, next http.Handler) (http.Handler, error) {
+type MW struct {
+	k *config.ThreadSafeKoanf
+}
+
+func NewFileServerMiddleware(k *config.ThreadSafeKoanf) (*MW, error) {
 	var rootDir string
 	k.Read(func(k *koanf.Koanf) {
 		rootDir = k.String(SimpleFileServerFlag)
@@ -37,11 +41,14 @@ func NewFileServerMiddleware(k *config.ThreadSafeKoanf, next http.Handler) (http
 			return nil, fmt.Errorf("%s is not a directory", rootDir)
 		}
 	}
+	return &MW{k: k}, nil
+}
 
+func (mw MW) Wrap(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(r.URL.Path, "/download") {
 			var rootDir string
-			k.Read(func(k *koanf.Koanf) {
+			mw.k.Read(func(k *koanf.Koanf) {
 				rootDir = k.String(SimpleFileServerFlag)
 			})
 			if rootDir != "" {
@@ -50,5 +57,7 @@ func NewFileServerMiddleware(k *config.ThreadSafeKoanf, next http.Handler) (http
 			}
 		}
 		next.ServeHTTP(w, r)
-	}), nil
+	})
 }
+
+func (mw MW) Shutdown() {}

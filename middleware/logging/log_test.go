@@ -22,7 +22,7 @@ import (
 )
 
 func TestLog(t *testing.T) {
-	handler := NewLoggingMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	handler := MW{}.Wrap(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "Hello, client")
 	}))
 
@@ -40,7 +40,7 @@ func TestLog(t *testing.T) {
 }
 
 func TestLogDebug(t *testing.T) {
-	handler := NewLoggingMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	handler := MW{}.Wrap(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "Hello, client")
 	}))
 

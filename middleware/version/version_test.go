@@ -20,7 +20,7 @@ import (
 
 func TestGetVersion(t *testing.T) {
 	result := apitest.New().
-		Handler(NewVersionMiddleware(nil)).
+		Handler(MW{}.Wrap(nil)).
 		Get("/version").
 		Expect(t).
 		Status(http.StatusOK).

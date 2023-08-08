@@ -10,47 +10,47 @@ package middleware
 
 import (
 	"net/http"
-
-	"github.com/Southclaws/fault"
-	"github.com/go-openapi/runtime/middleware"
-	"github.com/rs/cors"
-	"github.com/siemens/wfx/internal/config"
-	"github.com/siemens/wfx/middleware/fileserver"
-	"github.com/siemens/wfx/middleware/health"
-	"github.com/siemens/wfx/middleware/jq"
-	"github.com/siemens/wfx/middleware/logging"
-	"github.com/siemens/wfx/middleware/swagger"
-	"github.com/siemens/wfx/middleware/version"
-	"github.com/siemens/wfx/persistence"
 )
 
-type Config struct {
-	Config      *config.ThreadSafeKoanf
-	Storage     persistence.Storage
-	BasePath    string
-	SwaggerJSON []byte
+type GlobalMW struct {
+	handler       http.Handler
+	intermediates []IntermediateMW
 }
 
-func SetupGlobalMiddleware(config Config, handler http.Handler) (http.Handler, error) {
-	handler = logging.NewLoggingMiddleware(handler)
+type IntermediateMW interface {
+	Wrap(next http.Handler) http.Handler
+	Shutdown()
+}
 
-	handler = jq.NewJqMiddleware(handler)
+// implements the http.Handler interface
+func (global GlobalMW) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+	global.handler.ServeHTTP(rw, r)
+}
 
-	var err error
-	handler, err = fileserver.NewFileServerMiddleware(config.Config, handler)
-	if err != nil {
-		return nil, fault.Wrap(err)
+func (global GlobalMW) Shutdown() {
+	for _, mw := range global.intermediates {
+		mw.Shutdown()
 	}
+}
 
-	// expose swagger.json under basePath (useful if you're using a reverse proxy in front of wfx)
-	handler = middleware.Spec(config.BasePath, config.SwaggerJSON, handler)
-	// be friendly and tell user about swagger.json
-	handler = swagger.NewSpecMiddleware(handler)
+func NewGlobalMiddleware(base http.Handler, intermediates []IntermediateMW) *GlobalMW {
+	handler := base
+	for _, mw := range intermediates {
+		handler = mw.Wrap(handler)
+	}
+	return &GlobalMW{handler: handler, intermediates: intermediates}
+}
 
-	handler = health.NewHealthMiddleware(config.Storage, handler)
-	handler = version.NewVersionMiddleware(handler)
+type promotedMW struct {
+	wrap func(http.Handler) http.Handler
+}
 
-	// this is the first handler which is executed in the chain (LIFO):
-	handler = cors.AllowAll().Handler(handler)
-	return handler, nil
+func (promotedMW) Shutdown() {}
+
+func (mw promotedMW) Wrap(next http.Handler) http.Handler {
+	return mw.wrap(next)
+}
+
+func PromoteWrapper(wrap func(http.Handler) http.Handler) IntermediateMW {
+	return promotedMW{wrap: wrap}
 }

@@ -17,9 +17,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewSpecMiddleware(t *testing.T) {
+func TestHint(t *testing.T) {
+	mw := NewSpecMiddleware("/api", []byte(`{ "hello": "world" }`))
 	result := apitest.New().
-		Handler(NewSpecMiddleware(nil)).
+		Handler(mw.Wrap(nil)).
 		Get("/").
 		Expect(t).
 		Status(http.StatusNotFound).
@@ -30,4 +31,17 @@ func TestNewSpecMiddleware(t *testing.T) {
 
 Hint: Check /swagger.json to see available endpoints.
 `, string(actual))
+}
+
+func TestSwaggerJSON(t *testing.T) {
+	mw := NewSpecMiddleware("/api", []byte(`{ "hello": "world" }`))
+	result := apitest.New().
+		Handler(mw.Wrap(nil)).
+		Get("/api/swagger.json").
+		Expect(t).
+		Status(http.StatusOK).
+		End()
+	actual, err := io.ReadAll(result.Response.Body)
+	assert.NoError(t, err)
+	assert.JSONEq(t, `{ "hello": "world" }`, string(actual))
 }

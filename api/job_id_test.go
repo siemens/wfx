@@ -47,8 +47,8 @@ func TestJobGetIdFilter(t *testing.T) {
 	job := persistJob(t, db)
 	jobPath := fmt.Sprintf("/api/wfx/v1/jobs/%s", job.ID)
 
-	north = jq.NewJqMiddleware(north)
-	south = jq.NewJqMiddleware(south)
+	north = jq.MW{}.Wrap(north)
+	south = jq.MW{}.Wrap(south)
 
 	// read job
 	handlers := []http.Handler{north, south}

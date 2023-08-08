@@ -32,12 +32,12 @@ func adoptSystemdSockets(listeners []net.Listener, storage persistence.Storage, 
 		Msg("Received socket fds from systemd")
 
 	go func() {
-		servers, err := createSouthboundServers([]string{kindHTTP.String()}, storage)
+		sc, err := createSouthboundCollection([]string{kindHTTP.String()}, storage)
 		if err != nil {
 			errChan <- err
 			return
 		}
-		srv := servers[0]
+		srv := sc.servers[0]
 
 		log.Info().Msg("Starting southbound UDS listener (activated by systemd)")
 		l := listeners[0]
@@ -49,12 +49,12 @@ func adoptSystemdSockets(listeners []net.Listener, storage persistence.Storage, 
 	}()
 
 	go func() {
-		servers, err := createNorthboundServers([]string{kindHTTP.String()}, storage)
+		sc, err := createNorthboundCollection([]string{kindHTTP.String()}, storage)
 		if err != nil {
 			errChan <- err
 			return
 		}
-		srv := servers[0]
+		srv := sc.servers[0]
 
 		log.Info().Msg("Starting northbound UDS listener (activated by systemd)")
 		l := listeners[1]
