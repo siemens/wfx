@@ -12,14 +12,21 @@ import (
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"
 	"github.com/knadh/koanf/v2"
+	"github.com/rs/cors"
 	"github.com/siemens/wfx/api"
 	"github.com/siemens/wfx/generated/northbound/restapi"
 	"github.com/siemens/wfx/internal/server"
 	"github.com/siemens/wfx/middleware"
+	"github.com/siemens/wfx/middleware/fileserver"
+	"github.com/siemens/wfx/middleware/health"
+	"github.com/siemens/wfx/middleware/jq"
+	"github.com/siemens/wfx/middleware/logging"
+	"github.com/siemens/wfx/middleware/swagger"
+	"github.com/siemens/wfx/middleware/version"
 	"github.com/siemens/wfx/persistence"
 )
 
-func createNorthboundServers(schemes []string, storage persistence.Storage) ([]myServer, error) {
+func createNorthboundCollection(schemes []string, storage persistence.Storage) (*serverCollection, error) {
 	var settings server.HTTPSettings
 	k.Read(func(k *koanf.Koanf) {
 		settings.Host = k.String(mgmtHostFlag)
@@ -28,22 +35,36 @@ func createNorthboundServers(schemes []string, storage persistence.Storage) ([]m
 		settings.TLSPort = k.Int(mgmtTLSPortFlag)
 		settings.UDSPath = k.String(mgmtUnixSocketFlag)
 	})
-	swaggerJSON, _ := restapi.SwaggerJSON.MarshalJSON()
 	api, err := api.NewNorthboundAPI(storage)
 	if err != nil {
 		return nil, fault.Wrap(err, fmsg.With("Failed to create northbound API"))
 	}
-	cfg := middleware.Config{
-		Config:      k,
-		Storage:     storage,
-		BasePath:    api.Context().BasePath(),
-		SwaggerJSON: swaggerJSON,
-	}
-	// add our global middlewares
-	handler, err := middleware.SetupGlobalMiddleware(cfg, restapi.ConfigureAPI(api))
+
+	fsMW, err := fileserver.NewFileServerMiddleware(k)
 	if err != nil {
 		return nil, fault.Wrap(err)
 	}
-	servers, err := createServers(schemes, handler, settings)
-	return servers, fault.Wrap(err)
+
+	swaggerJSON, _ := restapi.SwaggerJSON.MarshalJSON()
+	mw := middleware.NewGlobalMiddleware(restapi.ConfigureAPI(api),
+		[]middleware.IntermediateMW{
+			// LIFO
+			logging.MW{},
+			jq.MW{},
+			fsMW,
+			swagger.NewSpecMiddleware(api.Context().BasePath(), swaggerJSON),
+			health.NewHealthMiddleware(storage),
+			version.MW{},
+			middleware.PromoteWrapper(cors.AllowAll().Handler),
+		})
+
+	servers, err := createServers(schemes, mw, settings)
+	if err != nil {
+		return nil, fault.Wrap(err)
+	}
+	return &serverCollection{
+		name:       "northbound",
+		servers:    servers,
+		middleware: mw,
+	}, nil
 }

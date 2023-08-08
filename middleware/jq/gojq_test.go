@@ -18,7 +18,8 @@ import (
 )
 
 func TestNewJqMiddleware(t *testing.T) {
-	handler := NewJqMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	mw := MW{}
+	handler := mw.Wrap(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "Hello, client")
 	}))
 

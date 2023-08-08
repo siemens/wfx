@@ -24,7 +24,9 @@ const (
 	KeyRequestLogger key = iota
 )
 
-func NewLoggingMiddleware(next http.Handler) http.Handler {
+type MW struct{}
+
+func (mw MW) Wrap(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		reqID := uuid.New().String()
@@ -66,6 +68,8 @@ func NewLoggingMiddleware(next http.Handler) http.Handler {
 			Msg("Finished request")
 	})
 }
+
+func (mw MW) Shutdown() {}
 
 func LoggerFromCtx(ctx context.Context) zerolog.Logger {
 	if log, ok := ctx.Value(KeyRequestLogger).(zerolog.Logger); ok {

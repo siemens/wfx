@@ -175,65 +175,65 @@ Examples of tasks are installation of firmware or other types of commands issued
 		k.Read(func(k *koanf.Koanf) {
 			schemes = k.Strings(schemeFlag)
 		})
-		allServers := make([]myServer, 0, 6)
+		serverCollections := make([]*serverCollection, 0, 2)
 		{
-			servers, err := createNorthboundServers(schemes, storage)
+			collection, err := createNorthboundCollection(schemes, storage)
 			if err != nil {
 				return fault.Wrap(err)
 			}
-			allServers = append(allServers, servers...)
+			serverCollections = append(serverCollections, collection)
 		}
 		{
-			servers, err := createSouthboundServers(schemes, storage)
+			collection, err := createSouthboundCollection(schemes, storage)
 			if err != nil {
 				return fault.Wrap(err)
 			}
-			allServers = append(allServers, servers...)
+			serverCollections = append(serverCollections, collection)
 		}
 
 		errChan := make(chan error)
-		for i := range allServers {
-			// make copy of loop variable
-			idx := i
-			go func() {
-				maxAttempts := 30
-				for attempt := 1; attempt <= maxAttempts; attempt++ {
-					srv := allServers[idx]
-					log.Info().Str("addr", srv.Srv.Addr).Str("kind", srv.Kind.String()).Msg("Starting server")
-					var err error
-					switch srv.Kind {
-					case kindHTTP:
-						err = srv.Srv.ListenAndServe()
-					case kindHTTPS:
-						err = srv.Srv.ListenAndServeTLS("", "")
-					case kindUnix:
-						var l net.Listener
-						l, err = net.Listen("unix", srv.Srv.Addr)
+		for _, collection := range serverCollections {
+			for i := range collection.servers {
+				// capture loop variable
+				srv := collection.servers[i]
+				go func() {
+					maxAttempts := 30
+					for attempt := 1; attempt <= maxAttempts; attempt++ {
+						log.Info().Str("addr", srv.Srv.Addr).Str("kind", srv.Kind.String()).Msg("Starting server")
+						var err error
+						switch srv.Kind {
+						case kindHTTP:
+							err = srv.Srv.ListenAndServe()
+						case kindHTTPS:
+							err = srv.Srv.ListenAndServeTLS("", "")
+						case kindUnix:
+							var l net.Listener
+							l, err = net.Listen("unix", srv.Srv.Addr)
+							if err != nil {
+								log.Err(err).Msg("Failed to launch unix-domain socket server")
+								errChan <- err
+								return
+							}
+							err = srv.Srv.Serve(l)
+						}
+						if err == nil || errors.Is(err, http.ErrServerClosed) {
+							break
+						}
 						if err != nil {
-							log.Err(err).Int("idx", idx).Msg("Failed to launch unix-domain socket server")
-							errChan <- err
-							return
+							log.Err(err).
+								Int("attempt", attempt).
+								Int("kind", int(srv.Kind)).
+								Str("addr", srv.Srv.Addr).
+								Msg("Failed to start server")
+							if attempt >= maxAttempts {
+								errChan <- err
+								return
+							}
+							time.Sleep(time.Second)
 						}
-						err = srv.Srv.Serve(l)
 					}
-					if err == nil || errors.Is(err, http.ErrServerClosed) {
-						break
-					}
-					if err != nil {
-						log.Err(err).
-							Int("idx", idx).
-							Int("attempt", attempt).
-							Int("kind", int(srv.Kind)).
-							Str("addr", srv.Srv.Addr).
-							Msg("Failed to start server")
-						if attempt >= maxAttempts {
-							errChan <- err
-							return
-						}
-						time.Sleep(time.Second)
-					}
-				}
-			}()
+				}()
+			}
 		}
 
 		// check for systemd socket-based activation
@@ -262,14 +262,9 @@ Examples of tasks are installation of firmware or other types of commands issued
 		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()
 
-		for i, s := range allServers {
-			log.Info().Int("i", i).Msg("Shutting down server...")
-			if err := s.Srv.Shutdown(ctx); err != nil {
-				log.Err(err).Msg("Shutdown error")
-			}
-			log.Debug().Int("i", i).Msg("Shut down successful")
+		for _, collection := range serverCollections {
+			collection.Shutdown(ctx)
 		}
-
 		return nil
 	},
 }

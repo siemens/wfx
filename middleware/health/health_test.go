@@ -20,10 +20,11 @@ import (
 )
 
 func TestNewHealthMiddleware(t *testing.T) {
-	mw := NewHealthMiddleware(nil, nil)
+	mw := NewHealthMiddleware(nil)
+	defer mw.Shutdown()
 
 	result := apitest.New().
-		Handler(mw).
+		Handler(mw.Wrap(nil)).
 		Get("/health").
 		Expect(t).
 		End()

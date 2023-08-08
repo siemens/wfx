@@ -33,10 +33,11 @@ func TestFileServerMiddleware_Fallback(t *testing.T) {
 		_ = k.Set(SimpleFileServerFlag, dir)
 	})
 
-	handler, err := NewFileServerMiddleware(k, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	fsMW, err := NewFileServerMiddleware(k)
+	require.Nil(t, err)
+	handler := fsMW.Wrap(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "Hello, client")
 	}))
-	require.Nil(t, err)
 
 	req := httptest.NewRequest(http.MethodGet, "/foo", nil)
 	w := httptest.NewRecorder()
@@ -60,10 +61,11 @@ func TestFileServerMiddleware_Download(t *testing.T) {
 		_ = k.Set(SimpleFileServerFlag, dir)
 	})
 
-	handler, err := NewFileServerMiddleware(k, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	fsMW, err := NewFileServerMiddleware(k)
+	require.Nil(t, err)
+	handler := fsMW.Wrap(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "Hello, client")
 	}))
-	require.Nil(t, err)
 
 	req := httptest.NewRequest(http.MethodGet, "/download/hello", nil)
 	w := httptest.NewRecorder()
@@ -80,8 +82,8 @@ func TestFileServerMiddleware_DirNotExist(t *testing.T) {
 	k.Write(func(k *koanf.Koanf) {
 		_ = k.Set(SimpleFileServerFlag, "/this/dir/does/not/exist")
 	})
-	handler, err := NewFileServerMiddleware(k, nil)
-	assert.Nil(t, handler)
+	fsMW, err := NewFileServerMiddleware(k)
+	assert.Nil(t, fsMW)
 	assert.NotNil(t, err)
 	assert.ErrorContains(t, err, "no such file or directory")
 }
@@ -95,18 +97,19 @@ func TestFileServerMiddleware_DirIsFile(t *testing.T) {
 	k.Write(func(k *koanf.Koanf) {
 		_ = k.Set(SimpleFileServerFlag, tmpFile.Name())
 	})
-	handler, err := NewFileServerMiddleware(k, nil)
-	assert.Nil(t, handler)
+	fsMW, err := NewFileServerMiddleware(k)
+	assert.Nil(t, fsMW)
 	assert.NotNil(t, err)
 	assert.ErrorContains(t, err, "not a directory")
 }
 
 func TestFileServerMiddleware_404(t *testing.T) {
 	k := config.New()
-	handler, err := NewFileServerMiddleware(k, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	fsMW, err := NewFileServerMiddleware(k)
+	require.Nil(t, err)
+	handler := fsMW.Wrap(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 	}))
-	require.Nil(t, err)
 
 	req := httptest.NewRequest(http.MethodGet, "/download", nil)
 	w := httptest.NewRecorder()

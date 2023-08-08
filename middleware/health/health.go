@@ -21,7 +21,12 @@ import (
 	"github.com/siemens/wfx/persistence"
 )
 
-func NewHealthMiddleware(storage persistence.Storage, next http.Handler) http.Handler {
+type MW struct {
+	checker health.Checker
+	health  http.Handler
+}
+
+func NewHealthMiddleware(storage persistence.Storage) MW {
 	log.Debug().Msg("Adding health middleware")
 
 	checker := health.NewChecker(
@@ -35,18 +40,26 @@ func NewHealthMiddleware(storage persistence.Storage, next http.Handler) http.Ha
 				return fault.Wrap(storage.CheckHealth(ctx))
 			},
 		}),
-		health.WithStatusListener(statusListener),
-	)
+		health.WithStatusListener(statusListener))
 
-	handler := health.NewHandler(checker)
+	return MW{
+		checker: checker,
+		health:  health.NewHandler(checker),
+	}
+}
 
+func (mw MW) Wrap(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(r.URL.Path, "/health") {
-			handler(w, r)
+			mw.health.ServeHTTP(w, r)
 			return
 		}
 		next.ServeHTTP(w, r)
 	})
+}
+
+func (mw MW) Shutdown() {
+	mw.checker.Stop()
 }
 
 func statusListener(_ context.Context, state health.CheckerState) {

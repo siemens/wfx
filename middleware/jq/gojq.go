@@ -12,7 +12,9 @@ import (
 	"net/http"
 )
 
-func NewJqMiddleware(next http.Handler) http.Handler {
+type MW struct{}
+
+func (mw MW) Wrap(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		filter := r.Header.Get("X-Response-Filter")
 		if filter != "" {
@@ -21,3 +23,5 @@ func NewJqMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
+
+func (mw MW) Shutdown() {}
