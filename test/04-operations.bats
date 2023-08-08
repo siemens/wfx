@@ -16,8 +16,11 @@ setup_file() {
 }
 
 teardown_file() {
-  pkill wfx
   rm -f "$PUBLIC_KEY" "$PRIVATE_KEY"
+}
+
+teardown() {
+  pkill wfx
 }
 
 @test "TLS only" {
