@@ -11,7 +11,9 @@ package root
 import (
 	"context"
 	"fmt"
+	"net"
 	"net/http"
+	"time"
 
 	"github.com/Southclaws/fault"
 	"github.com/go-openapi/runtime/flagext"
@@ -37,14 +39,16 @@ func (collection serverCollection) Shutdown(ctx context.Context) {
 		if err := server.Srv.Shutdown(ctx); err != nil {
 			log.Err(err).Msg("Shutdown error")
 		}
+		_ = server.Listener.Close()
 	}
 	collection.middleware.Shutdown()
 	contextLogger.Info().Msg("Shutdown successful")
 }
 
 type myServer struct {
-	Srv  *http.Server
-	Kind serverKind
+	Srv      *http.Server
+	Listener net.Listener
+	Kind     serverKind
 }
 
 type serverKind int
@@ -105,12 +109,14 @@ func createServers(schemes []string, handler http.Handler, settings server.HTTPS
 		case kindHTTP:
 			log.Debug().Msg("Creating http server")
 			srv := server.NewHTTPServer(&settings, handler)
-			srv.Addr = fmt.Sprintf("%s:%d", settings.Host, settings.Port)
-			result = append(result, myServer{Srv: srv, Kind: kind})
+			ln, err := createListener("tcp", fmt.Sprintf("%s:%d", settings.Host, settings.Port))
+			if err != nil {
+				return nil, fault.Wrap(err)
+			}
+			result = append(result, myServer{Srv: srv, Kind: kind, Listener: *ln})
 		case kindHTTPS:
 			log.Debug().Msg("Creating https server")
 			srv := server.NewHTTPServer(&settings, handler)
-			srv.Addr = fmt.Sprintf("%s:%d", settings.TLSHost, settings.TLSPort)
 			var tlsSettings server.TLSSettings
 			k.Read(func(k *koanf.Koanf) {
 				tlsSettings.TLSCertificate = k.String(tlsCertificateFlag)
@@ -121,13 +127,35 @@ func createServers(schemes []string, handler http.Handler, settings server.HTTPS
 			if err != nil {
 				return nil, fault.Wrap(err)
 			}
-			result = append(result, myServer{Srv: srv, Kind: kind})
+			ln, err := createListener("tcp", fmt.Sprintf("%s:%d", settings.TLSHost, settings.TLSPort))
+			if err != nil {
+				return nil, fault.Wrap(err)
+			}
+			result = append(result, myServer{Srv: srv, Kind: kind, Listener: *ln})
 		case kindUnix:
 			log.Debug().Msg("Creating unix-domain socket server")
 			srv := server.NewHTTPServer(&settings, handler)
-			srv.Addr = settings.UDSPath
-			result = append(result, myServer{Srv: srv, Kind: kind})
+			ln, err := createListener("unix", settings.UDSPath)
+			if err != nil {
+				return nil, fault.Wrap(err)
+			}
+			result = append(result, myServer{Srv: srv, Kind: kind, Listener: *ln})
 		}
 	}
 	return result, nil
+}
+
+func createListener(network string, addr string) (*net.Listener, error) {
+	var err error
+	maxAttempts := 30
+	for attempt := 1; attempt <= maxAttempts; attempt++ {
+		var ln net.Listener
+		ln, err = net.Listen(network, addr)
+		if err == nil {
+			return &ln, nil
+		}
+		log.Err(err).Str("network", network).Str("addr", addr).Msg("Failed to create listener server")
+		time.Sleep(time.Second)
+	}
+	return nil, fault.Wrap(err)
 }

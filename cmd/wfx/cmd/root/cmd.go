@@ -12,7 +12,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -175,7 +174,7 @@ Examples of tasks are installation of firmware or other types of commands issued
 		k.Read(func(k *koanf.Koanf) {
 			schemes = k.Strings(schemeFlag)
 		})
-		serverCollections := make([]*serverCollection, 0, 2)
+		serverCollections := make([]*serverCollection, 0, 3)
 		{
 			collection, err := createNorthboundCollection(schemes, storage)
 			if err != nil {
@@ -191,56 +190,58 @@ Examples of tasks are installation of firmware or other types of commands issued
 			serverCollections = append(serverCollections, collection)
 		}
 
+		// check for socket-based activation (systemd)
+		{
+			listeners, _ := activation.Listeners()
+			n := len(listeners)
+			if n > 0 {
+				if n != 2 {
+					return fmt.Errorf("invalid fd count: %d", n)
+				}
+				log.Info().Int("count", n).Msg("Adopting sockets provided by systemd")
+				south, err := createSouthboundCollection([]string{kindHTTP.String()}, storage)
+				if err != nil {
+					return fault.Wrap(err)
+				}
+				south.servers[0].Listener = listeners[0] // use listener created by systemd
+				serverCollections = append(serverCollections, south)
+
+				north, err := createNorthboundCollection([]string{kindHTTP.String()}, storage)
+				if err != nil {
+					return fault.Wrap(err)
+				}
+				north.servers[0].Listener = listeners[1] // use listener created by systemd
+				serverCollections = append(serverCollections, north)
+			}
+		}
+
 		errChan := make(chan error)
 		for _, collection := range serverCollections {
 			for i := range collection.servers {
 				// capture loop variable
 				srv := collection.servers[i]
+				log.Info().
+					Str("name", collection.name).
+					Str("addr", srv.Listener.Addr().String()).
+					Str("kind", srv.Kind.String()).
+					Msg("Starting server")
 				go func() {
-					maxAttempts := 30
-					for attempt := 1; attempt <= maxAttempts; attempt++ {
-						log.Info().Str("addr", srv.Srv.Addr).Str("kind", srv.Kind.String()).Msg("Starting server")
-						var err error
-						switch srv.Kind {
-						case kindHTTP:
-							err = srv.Srv.ListenAndServe()
-						case kindHTTPS:
-							err = srv.Srv.ListenAndServeTLS("", "")
-						case kindUnix:
-							var l net.Listener
-							l, err = net.Listen("unix", srv.Srv.Addr)
-							if err != nil {
-								log.Err(err).Msg("Failed to launch unix-domain socket server")
-								errChan <- err
-								return
-							}
-							err = srv.Srv.Serve(l)
-						}
-						if err == nil || errors.Is(err, http.ErrServerClosed) {
-							break
-						}
-						if err != nil {
-							log.Err(err).
-								Int("attempt", attempt).
-								Int("kind", int(srv.Kind)).
-								Str("addr", srv.Srv.Addr).
-								Msg("Failed to start server")
-							if attempt >= maxAttempts {
-								errChan <- err
-								return
-							}
-							time.Sleep(time.Second)
-						}
+					var err error
+					switch srv.Kind {
+					case kindHTTP:
+						err = srv.Srv.Serve(srv.Listener)
+					case kindHTTPS:
+						err = srv.Srv.ServeTLS(srv.Listener, "", "")
+					case kindUnix:
+						err = srv.Srv.Serve(srv.Listener)
+					}
+					if err == nil {
+						log.Info().Msg("Successfully started server")
+					} else if !errors.Is(err, http.ErrServerClosed) {
+						errChan <- err
 					}
 				}()
 			}
-		}
-
-		// check for systemd socket-based activation
-		listeners, _ := activation.Listeners()
-		err = adoptSystemdSockets(listeners, storage, errChan)
-		if err != nil {
-			log.Error().Err(err).Msg("Failed to adopt systemd sockets")
 		}
 
 		// wait for signal or an error
