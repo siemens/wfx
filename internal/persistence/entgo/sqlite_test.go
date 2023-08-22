@@ -13,7 +13,6 @@ package entgo
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -58,7 +57,7 @@ func setupSQLite(t *testing.T) SQLite {
 	l := log.With().Str("reqID", reqID).Logger()
 	ctx := context.WithValue(context.Background(), logging.KeyRequestLogger, l)
 
-	dir, err := ioutil.TempDir("", "wfx.db.*")
+	dir, err := os.MkdirTemp("", "wfx.db.*")
 	require.NoError(t, err)
 	f, err := os.Create(path.Join(dir, "wfx.db"))
 	require.NoError(t, err)
