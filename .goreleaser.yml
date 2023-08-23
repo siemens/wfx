@@ -106,7 +106,6 @@ archives:
     name_template: >-
       {{.Binary}}-{{.Version}}-{{.Os}}-{{- if eq .Arch "amd64" }}x86_64{{ else }}{{.Arch}}{{ end }}{{ if .Arm }}v{{.Arm }}{{ end }}
     format: tar.xz
-    rlcp: true
     files:
       - LICENSE
       - README.md
@@ -119,7 +118,6 @@ archives:
     name_template: >-
       {{.Binary}}-{{.Version}}-{{.Os}}-{{- if eq .Arch "amd64" }}x86_64{{ else }}{{.Arch}}{{ end }}{{ if .Arm }}v{{.Arm }}{{ end }}
     format: tar.xz
-    rlcp: true
     files:
       - LICENSE
 
@@ -129,7 +127,6 @@ archives:
     name_template: >-
       {{.Binary}}-{{.Version}}-{{.Os}}-{{- if eq .Arch "amd64" }}x86_64{{ else }}{{.Arch}}{{ end }}{{ if .Arm }}v{{.Arm }}{{ end }}
     format: tar.xz
-    rlcp: true
     files:
       - LICENSE
 
