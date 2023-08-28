@@ -15,7 +15,7 @@ as Windows or macOS), or if specific features need to be disabled during compila
 necessary.&lt;/p>
 &lt;h2 id="building-wfx">Building wfx&lt;/h2>
 &lt;p>A recent
-&lt;a href="https://go.dev/" target="_blank">Go compiler&lt;/a> &amp;gt;= 1.18 as well as
+&lt;a href="https://go.dev/" target="_blank">Go compiler&lt;/a> &amp;gt;= 1.19 as well as
 &lt;a href="https://www.gnu.org/software/make/" target="_blank">GNU make&lt;/a> wrapping the
 &lt;code>go build&lt;/code> commands is required to build wfx and its associated tools.&lt;/p>
 &lt;p>wfx requires a persistent storage to save workflows and jobs. Go
