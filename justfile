@@ -86,8 +86,10 @@ _generate-swagger:
     set -euxo pipefail
     cd "{{ THISDIR }}/generated"
 
-    # clean up
-    find . -not -name configure_workflow_executor.go -and -not -path "./ent/*" -type f -delete
+    # remove existing code
+    for dir in client model northbound southbound; do
+        find $dir -not -name configure_workflow_executor.go -type f -delete
+    done
 
     # generate spec (inline anchors)
     just -d . --justfile ../spec/justfile generate wfx.swagger.yml
