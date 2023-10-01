@@ -16,7 +16,7 @@ jobs:
         go: ["stable", "1.19"]
     name: Build (Go ${{ matrix.go }})
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-go@v4
         with:
           go-version: ${{ matrix.go }}
@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Test
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-go@v4
         with:
           go-version: stable
@@ -72,7 +72,7 @@ jobs:
           --health-timeout 5s
           --health-retries 20
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: go test -timeout 180s -race -coverprofile=coverage.out -covermode=atomic -tags testing,integration,postgres,sqlite ./...
         env:
           PGHOST: postgres
@@ -108,7 +108,7 @@ jobs:
           --health-timeout 5s
           --health-retries 20
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: go test -timeout 180s -race -coverprofile=coverage.out -covermode=atomic -tags testing,integration,mysql,sqlite ./...
         env:
           MYSQL_DATABASE: wfx
@@ -161,7 +161,7 @@ jobs:
     steps:
       - name: Install packages
         run: apt-get update -q && apt-get install -y --no-install-recommends bats make gcc libc6-dev golang git curl openssl jq systemd ca-certificates procps
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: "true"
       - name: Disable git security features
@@ -189,7 +189,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Lint
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-go@v4
         with:
           go-version: stable
@@ -209,7 +209,7 @@ jobs:
     container:
       image: quay.io/goswagger/swagger
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: apk add --no-cache py3-yaml git just bash go
       - name: Disable git security features
         run: git config --global safe.directory '*'
