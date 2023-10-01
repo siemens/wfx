@@ -133,11 +133,15 @@ func (tc *TagCreate) createSpec() (*Tag, *sqlgraph.CreateSpec) {
 // TagCreateBulk is the builder for creating many Tag entities in bulk.
 type TagCreateBulk struct {
 	config
+	err      error
 	builders []*TagCreate
 }
 
 // Save creates the Tag entities in the database.
 func (tcb *TagCreateBulk) Save(ctx context.Context) ([]*Tag, error) {
+	if tcb.err != nil {
+		return nil, tcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(tcb.builders))
 	nodes := make([]*Tag, len(tcb.builders))
 	mutators := make([]Mutator, len(tcb.builders))

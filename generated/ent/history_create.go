@@ -168,11 +168,15 @@ func (hc *HistoryCreate) createSpec() (*History, *sqlgraph.CreateSpec) {
 // HistoryCreateBulk is the builder for creating many History entities in bulk.
 type HistoryCreateBulk struct {
 	config
+	err      error
 	builders []*HistoryCreate
 }
 
 // Save creates the History entities in the database.
 func (hcb *HistoryCreateBulk) Save(ctx context.Context) ([]*History, error) {
+	if hcb.err != nil {
+		return nil, hcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(hcb.builders))
 	nodes := make([]*History, len(hcb.builders))
 	mutators := make([]Mutator, len(hcb.builders))

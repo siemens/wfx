@@ -332,11 +332,15 @@ func (jc *JobCreate) createSpec() (*Job, *sqlgraph.CreateSpec) {
 // JobCreateBulk is the builder for creating many Job entities in bulk.
 type JobCreateBulk struct {
 	config
+	err      error
 	builders []*JobCreate
 }
 
 // Save creates the Job entities in the database.
 func (jcb *JobCreateBulk) Save(ctx context.Context) ([]*Job, error) {
+	if jcb.err != nil {
+		return nil, jcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(jcb.builders))
 	nodes := make([]*Job, len(jcb.builders))
 	mutators := make([]Mutator, len(jcb.builders))
