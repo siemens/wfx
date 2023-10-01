@@ -3,7 +3,7 @@ module github.com/siemens/wfx
 go 1.19
 
 require (
-	entgo.io/ent v0.12.3
+	entgo.io/ent v0.12.4
 	github.com/OpenPeeDeeP/xdg v1.0.0
 	github.com/Southclaws/fault v0.6.1
 	github.com/alexliesenfeld/health v0.7.0
@@ -47,7 +47,7 @@ require (
 )
 
 require (
-	ariga.io/atlas v0.11.0 // indirect
+	ariga.io/atlas v0.14.1-0.20230918065911-83ad451a4935 // indirect
 	github.com/PaesslerAG/gval v1.2.0 // indirect
 	github.com/PaesslerAG/jsonpath v0.1.1 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
