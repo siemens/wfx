@@ -40,7 +40,7 @@ require (
 	github.com/tsenart/vegeta/v12 v12.11.0
 	github.com/yourbasic/graph v0.0.0-20210606180040-8ecfec1c2869
 	go.uber.org/goleak v1.2.1
-	golang.org/x/term v0.11.0
+	golang.org/x/term v0.12.0
 	gopkg.in/go-playground/colors.v1 v1.2.0
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.1
