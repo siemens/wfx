@@ -27,7 +27,7 @@ jobs:
           # goreleaser requires an absolute path to the compiler
           install -m0755 .ci/zcc /usr/local/bin/zcc
       - name: build
-        uses: goreleaser/goreleaser-action@v4
+        uses: goreleaser/goreleaser-action@v5
         with:
           distribution: goreleaser
           version: latest
