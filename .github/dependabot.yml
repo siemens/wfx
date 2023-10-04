@@ -15,3 +15,8 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
+
+  - package-ecosystem: "npm"
+    directory: "/hugo"
+    schedule:
+      interval: "monthly"
