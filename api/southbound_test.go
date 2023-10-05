@@ -20,7 +20,7 @@ import (
 )
 
 func TestSouthboundGetJobsIDStatusHandler_NotFound(t *testing.T) {
-	api, _ := NewSouthboundAPI(&faultyStorage{notFound: true})
+	api := NewSouthboundAPI(&faultyStorage{notFound: true})
 
 	params := southbound.NewGetJobsIDStatusParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -35,7 +35,7 @@ func TestSouthboundGetJobsIDStatusHandler_NotFound(t *testing.T) {
 }
 
 func TestSouthboundPutJobsIDStatusHandler_NotFound(t *testing.T) {
-	api, _ := NewSouthboundAPI(&faultyStorage{notFound: true})
+	api := NewSouthboundAPI(&faultyStorage{notFound: true})
 
 	params := southbound.NewPutJobsIDStatusParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -50,7 +50,7 @@ func TestSouthboundPutJobsIDStatusHandler_NotFound(t *testing.T) {
 }
 
 func TestSouthboundGetJobsHandler_InternalError(t *testing.T) {
-	api, _ := NewSouthboundAPI(&faultyStorage{})
+	api := NewSouthboundAPI(&faultyStorage{})
 
 	params := southbound.NewGetJobsParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -64,7 +64,7 @@ func TestSouthboundGetJobsHandler_InternalError(t *testing.T) {
 }
 
 func TestSouthboundGetJobsIDHandler_NotFound(t *testing.T) {
-	api, _ := NewSouthboundAPI(&faultyStorage{notFound: true})
+	api := NewSouthboundAPI(&faultyStorage{notFound: true})
 
 	params := southbound.NewGetJobsIDParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -78,7 +78,7 @@ func TestSouthboundGetJobsIDHandler_NotFound(t *testing.T) {
 }
 
 func TestSouthboundGetJobsIDHandler_InternalError(t *testing.T) {
-	api, _ := NewSouthboundAPI(&faultyStorage{})
+	api := NewSouthboundAPI(&faultyStorage{})
 
 	params := southbound.NewGetJobsIDParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -94,7 +94,7 @@ func TestSouthboundGetJobsIDHandler_InternalError(t *testing.T) {
 }
 
 func TestSouthboundGetJobsIDStatusHandler_InternalError(t *testing.T) {
-	api, _ := NewSouthboundAPI(&faultyStorage{})
+	api := NewSouthboundAPI(&faultyStorage{})
 
 	params := southbound.NewGetJobsIDStatusParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -108,7 +108,7 @@ func TestSouthboundGetJobsIDStatusHandler_InternalError(t *testing.T) {
 }
 
 func TestSouthboundPutJobsIDStatusHandler_InternalError(t *testing.T) {
-	api, _ := NewSouthboundAPI(&faultyStorage{})
+	api := NewSouthboundAPI(&faultyStorage{})
 
 	params := southbound.NewPutJobsIDStatusParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -122,7 +122,7 @@ func TestSouthboundPutJobsIDStatusHandler_InternalError(t *testing.T) {
 }
 
 func TestSouthboundGetJobsIDDefinitionHandler_NotFound(t *testing.T) {
-	api, _ := NewSouthboundAPI(&faultyStorage{notFound: true})
+	api := NewSouthboundAPI(&faultyStorage{notFound: true})
 
 	params := southbound.NewGetJobsIDDefinitionParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -136,7 +136,7 @@ func TestSouthboundGetJobsIDDefinitionHandler_NotFound(t *testing.T) {
 }
 
 func TestSouthboundGetJobsIDDefinitionHandler_InternalError(t *testing.T) {
-	api, _ := NewSouthboundAPI(&faultyStorage{})
+	api := NewSouthboundAPI(&faultyStorage{})
 
 	params := southbound.NewGetJobsIDDefinitionParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -150,7 +150,7 @@ func TestSouthboundGetJobsIDDefinitionHandler_InternalError(t *testing.T) {
 }
 
 func TestSouthboundPutJobsIDDefinitionHandler_NotFound(t *testing.T) {
-	api, _ := NewSouthboundAPI(&faultyStorage{notFound: true})
+	api := NewSouthboundAPI(&faultyStorage{notFound: true})
 
 	params := southbound.NewPutJobsIDDefinitionParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -164,7 +164,7 @@ func TestSouthboundPutJobsIDDefinitionHandler_NotFound(t *testing.T) {
 }
 
 func TestSouthboundPutJobsIDDefinitionHandler_InternalError(t *testing.T) {
-	api, _ := NewSouthboundAPI(&faultyStorage{})
+	api := NewSouthboundAPI(&faultyStorage{})
 
 	params := southbound.NewPutJobsIDDefinitionParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -178,7 +178,7 @@ func TestSouthboundPutJobsIDDefinitionHandler_InternalError(t *testing.T) {
 }
 
 func TestSouthboundGetWorkflowsNameHandler_InternalError(t *testing.T) {
-	api, _ := NewSouthboundAPI(&faultyStorage{})
+	api := NewSouthboundAPI(&faultyStorage{})
 
 	params := southbound.NewGetWorkflowsNameParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -192,7 +192,7 @@ func TestSouthboundGetWorkflowsNameHandler_InternalError(t *testing.T) {
 }
 
 func TestSouthboundGetWorkflowsHandler_InternalError(t *testing.T) {
-	api, _ := NewSouthboundAPI(&faultyStorage{})
+	api := NewSouthboundAPI(&faultyStorage{})
 
 	params := southbound.NewGetWorkflowsParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -206,7 +206,7 @@ func TestSouthboundGetWorkflowsHandler_InternalError(t *testing.T) {
 }
 
 func TestSouthboundGetWorkflowsHandler_Empty(t *testing.T) {
-	api, _ := NewSouthboundAPI(&faultyStorage{notFound: true})
+	api := NewSouthboundAPI(&faultyStorage{notFound: true})
 
 	params := southbound.NewGetWorkflowsParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -220,7 +220,7 @@ func TestSouthboundGetWorkflowsHandler_Empty(t *testing.T) {
 }
 
 func TestSouthboundGetJobsIDTagsHandler_NotFound(t *testing.T) {
-	api, _ := NewSouthboundAPI(&faultyStorage{notFound: true})
+	api := NewSouthboundAPI(&faultyStorage{notFound: true})
 
 	params := southbound.NewGetJobsIDTagsParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -234,7 +234,7 @@ func TestSouthboundGetJobsIDTagsHandler_NotFound(t *testing.T) {
 }
 
 func TestSouthboundGetJobsIDTagsHandler_InternalError(t *testing.T) {
-	api, _ := NewSouthboundAPI(&faultyStorage{})
+	api := NewSouthboundAPI(&faultyStorage{})
 
 	params := southbound.NewGetJobsIDTagsParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))

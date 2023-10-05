@@ -10,7 +10,6 @@ package root
 
 import (
 	"github.com/Southclaws/fault"
-	"github.com/Southclaws/fault/fmsg"
 	"github.com/knadh/koanf/v2"
 	"github.com/rs/cors"
 	"github.com/siemens/wfx/api"
@@ -35,11 +34,7 @@ func createNorthboundCollection(schemes []string, storage persistence.Storage) (
 		settings.TLSPort = k.Int(mgmtTLSPortFlag)
 		settings.UDSPath = k.String(mgmtUnixSocketFlag)
 	})
-	api, err := api.NewNorthboundAPI(storage)
-	if err != nil {
-		return nil, fault.Wrap(err, fmsg.With("Failed to create northbound API"))
-	}
-
+	api := api.NewNorthboundAPI(storage)
 	fsMW, err := fileserver.NewFileServerMiddleware(k)
 	if err != nil {
 		return nil, fault.Wrap(err)

@@ -12,6 +12,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -191,53 +192,19 @@ Examples of tasks are installation of firmware or other types of commands issued
 		}
 
 		// check for socket-based activation (systemd)
-		{
-			listeners, _ := activation.Listeners()
-			n := len(listeners)
-			if n > 0 {
-				if n != 2 {
-					return fmt.Errorf("invalid fd count: %d", n)
-				}
-				log.Info().Int("count", n).Msg("Adopting sockets provided by systemd")
-				south, err := createSouthboundCollection([]string{kindHTTP.String()}, storage)
-				if err != nil {
-					return fault.Wrap(err)
-				}
-				south.servers[0].Listener = listeners[0] // use listener created by systemd
-				serverCollections = append(serverCollections, south)
-
-				north, err := createNorthboundCollection([]string{kindHTTP.String()}, storage)
-				if err != nil {
-					return fault.Wrap(err)
-				}
-				north.servers[0].Listener = listeners[1] // use listener created by systemd
-				serverCollections = append(serverCollections, north)
-			}
-		}
+		listeners, _ := activation.Listeners()
+		serverCollections = append(serverCollections, adoptListeners(listeners, storage)...)
 
 		errChan := make(chan error)
 		for _, collection := range serverCollections {
 			for i := range collection.servers {
-				// capture loop variable
+				// capture loop variables
+				// see https://go.dev/blog/loopvar-preview
+				// TODO: remove this once our go.mod targets Go 1.22
+				name := collection.name
 				srv := collection.servers[i]
-				log.Info().
-					Str("name", collection.name).
-					Str("addr", srv.Listener.Addr().String()).
-					Str("kind", srv.Kind.String()).
-					Msg("Starting server")
 				go func() {
-					var err error
-					switch srv.Kind {
-					case kindHTTP:
-						err = srv.Srv.Serve(srv.Listener)
-					case kindHTTPS:
-						err = srv.Srv.ServeTLS(srv.Listener, "", "")
-					case kindUnix:
-						err = srv.Srv.Serve(srv.Listener)
-					}
-					if err == nil {
-						log.Info().Msg("Successfully started server")
-					} else if !errors.Is(err, http.ErrServerClosed) {
+					if err := launchServer(name, srv); err != nil {
 						errChan <- err
 					}
 				}()
@@ -268,4 +235,49 @@ Examples of tasks are installation of firmware or other types of commands issued
 		}
 		return nil
 	},
+}
+
+func adoptListeners(listeners []net.Listener, storage persistence.Storage) []*serverCollection {
+	if len(listeners) == 2 {
+		log.Debug().Msg("Adopting sockets provided by systemd")
+		south, err := createSouthboundCollection([]string{kindHTTP.String()}, storage)
+		if err != nil {
+			log.Err(err).Msg("Failed to create southbound collection")
+			return nil
+		}
+		south.servers[0].Listener = func() (net.Listener, error) {
+			// use listener created by systemd
+			return listeners[0], nil
+		}
+
+		north, err := createNorthboundCollection([]string{kindHTTP.String()}, storage)
+		if err != nil {
+			log.Err(err).Msg("Failed to create northbound collection")
+			return nil
+		}
+		north.servers[0].Listener = func() (net.Listener, error) {
+			// use listener created by systemd
+			return listeners[1], nil
+		}
+		return []*serverCollection{south, north}
+	}
+	log.Debug().Msg("No sockets provided by systemd")
+	return nil
+}
+
+func launchServer(name string, srv myServer) error {
+	ln, err := srv.Listener()
+	if err != nil {
+		return fault.Wrap(err)
+	}
+	log.Info().Str("name", name).Str("addr", ln.Addr().String()).Str("kind", srv.Kind.String()).Msg("Starting server")
+	if srv.Kind == kindHTTPS {
+		err = srv.Srv.ServeTLS(ln, "", "")
+	} else {
+		err = srv.Srv.Serve(ln)
+	}
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
+		return fault.Wrap(err)
+	}
+	return nil
 }

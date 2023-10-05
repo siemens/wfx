@@ -97,3 +97,6 @@ linters-settings:
     locale: US
   exhaustive:
     default-signifies-exhaustive: true
+  wrapcheck:
+    ignorePackageGlobs:
+      - github.com/siemens/wfx/internal/errutil

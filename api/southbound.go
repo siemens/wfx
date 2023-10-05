@@ -11,7 +11,6 @@ package api
 import (
 	"net/http"
 
-	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/ftag"
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/runtime/middleware"
@@ -28,11 +27,10 @@ import (
 	"github.com/siemens/wfx/persistence"
 )
 
-func NewSouthboundAPI(storage persistence.Storage) (*operations.WorkflowExecutorAPI, error) {
-	swaggerSpec, err := loads.Embedded(restapi.SwaggerJSON, restapi.FlatSwaggerJSON)
-	if err != nil {
-		return nil, fault.Wrap(err)
-	}
+func NewSouthboundAPI(storage persistence.Storage) *operations.WorkflowExecutorAPI {
+	// NOTE: loads.Embedded only fails when given invalid JSON input; in our
+	// context, the JSON is always valid, so we may safely ignore the error.
+	swaggerSpec, _ := loads.Embedded(restapi.SwaggerJSON, restapi.FlatSwaggerJSON)
 	serverAPI := operations.NewWorkflowExecutorAPI(swaggerSpec)
 
 	serverAPI.SouthboundGetJobsHandler = southbound.GetJobsHandlerFunc(
@@ -176,5 +174,5 @@ func NewSouthboundAPI(storage persistence.Storage) (*operations.WorkflowExecutor
 			return southbound.NewGetJobsIDTagsOK().WithPayload(tags)
 		})
 
-	return serverAPI, nil
+	return serverAPI
 }
