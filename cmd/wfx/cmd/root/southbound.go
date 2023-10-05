@@ -10,7 +10,6 @@ package root
 
 import (
 	"github.com/Southclaws/fault"
-	"github.com/Southclaws/fault/fmsg"
 	"github.com/knadh/koanf/v2"
 	"github.com/rs/cors"
 	"github.com/siemens/wfx/api"
@@ -35,10 +34,7 @@ func createSouthboundCollection(schemes []string, storage persistence.Storage) (
 		settings.TLSPort = k.Int(clientTLSPortFlag)
 		settings.UDSPath = k.String(clientUnixSocket)
 	})
-	api, err := api.NewSouthboundAPI(storage)
-	if err != nil {
-		return nil, fault.Wrap(err, fmsg.With("Failed to create southbound API"))
-	}
+	api := api.NewSouthboundAPI(storage)
 
 	fsMW, err := fileserver.NewFileServerMiddleware(k)
 	if err != nil {

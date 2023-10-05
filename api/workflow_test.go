@@ -199,13 +199,11 @@ func newInMemoryDB(t *testing.T) persistence.Storage {
 }
 
 func createNorthAndSouth(t *testing.T, db persistence.Storage) (http.Handler, http.Handler) {
-	northAPI, err := NewNorthboundAPI(db)
-	require.NoError(t, err)
+	northAPI := NewNorthboundAPI(db)
 	require.NoError(t, northAPI.Validate())
 	north := northbound.ConfigureAPI(northAPI)
 
-	southAPI, err := NewSouthboundAPI(db)
-	require.NoError(t, err)
+	southAPI := NewSouthboundAPI(db)
 	require.NoError(t, southAPI.Validate())
 	south := southbound.ConfigureAPI(southAPI)
 

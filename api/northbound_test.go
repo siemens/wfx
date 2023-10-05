@@ -97,7 +97,7 @@ func (st *faultyStorage) QueryWorkflows(context.Context, persistence.PaginationP
 }
 
 func TestNorthboundGetJobsIDStatusHandler_NotFound(t *testing.T) {
-	api, _ := NewNorthboundAPI(&faultyStorage{notFound: true})
+	api := NewNorthboundAPI(&faultyStorage{notFound: true})
 
 	params := northbound.NewGetJobsIDStatusParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -112,7 +112,7 @@ func TestNorthboundGetJobsIDStatusHandler_NotFound(t *testing.T) {
 }
 
 func TestNorthboundPutJobsIDStatusHandler_NotFound(t *testing.T) {
-	api, _ := NewNorthboundAPI(&faultyStorage{notFound: true})
+	api := NewNorthboundAPI(&faultyStorage{notFound: true})
 
 	params := northbound.NewPutJobsIDStatusParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -127,7 +127,7 @@ func TestNorthboundPutJobsIDStatusHandler_NotFound(t *testing.T) {
 }
 
 func TestNorthboundGetJobsHandler_InternalError(t *testing.T) {
-	api, _ := NewNorthboundAPI(&faultyStorage{})
+	api := NewNorthboundAPI(&faultyStorage{})
 
 	params := northbound.NewGetJobsParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -141,7 +141,7 @@ func TestNorthboundGetJobsHandler_InternalError(t *testing.T) {
 }
 
 func TestNorthboundGetJobsIDHandler_NotFound(t *testing.T) {
-	api, _ := NewNorthboundAPI(&faultyStorage{notFound: true})
+	api := NewNorthboundAPI(&faultyStorage{notFound: true})
 
 	params := northbound.NewGetJobsIDParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -155,7 +155,7 @@ func TestNorthboundGetJobsIDHandler_NotFound(t *testing.T) {
 }
 
 func TestNorthboundGetJobsIDHandler_InternalError(t *testing.T) {
-	api, _ := NewNorthboundAPI(&faultyStorage{})
+	api := NewNorthboundAPI(&faultyStorage{})
 
 	params := northbound.NewGetJobsIDParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -171,7 +171,7 @@ func TestNorthboundGetJobsIDHandler_InternalError(t *testing.T) {
 }
 
 func TestNorthboundGetJobsIDStatusHandler_InternalError(t *testing.T) {
-	api, _ := NewNorthboundAPI(&faultyStorage{})
+	api := NewNorthboundAPI(&faultyStorage{})
 
 	params := northbound.NewGetJobsIDStatusParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -185,7 +185,7 @@ func TestNorthboundGetJobsIDStatusHandler_InternalError(t *testing.T) {
 }
 
 func TestNorthboundPutJobsIDStatusHandler_InternalError(t *testing.T) {
-	api, _ := NewNorthboundAPI(&faultyStorage{})
+	api := NewNorthboundAPI(&faultyStorage{})
 
 	params := northbound.NewPutJobsIDStatusParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -199,7 +199,7 @@ func TestNorthboundPutJobsIDStatusHandler_InternalError(t *testing.T) {
 }
 
 func TestNorthboundGetJobsIDDefinitionHandler_NotFound(t *testing.T) {
-	api, _ := NewNorthboundAPI(&faultyStorage{notFound: true})
+	api := NewNorthboundAPI(&faultyStorage{notFound: true})
 
 	params := northbound.NewGetJobsIDDefinitionParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -213,7 +213,7 @@ func TestNorthboundGetJobsIDDefinitionHandler_NotFound(t *testing.T) {
 }
 
 func TestNorthboundGetJobsIDDefinitionHandler_InternalError(t *testing.T) {
-	api, _ := NewNorthboundAPI(&faultyStorage{})
+	api := NewNorthboundAPI(&faultyStorage{})
 
 	params := northbound.NewGetJobsIDDefinitionParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -227,7 +227,7 @@ func TestNorthboundGetJobsIDDefinitionHandler_InternalError(t *testing.T) {
 }
 
 func TestNorthboundPutJobsIDDefinitionHandler_NotFound(t *testing.T) {
-	api, _ := NewNorthboundAPI(&faultyStorage{notFound: true})
+	api := NewNorthboundAPI(&faultyStorage{notFound: true})
 
 	params := northbound.NewPutJobsIDDefinitionParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -241,7 +241,7 @@ func TestNorthboundPutJobsIDDefinitionHandler_NotFound(t *testing.T) {
 }
 
 func TestNorthboundPutJobsIDDefinitionHandler_InternalError(t *testing.T) {
-	api, _ := NewNorthboundAPI(&faultyStorage{})
+	api := NewNorthboundAPI(&faultyStorage{})
 
 	params := northbound.NewPutJobsIDDefinitionParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -255,7 +255,7 @@ func TestNorthboundPutJobsIDDefinitionHandler_InternalError(t *testing.T) {
 }
 
 func TestNorthboundGetWorkflowsNameHandler_InternalError(t *testing.T) {
-	api, _ := NewNorthboundAPI(&faultyStorage{})
+	api := NewNorthboundAPI(&faultyStorage{})
 
 	params := northbound.NewGetWorkflowsNameParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -269,7 +269,7 @@ func TestNorthboundGetWorkflowsNameHandler_InternalError(t *testing.T) {
 }
 
 func TestNorthboundGetWorkflowsHandler_InternalError(t *testing.T) {
-	api, _ := NewNorthboundAPI(&faultyStorage{})
+	api := NewNorthboundAPI(&faultyStorage{})
 
 	params := northbound.NewGetWorkflowsParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -283,7 +283,7 @@ func TestNorthboundGetWorkflowsHandler_InternalError(t *testing.T) {
 }
 
 func TestNorthboundGetWorkflowsHandler_Empty(t *testing.T) {
-	api, _ := NewNorthboundAPI(&faultyStorage{notFound: true})
+	api := NewNorthboundAPI(&faultyStorage{notFound: true})
 
 	params := northbound.NewGetWorkflowsParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -297,7 +297,7 @@ func TestNorthboundGetWorkflowsHandler_Empty(t *testing.T) {
 }
 
 func TestNorthboundDeleteWorkflowsNameHandle_NotFound(t *testing.T) {
-	api, _ := NewNorthboundAPI(&faultyStorage{notFound: true})
+	api := NewNorthboundAPI(&faultyStorage{notFound: true})
 
 	params := northbound.NewDeleteWorkflowsNameParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -311,7 +311,7 @@ func TestNorthboundDeleteWorkflowsNameHandle_NotFound(t *testing.T) {
 }
 
 func TestNorthboundDeleteWorkflowsNameHandle_InternalError(t *testing.T) {
-	api, _ := NewNorthboundAPI(&faultyStorage{})
+	api := NewNorthboundAPI(&faultyStorage{})
 
 	params := northbound.NewDeleteWorkflowsNameParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -325,7 +325,7 @@ func TestNorthboundDeleteWorkflowsNameHandle_InternalError(t *testing.T) {
 }
 
 func TestNorthboundPostWorkflowsHandler_InternalError(t *testing.T) {
-	api, _ := NewNorthboundAPI(&faultyStorage{})
+	api := NewNorthboundAPI(&faultyStorage{})
 
 	params := northbound.NewPostWorkflowsParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -340,7 +340,7 @@ func TestNorthboundPostWorkflowsHandler_InternalError(t *testing.T) {
 }
 
 func TestNorthboundPostWorkflowsHandler_AlreadyExists(t *testing.T) {
-	api, _ := NewNorthboundAPI(&faultyStorage{alreadyExists: true})
+	api := NewNorthboundAPI(&faultyStorage{alreadyExists: true})
 
 	params := northbound.NewPostWorkflowsParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -355,7 +355,7 @@ func TestNorthboundPostWorkflowsHandler_AlreadyExists(t *testing.T) {
 }
 
 func TestNorthboundPostWorkflowsHandler_InvalidWorkflow(t *testing.T) {
-	api, _ := NewNorthboundAPI(&faultyStorage{})
+	api := NewNorthboundAPI(&faultyStorage{})
 
 	params := northbound.NewPostWorkflowsParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -370,7 +370,7 @@ func TestNorthboundPostWorkflowsHandler_InvalidWorkflow(t *testing.T) {
 }
 
 func TestNorthboundPostJobsHandler_NotFound(t *testing.T) {
-	api, _ := NewNorthboundAPI(&faultyStorage{notFound: true})
+	api := NewNorthboundAPI(&faultyStorage{notFound: true})
 
 	params := northbound.NewPostJobsParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -385,7 +385,7 @@ func TestNorthboundPostJobsHandler_NotFound(t *testing.T) {
 }
 
 func TestNorthboundPostJobsHandler_InternalError(t *testing.T) {
-	api, _ := NewNorthboundAPI(&faultyStorage{})
+	api := NewNorthboundAPI(&faultyStorage{})
 
 	params := northbound.NewPostJobsParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -400,7 +400,7 @@ func TestNorthboundPostJobsHandler_InternalError(t *testing.T) {
 }
 
 func TestNorthboundDeleteJobsIDHandler_NotFound(t *testing.T) {
-	api, _ := NewNorthboundAPI(&faultyStorage{notFound: true})
+	api := NewNorthboundAPI(&faultyStorage{notFound: true})
 
 	params := northbound.NewDeleteJobsIDParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -414,7 +414,7 @@ func TestNorthboundDeleteJobsIDHandler_NotFound(t *testing.T) {
 }
 
 func TestNorthboundDeleteJobsIDHandler_InternalError(t *testing.T) {
-	api, _ := NewNorthboundAPI(&faultyStorage{})
+	api := NewNorthboundAPI(&faultyStorage{})
 
 	params := northbound.NewDeleteJobsIDParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -428,7 +428,7 @@ func TestNorthboundDeleteJobsIDHandler_InternalError(t *testing.T) {
 }
 
 func TestNorthboundGetJobsIDTagsHandler_NotFound(t *testing.T) {
-	api, _ := NewNorthboundAPI(&faultyStorage{notFound: true})
+	api := NewNorthboundAPI(&faultyStorage{notFound: true})
 
 	params := northbound.NewGetJobsIDTagsParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -442,7 +442,7 @@ func TestNorthboundGetJobsIDTagsHandler_NotFound(t *testing.T) {
 }
 
 func TestNorthboundGetJobsIDTagsHandler_InternalError(t *testing.T) {
-	api, _ := NewNorthboundAPI(&faultyStorage{})
+	api := NewNorthboundAPI(&faultyStorage{})
 
 	params := northbound.NewGetJobsIDTagsParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -456,7 +456,7 @@ func TestNorthboundGetJobsIDTagsHandler_InternalError(t *testing.T) {
 }
 
 func TestNorthboundPostJobsIDTagsHandler_NotFound(t *testing.T) {
-	api, _ := NewNorthboundAPI(&faultyStorage{notFound: true})
+	api := NewNorthboundAPI(&faultyStorage{notFound: true})
 
 	params := northbound.NewPostJobsIDTagsParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -470,7 +470,7 @@ func TestNorthboundPostJobsIDTagsHandler_NotFound(t *testing.T) {
 }
 
 func TestNorthboundPostJobsIDTagsHandler_InternalError(t *testing.T) {
-	api, _ := NewNorthboundAPI(&faultyStorage{})
+	api := NewNorthboundAPI(&faultyStorage{})
 
 	params := northbound.NewPostJobsIDTagsParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -484,7 +484,7 @@ func TestNorthboundPostJobsIDTagsHandler_InternalError(t *testing.T) {
 }
 
 func TestNorthboundDeleteJobsIDTagsHandler_NotFound(t *testing.T) {
-	api, _ := NewNorthboundAPI(&faultyStorage{notFound: true})
+	api := NewNorthboundAPI(&faultyStorage{notFound: true})
 
 	params := northbound.NewDeleteJobsIDTagsParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
@@ -498,7 +498,7 @@ func TestNorthboundDeleteJobsIDTagsHandler_NotFound(t *testing.T) {
 }
 
 func TestNorthboundDeleteJobsIDTagsHandler_InternalError(t *testing.T) {
-	api, _ := NewNorthboundAPI(&faultyStorage{})
+	api := NewNorthboundAPI(&faultyStorage{})
 
 	params := northbound.NewDeleteJobsIDTagsParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))

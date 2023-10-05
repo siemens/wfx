@@ -10,6 +10,7 @@ package root
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
@@ -19,6 +20,7 @@ import (
 	"github.com/go-openapi/runtime/flagext"
 	"github.com/knadh/koanf/v2"
 	"github.com/rs/zerolog/log"
+	"github.com/siemens/wfx/internal/errutil"
 	"github.com/siemens/wfx/internal/server"
 	"github.com/siemens/wfx/middleware"
 )
@@ -39,7 +41,6 @@ func (collection serverCollection) Shutdown(ctx context.Context) {
 		if err := server.Srv.Shutdown(ctx); err != nil {
 			log.Err(err).Msg("Shutdown error")
 		}
-		_ = server.Listener.Close()
 	}
 	collection.middleware.Shutdown()
 	contextLogger.Info().Msg("Shutdown successful")
@@ -47,7 +48,7 @@ func (collection serverCollection) Shutdown(ctx context.Context) {
 
 type myServer struct {
 	Srv      *http.Server
-	Listener net.Listener
+	Listener func() (net.Listener, error)
 	Kind     serverKind
 }
 
@@ -109,11 +110,10 @@ func createServers(schemes []string, handler http.Handler, settings server.HTTPS
 		case kindHTTP:
 			log.Debug().Msg("Creating http server")
 			srv := server.NewHTTPServer(&settings, handler)
-			ln, err := createListener("tcp", fmt.Sprintf("%s:%d", settings.Host, settings.Port))
-			if err != nil {
-				return nil, fault.Wrap(err)
-			}
-			result = append(result, myServer{Srv: srv, Kind: kind, Listener: *ln})
+
+			result = append(result, myServer{Srv: srv, Kind: kind, Listener: func() (net.Listener, error) {
+				return errutil.Wrap2(createListener("tcp", fmt.Sprintf("%s:%d", settings.Host, settings.Port)))
+			}})
 		case kindHTTPS:
 			log.Debug().Msg("Creating https server")
 			srv := server.NewHTTPServer(&settings, handler)
@@ -127,35 +127,31 @@ func createServers(schemes []string, handler http.Handler, settings server.HTTPS
 			if err != nil {
 				return nil, fault.Wrap(err)
 			}
-			ln, err := createListener("tcp", fmt.Sprintf("%s:%d", settings.TLSHost, settings.TLSPort))
-			if err != nil {
-				return nil, fault.Wrap(err)
-			}
-			result = append(result, myServer{Srv: srv, Kind: kind, Listener: *ln})
+
+			result = append(result, myServer{Srv: srv, Kind: kind, Listener: func() (net.Listener, error) {
+				return errutil.Wrap2(createListener("tcp", fmt.Sprintf("%s:%d", settings.TLSHost, settings.TLSPort)))
+			}})
+
 		case kindUnix:
 			log.Debug().Msg("Creating unix-domain socket server")
 			srv := server.NewHTTPServer(&settings, handler)
-			ln, err := createListener("unix", settings.UDSPath)
-			if err != nil {
-				return nil, fault.Wrap(err)
-			}
-			result = append(result, myServer{Srv: srv, Kind: kind, Listener: *ln})
+			result = append(result, myServer{Srv: srv, Kind: kind, Listener: func() (net.Listener, error) {
+				return errutil.Wrap2(createListener("unix", settings.UDSPath))
+			}})
 		}
 	}
 	return result, nil
 }
 
-func createListener(network string, addr string) (*net.Listener, error) {
-	var err error
+func createListener(network string, addr string) (net.Listener, error) {
 	maxAttempts := 30
 	for attempt := 1; attempt <= maxAttempts; attempt++ {
-		var ln net.Listener
-		ln, err = net.Listen(network, addr)
+		ln, err := net.Listen(network, addr)
 		if err == nil {
-			return &ln, nil
+			return ln, nil
 		}
-		log.Err(err).Str("network", network).Str("addr", addr).Msg("Failed to create listener server")
+		log.Err(err).Str("network", network).Str("addr", addr).Msg("Failed to create listener")
 		time.Sleep(time.Second)
 	}
-	return nil, fault.Wrap(err)
+	return nil, errors.New("failed to create listener")
 }
