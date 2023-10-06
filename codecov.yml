@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: 2023 Siemens AG
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Author: Michael Adler <michael.adler@siemens.com>
+
+# This file can be validated as follows:
+# curl -X POST --data-binary @codecov.yml https://codecov.io/validate
+coverage:
+  status:
+    patch:
+      default:
+        target: auto
+        threshold: 10% # the leniency in hitting the target
