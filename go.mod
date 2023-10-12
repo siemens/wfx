@@ -37,7 +37,7 @@ require (
 	github.com/steinfletcher/apitest v1.5.15
 	github.com/steinfletcher/apitest-jsonpath v1.7.2
 	github.com/stretchr/testify v1.8.4
-	github.com/tsenart/vegeta/v12 v12.11.0
+	github.com/tsenart/vegeta/v12 v12.11.1
 	github.com/yourbasic/graph v0.0.0-20210606180040-8ecfec1c2869
 	go.uber.org/goleak v1.2.1
 	golang.org/x/term v0.13.0
