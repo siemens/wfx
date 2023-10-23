@@ -39,7 +39,7 @@ wfxctl --client-unix-socket /var/run/wfx/foo/client.sock version
 ## Persistent Storage
 
 wfx requires a persistent storage to save workflows and jobs.
-The default persistent storage is [SQLite](#SQLite) and requires no further configuration.
+The default persistent storage is [SQLite](#sqlite) and requires no further configuration.
 
 The command line argument `--storage={sqlite,postgres,mysql}` is available to choose a persistent storage backend out of the compiled-in available ones at run-time.
 Each persistent storage allows further individual configuration via `--storage-opt=<options>`.

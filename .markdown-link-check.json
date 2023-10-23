@@ -1,9 +1,6 @@
 {
   "ignorePatterns": [
     {
-      "pattern": "^https://www.mysql.com"
-    },
-    {
       "pattern": "^http://127.0.0.1"
     },
     {
