@@ -17,7 +17,7 @@ import (
 	"github.com/Southclaws/fault"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 
 	"github.com/siemens/wfx/generated/model"
 	"github.com/siemens/wfx/workflow"
