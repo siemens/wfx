@@ -1,0 +1,54 @@
+# SPDX-FileCopyrightText: 2023 Siemens AG
+# SPDX-License-Identifier: Apache-2.0
+---
+name: wfx.workflow.remote.access
+
+states:
+  - name: OPEN
+    description: Instructs the client to open remote access
+
+  - name: OPENING
+    description: The client is preparing the remote access
+
+  - name: OPENED
+    description: The client has activated remote access
+
+  - name: CLOSED
+    description: The remote access has been shut down again
+
+  - name: FAILED
+    description: Something went wrong
+
+  - name: CANCELED
+    description: The request was canceled
+
+transitions:
+  ######################################################################
+  ## Happy Path
+  ######################################################################
+  - from: OPEN
+    to: OPENING
+    eligible: CLIENT
+
+  - from: OPENING
+    to: OPENED
+    eligible: CLIENT
+
+  - from: OPENED
+    to: CLOSED
+    eligible: CLIENT
+
+  - from: OPENED
+    to: CLOSED
+    eligible: WFX
+
+  ######################################################################
+  ## Abort and Error Scenarios
+  ######################################################################
+  - from: OPENING
+    to: FAILED
+    eligible: CLIENT
+
+  - from: OPEN
+    to: CANCELED
+    eligible: WFX
