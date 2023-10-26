@@ -24,7 +24,7 @@ are also included in the distribution packages available with wfx releases.</p><
 systemctl enable --now wfx@bar.socket
 </code></pre><p>The wfx services launch on-demand, i.e., they start when a client connects, such as when retrieving the wfx version:</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>wfxctl --client-unix-socket /var/run/wfx/foo/client.sock version
 </span></span></code></pre></div><h2 id=persistent-storage>Persistent Storage</h2><p>wfx requires a persistent storage to save workflows and jobs. The default persistent storage is
-<a href=#SQLite>SQLite</a> and
+<a href=#sqlite>SQLite</a> and
 requires no further configuration.</p><p>The command line argument <code>--storage={sqlite,postgres,mysql}</code> is available to choose a persistent storage backend out of
 the compiled-in available ones at run-time. Each persistent storage allows further individual configuration via
 <code>--storage-opt=&lt;options></code>.</p><p>Note that wfx needs to manage the database schema and hence needs appropriate permissions to, e.g., create tables. This
