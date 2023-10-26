@@ -17,6 +17,8 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldDescription holds the string denoting the description field in the database.
+	FieldDescription = "description"
 	// FieldStates holds the string denoting the states field in the database.
 	FieldStates = "states"
 	// FieldTransitions holds the string denoting the transitions field in the database.
@@ -40,6 +42,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldName,
+	FieldDescription,
 	FieldStates,
 	FieldTransitions,
 	FieldGroups,
@@ -58,6 +61,8 @@ func ValidColumn(column string) bool {
 var (
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
+	// DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	DescriptionValidator func(string) error
 )
 
 // OrderOption defines the ordering options for the Workflow queries.
@@ -71,6 +76,11 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // ByName orders the results by the name field.
 func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// ByDescription orders the results by the description field.
+func ByDescription(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
 // ByJobsCount orders the results by jobs count.

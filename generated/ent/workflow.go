@@ -23,6 +23,8 @@ type Workflow struct {
 	ID int `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// Description holds the value of the "description" field.
+	Description string `json:"description,omitempty"`
 	// States holds the value of the "states" field.
 	States []*model.State `json:"states,omitempty"`
 	// Transitions holds the value of the "transitions" field.
@@ -62,7 +64,7 @@ func (*Workflow) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case workflow.FieldID:
 			values[i] = new(sql.NullInt64)
-		case workflow.FieldName:
+		case workflow.FieldName, workflow.FieldDescription:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -90,6 +92,12 @@ func (w *Workflow) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
 				w.Name = value.String
+			}
+		case workflow.FieldDescription:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field description", values[i])
+			} else if value.Valid {
+				w.Description = value.String
 			}
 		case workflow.FieldStates:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -158,6 +166,9 @@ func (w *Workflow) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", w.ID))
 	builder.WriteString("name=")
 	builder.WriteString(w.Name)
+	builder.WriteString(", ")
+	builder.WriteString("description=")
+	builder.WriteString(w.Description)
 	builder.WriteString(", ")
 	builder.WriteString("states=")
 	builder.WriteString(fmt.Sprintf("%v", w.States))

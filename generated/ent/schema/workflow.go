@@ -30,6 +30,9 @@ func (Workflow) Fields() []ent.Field {
 			Unique().
 			MinLen(1).
 			MaxLen(64),
+		field.String("description").
+			Optional().
+			MaxLen(1024),
 		field.JSON("states", []*model.State{}),
 		field.JSON("transitions", []*model.Transition{}),
 		field.JSON("groups", []*model.Group{}),

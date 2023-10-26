@@ -25,6 +25,7 @@ func (db Database) CreateWorkflow(ctx context.Context, workflow *model.Workflow)
 	entity, err := db.client.Workflow.
 		Create().
 		SetName(workflow.Name).
+		SetDescription(workflow.Description).
 		SetStates(workflow.States).
 		SetTransitions(workflow.Transitions).
 		SetGroups(workflow.Groups).

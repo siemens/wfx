@@ -1,3 +1,5 @@
-h1:KkjfK26jNyGnXMx4J9GcB6aaT3vYhy3AIXdhj78jfUI=
+h1:nn0Gq3r0udJNI+0dgn1Cn1IT0MS9HXn6W71NYDUb8Pg=
 20230404121326_initial.down.sql h1:n990REnpzYtaV9tS5QVdcNvZS/wBy3jIJUdW1PBABzI=
 20230404121326_initial.up.sql h1:+IeXdLdW5V9SF6Ou0hTAWHtGyLc1kCxwEWCgjdzd1Jk=
+20231026152156_add-workflow-description.down.sql h1:sEeYTP1tjKZDEjxkW5ybpUMM/9J58+YFv+FRHMl0zoc=
+20231026152156_add-workflow-description.up.sql h1:zig1fC9n1YW5iMdwmZVEsaxVLjEtF0z40YcY9NFDOwA=

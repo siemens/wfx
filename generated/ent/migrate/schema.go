@@ -98,6 +98,7 @@ var (
 	WorkflowColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString, Unique: true, Size: 64},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 1024},
 		{Name: "states", Type: field.TypeJSON},
 		{Name: "transitions", Type: field.TypeJSON},
 		{Name: "groups", Type: field.TypeJSON},
