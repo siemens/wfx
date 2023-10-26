@@ -25,6 +25,11 @@ import (
 // swagger:model Workflow
 type Workflow struct {
 
+	// Description of the workflow
+	// Example: This is a workflow
+	// Max Length: 1024
+	Description string `json:"description,omitempty"`
+
 	// groups
 	// Max Items: 1024
 	Groups []*Group `json:"groups"`
@@ -54,6 +59,10 @@ type Workflow struct {
 func (m *Workflow) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateDescription(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateGroups(formats); err != nil {
 		res = append(res, err)
 	}
@@ -73,6 +82,18 @@ func (m *Workflow) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *Workflow) validateDescription(formats strfmt.Registry) error {
+	if swag.IsZero(m.Description) { // not required
+		return nil
+	}
+
+	if err := validate.MaxLength("description", "body", m.Description, 1024); err != nil {
+		return err
+	}
+
 	return nil
 }
 

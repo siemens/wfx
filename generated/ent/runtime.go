@@ -69,4 +69,8 @@ func init() {
 			return nil
 		}
 	}()
+	// workflowDescDescription is the schema descriptor for description field.
+	workflowDescDescription := workflowFields[1].Descriptor()
+	// workflow.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	workflow.DescriptionValidator = workflowDescDescription.Validators[0].(func(string) error)
 }

@@ -1336,6 +1336,12 @@ func init() {
         "transitions"
       ],
       "properties": {
+        "description": {
+          "description": "Description of the workflow",
+          "type": "string",
+          "maxLength": 1024,
+          "example": "This is a workflow"
+        },
         "groups": {
           "type": "array",
           "maxItems": 1024,
@@ -3006,6 +3012,12 @@ func init() {
         "transitions"
       ],
       "properties": {
+        "description": {
+          "description": "Description of the workflow",
+          "type": "string",
+          "maxLength": 1024,
+          "example": "This is a workflow"
+        },
         "groups": {
           "type": "array",
           "maxItems": 1024,

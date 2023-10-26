@@ -30,6 +30,20 @@ func (wc *WorkflowCreate) SetName(s string) *WorkflowCreate {
 	return wc
 }
 
+// SetDescription sets the "description" field.
+func (wc *WorkflowCreate) SetDescription(s string) *WorkflowCreate {
+	wc.mutation.SetDescription(s)
+	return wc
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (wc *WorkflowCreate) SetNillableDescription(s *string) *WorkflowCreate {
+	if s != nil {
+		wc.SetDescription(*s)
+	}
+	return wc
+}
+
 // SetStates sets the "states" field.
 func (wc *WorkflowCreate) SetStates(m []*model.State) *WorkflowCreate {
 	wc.mutation.SetStates(m)
@@ -105,6 +119,11 @@ func (wc *WorkflowCreate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Workflow.name": %w`, err)}
 		}
 	}
+	if v, ok := wc.mutation.Description(); ok {
+		if err := workflow.DescriptionValidator(v); err != nil {
+			return &ValidationError{Name: "description", err: fmt.Errorf(`ent: validator failed for field "Workflow.description": %w`, err)}
+		}
+	}
 	if _, ok := wc.mutation.States(); !ok {
 		return &ValidationError{Name: "states", err: errors.New(`ent: missing required field "Workflow.states"`)}
 	}
@@ -143,6 +162,10 @@ func (wc *WorkflowCreate) createSpec() (*Workflow, *sqlgraph.CreateSpec) {
 	if value, ok := wc.mutation.Name(); ok {
 		_spec.SetField(workflow.FieldName, field.TypeString, value)
 		_node.Name = value
+	}
+	if value, ok := wc.mutation.Description(); ok {
+		_spec.SetField(workflow.FieldDescription, field.TypeString, value)
+		_node.Description = value
 	}
 	if value, ok := wc.mutation.States(); ok {
 		_spec.SetField(workflow.FieldStates, field.TypeJSON, value)

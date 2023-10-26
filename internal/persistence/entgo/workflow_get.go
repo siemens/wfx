@@ -36,6 +36,7 @@ func (db Database) GetWorkflow(ctx context.Context, name string) (*model.Workflo
 func convertWorkflow(wf *ent.Workflow) *model.Workflow {
 	return &model.Workflow{
 		Name:        wf.Name,
+		Description: wf.Description,
 		States:      wf.States,
 		Transitions: wf.Transitions,
 		Groups:      wf.Groups,

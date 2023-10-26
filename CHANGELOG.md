@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add optional `description` field to workflows
+
 ### Fixed
 
 - Send HTTP status code 404 when attempting to access the file server while it is disabled
