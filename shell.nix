@@ -23,6 +23,7 @@ mkShell {
     go-swagger
     golangci-lint
     go-tools
+    go-mockery
     reuse
     gofumpt
 
