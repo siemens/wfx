@@ -1,0 +1,19 @@
+with-expecter: True
+inpackage: True
+dir: "{{.InterfaceDir}}"
+mockname: "Mock{{.InterfaceName}}"
+outpkg: "{{.PackageName}}"
+filename: "mock_{{.InterfaceName}}.go"
+all: True
+
+boilerplate-file: .ci/mockery_header.txt
+# tags are currently broken, see vektra/mockery issue #691
+tags: testing
+
+packages:
+  github.com/siemens/wfx/persistence:
+    config:
+      tags: testing
+      recursive: True
+    interfaces:
+      Storage:

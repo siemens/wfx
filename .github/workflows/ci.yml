@@ -213,5 +213,8 @@ jobs:
       - run: apk add --no-cache py3-yaml git just bash go
       - name: Disable git security features
         run: git config --global safe.directory '*'
+      - uses: brokeyourbike/go-mockery-action@v0
+        with:
+          mockery-version: "2.36.0"
       - run: just generate
       - run: git diff --exit-code
