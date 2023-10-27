@@ -189,7 +189,9 @@ func NewNorthboundAPI(storage persistence.Storage) *operations.WorkflowExecutorA
 					err2.Message = err.Error()
 					return northbound.NewPostWorkflowsBadRequest().WithPayload(&model.ErrorResponse{Errors: []*model.Error{&err2}})
 				case ftag.AlreadyExists:
-					return northbound.NewPostWorkflowsBadRequest().WithPayload(&model.ErrorResponse{Errors: []*model.Error{&WorkflowNotUnique}})
+					err2 := WorkflowNotUnique
+					err2.Message = fmt.Sprintf("Workflow with name '%s' already exists", params.Workflow.Name)
+					return northbound.NewPostWorkflowsBadRequest().WithPayload(&model.ErrorResponse{Errors: []*model.Error{&err2}})
 				default:
 					return northbound.NewPostWorkflowsDefault(http.StatusInternalServerError)
 				}

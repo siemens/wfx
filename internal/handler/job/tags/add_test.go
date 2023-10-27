@@ -10,6 +10,7 @@ package tags
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/siemens/wfx/generated/model"
@@ -36,6 +37,33 @@ func TestAdd(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, []string{"bar", "foo"}, actual)
+}
+
+func TestAdd_FaultyStorageGet(t *testing.T) {
+	db := persistence.NewMockStorage(t)
+	ctx := context.Background()
+	expectedErr := errors.New("mock error")
+	db.On("GetJob", ctx, "1", persistence.FetchParams{History: false}).Return(nil, expectedErr)
+
+	tags, err := Add(ctx, db, "1", []string{"foo", "bar"})
+	assert.Nil(t, tags)
+	assert.NotNil(t, err)
+}
+
+func TestAdd_FaultyStorageUpdate(t *testing.T) {
+	db := persistence.NewMockStorage(t)
+	ctx := context.Background()
+
+	expectedErr := errors.New("mock error")
+	dummyJob := model.Job{ID: "1"}
+	tags := []string{"foo", "bar"}
+
+	db.On("GetJob", ctx, "1", persistence.FetchParams{History: false}).Return(&dummyJob, nil)
+	db.On("UpdateJob", ctx, &dummyJob, persistence.JobUpdate{AddTags: &tags}).Return(nil, expectedErr)
+
+	tags, err := Add(ctx, db, "1", tags)
+	assert.Nil(t, tags)
+	assert.NotNil(t, err)
 }
 
 func newInMemoryDB(t *testing.T) persistence.Storage {
