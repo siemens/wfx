@@ -18,6 +18,10 @@ import (
 
 func DeleteWorkflow(ctx context.Context, storage persistence.Storage, name string) error {
 	log := logging.LoggerFromCtx(ctx)
-	log.Debug().Str("name", name).Msg("Deleting workflow")
-	return fault.Wrap(storage.DeleteWorkflow(ctx, name))
+	if err := storage.DeleteWorkflow(ctx, name); err != nil {
+		log.Err(err).Str("name", name).Msg("Failed to delete workflow")
+		return fault.Wrap(err)
+	}
+	log.Info().Str("name", name).Msg("Deleted workflow")
+	return nil
 }

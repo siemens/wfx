@@ -21,11 +21,7 @@ import (
 )
 
 func Update(ctx context.Context, storage persistence.Storage, jobID string, newStatus *model.JobStatus, actor model.EligibleEnum) (*model.JobStatus, error) {
-	log := logging.LoggerFromCtx(ctx)
-	contextLogger := log.With().
-		Str("id", jobID).
-		Str("actor", string(actor)).
-		Logger()
+	contextLogger := logging.LoggerFromCtx(ctx).With().Str("id", jobID).Str("actor", string(actor)).Logger()
 
 	job, err := storage.GetJob(ctx, jobID, persistence.FetchParams{History: false})
 	if err != nil {
@@ -33,7 +29,6 @@ func Update(ctx context.Context, storage persistence.Storage, jobID string, newS
 	}
 
 	from := job.Status.State
-	contextLogger.Debug().Str("from", from).Msg("Updating job")
 
 	// update status
 	to := newStatus.State
@@ -57,38 +52,32 @@ func Update(ctx context.Context, storage persistence.Storage, jobID string, newS
 	}
 	if !isAllowed {
 		if !foundTransition {
-			contextLogger.Info().Msg("Transition does not exist")
+			contextLogger.Warn().Msg("Transition does not exist")
 			return nil, fault.Wrap(fmt.Errorf("transition from '%s' to '%s' does not exist", from, to), ftag.With(ftag.InvalidArgument))
 		}
-		contextLogger.Info().Msg("Transition exists but actor is not allowed to trigger it")
+		contextLogger.Warn().Msg("Transition exists but actor is not allowed to trigger it")
 		return nil, fault.Wrap(fmt.Errorf("transition from '%s' to '%s' is not allowed for actor '%s'", from, to, actor), ftag.With(ftag.InvalidArgument))
 	}
 
 	// transition is allowed, now apply wfx transitions
 	newTo := workflow.FollowImmediateTransitions(job.Workflow, to)
 	if newTo != to {
-		log.Debug().Str("to", to).Str("newTo", newTo).Msg("Resetting state since we moved the transition forward")
+		contextLogger.Debug().Str("to", to).Str("newTo", newTo).Msg("Resetting state since we moved the transition forward")
 		newStatus = &model.JobStatus{}
 	}
 	newStatus.State = newTo
 	// override any definitionHash provided by client
 	newStatus.DefinitionHash = job.Status.DefinitionHash
 
-	log.Debug().
-		Str("message", job.Status.Message).
-		Str("state", job.Status.State).
-		Msg("Updating job")
-
 	result, err := storage.UpdateJob(ctx, job, persistence.JobUpdate{Status: newStatus})
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to persist job update")
+		contextLogger.Err(err).Msg("Failed to persist job update")
 		return nil, fault.Wrap(err)
 	}
 
-	if from != to {
-		contextLogger.Info().Msg("Updated job status")
-	} else {
-		contextLogger.Debug().Msg("Updated job status")
-	}
+	contextLogger.Info().
+		Str("from", from).
+		Str("to", newStatus.State).
+		Msg("Updated job status")
 	return result.Status, nil
 }

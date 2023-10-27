@@ -18,6 +18,10 @@ import (
 
 func DeleteJob(ctx context.Context, storage persistence.Storage, jobID string) error {
 	log := logging.LoggerFromCtx(ctx)
-	log.Info().Str("id", jobID).Msg("Deleting job")
-	return fault.Wrap(storage.DeleteJob(ctx, jobID))
+	if err := storage.DeleteJob(ctx, jobID); err != nil {
+		log.Err(err).Str("id", jobID).Msg("Failed to delete job")
+		return fault.Wrap(err)
+	}
+	log.Info().Str("id", jobID).Msg("Deleted job")
+	return nil
 }

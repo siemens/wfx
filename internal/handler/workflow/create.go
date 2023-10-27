@@ -28,5 +28,6 @@ func CreateWorkflow(ctx context.Context, storage persistence.Storage, wf *model.
 		log.Error().Err(err).Msg("Failed to create workflow")
 		return nil, fault.Wrap(err)
 	}
+	log.Info().Str("name", wf.Name).Msg("Created new workflow")
 	return wf, nil
 }

@@ -18,18 +18,19 @@ import (
 
 func Delete(ctx context.Context, storage persistence.Storage, jobID string, tags []string) ([]string, error) {
 	log := logging.LoggerFromCtx(ctx)
-	contextLogger := log.With().Str("id", jobID).Logger()
-	contextLogger.Debug().Strs("tags", tags).Msg("Deleting tags")
+	contextLogger := log.With().Str("id", jobID).Strs("tags", tags).Logger()
 
 	job, err := storage.GetJob(ctx, jobID, persistence.FetchParams{History: false})
 	if err != nil {
+		contextLogger.Err(err).Msg("Failed to get job from storage")
 		return nil, fault.Wrap(err)
 	}
 
 	updatedJob, err := storage.UpdateJob(ctx, job, persistence.JobUpdate{DelTags: &tags})
 	if err != nil {
+		contextLogger.Err(err).Msg("Failed to delete tags to job")
 		return nil, fault.Wrap(err)
 	}
-	contextLogger.Debug().Msg("Deleted tags")
+	contextLogger.Info().Msg("Deleted job tags")
 	return updatedJob.Tags, nil
 }
