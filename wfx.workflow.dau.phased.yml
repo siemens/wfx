@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 ---
 name: wfx.workflow.dau.phased
+description: a workflow for device artifact updates requiring confirmation steps
 
 groups:
   - name: OPEN

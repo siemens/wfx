@@ -79,6 +79,11 @@ definitions:
         description: User provided unique workflow name
         example: wfx.workflow.dau.direct
         x-nullable: false
+      description:
+        type: string
+        maxLength: 1024
+        description: Description of the workflow
+        example: This is a workflow
       states:
         type: array
         minItems: 1
