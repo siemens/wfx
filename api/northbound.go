@@ -9,6 +9,7 @@ package api
  */
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/Southclaws/fault/ftag"
@@ -169,7 +170,9 @@ func NewNorthboundAPI(storage persistence.Storage) *operations.WorkflowExecutorA
 			if err != nil {
 				switch ftag.Get(err) {
 				case ftag.NotFound:
-					return northbound.NewDeleteWorkflowsNameNotFound()
+					err2 := WorkflowNotFound
+					err2.Message = fmt.Sprintf("Workflow '%s' not found", params.Name)
+					return northbound.NewDeleteWorkflowsNameNotFound().WithPayload(&model.ErrorResponse{Errors: []*model.Error{&err2}})
 				default:
 					return northbound.NewDeleteWorkflowsNameDefault(http.StatusInternalServerError)
 				}
