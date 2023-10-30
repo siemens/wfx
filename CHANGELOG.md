@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Refactored `wfxctl workflow delete` command to accept workflows as arguments instead of positional parameters
+
 ### Removed
 
 ## [0.1.0] - 2023-02-06

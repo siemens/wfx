@@ -9,6 +9,9 @@ package delete
  */
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 
@@ -17,32 +20,28 @@ import (
 	"github.com/siemens/wfx/generated/client/workflows"
 )
 
-const (
-	nameFlag = "name"
-)
-
-func init() {
-	f := Command.PersistentFlags()
-	f.String(nameFlag, "", "workflow name")
-}
-
 var Command = &cobra.Command{
 	Use:              "delete",
 	Short:            "Delete an existing workflow",
-	Long:             `Delete an existing workflow`,
 	TraverseChildren: true,
-	Example:          "wfxctl workflow delete --name=wfx.workflow.kanban",
-	Run: func(cmd *cobra.Command, args []string) {
+	Example:          "wfxctl workflow delete wfx.workflow.kanban",
+	RunE: func(cmd *cobra.Command, args []string) error {
 		baseCmd := flags.NewBaseCmd()
 		client := errutil.Must(baseCmd.CreateHTTPClient())
-		params := workflows.NewDeleteWorkflowsNameParams().
-			WithHTTPClient(client).
-			WithName(flags.Koanf.String(nameFlag))
-
-		// no content
-		if _, err := baseCmd.CreateMgmtClient().Workflows.DeleteWorkflowsName(params); err != nil {
-			errutil.ProcessErrorResponse(cmd.OutOrStderr(), err)
-			log.Fatal().Msg("Failed to delete workflow")
+		failedWfs := make([]string, 0)
+		for _, workflow := range args {
+			params := workflows.NewDeleteWorkflowsNameParams().WithHTTPClient(client).WithName(workflow)
+			// no content
+			if _, err := baseCmd.CreateMgmtClient().Workflows.DeleteWorkflowsName(params); err != nil {
+				errutil.ProcessErrorResponse(cmd.OutOrStderr(), err)
+				failedWfs = append(failedWfs, workflow)
+			} else {
+				log.Info().Str("workflow", workflow).Msg("Deleted workflow")
+			}
 		}
+		if len(failedWfs) > 0 {
+			return fmt.Errorf("failed to delete workflows: %s", strings.Join(failedWfs, ","))
+		}
+		return nil
 	},
 }

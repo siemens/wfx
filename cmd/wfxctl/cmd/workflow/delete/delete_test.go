@@ -36,7 +36,7 @@ func TestDeleteWorkflow(t *testing.T) {
 	port, _ := strconv.Atoi(u.Port())
 	_ = flags.Koanf.Set(flags.MgmtPortFlag, port)
 
-	_ = flags.Koanf.Set(nameFlag, "wfx.workflow.dau.direct")
+	Command.SetArgs([]string{"wfx.workflow.dau.direct"})
 
 	err := Command.Execute()
 	assert.NoError(t, err)
