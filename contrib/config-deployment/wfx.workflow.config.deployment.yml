@@ -1,0 +1,54 @@
+# SPDX-FileCopyrightText: 2023 Siemens AG
+# SPDX-License-Identifier: Apache-2.0
+---
+name: wfx.workflow.config.deployment
+
+states:
+  - name: NEW
+    description: A new job for the client.
+
+  - name: DOWNLOADING
+    description: The client is downloading the artifact.
+
+  - name: INSTALLING
+    description: The client is installing the artifact. This includes the execution of pre- and post-install hooks.
+
+  - name: DONE
+    description: The client has successfully deployed the artifact.
+
+  - name: FAILED
+    description: Something went wrong.
+
+  - name: CANCELED
+    description: The deployment was canceled.
+
+transitions:
+  ######################################################################
+  ## Happy Path
+  ######################################################################
+  - from: NEW
+    to: DOWNLOADING
+    eligible: CLIENT
+
+  - from: DOWNLOADING
+    to: INSTALLING
+    eligible: CLIENT
+
+  - from: INSTALLING
+    to: DONE
+    eligible: CLIENT
+
+  ######################################################################
+  ## Abort and Error Scenarios
+  ######################################################################
+  - from: NEW
+    to: CANCELED
+    eligible: WFX
+
+  - from: DOWNLOADING
+    to: FAILED
+    eligible: CLIENT
+
+  - from: INSTALLING
+    to: FAILED
+    eligible: CLIENT

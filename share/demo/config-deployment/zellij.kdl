@@ -1,0 +1,16 @@
+layout {
+    tab name="wfx" focus=true {
+        pane split_direction="horizontal" {
+            pane split_direction="vertical" size="25%" {
+                pane name="wfx" command="./01-start-wfx.sh" cwd="." focus=true
+            }
+            pane split_direction="vertical" size="75%" {
+                pane split_direction="horizontal" {
+                    pane name="create workflow" command="./02-create-workflow.sh" cwd="."
+                    pane name="operator" command="./04-create-job.sh" cwd="."
+                }
+                pane name="client" command="./03-start-client.sh" cwd="." size="50%"
+            }
+        }
+    }
+}

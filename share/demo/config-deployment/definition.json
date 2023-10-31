@@ -1,0 +1,6 @@
+{
+  "url": "http://localhost:8080/download/example.ini",
+  "preinstall": "echo 'stopping service'; sleep 3",
+  "postinstall": "echo 'starting service'; sleep 3",
+  "destination": "/tmp/example.ini"
+}

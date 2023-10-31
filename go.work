@@ -3,4 +3,5 @@ go 1.19
 use (
 	.
 	./contrib/remote-access/client
+	./contrib/config-deployment/client
 )
