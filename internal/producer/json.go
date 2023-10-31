@@ -31,18 +31,19 @@ func JSONProducer() runtime.Producer {
 		if rw, ok := writer.(http.ResponseWriter); ok {
 			filter := rw.Header().Get("X-Response-Filter")
 			if filter != "" {
-				var input any
-				// need to unmarshal again, but to type 'any'
-				if err := json.Unmarshal(jsonData, &input); err != nil {
-					return fault.Wrap(err)
-				}
-
 				contextLogger := log.With().Str("filter", filter).Logger()
 				query, err := gojq.Parse(filter)
 				if err != nil {
-					contextLogger.Error().Err(err).Msg("Failed to parse response filter")
+					contextLogger.Err(err).Msg("Failed to parse response filter")
 					return fault.Wrap(err)
 				}
+
+				var input any
+				// need to unmarshal again, but to type 'any'; this cannot fail
+				// because we own the local variable jsonData and know it's
+				// valid JSON
+				_ = json.Unmarshal(jsonData, &input)
+
 				contextLogger.Debug().Msg("Applying response filter")
 				iter := query.Run(input)
 				ok := true
@@ -50,12 +51,9 @@ func JSONProducer() runtime.Producer {
 					var v any
 					v, ok = iter.Next()
 					if ok {
-						jsonData, err = json.Marshal(v)
-						if err != nil {
-							return fault.Wrap(err)
-						}
-						_, err = writer.Write(jsonData)
-						if err != nil {
+						// this cannot fail because we own `input`
+						jsonData, _ = json.Marshal(v)
+						if _, err := writer.Write(jsonData); err != nil {
 							return fault.Wrap(err)
 						}
 					}
@@ -63,7 +61,6 @@ func JSONProducer() runtime.Producer {
 				return nil
 			}
 		}
-
 		_, err = writer.Write(jsonData)
 		return fault.Wrap(err)
 	})
