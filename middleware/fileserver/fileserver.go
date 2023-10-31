@@ -16,6 +16,7 @@ import (
 
 	"github.com/Southclaws/fault"
 	"github.com/knadh/koanf/v2"
+	"github.com/rs/zerolog/log"
 	"github.com/siemens/wfx/internal/config"
 )
 
@@ -40,6 +41,7 @@ func NewFileServerMiddleware(k *config.ThreadSafeKoanf) (*MW, error) {
 		if !info.IsDir() {
 			return nil, fmt.Errorf("%s is not a directory", rootDir)
 		}
+		log.Info().Str("dir", rootDir).Msg("Fileserver is enabled")
 	}
 	return &MW{k: k}, nil
 }
