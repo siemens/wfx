@@ -10,6 +10,7 @@ package producer
 
 import (
 	"bytes"
+	"errors"
 	"net/http"
 	"testing"
 
@@ -66,4 +67,55 @@ func TestJSONProducer_ResponseFilter(t *testing.T) {
 	err := prod.Produce(&writer, data)
 	require.NoError(t, err)
 	assert.Equal(t, `"foo"`, string(writer.Output))
+}
+
+type BadMarshal struct{}
+
+func (bm *BadMarshal) MarshalJSON() ([]byte, error) {
+	return nil, errors.New("Marshaling this struct always fails")
+}
+
+func TestJSONProducer_BadMarshal(t *testing.T) {
+	badMarshal := BadMarshal{}
+	buf := new(bytes.Buffer)
+	err := JSONProducer().Produce(buf, &badMarshal)
+	assert.NotNil(t, err)
+}
+
+func TestJSONProducer_BadFilter(t *testing.T) {
+	headers := make(map[string][]string)
+	headers["X-Response-Filter"] = []string{"!!!"}
+	writer := TestResponseWriter{
+		Headers: headers,
+		Output:  make([]byte, 2048),
+	}
+
+	s := "hello world"
+	err := JSONProducer().Produce(&writer, &s)
+	assert.NotNil(t, err)
+}
+
+type BadWriter struct {
+	Headers map[string][]string
+}
+
+func (w *BadWriter) Header() http.Header {
+	return w.Headers
+}
+
+func (w *BadWriter) Write([]byte) (int, error) {
+	return 0, errors.New("This writer always fails")
+}
+
+func (w *BadWriter) WriteHeader(int) {}
+
+func TestJSONProducer_BadWriter(t *testing.T) {
+	headers := make(map[string][]string)
+	headers["X-Response-Filter"] = []string{".hello"}
+	writer := BadWriter{Headers: headers}
+
+	data := make(map[string]string)
+	data["hello"] = "world"
+	err := JSONProducer().Produce(&writer, &data)
+	assert.NotNil(t, err)
 }
