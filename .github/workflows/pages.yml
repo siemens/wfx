@@ -27,7 +27,7 @@ jobs:
           extended: true
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           # see https://github.com/nodejs/Release/blob/main/CODENAMES.md
           node-version: lts/Hydrogen
