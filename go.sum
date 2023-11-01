@@ -20,8 +20,8 @@ github.com/Southclaws/fault v0.7.0 h1:qT0aOp+bUpvxm8fveBIJRcU/QfrBCmR6kMaAHyAknS
 github.com/Southclaws/fault v0.7.0/go.mod h1:VUVkAWutC59SL16s6FTqf3I6I2z77RmnaW5XRz4bLOE=
 github.com/agext/levenshtein v1.2.3 h1:YB2fHEn0UJagG8T1rrWknE3ZQzWM06O8AMAatNn7lmo=
 github.com/agext/levenshtein v1.2.3/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
-github.com/alexliesenfeld/health v0.7.0 h1:U3mSZ3ussRbGx+/rXBjNVxjLX5cKaNh8Ly9Hx3q+yfY=
-github.com/alexliesenfeld/health v0.7.0/go.mod h1:6Nnjbu7vBYHoZqIuZeOnTpnW7OH14ulR+wIBE2QuJ8I=
+github.com/alexliesenfeld/health v0.8.0 h1:lCV0i+ZJPTbqP7LfKG7p3qZBl5VhelwUFCIVWl77fgk=
+github.com/alexliesenfeld/health v0.8.0/go.mod h1:TfNP0f+9WQVWMQRzvMUjlws4ceXKEL3WR+6Hp95HUFc=
 github.com/apparentlymart/go-textseg/v13 v13.0.0 h1:Y+KvPE1NYz0xl601PVImeQfFyEy6iT90AvPUL1NNfNw=
 github.com/apparentlymart/go-textseg/v13 v13.0.0/go.mod h1:ZK2fH7c4NqDTLtiYLvIkEghdlcqw7yxLeM89kiTRPUo=
 github.com/asaskevich/govalidator v0.0.0-20200907205600-7a23bdc65eef/go.mod h1:WaHUgvxTVq04UNunO+XhnAqY/wQc+bxr74GqbsZ/Jqw=
@@ -281,7 +281,6 @@ github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO+kdMU+MU=
 github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
-github.com/stretchr/testify v1.8.2/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
 github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
 github.com/tidwall/pretty v1.0.0 h1:HsD+QiTn7sK6flMKIvNmpqz1qrpP3Ps6jOKIKMooyg4=
