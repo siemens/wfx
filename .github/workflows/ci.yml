@@ -195,6 +195,7 @@ jobs:
           go-version: stable
       - uses: dominikh/staticcheck-action@v1.3.0
         with:
+          install-go: false
           build-tags: sqlite,testing
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
