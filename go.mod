@@ -39,7 +39,7 @@ require (
 	github.com/stretchr/testify v1.8.4
 	github.com/tsenart/vegeta/v12 v12.11.1
 	github.com/yourbasic/graph v0.0.0-20210606180040-8ecfec1c2869
-	go.uber.org/goleak v1.2.1
+	go.uber.org/goleak v1.3.0
 	golang.org/x/term v0.13.0
 	gopkg.in/go-playground/colors.v1 v1.2.0
 	gopkg.in/yaml.v3 v3.0.1
