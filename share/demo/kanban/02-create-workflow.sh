@@ -24,7 +24,7 @@ sleep 3
 ########################
 # include the magic
 ########################
-source "$SCRIPT_DIR"/demo.sh
+source "$SCRIPT_DIR/../demo.sh"
 . "$DM" -n
 DEMO_COMMENT_COLOR=$WHITE
 TYPE_SPEED=13

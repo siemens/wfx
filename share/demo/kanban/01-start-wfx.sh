@@ -6,7 +6,7 @@
 # Author: Michael Adler <michael.adler@siemens.com>
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
-source "$SCRIPT_DIR"/demo.sh
+source "$SCRIPT_DIR/../demo.sh"
 
 ########################
 # include the magic
@@ -22,6 +22,4 @@ clear
 
 PROMPT_TIMEOUT=2
 
-rm -f wfx.db*
-p "./wfx"
-"$GIT_ROOT/wfx"
+pe "wfx --storage sqlite --storage-opt 'file:wfx?mode=memory&cache=shared&_fk=1'"
