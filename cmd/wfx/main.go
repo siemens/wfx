@@ -10,6 +10,7 @@ package main
 
 import (
 	"github.com/rs/zerolog/log"
+	_ "go.uber.org/automaxprocs"
 
 	"github.com/siemens/wfx/cmd/wfx/cmd/root"
 	"github.com/siemens/wfx/cmd/wfx/metadata"
