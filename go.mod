@@ -32,7 +32,7 @@ require (
 	github.com/muesli/roff v0.1.0
 	github.com/rs/cors v1.10.1
 	github.com/rs/zerolog v1.31.0
-	github.com/spf13/cobra v1.7.0
+	github.com/spf13/cobra v1.8.0
 	github.com/spf13/pflag v1.0.5
 	github.com/steinfletcher/apitest v1.5.15
 	github.com/steinfletcher/apitest-jsonpath v1.7.2
