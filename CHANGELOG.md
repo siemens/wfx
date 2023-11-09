@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Refactored `wfxctl workflow delete` command to accept workflows as arguments instead of positional parameters
+- Prefer cgroup CPU quota over host CPU count
 
 ### Removed
 
