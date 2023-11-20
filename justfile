@@ -104,9 +104,10 @@ _generate-swagger:
 _generate-ent:
     #!/usr/bin/env bash
     set -euxo pipefail
+    ENT_VERSION=$(grep entgo.io/ent "{{ THISDIR }}/go.mod" | awk -F' ' '{ print $2; }')
     cd "{{ THISDIR }}/generated/ent"
     find . -not -name generate.go -and -not -name main.go -and -not -path "**/schema/*" -type f -delete
-    go run entgo.io/ent/cmd/ent@latest generate --header \
+    go run entgo.io/ent/cmd/ent@${ENT_VERSION} generate --header \
         "// SPDX-FileCopyrightText: The entgo authors
          // SPDX-License-Identifier: Apache-2.0
 
