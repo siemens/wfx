@@ -16,9 +16,12 @@ content/docs/installation.md
 content/docs/operations.md
 content/docs/workflows/_index.md
 content/docs/workflows/dau.md
+content/docs/use-cases.md
 
 static/benchmark.png
 static/favicons/
 static/wfx.swagger.yml
 static/wfx.workflow.dau.direct.yml
 static/wfx.workflow.dau.phased.yml
+static/wfx.workflow.config.deployment.yml
+static/wfx.workflow.remote.access.yml

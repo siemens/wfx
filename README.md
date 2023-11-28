@@ -81,6 +81,7 @@ Grouped by topic, the following documentation is available in [docs/](docs/):
 - [Installation](docs/installation.md): How to install and deploy wfx.
 - [Configuration](docs/configuration.md): How to configure wfx.
 - [Operation](docs/operations.md): How to operate wfx.
+- [Use-Cases](docs/use-cases.md): A collection of use-cases for wfx.
 - [API](docs/operations.md#api): wfx's north- and southbound APIs.
 
 You can also browse the rendered documentation at <https://siemens.github.io/wfx/>.

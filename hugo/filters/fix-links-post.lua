@@ -36,7 +36,8 @@ end
 local function link(el)
 	local target = el.target
 	-- we only care about links to markdown documents != self
-	local is_markdown_foreign = string.match(target, "%.md$") or string.match(target, "%.md#")
+	local is_markdown_foreign = not string.match(target, "^http")
+		and (string.match(target, "%.md$") or string.match(target, "%.md#"))
 	if is_markdown_foreign then
 		-- strip fragment
 		local idx = string.find(target, "#")

@@ -15,7 +15,8 @@ ALL_DOCS := \
 	content/docs/installation.md \
 	content/docs/operations.md \
 	content/docs/workflows/_index.md \
-	content/docs/workflows/dau.md
+	content/docs/workflows/dau.md \
+	content/docs/use-cases.md
 
 ALL_IMAGES := \
 	static/favicons/favicon.ico \
