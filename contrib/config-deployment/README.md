@@ -1,4 +1,4 @@
-# Remote Access Demo
+# Config Deployment Demo
 
 This repository showcases a proof-of-concept (PoC) for deploying configurations to a device (e.g. for diagnostic purposes), using `wfx` and a custom workflow.
 
