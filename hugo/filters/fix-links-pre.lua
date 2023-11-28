@@ -23,6 +23,17 @@ local logging = {
 	end,
 }
 
+local link_rewrites = {
+	-- src -> dest
+	["../workflow/dau/README.md"] = "workflows/dau.md",
+	["../CONTRIBUTING.md"] = "https://github.com/siemens/wfx/tree/main/CONTRIBUTING.md",
+	["../contrib/remote-access/README.md"] = "https://github.com/siemens/wfx/tree/main/contrib/remote-access",
+	["../contrib/remote-access/wfx.workflow.remote.access.yml"] = "https://github.com/siemens/wfx/tree/main/contrib/remote-access/wfx.workflow.remote.access.yml",
+	["../contrib/config-deployment/wfx.workflow.config.deployment.yml"] = "https://github.com/siemens/wfx/tree/main/contrib/config-deployment/wfx.workflow.config.deployment.yml",
+	["../contrib/config-deployment/README.md"] = "https://github.com/siemens/wfx/tree/main/contrib/config-deployment",
+	["../contrib/config-deployment/client/worker.go"] = "https://github.com/siemens/wfx/tree/main/contrib/config-deployment/client/worker.go",
+}
+
 local function find_git_root()
 	local p = io.popen("git rev-parse --show-toplevel", "r")
 	if not p then
@@ -34,7 +45,7 @@ local function find_git_root()
 end
 
 local function copy_file(from, to)
-	logging.info("Copying file:", from, "->", to)
+	logging.info("Copying file: ", from, " -> ", to)
 	local f = io.open(from, "rb")
 	if not f then
 		error(string.format("ERROR: source %s does not exist", from))
@@ -61,6 +72,12 @@ local git_root = find_git_root()
 local function link(el)
 	-- link destination
 	local target = el.target
+	local rewrite_target = link_rewrites[target]
+	if rewrite_target then
+		el.target = rewrite_target
+		return el
+	end
+
 	if string.match(target, "^http") then
 		-- link is external, no need to rewrite anything
 		return nil
@@ -76,7 +93,7 @@ local function link(el)
 		local dest = string.format("%s/hugo/static/%s", git_root, fname)
 		copy_file(target, dest)
 		local new_target = "/" .. fname
-		logging.info("Rewriting link", el.target, "->", new_target)
+		logging.info("Rewriting link: ", el.target, " -> ", new_target)
 		el.target = new_target
 	end
 	return el
