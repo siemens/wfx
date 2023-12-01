@@ -61,6 +61,14 @@ func (ju *JobUpdate) SetClientID(s string) *JobUpdate {
 	return ju
 }
 
+// SetNillableClientID sets the "client_id" field if the given value is not nil.
+func (ju *JobUpdate) SetNillableClientID(s *string) *JobUpdate {
+	if s != nil {
+		ju.SetClientID(*s)
+	}
+	return ju
+}
+
 // SetDefinition sets the "definition" field.
 func (ju *JobUpdate) SetDefinition(m map[string]interface{}) *JobUpdate {
 	ju.mutation.SetDefinition(m)
@@ -76,6 +84,14 @@ func (ju *JobUpdate) ClearDefinition() *JobUpdate {
 // SetStatus sets the "status" field.
 func (ju *JobUpdate) SetStatus(ms model.JobStatus) *JobUpdate {
 	ju.mutation.SetStatus(ms)
+	return ju
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (ju *JobUpdate) SetNillableStatus(ms *model.JobStatus) *JobUpdate {
+	if ms != nil {
+		ju.SetStatus(*ms)
+	}
 	return ju
 }
 
@@ -435,6 +451,14 @@ func (juo *JobUpdateOne) SetClientID(s string) *JobUpdateOne {
 	return juo
 }
 
+// SetNillableClientID sets the "client_id" field if the given value is not nil.
+func (juo *JobUpdateOne) SetNillableClientID(s *string) *JobUpdateOne {
+	if s != nil {
+		juo.SetClientID(*s)
+	}
+	return juo
+}
+
 // SetDefinition sets the "definition" field.
 func (juo *JobUpdateOne) SetDefinition(m map[string]interface{}) *JobUpdateOne {
 	juo.mutation.SetDefinition(m)
@@ -450,6 +474,14 @@ func (juo *JobUpdateOne) ClearDefinition() *JobUpdateOne {
 // SetStatus sets the "status" field.
 func (juo *JobUpdateOne) SetStatus(ms model.JobStatus) *JobUpdateOne {
 	juo.mutation.SetStatus(ms)
+	return juo
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (juo *JobUpdateOne) SetNillableStatus(ms *model.JobStatus) *JobUpdateOne {
+	if ms != nil {
+		juo.SetStatus(*ms)
+	}
 	return juo
 }
 
