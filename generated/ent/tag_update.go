@@ -37,6 +37,14 @@ func (tu *TagUpdate) SetName(s string) *TagUpdate {
 	return tu
 }
 
+// SetNillableName sets the "name" field if the given value is not nil.
+func (tu *TagUpdate) SetNillableName(s *string) *TagUpdate {
+	if s != nil {
+		tu.SetName(*s)
+	}
+	return tu
+}
+
 // AddJobIDs adds the "jobs" edge to the Job entity by IDs.
 func (tu *TagUpdate) AddJobIDs(ids ...string) *TagUpdate {
 	tu.mutation.AddJobIDs(ids...)
@@ -185,6 +193,14 @@ type TagUpdateOne struct {
 // SetName sets the "name" field.
 func (tuo *TagUpdateOne) SetName(s string) *TagUpdateOne {
 	tuo.mutation.SetName(s)
+	return tuo
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (tuo *TagUpdateOne) SetNillableName(s *string) *TagUpdateOne {
+	if s != nil {
+		tuo.SetName(*s)
+	}
 	return tuo
 }
 

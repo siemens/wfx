@@ -39,6 +39,14 @@ func (hu *HistoryUpdate) SetMtime(t time.Time) *HistoryUpdate {
 	return hu
 }
 
+// SetNillableMtime sets the "mtime" field if the given value is not nil.
+func (hu *HistoryUpdate) SetNillableMtime(t *time.Time) *HistoryUpdate {
+	if t != nil {
+		hu.SetMtime(*t)
+	}
+	return hu
+}
+
 // SetStatus sets the "status" field.
 func (hu *HistoryUpdate) SetStatus(ms model.JobStatus) *HistoryUpdate {
 	hu.mutation.SetStatus(ms)
@@ -204,6 +212,14 @@ type HistoryUpdateOne struct {
 // SetMtime sets the "mtime" field.
 func (huo *HistoryUpdateOne) SetMtime(t time.Time) *HistoryUpdateOne {
 	huo.mutation.SetMtime(t)
+	return huo
+}
+
+// SetNillableMtime sets the "mtime" field if the given value is not nil.
+func (huo *HistoryUpdateOne) SetNillableMtime(t *time.Time) *HistoryUpdateOne {
+	if t != nil {
+		huo.SetMtime(*t)
+	}
 	return huo
 }
 

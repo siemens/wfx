@@ -3,7 +3,7 @@ module github.com/siemens/wfx
 go 1.19
 
 require (
-	entgo.io/ent v0.12.4
+	entgo.io/ent v0.12.5
 	github.com/OpenPeeDeeP/xdg v1.0.0
 	github.com/Southclaws/fault v0.8.0
 	github.com/alexliesenfeld/health v0.8.0

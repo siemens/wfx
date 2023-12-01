@@ -39,6 +39,14 @@ func (wu *WorkflowUpdate) SetName(s string) *WorkflowUpdate {
 	return wu
 }
 
+// SetNillableName sets the "name" field if the given value is not nil.
+func (wu *WorkflowUpdate) SetNillableName(s *string) *WorkflowUpdate {
+	if s != nil {
+		wu.SetName(*s)
+	}
+	return wu
+}
+
 // SetDescription sets the "description" field.
 func (wu *WorkflowUpdate) SetDescription(s string) *WorkflowUpdate {
 	wu.mutation.SetDescription(s)
@@ -291,6 +299,14 @@ type WorkflowUpdateOne struct {
 // SetName sets the "name" field.
 func (wuo *WorkflowUpdateOne) SetName(s string) *WorkflowUpdateOne {
 	wuo.mutation.SetName(s)
+	return wuo
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (wuo *WorkflowUpdateOne) SetNillableName(s *string) *WorkflowUpdateOne {
+	if s != nil {
+		wuo.SetName(*s)
+	}
 	return wuo
 }
 
