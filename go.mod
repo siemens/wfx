@@ -41,7 +41,7 @@ require (
 	github.com/yourbasic/graph v0.0.0-20210606180040-8ecfec1c2869
 	go.uber.org/automaxprocs v1.5.3
 	go.uber.org/goleak v1.3.0
-	golang.org/x/term v0.14.0
+	golang.org/x/term v0.15.0
 	gopkg.in/go-playground/colors.v1 v1.2.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -107,6 +107,6 @@ require (
 	go.opentelemetry.io/otel/metric v1.16.0 // indirect
 	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
-	golang.org/x/sys v0.14.0 // indirect
+	golang.org/x/sys v0.15.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
