@@ -410,6 +410,121 @@ ranges and array lengths.&lt;/p>
 &lt;a href="http://localhost:8080/api/wfx/v1/docs" target="_blank">http://localhost:8080/api/wfx/v1/docs&lt;/a>,
 assuming default listening host and port
 &lt;a href="https://siemens.github.io/wfx/docs/configuration/">configuration&lt;/a>.&lt;/p>
+&lt;h3 id="job-events">Job Events&lt;/h3>
+&lt;p>Job events provide a notification mechanism that informs clients about certain operations happening on jobs. This
+approach eliminates the need for clients to continuously poll wfx, thus optimizing network usage and client resources.
+Job events can be useful for user interfaces (UIs) and other applications that demand near-instantaneous updates.&lt;/p>
+&lt;h4 id="architecture">Architecture&lt;/h4>
+&lt;p>Below is a high-level overview of how the communication flow operates:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-txt" data-lang="txt">&lt;span style="display:flex;">&lt;span> ┌────────┐ ┌─────┐
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │ Client │ │ wfx │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> └────────┘ └─────┘
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> | |
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> | HTTP GET /jobs/events |
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> |-----------------------------------►|
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> | |
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> | |
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> | Event Loop |
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ┌───|────────────────────────────────────|───┐
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │ | [Content-Type: text/event-stream] | │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │ | | │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │ | | │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │ | Push Event | │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │ |◄-----------------------------------| │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │ | | │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> └───|────────────────────────────────────|───┘
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> | |
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ▼ ▼
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ┌────────┐ ┌─────┐
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │ Client │ │ wfx │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> └────────┘ └─────┘
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol>
+&lt;li>The client initiates communication by sending an HTTP &lt;code>GET&lt;/code> request to the &lt;code>/jobs/events&lt;/code> endpoint. Clients may also
+include optional
+&lt;a href="#filter-parameters">filter parameters&lt;/a> within the request.&lt;/li>
+&lt;li>Upon receipt of the request, &lt;code>wfx&lt;/code> sets the &lt;code>Content-Type&lt;/code> header to &lt;code>text/event-stream&lt;/code>.&lt;/li>
+&lt;li>The server then initiates a stream of job events in the response body, allowing clients to receive instant updates.&lt;/li>
+&lt;/ol>
+&lt;h4 id="event-format-specification">Event Format Specification&lt;/h4>
+&lt;p>The job events stream is composed of
+&lt;a href="https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events" target="_blank">server-sent
+events&lt;/a> (SSE). Accordingly, the stream is
+structured as follows:&lt;/p>
+&lt;pre>&lt;code>data: [...]
+id: 1
+data: [...]
+id: 2
+[...]
+&lt;/code>&lt;/pre>
+&lt;p>An individual event within the stream conforms to this format:&lt;/p>
+&lt;pre>&lt;code>data: { &amp;quot;action&amp;quot;: &amp;quot;&amp;lt;ACTION&amp;gt;&amp;quot;, &amp;quot;ctime&amp;quot;: &amp;lt;CTIME&amp;gt;, &amp;quot;tags&amp;quot;: &amp;lt;TAGS&amp;gt;, &amp;quot;job&amp;quot;: &amp;lt;JOB&amp;gt; }
+id: &amp;lt;EVENT_ID&amp;gt;\n\n
+&lt;/code>&lt;/pre>
+&lt;p>&lt;strong>Note&lt;/strong>: Each event is terminated by a pair of newline characters &lt;code>\n\n&lt;/code> (as required by the SSE spec).&lt;/p>
+&lt;p>The semantics of the individual fields is:&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>&amp;lt;ACTION&amp;gt;&lt;/code> specifies the type of event that occurred. The valid actions are:
+&lt;ul>
+&lt;li>&lt;code>CREATE&lt;/code>: a new job has been created&lt;/li>
+&lt;li>&lt;code>DELETE&lt;/code>: an existing job has been deleted&lt;/li>
+&lt;li>&lt;code>ADD_TAGS&lt;/code>: tags were added to a job&lt;/li>
+&lt;li>&lt;code>DELETE_TAGS&lt;/code>: tags were removed from a job&lt;/li>
+&lt;li>&lt;code>UPDATE_STATUS&lt;/code>: job status has been updated&lt;/li>
+&lt;li>&lt;code>UPDATE_DEFINITION&lt;/code>: job definition has been updated&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>&lt;code>&amp;lt;CTIME&amp;gt;&lt;/code>: event creation time (ISO8601)&lt;/li>
+&lt;li>&lt;code>&amp;lt;TAGS&amp;gt;&lt;/code>: JSON array of tags as provided by the client&lt;/li>
+&lt;li>&lt;code>&amp;lt;JOB&amp;gt;&lt;/code> is a JSON object containing the portion of the job object which was changed, e.g., for an &lt;code>UPDATE_STATUS&lt;/code>
+event, the job status is sent but not its definition. To enable
+&lt;a href="#filter-parameters">filtering&lt;/a>, the fields &lt;code>id&lt;/code>,
+&lt;code>clientId&lt;/code> and &lt;code>workflow.name&lt;/code> are &lt;em>always&lt;/em> part of the response.&lt;/li>
+&lt;li>&lt;code>&amp;lt;EVENT_ID&amp;gt;&lt;/code>: an integer which uniquely identifies each event, starting at 1 and incrementing by 1 for every
+subsequent event. Clients can use this to identify any missed messages. If an overflow occurs, the integer resets to
+zero, a scenario the client can recognize and address.&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>Example:&lt;/strong>&lt;/p>
+&lt;pre>&lt;code>data: {&amp;quot;action&amp;quot;:&amp;quot;UPDATE_STATUS&amp;quot;,&amp;quot;job&amp;quot;:{&amp;quot;clientId&amp;quot;:&amp;quot;Dana&amp;quot;,&amp;quot;id&amp;quot;:&amp;quot;c6698105-6386-4940-a311-de1b57e3faeb&amp;quot;,&amp;quot;status&amp;quot;:{&amp;quot;definitionHash&amp;quot;:&amp;quot;adc1cfc1577119ba2a0852133340088390c1103bdf82d8102970d3e6c53ec10b&amp;quot;,&amp;quot;state&amp;quot;:&amp;quot;PROGRESS&amp;quot;},&amp;quot;workflow&amp;quot;:{&amp;quot;name&amp;quot;:&amp;quot;wfx.workflow.kanban&amp;quot;}}}
+id: 1\n\n
+&lt;/code>&lt;/pre>
+&lt;h4 id="filter-parameters">Filter Parameters&lt;/h4>
+&lt;p>Job events can be filtered using any combination of the following parameters:&lt;/p>
+&lt;ul>
+&lt;li>Job IDs&lt;/li>
+&lt;li>Client IDs&lt;/li>
+&lt;li>Workflow Names&lt;/li>
+&lt;/ul>
+&lt;p>This enables more precise control over the dispatched events. Note that it is entirely possible to subscribe multiple
+times to job events using various filters in order to create a more advanced event recognition model.&lt;/p>
+&lt;h4 id="examples">Examples&lt;/h4>
+&lt;p>&lt;code>wfxctl&lt;/code> offers a reference client implementation. The following command subscribes to &lt;strong>all&lt;/strong> job events:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>wfxctl job events
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>This may result in a large number of events, though. For a more targeted approach, filter parameters may be used.
+Assuming the job IDs are known (either because the jobs have been created already or the IDs are received via another
+subscription channel), the following will subscribe to events matching either of the two specified job IDs:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>wfxctl job events --job-id&lt;span style="color:#000;font-weight:bold">=&lt;/span>d305e539-1d41-4c95-b19a-2a7055c469d0 --job-id&lt;span style="color:#000;font-weight:bold">=&lt;/span>e692ad92-45e6-4164-b3fd-8c6aa884011c
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>See &lt;code>wfxctl job events --help&lt;/code> for other filter parameters, e.g. workflow names.&lt;/p>
+&lt;h4 id="considerations-and-limitations">Considerations and Limitations&lt;/h4>
+&lt;ol>
+&lt;li>&lt;strong>Asynchronous Job Status Updates&lt;/strong>: Job status updates are dispatched asynchronously to avoid the risk of a
+subscriber interfering with the actual job operation. In particular, there is no guarantee that the messages sent to
+the client arrive in a linear order (another reason for that may be networking-related). While this is typically not
+a concern, it could become an issue in high-concurrency situations. For example, when multiple clients try to modify
+the same job or when a single client issues a rapid sequence of status updates. As a result, messages could arrive
+in a not necessarily linear order, possibly deviating from the client&amp;rsquo;s expectation. However, the client can use the
+(event) &lt;code>id&lt;/code> and &lt;code>ctime&lt;/code> fields to establish a natural ordering of events as emitted by wfx.&lt;/li>
+&lt;li>&lt;strong>Unacknowledged Server-Sent Events (SSE)&lt;/strong>: SSE operates on a one-way communication model and does not include an
+acknowledgment or handshake protocol to confirm message delivery. This design choice aligns with the fundamental
+principles of SSE but does mean that there&amp;rsquo;s a possibility some events may not reach the intended subscriber (which
+the client can possibly detect by keeping track of SSE event IDs).&lt;/li>
+&lt;li>&lt;strong>Event Stream Orchestration&lt;/strong>: Each wfx instance only yields the events happening on that instance. Consequently,
+if there are multiple wfx instances, a consolidated &amp;ldquo;global&amp;rdquo; event stream can only be assembled by subscribing to
+all wfx instances (and aggregating the events).&lt;/li>
+&lt;li>&lt;strong>Browser Connection Limits for SSE&lt;/strong>: Web browsers typically restrict the number of SSE connections to six per
+domain. To overcome this limitation, HTTP/2 can be used, allowing up to 100 connections by default, or
+&lt;a href="#filter-parameters">filter
+parameters&lt;/a> can be utilized to efficiently manage the connections.&lt;/li>
+&lt;/ol>
 &lt;h3 id="response-filters">Response Filters&lt;/h3>
 &lt;p>wfx allows server-side response content filtering prior to sending the response to the client so to tailor it to client
 information needs. For example, if a client isn&amp;rsquo;t interested in the job&amp;rsquo;s history, it may request to omit it in wfx
