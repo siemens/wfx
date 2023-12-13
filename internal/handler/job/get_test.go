@@ -27,7 +27,7 @@ func TestGetJob(t *testing.T) {
 	var jobID string
 	{
 		job, err := CreateJob(context.Background(), db, &model.JobRequest{
-			ClientID:   "klaus",
+			ClientID:   "foo",
 			Workflow:   wf.Name,
 			Definition: map[string]interface{}{"foo": "bar"},
 		})
@@ -38,8 +38,8 @@ func TestGetJob(t *testing.T) {
 	job, err := GetJob(context.Background(), db, jobID, false)
 	assert.NoError(t, err)
 	assert.Equal(t, jobID, job.ID)
-	assert.Equal(t, job.Mtime, job.Stime)
-	assert.GreaterOrEqual(t, time.Time(job.Mtime).UnixMicro(), now.UnixMicro())
+	assert.Equal(t, *job.Mtime, *job.Stime)
+	assert.GreaterOrEqual(t, time.Time(*job.Mtime).UnixMicro(), now.UnixMicro())
 	assert.Equal(t, "adc1cfc1577119ba2a0852133340088390c1103bdf82d8102970d3e6c53ec10b", job.Status.DefinitionHash)
 }
 

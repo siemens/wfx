@@ -10,21 +10,29 @@ package api
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/ftag"
 	"github.com/siemens/wfx/generated/southbound/restapi/operations/southbound"
 	"github.com/siemens/wfx/internal/producer"
+	"github.com/siemens/wfx/persistence"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSouthboundGetJobsIDStatusHandler_NotFound(t *testing.T) {
-	api := NewSouthboundAPI(&faultyStorage{notFound: true})
-
 	params := southbound.NewGetJobsIDStatusParams()
+	jobID := "42"
+	params.ID = jobID
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
+	dbMock := persistence.NewMockStorage(t)
+	dbMock.EXPECT().GetJob(params.HTTPRequest.Context(), params.ID, persistence.FetchParams{}).Return(nil, fault.Wrap(fmt.Errorf("job with id %s does not exist", jobID), ftag.With(ftag.NotFound)))
 
+	api := NewSouthboundAPI(dbMock)
 	resp := api.SouthboundGetJobsIDStatusHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
@@ -35,11 +43,14 @@ func TestSouthboundGetJobsIDStatusHandler_NotFound(t *testing.T) {
 }
 
 func TestSouthboundPutJobsIDStatusHandler_NotFound(t *testing.T) {
-	api := NewSouthboundAPI(&faultyStorage{notFound: true})
-
 	params := southbound.NewPutJobsIDStatusParams()
+	jobID := "42"
+	params.ID = jobID
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
+	dbMock := persistence.NewMockStorage(t)
+	dbMock.EXPECT().GetJob(params.HTTPRequest.Context(), params.ID, persistence.FetchParams{}).Return(nil, fault.Wrap(fmt.Errorf("job with id %s does not exist", jobID), ftag.With(ftag.NotFound)))
 
+	api := NewSouthboundAPI(dbMock)
 	resp := api.SouthboundPutJobsIDStatusHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
@@ -50,10 +61,14 @@ func TestSouthboundPutJobsIDStatusHandler_NotFound(t *testing.T) {
 }
 
 func TestSouthboundGetJobsHandler_InternalError(t *testing.T) {
-	api := NewSouthboundAPI(&faultyStorage{})
-
 	params := southbound.NewGetJobsParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
+	dbMock := persistence.NewMockStorage(t)
+	dbMock.EXPECT().
+		QueryJobs(params.HTTPRequest.Context(), persistence.FilterParams{}, persistence.SortParams{}, persistence.PaginationParams{Limit: 10}).
+		Return(nil, errors.New("something went wrong"))
+
+	api := NewSouthboundAPI(dbMock)
 	resp := api.SouthboundGetJobsHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
@@ -64,10 +79,15 @@ func TestSouthboundGetJobsHandler_InternalError(t *testing.T) {
 }
 
 func TestSouthboundGetJobsIDHandler_NotFound(t *testing.T) {
-	api := NewSouthboundAPI(&faultyStorage{notFound: true})
-
 	params := southbound.NewGetJobsIDParams()
+
+	jobID := "42"
+	params.ID = jobID
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
+	dbMock := persistence.NewMockStorage(t)
+	dbMock.EXPECT().GetJob(params.HTTPRequest.Context(), params.ID, persistence.FetchParams{}).Return(nil, fault.Wrap(fmt.Errorf("job with id %s does not exist", jobID), ftag.With(ftag.NotFound)))
+
+	api := NewSouthboundAPI(dbMock)
 	resp := api.SouthboundGetJobsIDHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
@@ -78,12 +98,16 @@ func TestSouthboundGetJobsIDHandler_NotFound(t *testing.T) {
 }
 
 func TestSouthboundGetJobsIDHandler_InternalError(t *testing.T) {
-	api := NewSouthboundAPI(&faultyStorage{})
-
 	params := southbound.NewGetJobsIDParams()
+	jobID := "42"
+	params.ID = jobID
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
 	history := true
 	params.History = &history
+	dbMock := persistence.NewMockStorage(t)
+	dbMock.EXPECT().GetJob(params.HTTPRequest.Context(), params.ID, persistence.FetchParams{History: history}).Return(nil, errors.New("something went wrong"))
+
+	api := NewSouthboundAPI(dbMock)
 	resp := api.SouthboundGetJobsIDHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
@@ -94,10 +118,14 @@ func TestSouthboundGetJobsIDHandler_InternalError(t *testing.T) {
 }
 
 func TestSouthboundGetJobsIDStatusHandler_InternalError(t *testing.T) {
-	api := NewSouthboundAPI(&faultyStorage{})
-
 	params := southbound.NewGetJobsIDStatusParams()
+	jobID := "42"
+	params.ID = jobID
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
+	dbMock := persistence.NewMockStorage(t)
+	dbMock.EXPECT().GetJob(params.HTTPRequest.Context(), params.ID, persistence.FetchParams{}).Return(nil, errors.New("something went wrong"))
+
+	api := NewSouthboundAPI(dbMock)
 	resp := api.SouthboundGetJobsIDStatusHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
@@ -108,10 +136,14 @@ func TestSouthboundGetJobsIDStatusHandler_InternalError(t *testing.T) {
 }
 
 func TestSouthboundPutJobsIDStatusHandler_InternalError(t *testing.T) {
-	api := NewSouthboundAPI(&faultyStorage{})
-
 	params := southbound.NewPutJobsIDStatusParams()
+	jobID := "42"
+	params.ID = jobID
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
+	dbMock := persistence.NewMockStorage(t)
+	dbMock.EXPECT().GetJob(params.HTTPRequest.Context(), params.ID, persistence.FetchParams{}).Return(nil, errors.New("something went wrong"))
+
+	api := NewSouthboundAPI(dbMock)
 	resp := api.SouthboundPutJobsIDStatusHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
@@ -122,10 +154,14 @@ func TestSouthboundPutJobsIDStatusHandler_InternalError(t *testing.T) {
 }
 
 func TestSouthboundGetJobsIDDefinitionHandler_NotFound(t *testing.T) {
-	api := NewSouthboundAPI(&faultyStorage{notFound: true})
-
 	params := southbound.NewGetJobsIDDefinitionParams()
+	jobID := "42"
+	params.ID = jobID
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
+	dbMock := persistence.NewMockStorage(t)
+	dbMock.EXPECT().GetJob(params.HTTPRequest.Context(), params.ID, persistence.FetchParams{}).Return(nil, fault.Wrap(fmt.Errorf("job with id %s does not exist", jobID), ftag.With(ftag.NotFound)))
+
+	api := NewSouthboundAPI(dbMock)
 	resp := api.SouthboundGetJobsIDDefinitionHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
@@ -136,10 +172,14 @@ func TestSouthboundGetJobsIDDefinitionHandler_NotFound(t *testing.T) {
 }
 
 func TestSouthboundGetJobsIDDefinitionHandler_InternalError(t *testing.T) {
-	api := NewSouthboundAPI(&faultyStorage{})
-
 	params := southbound.NewGetJobsIDDefinitionParams()
+	jobID := "42"
+	params.ID = jobID
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
+	dbMock := persistence.NewMockStorage(t)
+	dbMock.EXPECT().GetJob(params.HTTPRequest.Context(), params.ID, persistence.FetchParams{}).Return(nil, errors.New("something went wrong"))
+
+	api := NewSouthboundAPI(dbMock)
 	resp := api.SouthboundGetJobsIDDefinitionHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
@@ -150,10 +190,14 @@ func TestSouthboundGetJobsIDDefinitionHandler_InternalError(t *testing.T) {
 }
 
 func TestSouthboundPutJobsIDDefinitionHandler_NotFound(t *testing.T) {
-	api := NewSouthboundAPI(&faultyStorage{notFound: true})
-
 	params := southbound.NewPutJobsIDDefinitionParams()
+	jobID := "42"
+	params.ID = jobID
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
+	dbMock := persistence.NewMockStorage(t)
+	dbMock.EXPECT().GetJob(params.HTTPRequest.Context(), params.ID, persistence.FetchParams{}).Return(nil, fault.Wrap(fmt.Errorf("job with id %s does not exist", jobID), ftag.With(ftag.NotFound)))
+
+	api := NewSouthboundAPI(dbMock)
 	resp := api.SouthboundPutJobsIDDefinitionHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
@@ -164,10 +208,14 @@ func TestSouthboundPutJobsIDDefinitionHandler_NotFound(t *testing.T) {
 }
 
 func TestSouthboundPutJobsIDDefinitionHandler_InternalError(t *testing.T) {
-	api := NewSouthboundAPI(&faultyStorage{})
-
 	params := southbound.NewPutJobsIDDefinitionParams()
+	jobID := "42"
+	params.ID = jobID
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
+	dbMock := persistence.NewMockStorage(t)
+	dbMock.EXPECT().GetJob(params.HTTPRequest.Context(), params.ID, persistence.FetchParams{}).Return(nil, errors.New("something went wrong"))
+
+	api := NewSouthboundAPI(dbMock)
 	resp := api.SouthboundPutJobsIDDefinitionHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
@@ -178,10 +226,14 @@ func TestSouthboundPutJobsIDDefinitionHandler_InternalError(t *testing.T) {
 }
 
 func TestSouthboundGetWorkflowsNameHandler_InternalError(t *testing.T) {
-	api := NewSouthboundAPI(&faultyStorage{})
-
 	params := southbound.NewGetWorkflowsNameParams()
+	params.Name = "wfx.test.workflow"
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
+	dbMock := persistence.NewMockStorage(t)
+	dbMock.EXPECT().GetWorkflow(params.HTTPRequest.Context(), params.Name).Return(nil, errors.New("something went wrong"))
+
+	api := NewSouthboundAPI(dbMock)
+
 	resp := api.SouthboundGetWorkflowsNameHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
@@ -192,10 +244,12 @@ func TestSouthboundGetWorkflowsNameHandler_InternalError(t *testing.T) {
 }
 
 func TestSouthboundGetWorkflowsHandler_InternalError(t *testing.T) {
-	api := NewSouthboundAPI(&faultyStorage{})
-
 	params := southbound.NewGetWorkflowsParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
+	dbMock := persistence.NewMockStorage(t)
+	dbMock.EXPECT().QueryWorkflows(params.HTTPRequest.Context(), persistence.PaginationParams{Limit: 10}).Return(nil, errors.New("something went wrong"))
+
+	api := NewSouthboundAPI(dbMock)
 	resp := api.SouthboundGetWorkflowsHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
@@ -206,9 +260,13 @@ func TestSouthboundGetWorkflowsHandler_InternalError(t *testing.T) {
 }
 
 func TestSouthboundGetWorkflowsHandler_Empty(t *testing.T) {
-	api := NewSouthboundAPI(&faultyStorage{notFound: true})
-
 	params := southbound.NewGetWorkflowsParams()
+	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
+	dbMock := persistence.NewMockStorage(t)
+	dbMock.EXPECT().QueryWorkflows(params.HTTPRequest.Context(), persistence.PaginationParams{Limit: 10}).Return(nil, nil)
+
+	api := NewSouthboundAPI(dbMock)
+
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
 	resp := api.SouthboundGetWorkflowsHandler.Handle(params)
 
@@ -220,10 +278,13 @@ func TestSouthboundGetWorkflowsHandler_Empty(t *testing.T) {
 }
 
 func TestSouthboundGetJobsIDTagsHandler_NotFound(t *testing.T) {
-	api := NewSouthboundAPI(&faultyStorage{notFound: true})
-
 	params := southbound.NewGetJobsIDTagsParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
+
+	dbMock := persistence.NewMockStorage(t)
+	dbMock.EXPECT().GetJob(params.HTTPRequest.Context(), params.ID, persistence.FetchParams{}).Return(nil, fault.Wrap(errors.New("not found"), ftag.With(ftag.NotFound)))
+
+	api := NewSouthboundAPI(dbMock)
 	resp := api.SouthboundGetJobsIDTagsHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
@@ -234,10 +295,13 @@ func TestSouthboundGetJobsIDTagsHandler_NotFound(t *testing.T) {
 }
 
 func TestSouthboundGetJobsIDTagsHandler_InternalError(t *testing.T) {
-	api := NewSouthboundAPI(&faultyStorage{})
-
 	params := southbound.NewGetJobsIDTagsParams()
 	params.HTTPRequest = httptest.NewRequest(http.MethodGet, "http://localhost", new(bytes.Buffer))
+
+	dbMock := persistence.NewMockStorage(t)
+	dbMock.EXPECT().GetJob(params.HTTPRequest.Context(), params.ID, persistence.FetchParams{}).Return(nil, fault.Wrap(errors.New("something went wrong"), ftag.With(ftag.Internal)))
+
+	api := NewSouthboundAPI(dbMock)
 	resp := api.SouthboundGetJobsIDTagsHandler.Handle(params)
 
 	recorder := httptest.NewRecorder()
@@ -245,4 +309,20 @@ func TestSouthboundGetJobsIDTagsHandler_InternalError(t *testing.T) {
 	response := recorder.Result()
 
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
+}
+
+func TestParseFilterParamsSouth(t *testing.T) {
+	jobIDs := "abc,424-194-123"
+	clientIDs := "alpha,beta"
+	workflows := "wf1,wf2,wf3"
+	params := southbound.GetJobsEventsParams{
+		HTTPRequest: &http.Request{},
+		JobIds:      &jobIDs,
+		ClientIds:   &clientIDs,
+		Workflows:   &workflows,
+	}
+	filter := parseFilterParamsSouth(params)
+	assert.Equal(t, []string{"abc", "424-194-123"}, filter.JobIDs)
+	assert.Equal(t, []string{"alpha", "beta"}, filter.ClientIDs)
+	assert.Equal(t, []string{"wf1", "wf2", "wf3"}, filter.Workflows)
 }

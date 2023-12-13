@@ -40,7 +40,7 @@ func TestUpdateJobStatus(t *testing.T) {
 	port, _ := strconv.Atoi(u.Port())
 	_ = flags.Koanf.Set(flags.ClientPortFlag, port)
 
-	_ = flags.Koanf.Set(clientIDFlag, "klaus")
+	_ = flags.Koanf.Set(clientIDFlag, "foo")
 	_ = flags.Koanf.Set(messageFlag, "this is a test")
 	_ = flags.Koanf.Set(progressFlag, int32(42))
 	_ = flags.Koanf.Set(stateFlag, "DOWNLOADED")
@@ -51,5 +51,5 @@ func TestUpdateJobStatus(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, "/api/wfx/v1/jobs/1/status", actualPath)
-	assert.JSONEq(t, `{"clientId": "klaus", "message":"this is a test","progress":42,"state":"DOWNLOADED"}`, string(body))
+	assert.JSONEq(t, `{"clientId": "foo", "message":"this is a test","progress":42,"state":"DOWNLOADED"}`, string(body))
 }

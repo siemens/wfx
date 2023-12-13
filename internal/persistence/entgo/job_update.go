@@ -60,7 +60,7 @@ func doUpdateJob(ctx context.Context, tx *ent.Tx, job *model.Job, request persis
 
 	updater := tx.Job.UpdateOneID(job.ID)
 
-	oldMtime := time.Time(job.Mtime)
+	oldMtime := time.Time(*job.Mtime)
 
 	if request.Status != nil {
 		updater.SetStatus(*request.Status)

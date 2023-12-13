@@ -30,6 +30,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.18
 	github.com/muesli/mango-cobra v1.2.0
 	github.com/muesli/roff v0.1.0
+	github.com/olebedev/emitter v0.0.0-20230411050614-349169dec2ba
 	github.com/rs/cors v1.10.1
 	github.com/rs/zerolog v1.31.0
 	github.com/spf13/cobra v1.8.0
@@ -37,6 +38,7 @@ require (
 	github.com/steinfletcher/apitest v1.5.15
 	github.com/steinfletcher/apitest-jsonpath v1.7.2
 	github.com/stretchr/testify v1.8.4
+	github.com/tmaxmax/go-sse v0.6.0
 	github.com/tsenart/vegeta/v12 v12.11.1
 	github.com/yourbasic/graph v0.0.0-20210606180040-8ecfec1c2869
 	go.uber.org/automaxprocs v1.5.3
@@ -83,11 +85,12 @@ require (
 	go.opentelemetry.io/otel/trace v1.16.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	golang.org/x/crypto v0.14.0 // indirect
-	golang.org/x/mod v0.12.0 // indirect
+	golang.org/x/mod v0.13.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 )
 
 require (
+	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/go-openapi/analysis v0.21.4 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
@@ -104,6 +107,7 @@ require (
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	go.mongodb.org/mongo-driver v1.12.0 // indirect
 	go.opentelemetry.io/otel/metric v1.16.0 // indirect
+	golang.org/x/exp v0.0.0-20231006140011-7918f672742d // indirect
 	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect

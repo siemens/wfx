@@ -10,18 +10,40 @@ package job
 
 import (
 	"context"
+	"time"
 
 	"github.com/Southclaws/fault"
+	"github.com/go-openapi/strfmt"
+	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/internal/handler/job/events"
 	"github.com/siemens/wfx/middleware/logging"
 	"github.com/siemens/wfx/persistence"
 )
 
 func DeleteJob(ctx context.Context, storage persistence.Storage, jobID string) error {
 	log := logging.LoggerFromCtx(ctx)
-	if err := storage.DeleteJob(ctx, jobID); err != nil {
-		log.Err(err).Str("id", jobID).Msg("Failed to delete job")
+
+	// we have to fetch the job because we need the `ClientID` and `Workflow` for
+	// the job event notification
+	job, err := storage.GetJob(ctx, jobID, persistence.FetchParams{History: false})
+	if err != nil {
 		return fault.Wrap(err)
 	}
+
+	if err := storage.DeleteJob(ctx, jobID); err != nil {
+		return fault.Wrap(err)
+	}
+
+	_ = events.PublishEvent(ctx, &events.JobEvent{
+		Ctime:  strfmt.DateTime(time.Now()),
+		Action: events.ActionDelete,
+		Job: &model.Job{
+			ID:       jobID,
+			ClientID: job.ClientID,
+			Workflow: &model.Workflow{Name: job.Workflow.Name},
+		},
+	})
+
 	log.Info().Str("id", jobID).Msg("Deleted job")
 	return nil
 }

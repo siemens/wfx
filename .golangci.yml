@@ -79,14 +79,15 @@ linters:
     - gocritic
     - gofumpt
     - importas
+    - misspell
     - nilnil
     - prealloc
     - reassign
     - revive
     - stylecheck
+    - tparallel
     - usestdlibvars
     - wrapcheck
-    - misspell
 
 linters-settings:
   staticcheck:

@@ -35,7 +35,7 @@ type Job struct {
 
 	// The job's history. Last in, first out (LIFO). Array is truncated if its length exceeds the maximum allowed length.
 	// Max Items: 8192
-	History []*History `json:"history"`
+	History []*History `json:"history,omitempty"`
 
 	// Unique job ID (wfx-generated)
 	// Example: 3307e5cb-074c-49b7-99d4-5e61839a4c2d
@@ -46,18 +46,18 @@ type Job struct {
 	// Date and time (ISO8601) when the job was last modified (set by wfx)
 	// Read Only: true
 	// Format: date-time
-	Mtime strfmt.DateTime `json:"mtime,omitempty"`
+	Mtime *strfmt.DateTime `json:"mtime,omitempty"`
 
 	// status
 	Status *JobStatus `json:"status,omitempty"`
 
-	// Date and time (ISO8601) when the job was created (set by wfx)
+	// Date and time (ISO8601) when the job was created (set by wfx). Although stime conceptually always exists, it's nullable because we don't want to serialize stime in some cases (e.g. for job events).
 	// Read Only: true
 	// Format: date-time
-	Stime strfmt.DateTime `json:"stime,omitempty"`
+	Stime *strfmt.DateTime `json:"stime,omitempty"`
 
 	// tags
-	Tags []string `json:"tags"`
+	Tags []string `json:"tags,omitempty"`
 
 	// workflow
 	Workflow *Workflow `json:"workflow,omitempty"`
@@ -273,7 +273,7 @@ func (m *Job) contextValidateID(ctx context.Context, formats strfmt.Registry) er
 
 func (m *Job) contextValidateMtime(ctx context.Context, formats strfmt.Registry) error {
 
-	if err := validate.ReadOnly(ctx, "mtime", "body", strfmt.DateTime(m.Mtime)); err != nil {
+	if err := validate.ReadOnly(ctx, "mtime", "body", m.Mtime); err != nil {
 		return err
 	}
 
@@ -303,7 +303,7 @@ func (m *Job) contextValidateStatus(ctx context.Context, formats strfmt.Registry
 
 func (m *Job) contextValidateStime(ctx context.Context, formats strfmt.Registry) error {
 
-	if err := validate.ReadOnly(ctx, "stime", "body", strfmt.DateTime(m.Stime)); err != nil {
+	if err := validate.ReadOnly(ctx, "stime", "body", m.Stime); err != nil {
 		return err
 	}
 

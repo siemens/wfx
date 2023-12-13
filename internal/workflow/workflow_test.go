@@ -18,8 +18,14 @@ import (
 
 func TestFindStateGroup(t *testing.T) {
 	workflow := dau.PhasedWorkflow()
-	group := FindStateGroup(workflow, "DOWNLOAD")
-	assert.Equal(t, "OPEN", group)
+	{
+		group := FindStateGroup(workflow, "DOWNLOAD")
+		assert.Equal(t, "OPEN", group)
+	}
+	{
+		group := FindStateGroup(workflow, "FOO")
+		assert.Equal(t, "", group)
+	}
 }
 
 func TestFollowTransitions(t *testing.T) {

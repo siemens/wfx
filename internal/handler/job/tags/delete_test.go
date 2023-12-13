@@ -14,6 +14,7 @@ import (
 	"testing"
 
 	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/internal/handler/job/events"
 	"github.com/siemens/wfx/persistence"
 	"github.com/siemens/wfx/workflow/dau"
 	"github.com/stretchr/testify/assert"
@@ -26,16 +27,26 @@ func TestDelete(t *testing.T) {
 	wf, err := db.CreateWorkflow(context.Background(), dau.DirectWorkflow())
 	require.NoError(t, err)
 	job, err := db.CreateJob(context.Background(), &model.Job{
-		ClientID: "klaus",
+		ClientID: "foo",
 		Workflow: wf,
 		Status:   &model.JobStatus{State: "INSTALL"},
 		Tags:     []string{"foo", "bar"},
 	})
 	require.NoError(t, err)
 
+	ch, err := events.AddSubscriber(context.Background(), events.FilterParams{}, nil)
+	require.NoError(t, err)
+
 	tags, err := Delete(context.Background(), db, job.ID, []string{"foo"})
 	require.NoError(t, err)
-	assert.Equal(t, []string{"bar"}, tags)
+	expectedTags := []string{"bar"}
+	assert.Equal(t, expectedTags, tags)
+
+	ev := <-ch
+	jobEvent := ev.Args[0].(*events.JobEvent)
+	assert.Equal(t, events.ActionDeleteTags, jobEvent.Action)
+	assert.Equal(t, job.ID, jobEvent.Job.ID)
+	assert.Equal(t, expectedTags, jobEvent.Job.Tags)
 }
 
 func TestDelete_FaultyStorageGet(t *testing.T) {

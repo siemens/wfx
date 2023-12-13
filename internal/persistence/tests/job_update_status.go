@@ -36,7 +36,7 @@ func TestUpdateJobStatus(t *testing.T, db persistence.Storage) {
 	update := model.JobStatus{Message: message, State: "ACTIVATING"}
 	updatedJob, err := db.UpdateJob(context.Background(), job, persistence.JobUpdate{Status: &update})
 	assert.NoError(t, err)
-	assert.Greater(t, updatedJob.Mtime, mtime)
+	assert.Greater(t, *updatedJob.Mtime, *mtime)
 	assert.Equal(t, "ACTIVATING", updatedJob.Status.State)
 	assert.Equal(t, message, updatedJob.Status.Message)
 	assert.Len(t, updatedJob.History, 0)
@@ -45,7 +45,7 @@ func TestUpdateJobStatus(t *testing.T, db persistence.Storage) {
 		job, err := db.GetJob(context.Background(), job.ID, persistence.FetchParams{History: true})
 		require.NoError(t, err)
 		assert.Len(t, job.History, 1)
-		assert.Equal(t, job.Stime, job.History[0].Mtime)
+		assert.Equal(t, *job.Stime, job.History[0].Mtime)
 	}
 }
 

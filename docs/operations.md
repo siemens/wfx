@@ -28,6 +28,140 @@ Clients may inspect this specification at run-time so to obey the various limits
 
 For convenience, wfx includes a built-in Swagger UI accessible at runtime via <http://localhost:8080/api/wfx/v1/docs>, assuming default listening host and port [configuration](configuration.md).
 
+### Job Events
+
+Job events provide a notification mechanism that informs clients about certain operations happening on jobs.
+This approach eliminates the need for clients to continuously poll wfx, thus optimizing network usage and client resources.
+Job events can be useful for user interfaces (UIs) and other applications that demand near-instantaneous updates.
+
+#### Architecture
+
+Below is a high-level overview of how the communication flow operates:
+
+```txt
+ ┌────────┐                            ┌─────┐
+ │ Client │                            │ wfx │
+ └────────┘                            └─────┘
+     |                                    |
+     |        HTTP GET /jobs/events       |
+     |-----------------------------------►|
+     |                                    |
+     |                                    |
+     |           Event Loop               |
+ ┌───|────────────────────────────────────|───┐
+ │   |  [Content-Type: text/event-stream] |   │
+ │   |                                    |   │
+ │   |                                    |   │
+ │   |            Push Event              |   │
+ │   |◄-----------------------------------|   │
+ │   |                                    |   │
+ └───|────────────────────────────────────|───┘
+     |                                    |
+     ▼                                    ▼
+ ┌────────┐                            ┌─────┐
+ │ Client │                            │ wfx │
+ └────────┘                            └─────┘
+```
+
+1. The client initiates communication by sending an HTTP `GET` request to the `/jobs/events` endpoint. Clients may also
+   include optional [filter parameters](#filter-parameters) within the request.
+2. Upon receipt of the request, `wfx` sets the `Content-Type` header to `text/event-stream`.
+3. The server then initiates a stream of job events in the response body, allowing clients to receive instant updates.
+
+#### Event Format Specification
+
+The job events stream is composed of [server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events) (SSE).
+Accordingly, the stream is structured as follows:
+
+```
+data: [...]
+id: 1
+
+data: [...]
+id: 2
+
+[...]
+```
+
+An individual event within the stream conforms to this format:
+
+```
+data: { "action": "<ACTION>", "ctime": <CTIME>, "tags": <TAGS>, "job": <JOB> }
+id: <EVENT_ID>\n\n
+```
+
+**Note**: Each event is terminated by a pair of newline characters `\n\n` (as required by the SSE spec).
+
+The semantics of the individual fields is:
+
+- `<ACTION>` specifies the type of event that occurred. The valid actions are:
+  - `CREATE`: a new job has been created
+  - `DELETE`: an existing job has been deleted
+  - `ADD_TAGS`: tags were added to a job
+  - `DELETE_TAGS`: tags were removed from a job
+  - `UPDATE_STATUS`: job status has been updated
+  - `UPDATE_DEFINITION`: job definition has been updated
+- `<CTIME>`: event creation time (ISO8601)
+- `<TAGS>`: JSON array of tags as provided by the client
+- `<JOB>` is a JSON object containing the portion of the job object which was changed, e.g., for an `UPDATE_STATUS` event, the job status is sent but not its definition. To enable [filtering](#filter-parameters), the fields `id`, `clientId` and `workflow.name` are _always_ part of the response.
+- `<EVENT_ID>`: an integer which uniquely identifies each event, starting at 1 and incrementing by 1 for every subsequent event. Clients can use this to identify any missed messages. If an overflow occurs, the integer resets to zero, a scenario the client can recognize and address.
+
+**Example:**
+
+```
+data: {"action":"UPDATE_STATUS","job":{"clientId":"Dana","id":"c6698105-6386-4940-a311-de1b57e3faeb","status":{"definitionHash":"adc1cfc1577119ba2a0852133340088390c1103bdf82d8102970d3e6c53ec10b","state":"PROGRESS"},"workflow":{"name":"wfx.workflow.kanban"}}}
+id: 1\n\n
+```
+
+#### Filter Parameters
+
+Job events can be filtered using any combination of the following parameters:
+
+- Job IDs
+- Client IDs
+- Workflow Names
+
+This enables more precise control over the dispatched events. Note that it is entirely possible to subscribe multiple
+times to job events using various filters in order to create a more advanced event recognition model.
+
+#### Examples
+
+`wfxctl` offers a reference client implementation. The following command subscribes to **all** job events:
+
+```bash
+wfxctl job events
+```
+
+This may result in a large number of events, though. For a more targeted approach, filter parameters may be used.
+Assuming the job IDs are known (either because the jobs have been created already or the IDs are received via another
+subscription channel), the following will subscribe to events matching either of the two specified job IDs:
+
+```bash
+wfxctl job events --job-id=d305e539-1d41-4c95-b19a-2a7055c469d0 --job-id=e692ad92-45e6-4164-b3fd-8c6aa884011c
+```
+
+See `wfxctl job events --help` for other filter parameters, e.g. workflow names.
+
+#### Considerations and Limitations
+
+1. **Asynchronous Job Status Updates**: Job status updates are dispatched asynchronously to avoid the risk of a
+   subscriber interfering with the actual job operation. In particular, there is no guarantee that the messages sent to
+   the client arrive in a linear order (another reason for that may be networking-related). While this is typically not
+   a concern, it could become an issue in high-concurrency situations. For example, when multiple clients try to modify
+   the same job or when a single client issues a rapid sequence of status updates. As a result, messages could arrive in
+   a not necessarily linear order, possibly deviating from the client's expectation. However, the client can use the
+   (event) `id` and `ctime` fields to establish a natural ordering of events as emitted by wfx.
+2. **Unacknowledged Server-Sent Events (SSE)**: SSE operates on a one-way communication model and does not include an
+   acknowledgment or handshake protocol to confirm message delivery. This design choice aligns with the fundamental
+   principles of SSE but does mean that there's a possibility some events may not reach the intended subscriber (which
+   the client can possibly detect by keeping track of SSE event IDs).
+3. **Event Stream Orchestration**: Each wfx instance only yields the events happening on that instance. Consequently, if
+   there are multiple wfx instances, a consolidated "global" event stream can only be assembled by subscribing to all
+   wfx instances (and aggregating the events).
+4. **Browser Connection Limits for SSE**: Web browsers typically restrict the number of SSE connections to six per
+   domain. To overcome this limitation, HTTP/2 can be used, allowing up to 100 connections by default, or [filter
+   parameters](#filter-parameters) can be utilized to efficiently manage the connections.
+
 ### Response Filters
 
 wfx allows server-side response content filtering prior to sending the response to the client so to tailor it to client information needs.

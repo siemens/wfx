@@ -68,8 +68,6 @@ definitions:
     type: object
     required:
       - name
-      - states
-      - transitions
     properties:
       name:
         type: string
@@ -86,18 +84,19 @@ definitions:
         example: This is a workflow
       states:
         type: array
-        minItems: 1
+        x-omitempty: true
         <<: *maxStateCount
         items:
           $ref: "#/definitions/State"
       groups:
         type: array
+        x-omitempty: true
         <<: *maxGroupCount
         items:
           $ref: "#/definitions/Group"
       transitions:
         type: array
-        minItems: 1
+        x-omitempty: true
         <<: *maxTransitionCount
         items:
           $ref: "#/definitions/Transition"
@@ -266,6 +265,7 @@ definitions:
         $ref: "#/definitions/Workflow"
       tags:
         type: array
+        x-omitempty: true
         items:
           type: string
           <<: *maxTagsCount
@@ -278,18 +278,21 @@ definitions:
       status:
         $ref: "#/definitions/JobStatus"
       stime:
-        description: Date and time (ISO8601) when the job was created (set by wfx)
+        description: Date and time (ISO8601) when the job was created (set by wfx). Although stime conceptually always exists, it's nullable because we don't want to serialize stime in some cases (e.g. for job events).
         type: string
         format: date-time
         readOnly: true
+        x-nullable: true
       mtime:
         description: Date and time (ISO8601) when the job was last modified (set by wfx)
         type: string
         format: date-time
         readOnly: true
+        x-nullable: true
       history:
         description: The job's history. Last in, first out (LIFO). Array is truncated if its length exceeds the maximum allowed length.
         type: array
+        x-omitempty: true
         <<: *maxHistoryCount
         items:
           $ref: "#/definitions/History"
@@ -426,6 +429,11 @@ x-paths-templates:
       code: wfx.jobNotFound
       logref: 11cc67762090e15b79a1387eca65ba65
       message: Job ID was not found
+
+    jobTerminalStateError: &jobTerminalStateError
+      code: wfx.jobTerminalState
+      logref: 916f0a913a3e4a52a96bd271e029c201
+      message: The request was invalid because the job is in a terminal state
 
     workflowNotFoundError: &workflowNotFoundError
       code: wfx.workflowNotFound
@@ -655,6 +663,67 @@ paths:
             Error responses occurring at this operation for invalid requests:
               errors:
                 - <<: *invalidRequestError
+
+  /jobs/events:
+    get:
+      summary: Subscribe to job-related events such as status updates
+      description: >
+        Obtain instant notifications when there are job changes matching the criteria.
+        This endpoint utilizes server-sent events (SSE), where responses are "chunked" with double newline breaks.
+        For example, a single event might look like this:
+          data: {"clientId":"example_client","state":"INSTALLING"}\n\n
+      tags:
+        - jobs
+        - northbound
+        - southbound
+      produces:
+        - application/json
+        - text/event-stream
+      parameters:
+        - name: clientIds
+          in: query
+          description: The job's clientId must be one of these clientIds (comma-separated).
+          required: false
+          type: string
+        - name: jobIds
+          in: query
+          description: The job's id must be one of these ids (comma-separated).
+          required: false
+          type: string
+        - name: workflows
+          in: query
+          description: The job's workflow must be equal to one of the provided workflow names (comma-separated).
+          required: false
+          type: string
+        - name: tags
+          in: query
+          description: >
+            A (comma-separated) list of tags to include into each job event.
+            This can be used to aggregrate events from multiple wfx instances.
+          required: false
+          type: string
+
+      responses:
+        "default":
+          description: Other error with any status code and response body format
+        "200":
+          description: A stream of server-sent events
+        "400":
+          description: Bad Request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            Error responses occurring at this operation for invalid requests:
+              errors:
+                - <<: *jobTerminalStateError
+        "404":
+          description: Not Found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            Error responses occurring at this operation while updating a non-existent job:
+              errors:
+                - <<: *jobNotFoundError
 
   /jobs/{id}:
     get:

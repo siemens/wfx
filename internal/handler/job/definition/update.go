@@ -12,10 +12,13 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
+	"time"
 
 	"github.com/Southclaws/fault"
 	"github.com/cnf/structhash"
+	"github.com/go-openapi/strfmt"
 	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/internal/handler/job/events"
 	"github.com/siemens/wfx/middleware/logging"
 	"github.com/siemens/wfx/persistence"
 )
@@ -38,6 +41,20 @@ func Update(ctx context.Context, storage persistence.Storage, jobID string, defi
 		contextLogger.Err(err).Msg("Failed to update job")
 		return nil, fault.Wrap(err)
 	}
+
+	_ = events.PublishEvent(ctx, &events.JobEvent{
+		Ctime:  strfmt.DateTime(time.Now()),
+		Action: events.ActionUpdateDefinition,
+		Job: &model.Job{
+			ID:         result.ID,
+			ClientID:   result.ClientID,
+			Workflow:   &model.Workflow{Name: job.Workflow.Name},
+			Definition: result.Definition,
+			Status: &model.JobStatus{
+				DefinitionHash: result.Status.DefinitionHash,
+			},
+		},
+	})
 
 	contextLogger.Info().Msg("Updated job definition")
 	return result.Definition, nil

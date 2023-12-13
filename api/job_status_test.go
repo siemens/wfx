@@ -80,7 +80,7 @@ func TestJobStatusUpdate(t *testing.T) {
 	apitest.New().
 		Handler(south).
 		Put(statusPath).
-		Body(`{"clientId": "klaus", "state":"DOWNLOAD"}`).
+		Body(`{"clientId": "foo", "state":"DOWNLOAD"}`).
 		ContentType("application/json").
 		Expect(t).
 		Status(http.StatusBadRequest).
@@ -90,7 +90,7 @@ func TestJobStatusUpdate(t *testing.T) {
 	apitest.New().
 		Handler(north).
 		Put(statusPath).
-		Body(`{"clientId": "klaus", "state":"DOWNLOAD"}`).
+		Body(`{"clientId": "foo", "state":"DOWNLOAD"}`).
 		ContentType("application/json").
 		Expect(t).
 		Status(http.StatusOK).
@@ -101,7 +101,7 @@ func TestJobStatusUpdate(t *testing.T) {
 	apitest.New().
 		Handler(north).
 		Put(statusPath).
-		Body(`{"clientId": "klaus", "state":"DOWNLOADING"}`).
+		Body(`{"clientId": "foo", "state":"DOWNLOADING"}`).
 		ContentType("application/json").
 		Expect(t).
 		Status(http.StatusBadRequest).
@@ -111,7 +111,7 @@ func TestJobStatusUpdate(t *testing.T) {
 	apitest.New().
 		Handler(south).
 		Put(statusPath).
-		Body(`{"clientId":"klaus","state":"DOWNLOADING"}`).
+		Body(`{"clientId":"foo","state":"DOWNLOADING"}`).
 		ContentType("application/json").
 		Expect(t).
 		Status(http.StatusOK).

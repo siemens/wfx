@@ -87,6 +87,7 @@ func (b *BaseCmd) CreateHTTPClient() (*http.Client, error) {
 		if err != nil {
 			return nil, fault.Wrap(err)
 		}
+		log.Info().Msg("Using unix-domain socket transport")
 		return &http.Client{
 			Transport: &http.Transport{
 				Dial: func(_, _ string) (net.Conn, error) {
@@ -125,6 +126,10 @@ func (b *BaseCmd) CreateHTTPClient() (*http.Client, error) {
 }
 
 func (b *BaseCmd) CreateClient() *client.WorkflowExecutor {
+	return client.NewHTTPClientWithConfig(strfmt.Default, b.CreateTransportConfig())
+}
+
+func (b *BaseCmd) CreateTransportConfig() *client.TransportConfig {
 	var host string
 	var schemes []string
 	if b.EnableTLS {
@@ -134,11 +139,9 @@ func (b *BaseCmd) CreateClient() *client.WorkflowExecutor {
 		schemes = []string{"http"}
 		host = fmt.Sprintf("%s:%d", b.Host, b.Port)
 	}
-
-	cfg := client.DefaultTransportConfig().
+	return client.DefaultTransportConfig().
 		WithHost(host).
 		WithSchemes(schemes)
-	return client.NewHTTPClientWithConfig(strfmt.Default, cfg)
 }
 
 func (b *BaseCmd) CreateMgmtClient() *client.WorkflowExecutor {

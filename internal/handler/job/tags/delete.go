@@ -10,8 +10,12 @@ package tags
 
 import (
 	"context"
+	"time"
 
 	"github.com/Southclaws/fault"
+	"github.com/go-openapi/strfmt"
+	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/internal/handler/job/events"
 	"github.com/siemens/wfx/middleware/logging"
 	"github.com/siemens/wfx/persistence"
 )
@@ -31,6 +35,18 @@ func Delete(ctx context.Context, storage persistence.Storage, jobID string, tags
 		contextLogger.Err(err).Msg("Failed to delete tags to job")
 		return nil, fault.Wrap(err)
 	}
+
+	_ = events.PublishEvent(ctx, &events.JobEvent{
+		Ctime:  strfmt.DateTime(time.Now()),
+		Action: events.ActionDeleteTags,
+		Job: &model.Job{
+			ID:       updatedJob.ID,
+			ClientID: updatedJob.ClientID,
+			Workflow: updatedJob.Workflow,
+			Tags:     updatedJob.Tags,
+		},
+	})
+
 	contextLogger.Info().Msg("Deleted job tags")
 	return updatedJob.Tags, nil
 }

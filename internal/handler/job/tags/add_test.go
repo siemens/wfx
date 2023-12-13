@@ -11,9 +11,11 @@ package tags
 import (
 	"context"
 	"errors"
+	"sort"
 	"testing"
 
 	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/internal/handler/job/events"
 	"github.com/siemens/wfx/internal/persistence/entgo"
 	"github.com/siemens/wfx/persistence"
 	"github.com/siemens/wfx/workflow/dau"
@@ -27,16 +29,27 @@ func TestAdd(t *testing.T) {
 	wf, err := db.CreateWorkflow(context.Background(), dau.PhasedWorkflow())
 	require.NoError(t, err)
 	job, err := db.CreateJob(context.Background(), &model.Job{
-		ClientID: "klaus",
+		ClientID: "foo",
 		Workflow: wf,
 		Status:   &model.JobStatus{State: "CREATED"},
 	})
 	require.NoError(t, err)
 
-	actual, err := Add(context.Background(), db, job.ID, []string{"foo", "bar"})
+	ch, err := events.AddSubscriber(context.Background(), events.FilterParams{}, nil)
 	require.NoError(t, err)
 
-	assert.Equal(t, []string{"bar", "foo"}, actual)
+	tags := []string{"foo", "bar"}
+	actual, err := Add(context.Background(), db, job.ID, tags)
+	require.NoError(t, err)
+	sort.Strings(tags)
+
+	assert.Equal(t, tags, actual)
+
+	ev := <-ch
+	jobEvent := ev.Args[0].(*events.JobEvent)
+	assert.Equal(t, events.ActionAddTags, jobEvent.Action)
+	assert.Equal(t, job.ID, jobEvent.Job.ID)
+	assert.Equal(t, tags, jobEvent.Job.Tags)
 }
 
 func TestAdd_FaultyStorageGet(t *testing.T) {

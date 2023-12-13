@@ -24,7 +24,7 @@ func TestGet(t *testing.T) {
 	wf, err := db.CreateWorkflow(context.Background(), dau.DirectWorkflow())
 	require.NoError(t, err)
 	job, err := db.CreateJob(context.Background(), &model.Job{
-		ClientID: "klaus",
+		ClientID: "foo",
 		Workflow: wf,
 		Status:   &model.JobStatus{State: "CREATED"},
 		Tags:     []string{"foo", "bar"},
@@ -42,7 +42,7 @@ func TestGetEmpty(t *testing.T) {
 	wf, err := db.CreateWorkflow(context.Background(), dau.DirectWorkflow())
 	require.NoError(t, err)
 	job, err := db.CreateJob(context.Background(), &model.Job{
-		ClientID: "klaus",
+		ClientID: "foo",
 		Workflow: wf,
 		Status:   &model.JobStatus{State: "CREATED"},
 	})

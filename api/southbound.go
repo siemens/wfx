@@ -10,6 +10,7 @@ package api
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/Southclaws/fault/ftag"
 	"github.com/go-openapi/loads"
@@ -20,10 +21,12 @@ import (
 	"github.com/siemens/wfx/generated/southbound/restapi/operations/southbound"
 	"github.com/siemens/wfx/internal/handler/job"
 	"github.com/siemens/wfx/internal/handler/job/definition"
+	"github.com/siemens/wfx/internal/handler/job/events"
 	"github.com/siemens/wfx/internal/handler/job/status"
 	"github.com/siemens/wfx/internal/handler/job/tags"
 	"github.com/siemens/wfx/internal/handler/workflow"
 	"github.com/siemens/wfx/middleware/logging"
+	"github.com/siemens/wfx/middleware/responder/sse"
 	"github.com/siemens/wfx/persistence"
 )
 
@@ -174,5 +177,36 @@ func NewSouthboundAPI(storage persistence.Storage) *operations.WorkflowExecutorA
 			return southbound.NewGetJobsIDTagsOK().WithPayload(tags)
 		})
 
+	serverAPI.SouthboundGetJobsEventsHandler = southbound.GetJobsEventsHandlerFunc(
+		func(params southbound.GetJobsEventsParams) middleware.Responder {
+			ctx := params.HTTPRequest.Context()
+			filter := parseFilterParamsSouth(params)
+			var tags []string
+			if s := params.Tags; s != nil {
+				tags = strings.Split(*s, ",")
+			}
+			eventChan, err := events.AddSubscriber(ctx, filter, tags)
+			if err != nil {
+				return southbound.NewGetJobsEventsDefault(http.StatusInternalServerError)
+			}
+			return sse.Responder(ctx, eventChan)
+		})
+
 	return serverAPI
+}
+
+func parseFilterParamsSouth(params southbound.GetJobsEventsParams) events.FilterParams {
+	// same code as parseFilterParamsNorth but params is from a different package;
+	// this isn't pretty (DRY) but we have a conceptually clear distinction
+	var filter events.FilterParams
+	if ids := params.JobIds; ids != nil {
+		filter.JobIDs = strings.Split(*ids, ",")
+	}
+	if ids := params.ClientIds; ids != nil {
+		filter.ClientIDs = strings.Split(*ids, ",")
+	}
+	if wfs := params.Workflows; wfs != nil {
+		filter.Workflows = strings.Split(*wfs, ",")
+	}
+	return filter
 }

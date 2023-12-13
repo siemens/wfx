@@ -28,7 +28,7 @@ func TestGetJobStatus(t *testing.T) {
 	require.NoError(t, err)
 
 	tmpJob := model.Job{
-		ClientID: "klaus",
+		ClientID: "foo",
 		Workflow: wf,
 		Status:   &model.JobStatus{State: "CREATED"},
 	}
