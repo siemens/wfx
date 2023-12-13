@@ -10,6 +10,7 @@ package workflow
 
 import "github.com/siemens/wfx/generated/model"
 
+// FindStateGroup tries to find the group of a state. If not found, it returns the empty string.
 func FindStateGroup(workflow *model.Workflow, state string) string {
 	for _, group := range workflow.Groups {
 		for _, s := range group.States {

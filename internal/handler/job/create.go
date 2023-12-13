@@ -18,6 +18,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/siemens/wfx/generated/model"
 	"github.com/siemens/wfx/internal/handler/job/definition"
+	"github.com/siemens/wfx/internal/handler/job/events"
 	"github.com/siemens/wfx/internal/workflow"
 	"github.com/siemens/wfx/middleware/logging"
 	"github.com/siemens/wfx/persistence"
@@ -26,7 +27,6 @@ import (
 func CreateJob(ctx context.Context, storage persistence.Storage, request *model.JobRequest) (*model.Job, error) {
 	log := logging.LoggerFromCtx(ctx)
 	contextLogger := log.With().Str("clientId", request.ClientID).Str("name", request.Workflow).Logger()
-	contextLogger.Debug().Msg("Creating new job")
 
 	wf, err := storage.GetWorkflow(ctx, request.Workflow)
 	if err != nil {
@@ -45,8 +45,8 @@ func CreateJob(ctx context.Context, storage persistence.Storage, request *model.
 	job := model.Job{
 		ClientID: request.ClientID,
 		Workflow: wf,
-		Mtime:    now,
-		Stime:    now,
+		Mtime:    &now,
+		Stime:    &now,
 		Status: &model.JobStatus{
 			ClientID: request.ClientID,
 			State:    initialState,
@@ -67,6 +67,12 @@ func CreateJob(ctx context.Context, storage persistence.Storage, request *model.
 		contextLogger.Error().Err(err).Msg("Failed to persist job")
 		return nil, fault.Wrap(err, ftag.With(ftag.Internal))
 	}
+
+	_ = events.PublishEvent(ctx, &events.JobEvent{
+		Ctime:  strfmt.DateTime(time.Now()),
+		Action: events.ActionCreate,
+		Job:    createdJob,
+	})
 
 	contextLogger.Info().Str("id", job.ID).Msg("Created new job")
 	return createdJob, nil

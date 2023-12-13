@@ -121,12 +121,11 @@ func createJobHelper(ctx context.Context, tx *ent.Tx, job *model.Job) (*model.Jo
 		AddTagIDs(allTagIDs...).
 		SetGroup(group)
 
-	var initialTime time.Time
-	if t := time.Time(job.Stime); t != initialTime {
-		builder.SetStime(t)
+	if job.Stime != nil {
+		builder.SetStime(time.Time(*job.Stime))
 	}
-	if t := time.Time(job.Mtime); t != initialTime {
-		builder.SetMtime(t)
+	if job.Mtime != nil {
+		builder.SetMtime(time.Time(*job.Mtime))
 	}
 
 	entity, err := builder.Save(ctx)

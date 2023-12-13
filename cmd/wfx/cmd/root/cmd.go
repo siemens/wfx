@@ -31,6 +31,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/siemens/wfx/cmd/wfx/metadata"
 	"github.com/siemens/wfx/internal/config"
+	"github.com/siemens/wfx/internal/handler/job/events"
 	"github.com/siemens/wfx/persistence"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -222,7 +223,10 @@ Examples of tasks are installation of firmware or other types of commands issued
 			}
 		}
 
-		// Create a context with a timeout to allow outstanding requests to complete
+		// shut down (disconnect) subscribers otherwise we cannot stop the web server due to open connections
+		events.ShutdownSubscribers()
+
+		// create a context with a timeout to allow outstanding requests to complete
 		var timeout time.Duration
 		k.Read(func(k *koanf.Koanf) {
 			timeout = k.Duration(gracefulTimeoutFlag)

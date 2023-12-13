@@ -45,7 +45,7 @@ func TestUpdateJobDefinition(t *testing.T, db persistence.Storage) {
 	time.Sleep(10 * time.Millisecond)
 	updatedJob, err := db.UpdateJob(context.Background(), job, persistence.JobUpdate{Definition: &newDefinition})
 	assert.NoError(t, err)
-	assert.Greater(t, updatedJob.Mtime, mtime)
+	assert.Greater(t, *updatedJob.Mtime, *mtime)
 	assert.Equal(t, "http://localhost/new_file.tgz", updatedJob.Definition["url"])
 	assert.Empty(t, updatedJob.Definition["sha256"])
 }

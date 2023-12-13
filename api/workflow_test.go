@@ -211,8 +211,11 @@ func createNorthAndSouth(t *testing.T, db persistence.Storage) (http.Handler, ht
 }
 
 func persistJob(t *testing.T, db persistence.Storage) *model.Job {
-	wf, err := workflow.CreateWorkflow(context.Background(), db, dau.DirectWorkflow())
-	require.NoError(t, err)
+	wf := dau.DirectWorkflow()
+	if found, _ := workflow.GetWorkflow(context.Background(), db, wf.Name); found == nil {
+		_, err := workflow.CreateWorkflow(context.Background(), db, wf)
+		require.NoError(t, err)
+	}
 
 	jobReq := model.JobRequest{
 		ClientID: "foo",

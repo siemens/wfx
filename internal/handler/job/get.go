@@ -18,16 +18,11 @@ import (
 )
 
 func GetJob(ctx context.Context, storage persistence.Storage, id string, history bool) (*model.Job, error) {
-	log := logging.LoggerFromCtx(ctx)
-	contextLogger := log.With().
-		Str("id", id).
-		Bool("history", history).
-		Logger()
-	contextLogger.Debug().Msg("Fetching job")
-
 	fetchParams := persistence.FetchParams{History: history}
 	job, err := storage.GetJob(ctx, id, fetchParams)
 	if err != nil {
+		log := logging.LoggerFromCtx(ctx)
+		log.Error().Str("id", id).Bool("history", history).Err(err).Msg("Failed to get job from storage")
 		return nil, fault.Wrap(err)
 	}
 	return job, nil

@@ -32,7 +32,7 @@ type Workflow struct {
 
 	// groups
 	// Max Items: 1024
-	Groups []*Group `json:"groups"`
+	Groups []*Group `json:"groups,omitempty"`
 
 	// User provided unique workflow name
 	// Example: wfx.workflow.dau.direct
@@ -43,16 +43,12 @@ type Workflow struct {
 	Name string `json:"name"`
 
 	// states
-	// Required: true
 	// Max Items: 4096
-	// Min Items: 1
-	States []*State `json:"states"`
+	States []*State `json:"states,omitempty"`
 
 	// transitions
-	// Required: true
 	// Max Items: 16384
-	// Min Items: 1
-	Transitions []*Transition `json:"transitions"`
+	Transitions []*Transition `json:"transitions,omitempty"`
 }
 
 // Validate validates this workflow
@@ -151,16 +147,11 @@ func (m *Workflow) validateName(formats strfmt.Registry) error {
 }
 
 func (m *Workflow) validateStates(formats strfmt.Registry) error {
-
-	if err := validate.Required("states", "body", m.States); err != nil {
-		return err
+	if swag.IsZero(m.States) { // not required
+		return nil
 	}
 
 	iStatesSize := int64(len(m.States))
-
-	if err := validate.MinItems("states", "body", iStatesSize, 1); err != nil {
-		return err
-	}
 
 	if err := validate.MaxItems("states", "body", iStatesSize, 4096); err != nil {
 		return err
@@ -188,16 +179,11 @@ func (m *Workflow) validateStates(formats strfmt.Registry) error {
 }
 
 func (m *Workflow) validateTransitions(formats strfmt.Registry) error {
-
-	if err := validate.Required("transitions", "body", m.Transitions); err != nil {
-		return err
+	if swag.IsZero(m.Transitions) { // not required
+		return nil
 	}
 
 	iTransitionsSize := int64(len(m.Transitions))
-
-	if err := validate.MinItems("transitions", "body", iTransitionsSize, 1); err != nil {
-		return err
-	}
 
 	if err := validate.MaxItems("transitions", "body", iTransitionsSize, 16384); err != nil {
 		return err

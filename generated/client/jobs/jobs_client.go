@@ -39,6 +39,8 @@ type ClientService interface {
 
 	GetJobs(params *GetJobsParams, opts ...ClientOption) (*GetJobsOK, error)
 
+	GetJobsEvents(params *GetJobsEventsParams, opts ...ClientOption) (*GetJobsEventsOK, error)
+
 	GetJobsID(params *GetJobsIDParams, opts ...ClientOption) (*GetJobsIDOK, error)
 
 	GetJobsIDDefinition(params *GetJobsIDDefinitionParams, opts ...ClientOption) (*GetJobsIDDefinitionOK, error)
@@ -177,6 +179,46 @@ func (a *Client) GetJobs(params *GetJobsParams, opts ...ClientOption) (*GetJobsO
 	}
 	// unexpected success response
 	unexpectedSuccess := result.(*GetJobsDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+GetJobsEvents subscribes to job related events such as status updates
+
+Obtain instant notifications when there are job changes matching the criteria. This endpoint utilizes server-sent events (SSE), where responses are "chunked" with double newline breaks. For example, a single event might look like this:
+data: {"clientId":"example_client","state":"INSTALLING"}\n\n
+*/
+func (a *Client) GetJobsEvents(params *GetJobsEventsParams, opts ...ClientOption) (*GetJobsEventsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetJobsEventsParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "GetJobsEvents",
+		Method:             "GET",
+		PathPattern:        "/jobs/events",
+		ProducesMediaTypes: []string{"application/json", "text/event-stream"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &GetJobsEventsReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetJobsEventsOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*GetJobsEventsDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 

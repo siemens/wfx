@@ -90,3 +90,30 @@ teardown_file() {
     jobs_open_closed=$(wfxctl job query --group OPEN --group CLOSED --filter ".content | length")
     assert_equal "$jobs_open_closed" 2
 }
+
+@test "Subscribe to job events" {
+    cd "$BATS_TEST_TMPDIR"
+    ID=$(echo '{ "title": "Expose Job API" }' |
+        wfxctl job create --workflow wfx.workflow.kanban \
+            --client-id Dana \
+            --filter='.id' --raw - 2>/dev/null)
+
+    curl -s --no-buffer "localhost:8080/api/wfx/v1/jobs/events?jobIds=$ID&tags=bats" > curl.out &
+    sleep 1
+    for state in PROGRESS VALIDATE DONE; do
+        wfxctl job update-status \
+            --actor=client \
+            --id "$ID" \
+            --state "$state" 1>/dev/null 2>&1
+    done
+    for i in {1..30}; do
+        if grep -q DONE curl.out; then
+            break
+        fi
+        sleep 1
+    done
+
+    assert_file_contains curl.out '"state":"PROGRESS"'
+    assert_file_contains curl.out '"state":"VALIDATE"'
+    assert_file_contains curl.out '"state":"DONE"'
+}

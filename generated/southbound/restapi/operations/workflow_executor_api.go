@@ -12,6 +12,7 @@ package operations
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 
@@ -48,9 +49,15 @@ func NewWorkflowExecutorAPI(spec *loads.Document) *WorkflowExecutorAPI {
 		JSONConsumer: runtime.JSONConsumer(),
 
 		JSONProducer: runtime.JSONProducer(),
+		TextEventStreamProducer: runtime.ProducerFunc(func(w io.Writer, data interface{}) error {
+			return errors.NotImplemented("textEventStream producer has not yet been implemented")
+		}),
 
 		SouthboundGetJobsHandler: southbound.GetJobsHandlerFunc(func(params southbound.GetJobsParams) middleware.Responder {
 			return middleware.NotImplemented("operation southbound.GetJobs has not yet been implemented")
+		}),
+		SouthboundGetJobsEventsHandler: southbound.GetJobsEventsHandlerFunc(func(params southbound.GetJobsEventsParams) middleware.Responder {
+			return middleware.NotImplemented("operation southbound.GetJobsEvents has not yet been implemented")
 		}),
 		SouthboundGetJobsIDHandler: southbound.GetJobsIDHandlerFunc(func(params southbound.GetJobsIDParams) middleware.Responder {
 			return middleware.NotImplemented("operation southbound.GetJobsID has not yet been implemented")
@@ -111,9 +118,14 @@ type WorkflowExecutorAPI struct {
 	// JSONProducer registers a producer for the following mime types:
 	//   - application/json
 	JSONProducer runtime.Producer
+	// TextEventStreamProducer registers a producer for the following mime types:
+	//   - text/event-stream
+	TextEventStreamProducer runtime.Producer
 
 	// SouthboundGetJobsHandler sets the operation handler for the get jobs operation
 	SouthboundGetJobsHandler southbound.GetJobsHandler
+	// SouthboundGetJobsEventsHandler sets the operation handler for the get jobs events operation
+	SouthboundGetJobsEventsHandler southbound.GetJobsEventsHandler
 	// SouthboundGetJobsIDHandler sets the operation handler for the get jobs ID operation
 	SouthboundGetJobsIDHandler southbound.GetJobsIDHandler
 	// SouthboundGetJobsIDDefinitionHandler sets the operation handler for the get jobs ID definition operation
@@ -206,9 +218,15 @@ func (o *WorkflowExecutorAPI) Validate() error {
 	if o.JSONProducer == nil {
 		unregistered = append(unregistered, "JSONProducer")
 	}
+	if o.TextEventStreamProducer == nil {
+		unregistered = append(unregistered, "TextEventStreamProducer")
+	}
 
 	if o.SouthboundGetJobsHandler == nil {
 		unregistered = append(unregistered, "southbound.GetJobsHandler")
+	}
+	if o.SouthboundGetJobsEventsHandler == nil {
+		unregistered = append(unregistered, "southbound.GetJobsEventsHandler")
 	}
 	if o.SouthboundGetJobsIDHandler == nil {
 		unregistered = append(unregistered, "southbound.GetJobsIDHandler")
@@ -282,6 +300,8 @@ func (o *WorkflowExecutorAPI) ProducersFor(mediaTypes []string) map[string]runti
 		switch mt {
 		case "application/json":
 			result["application/json"] = o.JSONProducer
+		case "text/event-stream":
+			result["text/event-stream"] = o.TextEventStreamProducer
 		}
 
 		if p, ok := o.customProducers[mt]; ok {
@@ -326,6 +346,10 @@ func (o *WorkflowExecutorAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/jobs"] = southbound.NewGetJobs(o.context, o.SouthboundGetJobsHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/jobs/events"] = southbound.NewGetJobsEvents(o.context, o.SouthboundGetJobsEventsHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}

@@ -64,12 +64,14 @@ func convertJob(entity *ent.Job) *model.Job {
 		wf = convertWorkflow(entity.Edges.Workflow)
 	}
 
+	stime := strfmt.DateTime(entity.Stime)
+	mtime := strfmt.DateTime(entity.Mtime)
 	job := model.Job{
 		ID:         entity.ID,
 		ClientID:   entity.ClientID,
 		Definition: entity.Definition,
-		Stime:      strfmt.DateTime(entity.Stime),
-		Mtime:      strfmt.DateTime(entity.Mtime),
+		Stime:      &stime,
+		Mtime:      &mtime,
 		Status:     &entity.Status,
 		Tags:       convertTags(entity.Edges.Tags),
 		Workflow:   wf,

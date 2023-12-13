@@ -162,6 +162,89 @@ func init() {
         }
       }
     },
+    "/jobs/events": {
+      "get": {
+        "description": "Obtain instant notifications when there are job changes matching the criteria. This endpoint utilizes server-sent events (SSE), where responses are \"chunked\" with double newline breaks. For example, a single event might look like this:\n  data: {\"clientId\":\"example_client\",\"state\":\"INSTALLING\"}\\n\\n\n",
+        "produces": [
+          "application/json",
+          "text/event-stream"
+        ],
+        "tags": [
+          "jobs",
+          "northbound",
+          "southbound"
+        ],
+        "summary": "Subscribe to job-related events such as status updates",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "The job's clientId must be one of these clientIds (comma-separated).",
+            "name": "clientIds",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "The job's id must be one of these ids (comma-separated).",
+            "name": "jobIds",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "The job's workflow must be equal to one of the provided workflow names (comma-separated).",
+            "name": "workflows",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "A (comma-separated) list of tags to include into each job event. This can be used to aggregrate events from multiple wfx instances.\n",
+            "name": "tags",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A stream of server-sent events"
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            },
+            "examples": {
+              "Error responses occurring at this operation for invalid requests": {
+                "errors": [
+                  {
+                    "code": "wfx.jobTerminalState",
+                    "logref": "916f0a913a3e4a52a96bd271e029c201",
+                    "message": "The request was invalid because the job is in a terminal state"
+                  }
+                ]
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            },
+            "examples": {
+              "Error responses occurring at this operation while updating a non-existent job": {
+                "errors": [
+                  {
+                    "code": "wfx.jobNotFound",
+                    "logref": "11cc67762090e15b79a1387eca65ba65",
+                    "message": "Job ID was not found"
+                  }
+                ]
+              }
+            }
+          },
+          "default": {
+            "description": "Other error with any status code and response body format"
+          }
+        }
+      }
+    },
     "/jobs/{id}": {
       "get": {
         "description": "Job description for a given ID\n",
@@ -1086,7 +1169,8 @@ func init() {
           "maxItems": 8192,
           "items": {
             "$ref": "#/definitions/History"
-          }
+          },
+          "x-omitempty": true
         },
         "id": {
           "description": "Unique job ID (wfx-generated)",
@@ -1100,15 +1184,17 @@ func init() {
           "description": "Date and time (ISO8601) when the job was last modified (set by wfx)",
           "type": "string",
           "format": "date-time",
+          "x-nullable": true,
           "readOnly": true
         },
         "status": {
           "$ref": "#/definitions/JobStatus"
         },
         "stime": {
-          "description": "Date and time (ISO8601) when the job was created (set by wfx)",
+          "description": "Date and time (ISO8601) when the job was created (set by wfx). Although stime conceptually always exists, it's nullable because we don't want to serialize stime in some cases (e.g. for job events).",
           "type": "string",
           "format": "date-time",
+          "x-nullable": true,
           "readOnly": true
         },
         "tags": {
@@ -1116,7 +1202,8 @@ func init() {
           "items": {
             "type": "string",
             "maxItems": 16
-          }
+          },
+          "x-omitempty": true
         },
         "workflow": {
           "$ref": "#/definitions/Workflow"
@@ -1331,9 +1418,7 @@ func init() {
     "Workflow": {
       "type": "object",
       "required": [
-        "name",
-        "states",
-        "transitions"
+        "name"
       ],
       "properties": {
         "description": {
@@ -1347,7 +1432,8 @@ func init() {
           "maxItems": 1024,
           "items": {
             "$ref": "#/definitions/Group"
-          }
+          },
+          "x-omitempty": true
         },
         "name": {
           "description": "User provided unique workflow name",
@@ -1361,18 +1447,18 @@ func init() {
         "states": {
           "type": "array",
           "maxItems": 4096,
-          "minItems": 1,
           "items": {
             "$ref": "#/definitions/State"
-          }
+          },
+          "x-omitempty": true
         },
         "transitions": {
           "type": "array",
           "maxItems": 16384,
-          "minItems": 1,
           "items": {
             "$ref": "#/definitions/Transition"
-          }
+          },
+          "x-omitempty": true
         }
       }
     }
@@ -1535,6 +1621,11 @@ func init() {
         "code": "wfx.jobNotFound",
         "logref": "11cc67762090e15b79a1387eca65ba65",
         "message": "Job ID was not found"
+      },
+      "jobTerminalStateError": {
+        "code": "wfx.jobTerminalState",
+        "logref": "916f0a913a3e4a52a96bd271e029c201",
+        "message": "The request was invalid because the job is in a terminal state"
       },
       "workflowInvalidError": {
         "code": "wfx.workflowInvalid",
@@ -1730,6 +1821,89 @@ func init() {
           },
           "default": {
             "description": "Other error with any status code and response body format."
+          }
+        }
+      }
+    },
+    "/jobs/events": {
+      "get": {
+        "description": "Obtain instant notifications when there are job changes matching the criteria. This endpoint utilizes server-sent events (SSE), where responses are \"chunked\" with double newline breaks. For example, a single event might look like this:\n  data: {\"clientId\":\"example_client\",\"state\":\"INSTALLING\"}\\n\\n\n",
+        "produces": [
+          "application/json",
+          "text/event-stream"
+        ],
+        "tags": [
+          "jobs",
+          "northbound",
+          "southbound"
+        ],
+        "summary": "Subscribe to job-related events such as status updates",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "The job's clientId must be one of these clientIds (comma-separated).",
+            "name": "clientIds",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "The job's id must be one of these ids (comma-separated).",
+            "name": "jobIds",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "The job's workflow must be equal to one of the provided workflow names (comma-separated).",
+            "name": "workflows",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "A (comma-separated) list of tags to include into each job event. This can be used to aggregrate events from multiple wfx instances.\n",
+            "name": "tags",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A stream of server-sent events"
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            },
+            "examples": {
+              "Error responses occurring at this operation for invalid requests": {
+                "errors": [
+                  {
+                    "code": "wfx.jobTerminalState",
+                    "logref": "916f0a913a3e4a52a96bd271e029c201",
+                    "message": "The request was invalid because the job is in a terminal state"
+                  }
+                ]
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            },
+            "examples": {
+              "Error responses occurring at this operation while updating a non-existent job": {
+                "errors": [
+                  {
+                    "code": "wfx.jobNotFound",
+                    "logref": "11cc67762090e15b79a1387eca65ba65",
+                    "message": "Job ID was not found"
+                  }
+                ]
+              }
+            }
+          },
+          "default": {
+            "description": "Other error with any status code and response body format"
           }
         }
       }
@@ -2716,7 +2890,8 @@ func init() {
           "maxItems": 8192,
           "items": {
             "$ref": "#/definitions/History"
-          }
+          },
+          "x-omitempty": true
         },
         "id": {
           "description": "Unique job ID (wfx-generated)",
@@ -2730,22 +2905,25 @@ func init() {
           "description": "Date and time (ISO8601) when the job was last modified (set by wfx)",
           "type": "string",
           "format": "date-time",
+          "x-nullable": true,
           "readOnly": true
         },
         "status": {
           "$ref": "#/definitions/JobStatus"
         },
         "stime": {
-          "description": "Date and time (ISO8601) when the job was created (set by wfx)",
+          "description": "Date and time (ISO8601) when the job was created (set by wfx). Although stime conceptually always exists, it's nullable because we don't want to serialize stime in some cases (e.g. for job events).",
           "type": "string",
           "format": "date-time",
+          "x-nullable": true,
           "readOnly": true
         },
         "tags": {
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "x-omitempty": true
         },
         "workflow": {
           "$ref": "#/definitions/Workflow"
@@ -3007,9 +3185,7 @@ func init() {
     "Workflow": {
       "type": "object",
       "required": [
-        "name",
-        "states",
-        "transitions"
+        "name"
       ],
       "properties": {
         "description": {
@@ -3023,7 +3199,8 @@ func init() {
           "maxItems": 1024,
           "items": {
             "$ref": "#/definitions/Group"
-          }
+          },
+          "x-omitempty": true
         },
         "name": {
           "description": "User provided unique workflow name",
@@ -3037,18 +3214,18 @@ func init() {
         "states": {
           "type": "array",
           "maxItems": 4096,
-          "minItems": 1,
           "items": {
             "$ref": "#/definitions/State"
-          }
+          },
+          "x-omitempty": true
         },
         "transitions": {
           "type": "array",
           "maxItems": 16384,
-          "minItems": 1,
           "items": {
             "$ref": "#/definitions/Transition"
-          }
+          },
+          "x-omitempty": true
         }
       }
     }
@@ -3211,6 +3388,11 @@ func init() {
         "code": "wfx.jobNotFound",
         "logref": "11cc67762090e15b79a1387eca65ba65",
         "message": "Job ID was not found"
+      },
+      "jobTerminalStateError": {
+        "code": "wfx.jobTerminalState",
+        "logref": "916f0a913a3e4a52a96bd271e029c201",
+        "message": "The request was invalid because the job is in a terminal state"
       },
       "workflowInvalidError": {
         "code": "wfx.workflowInvalid",

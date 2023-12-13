@@ -55,22 +55,23 @@ func TestQueryJobsFilter(t *testing.T, db persistence.Storage) {
 		Tags: []string{"bar", "foo"},
 	})
 	require.NoError(t, err)
-	var initialTime time.Time
-	assert.NotEqual(t, initialTime, firstJob.Stime)
-	assert.NotEqual(t, initialTime, firstJob.Mtime)
-	assert.True(t, time.Time(firstJob.Stime).After(now) || time.Time(firstJob.Stime).Equal(now))
-	assert.True(t, time.Time(firstJob.Mtime).After(now) || time.Time(firstJob.Mtime).Equal(now))
+	assert.NotNil(t, firstJob.Stime)
+	assert.NotNil(t, firstJob.Mtime)
+	assert.True(t, time.Time(*firstJob.Stime).After(now) || time.Time(*firstJob.Stime).Equal(now))
+	assert.True(t, time.Time(*firstJob.Mtime).After(now) || time.Time(*firstJob.Mtime).Equal(now))
 
+	secondStime := strfmt.DateTime(now.Add(time.Second))
 	secondJob, err := db.CreateJob(context.Background(), &model.Job{
 		ClientID: clientID,
 		Workflow: wf,
 		Status: &model.JobStatus{
 			State: installState,
 		},
-		Stime: strfmt.DateTime(now.Add(time.Second)),
+		Stime: &secondStime,
 	})
 	require.NoError(t, err)
 
+	thirdStime := strfmt.DateTime(now.Add(2 * time.Second))
 	thirdJob, err := db.CreateJob(context.Background(), &model.Job{
 		ClientID: clientID,
 		Workflow: wf,
@@ -78,7 +79,7 @@ func TestQueryJobsFilter(t *testing.T, db persistence.Storage) {
 			State: activatedState,
 		},
 		Tags:  []string{"meh"},
-		Stime: strfmt.DateTime(now.Add(2 * time.Second)),
+		Stime: &thirdStime,
 	})
 	require.NoError(t, err)
 
@@ -177,14 +178,16 @@ func TestGetJobsSorted(t *testing.T, db persistence.Storage) {
 		_, err := db.CreateWorkflow(context.Background(), tmp.Workflow)
 		require.NoError(t, err)
 
-		tmp.Stime = strfmt.DateTime(time.Now().Add(-2 * time.Minute))
+		stime := strfmt.DateTime(time.Now().Add(-2 * time.Minute))
+		tmp.Stime = &stime
 		first, err = db.CreateJob(context.Background(), tmp)
 		require.NoError(t, err)
 	}
 
 	{
 		tmp := newValidJob(clientID)
-		tmp.Mtime = strfmt.DateTime(time.Now().Add(-time.Minute))
+		mtime := strfmt.DateTime(time.Now().Add(-time.Minute))
+		tmp.Mtime = &mtime
 		second, err = db.CreateJob(context.Background(), tmp)
 		require.NoError(t, err)
 	}
@@ -247,7 +250,7 @@ func TestGetJobMaxHistorySize(t *testing.T, db persistence.Storage) {
 
 	{
 		// job which we are going to update often
-		tmp := newValidJob("klaus")
+		tmp := newValidJob("foo")
 		tmp.Status.Message = "0"
 		_, err := db.CreateWorkflow(context.Background(), tmp.Workflow)
 		require.NoError(t, err)

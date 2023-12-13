@@ -14,6 +14,7 @@ import (
 
 	"github.com/Southclaws/fault/ftag"
 	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/internal/handler/job/events"
 	"github.com/siemens/wfx/persistence"
 	"github.com/siemens/wfx/workflow/dau"
 	"github.com/stretchr/testify/assert"
@@ -42,6 +43,9 @@ func TestUpdateJobDefinition(t *testing.T) {
 	oldDefinitionHash := job.Status.DefinitionHash
 	assert.NotEmpty(t, oldDefinitionHash)
 
+	ch, err := events.AddSubscriber(context.Background(), events.FilterParams{}, nil)
+	require.NoError(t, err)
+
 	newDefinition := map[string]any{
 		"foo": "baz",
 	}
@@ -55,6 +59,11 @@ func TestUpdateJobDefinition(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotEqual(t, oldDefinitionHash, job.Status.DefinitionHash)
 	}
+
+	ev := <-ch
+	jobEvent := ev.Args[0].(*events.JobEvent)
+	assert.Equal(t, events.ActionUpdateDefinition, jobEvent.Action)
+	assert.Equal(t, job.ID, jobEvent.Job.ID)
 }
 
 func TestUpdateJobDefinition_NotFound(t *testing.T) {

@@ -11,10 +11,13 @@ package status
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/ftag"
+	"github.com/go-openapi/strfmt"
 	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/internal/handler/job/events"
 	"github.com/siemens/wfx/internal/workflow"
 	"github.com/siemens/wfx/middleware/logging"
 	"github.com/siemens/wfx/persistence"
@@ -74,6 +77,17 @@ func Update(ctx context.Context, storage persistence.Storage, jobID string, newS
 		contextLogger.Err(err).Msg("Failed to persist job update")
 		return nil, fault.Wrap(err)
 	}
+
+	_ = events.PublishEvent(ctx, &events.JobEvent{
+		Ctime:  strfmt.DateTime(time.Now()),
+		Action: events.ActionUpdateStatus,
+		Job: &model.Job{
+			ID:       result.ID,
+			ClientID: result.ClientID,
+			Workflow: &model.Workflow{Name: job.Workflow.Name},
+			Status:   result.Status,
+		},
+	})
 
 	contextLogger.Info().
 		Str("from", from).

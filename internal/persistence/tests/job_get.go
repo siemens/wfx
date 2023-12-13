@@ -80,11 +80,11 @@ func TestGetJobWithHistory(t *testing.T, db persistence.Storage) {
 func newValidJob(clientID string) *model.Job {
 	now := strfmt.DateTime(time.Now())
 	return &model.Job{
-		Mtime:    now,
-		Stime:    now,
+		Mtime:    &now,
+		Stime:    &now,
 		ClientID: clientID,
 		Status: &model.JobStatus{
-			ClientID: "klaus",
+			ClientID: "foo",
 			State:    "CREATED",
 		},
 		Tags: []string{

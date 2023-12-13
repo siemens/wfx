@@ -13,6 +13,7 @@ import (
 	"github.com/siemens/wfx/cmd/wfxctl/cmd/job/create"
 	"github.com/siemens/wfx/cmd/wfxctl/cmd/job/delete"
 	"github.com/siemens/wfx/cmd/wfxctl/cmd/job/deltags"
+	"github.com/siemens/wfx/cmd/wfxctl/cmd/job/events"
 	"github.com/siemens/wfx/cmd/wfxctl/cmd/job/get"
 	"github.com/siemens/wfx/cmd/wfxctl/cmd/job/getdefinition"
 	"github.com/siemens/wfx/cmd/wfxctl/cmd/job/getstatus"
@@ -43,4 +44,5 @@ func init() {
 	Command.AddCommand(addtags.Command)
 	Command.AddCommand(deltags.Command)
 	Command.AddCommand(gettags.Command)
+	Command.AddCommand(events.Command)
 }

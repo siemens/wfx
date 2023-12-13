@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/internal/handler/job/events"
 	"github.com/siemens/wfx/internal/persistence/entgo"
 	"github.com/siemens/wfx/persistence"
 	"github.com/siemens/wfx/workflow/dau"
@@ -25,11 +26,30 @@ func TestCreateJob(t *testing.T) {
 	wf := createDirectWorkflow(t, db)
 
 	job, err := CreateJob(context.Background(), db, &model.JobRequest{
-		ClientID: "klaus",
+		ClientID: "foo",
 		Workflow: wf.Name,
 	})
 	assert.NoError(t, err)
 	assert.NotEmpty(t, job.Status.DefinitionHash)
+}
+
+func TestCreateJob_Notification(t *testing.T) {
+	db := newInMemoryDB(t)
+	wf := createDirectWorkflow(t, db)
+
+	ch, err := events.AddSubscriber(context.Background(), events.FilterParams{}, nil)
+	require.NoError(t, err)
+
+	job, err := CreateJob(context.Background(), db, &model.JobRequest{
+		ClientID: "foo",
+		Workflow: wf.Name,
+	})
+	require.NoError(t, err)
+
+	ev := <-ch
+	jobEvent := ev.Args[0].(*events.JobEvent)
+	assert.Equal(t, events.ActionCreate, jobEvent.Action)
+	assert.Equal(t, job.ID, jobEvent.Job.ID)
 }
 
 func TestFindInitial(t *testing.T) {
