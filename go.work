@@ -4,4 +4,5 @@ use (
 	.
 	./contrib/remote-access/client
 	./contrib/config-deployment/client
+	./example/plugin
 )

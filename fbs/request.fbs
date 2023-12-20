@@ -1,0 +1,20 @@
+// SPDX-FileCopyrightText: 2023 Siemens AG
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+// Author: Michael Adler <michael.adler@siemens.com>
+
+include "client/request.fbs";
+
+namespace generated.plugin;
+
+// PluginRequest sent to the plugin.
+table PluginRequest {
+  // Version identifier for the schema.
+  version: ulong;
+  // Cookie is a unique value for the specific request.
+  cookie: ulong;
+  request: client.Request;
+}
+
+root_type PluginRequest;

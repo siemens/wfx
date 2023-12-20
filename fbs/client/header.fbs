@@ -1,0 +1,13 @@
+// SPDX-FileCopyrightText: 2023 Siemens AG
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+// Author: Michael Adler <michael.adler@siemens.com>
+
+namespace generated.plugin.client;
+
+// Envelope consists of a name and a (possibly empty) list of values.
+table Envelope {
+  name: string;
+  values: [string];
+}

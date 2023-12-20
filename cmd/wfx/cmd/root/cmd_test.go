@@ -101,8 +101,8 @@ func TestCommand_ReloadConfig(t *testing.T) {
 }
 
 func TestAdoptListeners(t *testing.T) {
-	assert.Empty(t, adoptListeners(nil, nil))
-	assert.Empty(t, adoptListeners([]net.Listener{nil, nil, nil}, nil))
+	assert.Empty(t, adoptListeners(nil, nil, nil))
+	assert.Empty(t, adoptListeners([]net.Listener{nil, nil, nil}, nil, nil))
 
 	sock1, _ := os.CreateTemp(os.TempDir(), "TestAdoptListeners*.sock")
 	sock2, _ := os.CreateTemp(os.TempDir(), "TestAdoptListeners*.sock")
@@ -114,7 +114,7 @@ func TestAdoptListeners(t *testing.T) {
 	ln1, _ := net.Listen("unix", sock1.Name())
 	ln2, _ := net.Listen("unix", sock1.Name())
 
-	collection := adoptListeners([]net.Listener{ln1, ln2}, nil)
+	collection := adoptListeners([]net.Listener{ln1, ln2}, nil, nil)
 	t.Cleanup(func() {
 		for _, sc := range collection {
 			sc.Shutdown(context.Background())

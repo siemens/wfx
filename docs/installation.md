@@ -30,6 +30,7 @@ The following persistent storage selection build tags are available:
 | `libsqlite3` | Dynamically link against `libsqlite3`                            |
 | `postgres`   | Enable built-in [PostgreSQL](https://www.postgresql.org) support |
 | `mysql`      | Enable built-in [MySQL](https://www.mysql.com/) support          |
+| `plugin`     | Enable support for [external plugins](operations.md#Plugins)     |
 
 By default, all built-in persistent storage options are enabled.
 

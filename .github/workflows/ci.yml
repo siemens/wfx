@@ -73,7 +73,7 @@ jobs:
           --health-retries 20
     steps:
       - uses: actions/checkout@v4
-      - run: go test -timeout 180s -race -coverprofile=coverage.out -covermode=atomic -tags testing,integration,postgres,sqlite ./...
+      - run: go test -timeout 180s -race -coverprofile=coverage.out -covermode=atomic -tags testing,integration,postgres,sqlite,plugin ./...
         env:
           PGHOST: postgres
           PGPORT: 5432
@@ -109,7 +109,7 @@ jobs:
           --health-retries 20
     steps:
       - uses: actions/checkout@v4
-      - run: go test -timeout 180s -race -coverprofile=coverage.out -covermode=atomic -tags testing,integration,mysql,sqlite ./...
+      - run: go test -timeout 180s -race -coverprofile=coverage.out -covermode=atomic -tags testing,integration,mysql,sqlite,plugin ./...
         env:
           MYSQL_DATABASE: wfx
           MYSQL_ROOT_PASSWORD: root
@@ -196,22 +196,23 @@ jobs:
       - uses: dominikh/staticcheck-action@v1.3.0
         with:
           install-go: false
-          build-tags: sqlite,testing
+          build-tags: sqlite,testing,plugin
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
           version: latest
-          args: --build-tags=sqlite,testing
+          args: --build-tags=sqlite,testing,plugin
           skip-cache: true
 
   generate:
     name: Generate Code
     runs-on: ubuntu-latest
     container:
-      image: quay.io/goswagger/swagger
+      image: archlinux
     steps:
+      - name: Install packages
+        run: pacman -Syu --noconfirm python-yaml git just go flatbuffers go-swagger gofumpt
       - uses: actions/checkout@v4
-      - run: apk add --no-cache py3-yaml git just bash go
       - name: Disable git security features
         run: git config --global safe.directory '*'
       - uses: brokeyourbike/go-mockery-action@v0

@@ -1,0 +1,23 @@
+// SPDX-FileCopyrightText: 2023 Siemens AG
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+// Author: Michael Adler <michael.adler@siemens.com>
+
+include "client/request.fbs";
+include "client/response.fbs";
+
+namespace generated.plugin;
+
+union Payload { generated.plugin.client.Request, generated.plugin.client.Response }
+
+// PluginResponse is the response of a plugin.
+table PluginResponse {
+  // Version identifier for the schema.
+  version: ulong;
+  // Cookie used to correlate the response with the original request.
+  cookie: ulong;
+  payload: Payload;
+}
+
+root_type PluginResponse;

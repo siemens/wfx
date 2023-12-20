@@ -33,10 +33,11 @@ mkShell {
     just
     git
     go
+    flatbuffers
   ];
 
   shellHook = ''
-    export GOFLAGS="-tags=sqlite,mysql,postgres,testing,integration"
+    export GOFLAGS="-tags=sqlite,mysql,postgres,testing,integration,plugin"
     export LUA_PATH="$(pwd)/hugo/filters/?.lua;;"
     export PATH="$(pwd):$PATH"
 

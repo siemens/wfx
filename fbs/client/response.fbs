@@ -1,0 +1,27 @@
+// SPDX-FileCopyrightText: 2023 Siemens AG
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+// Author: Michael Adler <michael.adler@siemens.com>
+
+include "header.fbs";
+
+namespace generated.plugin.client;
+
+enum ResponseStatus: byte {
+  // The request was denied and may not proceed.
+  Deny = 0,
+  // The request may proceed.
+  Accept = 1,
+  // The request was modifified and may proceed.
+  Modified = 2,
+  // There was a temporary problem processing the request.
+  Unavailable = 3,
+}
+
+// Response contains the response details for a client.
+table Response {
+  status: ResponseStatus;
+  envelope: [Envelope];
+  content: [ubyte];
+}

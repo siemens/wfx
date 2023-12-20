@@ -18,6 +18,7 @@ require (
 	github.com/go-openapi/validate v0.22.3
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/golang-migrate/migrate/v4 v4.17.0
+	github.com/google/flatbuffers v23.5.26+incompatible
 	github.com/gookit/color v1.5.4
 	github.com/itchyny/gojq v0.12.13
 	github.com/jackc/pgx/v5 v5.5.0
