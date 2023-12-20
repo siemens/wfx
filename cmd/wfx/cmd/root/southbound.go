@@ -25,7 +25,7 @@ import (
 	"github.com/siemens/wfx/persistence"
 )
 
-func createSouthboundCollection(schemes []string, storage persistence.Storage) (*serverCollection, error) {
+func createSouthboundCollection(schemes []string, storage persistence.Storage, chQuit chan error) (*serverCollection, error) {
 	var settings server.HTTPSettings
 	k.Read(func(k *koanf.Koanf) {
 		settings.Host = k.String(clientHostFlag)
@@ -42,20 +42,29 @@ func createSouthboundCollection(schemes []string, storage persistence.Storage) (
 	}
 
 	swaggerJSON, _ := restapi.SwaggerJSON.MarshalJSON()
-	mw := middleware.NewGlobalMiddleware(restapi.ConfigureAPI(api),
-		[]middleware.IntermediateMW{
-			// LIFO
-			logging.MW{},
-			jq.MW{},
-			fsMW,
-			swagger.NewSpecMiddleware(api.Context().BasePath(), swaggerJSON),
-			health.NewHealthMiddleware(storage),
-			version.MW{},
-			middleware.PromoteWrapper(cors.AllowAll().Handler),
-		})
 
+	pluginMws, err := LoadSouthboundPlugins(chQuit)
+	if err != nil {
+		return nil, fault.Wrap(err)
+	}
+
+	// LIFO, i.e. middlewares are applied in reverse order
+	intermdiateMws := []middleware.IntermediateMW{
+		jq.MW{},
+		fsMW,
+		swagger.NewSpecMiddleware(api.Context().BasePath(), swaggerJSON),
+		health.NewHealthMiddleware(storage),
+		version.MW{},
+		middleware.PromoteWrapper(cors.AllowAll().Handler),
+	}
+
+	intermdiateMws = append(intermdiateMws, pluginMws...)
+	intermdiateMws = append(intermdiateMws, logging.MW{})
+
+	mw := middleware.NewGlobalMiddleware(restapi.ConfigureAPI(api), intermdiateMws)
 	servers, err := createServers(schemes, mw, settings)
 	if err != nil {
+		mw.Shutdown()
 		return nil, fault.Wrap(err)
 	}
 	return &serverCollection{

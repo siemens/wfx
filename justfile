@@ -116,8 +116,15 @@ _generate-ent:
 _generate-mockery:
     mockery --all
 
+_generate-flatbuffers:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    rm -rf generated/plugin
+    find fbs -name "*.fbs" | xargs flatc -g --gen-object-api --go-module-name github.com/siemens/wfx
+    gofumpt -l -w generated/plugin
+
 # Generate code
-generate: _generate-swagger _generate-ent _generate-mockery
+generate: _generate-swagger _generate-ent _generate-mockery _generate-flatbuffers
 
 # Start PostgreSQL container
 postgres-start VERSION="15":

@@ -177,15 +177,16 @@ Examples of tasks are installation of firmware or other types of commands issued
 			schemes = k.Strings(schemeFlag)
 		})
 		serverCollections := make([]*serverCollection, 0, 3)
+		chQuit := make(chan error)
 		{
-			collection, err := createNorthboundCollection(schemes, storage)
+			collection, err := createNorthboundCollection(schemes, storage, chQuit)
 			if err != nil {
 				return fault.Wrap(err)
 			}
 			serverCollections = append(serverCollections, collection)
 		}
 		{
-			collection, err := createSouthboundCollection(schemes, storage)
+			collection, err := createSouthboundCollection(schemes, storage, chQuit)
 			if err != nil {
 				return fault.Wrap(err)
 			}
@@ -194,9 +195,8 @@ Examples of tasks are installation of firmware or other types of commands issued
 
 		// check for socket-based activation (systemd)
 		listeners, _ := activation.Listeners()
-		serverCollections = append(serverCollections, adoptListeners(listeners, storage)...)
+		serverCollections = append(serverCollections, adoptListeners(listeners, storage, chQuit)...)
 
-		errChan := make(chan error)
 		for _, collection := range serverCollections {
 			for i := range collection.servers {
 				// capture loop variables
@@ -206,7 +206,7 @@ Examples of tasks are installation of firmware or other types of commands issued
 				srv := collection.servers[i]
 				go func() {
 					if err := launchServer(name, srv); err != nil {
-						errChan <- err
+						chQuit <- err
 					}
 				}()
 			}
@@ -218,7 +218,7 @@ Examples of tasks are installation of firmware or other types of commands issued
 			select {
 			case <-signalChannel:
 				running = false
-			case <-errChan:
+			case <-chQuit:
 				running = false
 			}
 		}
@@ -241,10 +241,10 @@ Examples of tasks are installation of firmware or other types of commands issued
 	},
 }
 
-func adoptListeners(listeners []net.Listener, storage persistence.Storage) []*serverCollection {
+func adoptListeners(listeners []net.Listener, storage persistence.Storage, chQuit chan error) []*serverCollection {
 	if len(listeners) == 2 {
 		log.Debug().Msg("Adopting sockets provided by systemd")
-		south, err := createSouthboundCollection([]string{kindHTTP.String()}, storage)
+		south, err := createSouthboundCollection([]string{kindHTTP.String()}, storage, chQuit)
 		if err != nil {
 			log.Err(err).Msg("Failed to create southbound collection")
 			return nil
@@ -254,7 +254,7 @@ func adoptListeners(listeners []net.Listener, storage persistence.Storage) []*se
 			return listeners[0], nil
 		}
 
-		north, err := createNorthboundCollection([]string{kindHTTP.String()}, storage)
+		north, err := createNorthboundCollection([]string{kindHTTP.String()}, storage, chQuit)
 		if err != nil {
 			log.Err(err).Msg("Failed to create northbound collection")
 			return nil

@@ -18,6 +18,7 @@ builds:
       - sqlite
       - postgres
       - mysql
+      - plugin
     flags:
       - -trimpath
       - -mod=readonly

@@ -1,0 +1,27 @@
+// SPDX-FileCopyrightText: 2023 Siemens AG
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+// Author: Michael Adler <michael.adler@siemens.com>
+
+include "header.fbs";
+
+namespace generated.plugin.client;
+
+enum Action: byte {
+  Read = 0,
+  Create = 1,
+  Update = 2,
+  Delete = 3,
+}
+
+table Request {
+  // Unique identifier for the request used to correlate requests and responses.
+  cookie: ulong;
+
+  destination: string;
+  // The action requested by the client. This field is read-only.
+  action: Action;
+  envelope: [Envelope];
+  content: [ubyte];
+}

@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add optional `description` field to workflows
 - Job event notifications via server-sent events (see #11)
+- Plugin System for External Middlewares (see #43)
 
 ### Fixed
 

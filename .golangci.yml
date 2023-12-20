@@ -88,6 +88,7 @@ linters:
     - tparallel
     - usestdlibvars
     - wrapcheck
+    - zerologlint
 
 linters-settings:
   staticcheck:
@@ -101,3 +102,5 @@ linters-settings:
   wrapcheck:
     ignorePackageGlobs:
       - github.com/siemens/wfx/internal/errutil
+      - google.golang.org/protobuf/*
+      - io

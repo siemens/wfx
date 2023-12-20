@@ -10,6 +10,7 @@ package logging
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -22,7 +23,8 @@ import (
 )
 
 func TestLog(t *testing.T) {
-	handler := MW{}.Wrap(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	mw := MW{}
+	handler := mw.Wrap(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "Hello, client")
 	}))
 
@@ -37,6 +39,7 @@ func TestLog(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, "Hello, client\n", string(greeting))
+	mw.Shutdown()
 }
 
 func TestLogDebug(t *testing.T) {
@@ -67,4 +70,27 @@ func TestLoggerFomCtx(t *testing.T) {
 func TestLoggerFomCtx_Default(t *testing.T) {
 	actual := LoggerFromCtx(context.Background())
 	assert.Equal(t, log.Logger, actual)
+}
+
+type FaultyReadCloser struct{}
+
+func (r FaultyReadCloser) Read([]byte) (n int, err error) {
+	return 0, errors.New("failed to read")
+}
+
+func (r FaultyReadCloser) Close() error {
+	return nil
+}
+
+func TestPeekBody_ReadFailure(t *testing.T) {
+	var body FaultyReadCloser
+	r := &http.Request{Body: body}
+	_, err := PeekBody(r)
+	assert.NotNil(t, err)
+
+	handler := MW{}.Wrap(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintln(w, "Hello, client")
+	}))
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, r)
 }

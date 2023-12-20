@@ -254,6 +254,78 @@ access.
 └──────────────────┘
 ```
 
+## Plugins
+
+wfx offers a flexible (out-of-tree) plugin mechanism for extending its request processing capabilities.
+A plugin functions as a subprocess, both initiated and supervised by wfx.
+Communication between the plugin and wfx is facilitated through the exchange of [flatbuffer](https://flatbuffers.dev/)
+messages over stdin/stdout, thus permitting plugins to be developed in _any_ programming language.
+
+### Design Choices
+
+Due to the potential use of plugins for authentication, it is critical that **all requests are passed through the
+plugins** before further processing and that that **no request can slip through** without being processed by the plugins.
+This has led to the following deliberate design choices:
+
+1. Should any plugin **exit** (e.g., due to a crash), **wfx is designed to terminate gracefully**. While it might be
+   feasible for wfx to attempt restarting the affected plugins, this responsibility is more suitably handled by a
+   dedicated process supervisor like systemd. The shutdown of wfx enables the process supervisor to restart wfx, which,
+   in turn, starts all its plugins again.
+2. All plugins are **initialized before wfx starts processing any requests**. In particular, after the completion of
+   wfx's startup phase, it's not possible to add or remove any plugins.
+3. Plugins are expected to function properly. Specifically, if a plugin returns an invalid response type or an unexpected
+   response (for example, in response to a request that was never sent to the plugin), wfx will terminate gracefully.
+   This is because such behavior usually indicates a misconfiguration. The overall strategy is to fail fast and early.
+
+### Using Plugins
+
+To use plugins at runtime, wfx must be compiled with the `plugin` tag (enabled by default) and started with the
+`--mgmt-plugins-dir` resp. `--client-plugins-dir` flag, specifying a directory containing the plugins to be used. This
+enables the use of different plugin sets for the north- resp. southbound API.
+
+**Note**: In a plugin directory, all _executable_ files (including symlinks to executables) are assumed to be plugins.
+Non-executable files, like configuration files, are excluded. For deterministic behavior, plugins are sorted and
+executed in lexicographic order based on their filenames during the startup of wfx.
+
+### Developing Plugins
+
+Communication between wfx and a plugin is achieved by exchanging [flatbuffer](https://flatbuffers.dev/) messages via
+stdin/stdout. The flatbuffer specification is available in the [fbs](../fbs) directory.
+A plugin can use `stderr` for logging purposes (`stderr` is forwarded and prefixed by wfx).
+
+For every incoming request, wfx generates a unique number called `cookie`. The `cookie`, along with the complete request
+(e.g., headers and body in the case of HTTP), is written to the plugin's stdin. The plugin then sends its response,
+paired with the same `cookie`, back to wfx by writing to its stdout. This `cookie` mechanism ensures that wfx can
+accurately associate responses with their corresponding requests.
+
+**Technical Note**: Cookies are represented as unsigned 64-bit integers, which may lead to wraparound. This means there is a
+slight possibility that a cookie could be reused for more than one request over the lifespan of a plugin. However, this
+event occurs only once every 2^64 requests. By the time such a reuse might happen, the original request associated with
+the cookie would have already timed out.
+
+**Note**:
+
+1. It is crucial for the plugin to read data from its stdin descriptor promptly to prevent blocking writes by wfx. The
+   `cookie` mechanism facilitates (and encourages!) asynchronous processing.
+2. The working directory for the plugin process is the same as the working directory of wfx, which is the directory from which wfx was launched.
+
+Based on the plugin's response, wfx can:
+
+- Modify the incoming request before it undergoes further processing by wfx in the usual manner.
+- Send a preemptive response back to the client, such as a "permission denied" or "service unavailable" message.
+- Leave the request unchanged.
+
+### Use Cases
+
+Plugins are typically used for:
+
+- Enforcing authentication and authorization for API endpoints.
+- Handling URL rewriting and redirection tasks.
+
+### Example
+
+An [example plugin](../example/plugin) written in Go demonstrates denying access to the `/api/wfx/v1/workflows` endpoint.
+
 ## Telemetry
 
 No telemetry or user data is collected or processed by wfx.
