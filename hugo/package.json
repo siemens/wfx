@@ -2,7 +2,7 @@
   "name": "wfx-pages",
   "dependencies": {
     "autoprefixer": "^10.4.16",
-    "postcss": "^8.4.31",
+    "postcss": "^8.4.32",
     "postcss-cli": "^10.1.0"
   }
 }
