@@ -13,7 +13,7 @@ require (
 	github.com/go-openapi/loads v0.21.5
 	github.com/go-openapi/runtime v0.26.2
 	github.com/go-openapi/spec v0.20.13
-	github.com/go-openapi/strfmt v0.21.10
+	github.com/go-openapi/strfmt v0.22.0
 	github.com/go-openapi/swag v0.22.6
 	github.com/go-openapi/validate v0.22.3
 	github.com/go-sql-driver/mysql v1.7.1
@@ -63,7 +63,7 @@ require (
 	github.com/go-openapi/jsonpointer v0.20.2 // indirect
 	github.com/go-openapi/jsonreference v0.20.4 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
-	github.com/google/uuid v1.4.0
+	github.com/google/uuid v1.5.0
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/hcl/v2 v2.17.0 // indirect
