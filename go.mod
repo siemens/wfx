@@ -17,7 +17,7 @@ require (
 	github.com/go-openapi/swag v0.22.6
 	github.com/go-openapi/validate v0.22.3
 	github.com/go-sql-driver/mysql v1.7.1
-	github.com/golang-migrate/migrate/v4 v4.16.2
+	github.com/golang-migrate/migrate/v4 v4.17.0
 	github.com/gookit/color v1.5.4
 	github.com/itchyny/gojq v0.12.13
 	github.com/jackc/pgx/v5 v5.5.0
@@ -108,7 +108,7 @@ require (
 	go.mongodb.org/mongo-driver v1.13.1 // indirect
 	go.opentelemetry.io/otel/metric v1.17.0 // indirect
 	golang.org/x/exp v0.0.0-20231006140011-7918f672742d // indirect
-	golang.org/x/net v0.17.0 // indirect
-	golang.org/x/sync v0.3.0 // indirect
+	golang.org/x/net v0.18.0 // indirect
+	golang.org/x/sync v0.5.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect
 )
