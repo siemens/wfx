@@ -49,6 +49,11 @@ tags are available:&lt;/p>
 &lt;td style="text-align:left">Enable built-in
 &lt;a href="https://www.mysql.com/" target="_blank">MySQL&lt;/a> support&lt;/td>
 &lt;/tr>
+&lt;tr>
+&lt;td style="text-align:left">&lt;code>plugin&lt;/code>&lt;/td>
+&lt;td style="text-align:left">Enable support for
+&lt;a href="https://siemens.github.io/wfx/docs/operations/#Plugins">external plugins&lt;/a>&lt;/td>
+&lt;/tr>
 &lt;/tbody>
 &lt;/table>
 &lt;p>By default, all built-in persistent storage options are enabled.&lt;/p>
@@ -593,7 +598,72 @@ access.&lt;/p>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>┌┴─────────────────┐│
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ Client ├┘
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>└──────────────────┘
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="telemetry">Telemetry&lt;/h2>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="plugins">Plugins&lt;/h2>
+&lt;p>wfx offers a flexible (out-of-tree) plugin mechanism for extending its request processing capabilities. A plugin
+functions as a subprocess, both initiated and supervised by wfx. Communication between the plugin and wfx is facilitated
+through the exchange of
+&lt;a href="https://flatbuffers.dev/" target="_blank">flatbuffer&lt;/a> messages over stdin/stdout, thus permitting plugins to be
+developed in &lt;em>any&lt;/em> programming language.&lt;/p>
+&lt;h3 id="design-choices">Design Choices&lt;/h3>
+&lt;p>Due to the potential use of plugins for authentication, it is critical that &lt;strong>all requests are passed through the
+plugins&lt;/strong> before further processing and that that &lt;strong>no request can slip through&lt;/strong> without being processed by the
+plugins. This has led to the following deliberate design choices:&lt;/p>
+&lt;ol>
+&lt;li>Should any plugin &lt;strong>exit&lt;/strong> (e.g., due to a crash), &lt;strong>wfx is designed to terminate gracefully&lt;/strong>. While it might be
+feasible for wfx to attempt restarting the affected plugins, this responsibility is more suitably handled by a
+dedicated process supervisor like systemd. The shutdown of wfx enables the process supervisor to restart wfx, which,
+in turn, starts all its plugins again.&lt;/li>
+&lt;li>All plugins are &lt;strong>initialized before wfx starts processing any requests&lt;/strong>. In particular, after the completion of
+wfx&amp;rsquo;s startup phase, it&amp;rsquo;s not possible to add or remove any plugins.&lt;/li>
+&lt;li>Plugins are expected to function properly. Specifically, if a plugin returns an invalid response type or an
+unexpected response (for example, in response to a request that was never sent to the plugin), wfx will terminate
+gracefully. This is because such behavior usually indicates a misconfiguration. The overall strategy is to fail fast
+and early.&lt;/li>
+&lt;/ol>
+&lt;h3 id="using-plugins">Using Plugins&lt;/h3>
+&lt;p>To use plugins at runtime, wfx must be compiled with the &lt;code>plugin&lt;/code> tag (enabled by default) and started with the
+&lt;code>--mgmt-plugins-dir&lt;/code> resp. &lt;code>--client-plugins-dir&lt;/code> flag, specifying a directory containing the plugins to be used. This
+enables the use of different plugin sets for the north- resp. southbound API.&lt;/p>
+&lt;p>&lt;strong>Note&lt;/strong>: In a plugin directory, all &lt;em>executable&lt;/em> files (including symlinks to executables) are assumed to be plugins.
+Non-executable files, like configuration files, are excluded. For deterministic behavior, plugins are sorted and
+executed in lexicographic order based on their filenames during the startup of wfx.&lt;/p>
+&lt;h3 id="developing-plugins">Developing Plugins&lt;/h3>
+&lt;p>Communication between wfx and a plugin is achieved by exchanging
+&lt;a href="https://flatbuffers.dev/" target="_blank">flatbuffer&lt;/a> messages via
+stdin/stdout. The flatbuffer specification is available in the
+&lt;a href="https://siemens.github.io/wfx/fbs">fbs&lt;/a> directory. A plugin can use &lt;code>stderr&lt;/code> for
+logging purposes (&lt;code>stderr&lt;/code> is forwarded and prefixed by wfx).&lt;/p>
+&lt;p>For every incoming request, wfx generates a unique number called &lt;code>cookie&lt;/code>. The &lt;code>cookie&lt;/code>, along with the complete request
+(e.g., headers and body in the case of HTTP), is written to the plugin&amp;rsquo;s stdin. The plugin then sends its response,
+paired with the same &lt;code>cookie&lt;/code>, back to wfx by writing to its stdout. This &lt;code>cookie&lt;/code> mechanism ensures that wfx can
+accurately associate responses with their corresponding requests.&lt;/p>
+&lt;p>&lt;strong>Technical Note&lt;/strong>: Cookies are represented as unsigned 64-bit integers, which may lead to wraparound. This means there
+is a slight possibility that a cookie could be reused for more than one request over the lifespan of a plugin. However,
+this event occurs only once every 2^64 requests. By the time such a reuse might happen, the original request associated
+with the cookie would have already timed out.&lt;/p>
+&lt;p>&lt;strong>Note&lt;/strong>:&lt;/p>
+&lt;ol>
+&lt;li>It is crucial for the plugin to read data from its stdin descriptor promptly to prevent blocking writes by wfx. The
+&lt;code>cookie&lt;/code> mechanism facilitates (and encourages!) asynchronous processing.&lt;/li>
+&lt;li>The working directory for the plugin process is the same as the working directory of wfx, which is the directory
+from which wfx was launched.&lt;/li>
+&lt;/ol>
+&lt;p>Based on the plugin&amp;rsquo;s response, wfx can:&lt;/p>
+&lt;ul>
+&lt;li>Modify the incoming request before it undergoes further processing by wfx in the usual manner.&lt;/li>
+&lt;li>Send a preemptive response back to the client, such as a &amp;ldquo;permission denied&amp;rdquo; or &amp;ldquo;service unavailable&amp;rdquo; message.&lt;/li>
+&lt;li>Leave the request unchanged.&lt;/li>
+&lt;/ul>
+&lt;h3 id="use-cases">Use Cases&lt;/h3>
+&lt;p>Plugins are typically used for:&lt;/p>
+&lt;ul>
+&lt;li>Enforcing authentication and authorization for API endpoints.&lt;/li>
+&lt;li>Handling URL rewriting and redirection tasks.&lt;/li>
+&lt;/ul>
+&lt;h3 id="example">Example&lt;/h3>
+&lt;p>An
+&lt;a href="https://siemens.github.io/wfx/plugin">example plugin&lt;/a> written in Go demonstrates denying access to the &lt;code>/api/wfx/v1/workflows&lt;/code> endpoint.&lt;/p>
+&lt;h2 id="telemetry">Telemetry&lt;/h2>
 &lt;p>No telemetry or user data is collected or processed by wfx.&lt;/p>
 &lt;p>Note that there is an indirect dependency on &lt;code>go.opentelemetry.io/otel&lt;/code> via
 &lt;a href="https://github.com/go-openapi" target="_blank">Go OpenAPI&lt;/a>
