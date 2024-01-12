@@ -46,6 +46,15 @@ wfx wfxctl wfx-loadtest wfx-viewer:
 		-ldflags '$(LD_FLAGS) -X github.com/siemens/wfx/cmd/$@/metadata.Commit=$(shell git rev-parse HEAD | tr -d [:space:]) -X github.com/siemens/wfx/cmd/$@/metadata.Date=$(shell date -Iseconds)' \
 		./cmd/$@
 
+.PHONY: plugins
+plugins:
+	cd example/plugin && go build
+
+.PHONY: contrib
+contrib:
+	make -s -C contrib/remote-access
+	make -s -C contrib/config-deployment
+
 .PHONY: clean
 clean:
 	@$(RM) $(ALL_TARGETS) *.exe

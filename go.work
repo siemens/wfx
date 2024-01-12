@@ -1,8 +1,10 @@
-go 1.19
+go 1.21
+
+toolchain go1.21.5
 
 use (
 	.
-	./contrib/remote-access/client
 	./contrib/config-deployment/client
+	./contrib/remote-access/client
 	./example/plugin
 )

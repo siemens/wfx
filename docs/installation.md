@@ -18,10 +18,24 @@ necessary.
 
 ## Building wfx
 
-A recent [Go compiler](https://go.dev/) >= 1.19 as well as [GNU make](https://www.gnu.org/software/make/) wrapping the `go build` commands is required to build wfx and its associated tools.
+A recent [Go compiler](https://go.dev/) (see `go.mod`) as well as [GNU make](https://www.gnu.org/software/make/) wrapping the `go build` commands is required to build wfx and its associated tools:
 
-wfx requires a persistent storage to save workflows and jobs.
-Go [Build Tags](https://pkg.go.dev/go/build) are used to select compiled-in support for different persistent storage options.
+```bash
+make
+```
+
+The above command produces the following binaries:
+
+- `wfx`: The server component providing the RESTful APIs for managing workflows and jobs.
+- `wfxctl`: Command line client for interacting with the wfx.
+- `wfx-loadtest`: Command line tool for load-testing a wfx instance.
+- `wfx-viewer`: Convenience tool to visualize workflows in PlantUML or SVG format.
+
+All binaries have extensive help texts when invoked with `--help`.
+
+### Build Tags
+
+Go [build tags](https://pkg.go.dev/go/build) are used to select compiled-in support for various features.
 The following persistent storage selection build tags are available:
 
 | Build Tag    | Description                                                      |
@@ -32,30 +46,22 @@ The following persistent storage selection build tags are available:
 | `mysql`      | Enable built-in [MySQL](https://www.mysql.com/) support          |
 | `plugin`     | Enable support for [external plugins](operations.md#Plugins)     |
 
-By default, all built-in persistent storage options are enabled.
+By default, all built-in persistent storage options are enabled (wfx requires at least one persistent storage to save workflows and jobs).
 
 Note that the selection of build tags can impact the size of the `wfx` binary file and may as well have implications for the software clearing process, including obligations that must be met.
-
-Building wfx via
-
-```bash
-make
-```
-
-results in the following binaries:
-
-- `wfx`: The server component providing the RESTful APIs for managing workflows and jobs.
-- `wfxctl`: Command line client for interacting with the wfx.
-- `wfx-loadtest`: Command line tool for load-testing a wfx instance.
-- `wfx-viewer`: Convenience tool to visualize workflows in PlantUML or SVG format.
-
-All binaries have extensive help texts when invoked with `--help`.
 
 To build and compile-in, e.g., SQLite persistent storage support only, according `GO_TAGS` must be given:
 
 ```bash
 make GO_TAGS=sqlite
 ```
+
+### Debian
+
+The Go toolchain provided by Debian _stable_ is often outdated; it's typically end-of-life upstream but still maintained
+by Debian's security team. Therefore, to compile wfx from source in Debian _stable_, the `-backports` repository is
+necessary. In contrast, for Debian _testing_, it usually works out of the box since it ships with a recent version of
+the Go toolchain.
 
 ## Installing wfx
 

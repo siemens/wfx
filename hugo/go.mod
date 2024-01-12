@@ -1,6 +1,6 @@
 module github.com/siemens/wfx
 
-go 1.20
+go 1.21
 
 require (
 	github.com/FortAwesome/Font-Awesome v0.0.0-20230327165841-0698449d50f2 // indirect
