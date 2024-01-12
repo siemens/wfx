@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go: ["stable", "1.19"]
+        go: ["stable"]
     name: Build (Go ${{ matrix.go }})
     steps:
       - uses: actions/checkout@v4
@@ -26,7 +26,7 @@ jobs:
       - run: |
           # goreleaser requires an absolute path to the compiler
           install -m0755 .ci/zcc /usr/local/bin/zcc
-      - name: build
+      - name: build wfx
         uses: goreleaser/goreleaser-action@v5
         with:
           distribution: goreleaser
@@ -34,6 +34,8 @@ jobs:
           args: build --clean --single-target --snapshot
         env:
           CC: /usr/local/bin/zcc
+      - name: build plugins and contrib
+        run: make -s plugins contrib
 
   test:
     runs-on: ubuntu-latest
@@ -125,7 +127,7 @@ jobs:
   cli-tests:
     name: CLI Tests
     runs-on: ubuntu-latest
-    container: debian:bookworm-slim
+    container: debian:testing-slim
     services:
       mysql:
         image: mysql:8-debian
@@ -217,6 +219,6 @@ jobs:
         run: git config --global safe.directory '*'
       - uses: brokeyourbike/go-mockery-action@v0
         with:
-          mockery-version: "2.36.0"
+          mockery-version: "2.39.2"
       - run: just generate
       - run: git diff --exit-code

@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored `wfxctl workflow delete` command to accept workflows as arguments instead of positional parameters
 - Prefer cgroup CPU quota over host CPU count
 - Empty or `null` arrays are omitted from JSON responses
+- Build requires Go >= 1.21
 
 ### Removed
 

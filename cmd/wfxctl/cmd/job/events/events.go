@@ -10,6 +10,7 @@ package events
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -101,7 +102,8 @@ func (t SSETransport) Submit(op *runtime.ClientOperation) (interface{}, error) {
 	defer unsubscribe()
 
 	err := conn.Connect()
-	if err != nil {
+	if err != nil && !errors.Is(err, io.EOF) {
+		log.Error().Err(err).Msg("Failed to connect to remote server")
 		return nil, fault.Wrap(err)
 	}
 
@@ -139,7 +141,7 @@ wfxctl job events --job-id=1 --job-id=2 --client-id=foo
 		transport := SSETransport{baseCmd: &baseCmd, out: cmd.OutOrStderr()}
 		executor := generatedClient.New(transport, strfmt.Default)
 		if _, err := executor.Jobs.GetJobsEvents(params); err != nil {
-			log.Fatal().Msg("Failed to subscribe to job events")
+			log.Fatal().Err(err).Msg("Failed to subscribe to job events")
 		}
 	},
 }

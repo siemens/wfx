@@ -33,7 +33,7 @@ func TestSubscribeJobStatus(t *testing.T) {
 
 `))
 	}))
-	defer ts.Close()
+	t.Cleanup(ts.Close)
 
 	u, _ := url.Parse(ts.URL)
 	_ = flags.Koanf.Set(flags.ClientHostFlag, u.Hostname())
