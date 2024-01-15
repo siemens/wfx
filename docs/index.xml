@@ -15,13 +15,22 @@ as Windows or macOS), or if specific features need to be disabled during compila
 necessary.&lt;/p>
 &lt;h2 id="building-wfx">Building wfx&lt;/h2>
 &lt;p>A recent
-&lt;a href="https://go.dev/" target="_blank">Go compiler&lt;/a> &amp;gt;= 1.19 as well as
-&lt;a href="https://www.gnu.org/software/make/" target="_blank">GNU make&lt;/a> wrapping the
-&lt;code>go build&lt;/code> commands is required to build wfx and its associated tools.&lt;/p>
-&lt;p>wfx requires a persistent storage to save workflows and jobs. Go
-&lt;a href="https://pkg.go.dev/go/build" target="_blank">Build Tags&lt;/a> are used to
-select compiled-in support for different persistent storage options. The following persistent storage selection build
-tags are available:&lt;/p>
+&lt;a href="https://go.dev/" target="_blank">Go compiler&lt;/a> (see &lt;code>go.mod&lt;/code>) as well as
+&lt;a href="https://www.gnu.org/software/make/" target="_blank">GNU make&lt;/a>
+wrapping the &lt;code>go build&lt;/code> commands is required to build wfx and its associated tools:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>make
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The above command produces the following binaries:&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>wfx&lt;/code>: The server component providing the RESTful APIs for managing workflows and jobs.&lt;/li>
+&lt;li>&lt;code>wfxctl&lt;/code>: Command line client for interacting with the wfx.&lt;/li>
+&lt;li>&lt;code>wfx-loadtest&lt;/code>: Command line tool for load-testing a wfx instance.&lt;/li>
+&lt;li>&lt;code>wfx-viewer&lt;/code>: Convenience tool to visualize workflows in PlantUML or SVG format.&lt;/li>
+&lt;/ul>
+&lt;p>All binaries have extensive help texts when invoked with &lt;code>--help&lt;/code>.&lt;/p>
+&lt;h3 id="build-tags">Build Tags&lt;/h3>
+&lt;p>Go
+&lt;a href="https://pkg.go.dev/go/build" target="_blank">build tags&lt;/a> are used to select compiled-in support for various features. The following
+persistent storage selection build tags are available:&lt;/p>
 &lt;table>
 &lt;thead>
 &lt;tr>
@@ -56,22 +65,18 @@ tags are available:&lt;/p>
 &lt;/tr>
 &lt;/tbody>
 &lt;/table>
-&lt;p>By default, all built-in persistent storage options are enabled.&lt;/p>
+&lt;p>By default, all built-in persistent storage options are enabled (wfx requires at least one persistent storage to save
+workflows and jobs).&lt;/p>
 &lt;p>Note that the selection of build tags can impact the size of the &lt;code>wfx&lt;/code> binary file and may as well have implications for
 the software clearing process, including obligations that must be met.&lt;/p>
-&lt;p>Building wfx via&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>make
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>results in the following binaries:&lt;/p>
-&lt;ul>
-&lt;li>&lt;code>wfx&lt;/code>: The server component providing the RESTful APIs for managing workflows and jobs.&lt;/li>
-&lt;li>&lt;code>wfxctl&lt;/code>: Command line client for interacting with the wfx.&lt;/li>
-&lt;li>&lt;code>wfx-loadtest&lt;/code>: Command line tool for load-testing a wfx instance.&lt;/li>
-&lt;li>&lt;code>wfx-viewer&lt;/code>: Convenience tool to visualize workflows in PlantUML or SVG format.&lt;/li>
-&lt;/ul>
-&lt;p>All binaries have extensive help texts when invoked with &lt;code>--help&lt;/code>.&lt;/p>
 &lt;p>To build and compile-in, e.g., SQLite persistent storage support only, according &lt;code>GO_TAGS&lt;/code> must be given:&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>make &lt;span style="color:#008080">GO_TAGS&lt;/span>&lt;span style="color:#000;font-weight:bold">=&lt;/span>sqlite
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="installing-wfx">Installing wfx&lt;/h2>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="debian">Debian&lt;/h3>
+&lt;p>The Go toolchain provided by Debian &lt;em>stable&lt;/em> is often outdated; it&amp;rsquo;s typically end-of-life upstream but still maintained
+by Debian&amp;rsquo;s security team. Therefore, to compile wfx from source in Debian &lt;em>stable&lt;/em>, the &lt;code>-backports&lt;/code> repository is
+necessary. In contrast, for Debian &lt;em>testing&lt;/em>, it usually works out of the box since it ships with a recent version of
+the Go toolchain.&lt;/p>
+&lt;h2 id="installing-wfx">Installing wfx&lt;/h2>
 &lt;p>wfx&amp;rsquo;s release binaries are statically linked and self-contained. Hence, an installation isn&amp;rsquo;t strictly necessary,
 although if available, it&amp;rsquo;s recommended to pick the distro packages (e.g. &lt;code>*.deb&lt;/code> for Debian-based distros).&lt;/p>
 &lt;p>Nevertheless, for convenience on UNIXy systems,&lt;/p>
