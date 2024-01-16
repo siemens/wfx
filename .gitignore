@@ -19,3 +19,4 @@ generated/wfx.swagger.yml
 /out
 *.cov
 /wfx.db*
+*.exe

@@ -11,15 +11,12 @@ on: [push, pull_request, workflow_dispatch]
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go: ["stable"]
-    name: Build (Go ${{ matrix.go }})
+    name: Build
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: ${{ matrix.go }}
+          go-version: stable
       - uses: korandoru/setup-zig@v1
         with:
           zig-version: 0.10.1
@@ -36,6 +33,13 @@ jobs:
           CC: /usr/local/bin/zcc
       - name: build plugins and contrib
         run: make -s plugins contrib
+      - name: build for Windows
+        # even though not officially supported, we want it at least to compile successfully
+        run: make -s default plugins
+        env:
+          CC: /usr/local/bin/zcc
+          GOOS: windows
+          GOARCH: amd64
 
   test:
     runs-on: ubuntu-latest

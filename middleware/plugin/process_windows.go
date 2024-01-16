@@ -12,11 +12,17 @@ package plugin
 
 import (
 	"os"
+	"os/exec"
 
 	"github.com/Southclaws/fault"
 )
 
-func (p *Plugin) terminateProcess() error {
+func createCmd(path string) *exec.Cmd {
+	cmd := exec.Command(path)
+	return cmd
+}
+
+func (p *FBPlugin) terminateProcess() error {
 	pid := p.cmd.Process.Pid
 	proc, err := os.FindProcess(pid)
 	if err != nil {
