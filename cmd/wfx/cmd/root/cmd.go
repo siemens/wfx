@@ -35,6 +35,7 @@ import (
 	"github.com/siemens/wfx/persistence"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+	"go.uber.org/automaxprocs/maxprocs"
 )
 
 var k = config.New()
@@ -101,6 +102,9 @@ Examples of tasks are installation of firmware or other types of commands issued
 			logFormat = k.String(logFormatFlag)
 		})
 		setupLogging(os.Stdout, logFormat, logLevel)
+		if _, err := maxprocs.Set(maxprocs.Logger(log.Printf)); err != nil {
+			log.Warn().Err(err).Msg("Failed to set GOMAXPROCS")
+		}
 
 		// start watching config
 		if fileProvider != nil {
