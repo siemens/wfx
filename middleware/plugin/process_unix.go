@@ -12,6 +12,7 @@ package plugin
 
 import (
 	"fmt"
+	"os/exec"
 	"syscall"
 	"time"
 
@@ -20,6 +21,12 @@ import (
 )
 
 var gracefulTimeout = 15 * time.Second
+
+func createCmd(path string) *exec.Cmd {
+	cmd := exec.Command(path)
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	return cmd
+}
 
 func (p *FBPlugin) terminateProcess() error {
 	pid := p.cmd.Process.Pid

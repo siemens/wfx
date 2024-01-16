@@ -17,7 +17,6 @@ import (
 	"os/exec"
 	"sync"
 	"sync/atomic"
-	"syscall"
 
 	"github.com/Southclaws/fault"
 	"github.com/rs/zerolog/log"
@@ -51,11 +50,11 @@ func (p *FBPlugin) Name() string {
 
 func (p *FBPlugin) Start(chQuit chan error) (chan Message, error) {
 	log.Info().Str("path", p.path).Msg("Starting plugin")
-	cmd := exec.Command(p.path)
+	cmd := createCmd(p.path)
+
 	p.chQuit = chQuit
 
 	// this ensures that a process group is created (needed to kill all child processes)
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	p.responses = make(map[uint64]chan genPlugin.PluginResponseT)
 
 	stdin, err := cmd.StdinPipe()
