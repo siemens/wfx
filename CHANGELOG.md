@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Fixed
+
+### Changed
+
+- Log messages from automaxprocs/maxprocs are now seamlessly integrated into existing logging framework
+
+### Removed
+
+## [0.2.0] - 2024-01-15
+
+### Added
+
 - Add optional `description` field to workflows
 - Job event notifications via server-sent events (see #11)
 - Plugin System for External Middlewares (see #43)
@@ -32,5 +44,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Initial release of wfx.
 
-[unreleased]: https://github.com/siemens/wfx/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/siemens/wfx/releases/tag/v0.1.0
+[0.2.0]: https://github.com/siemens/wfx/releases/tag/v0.2.0
+[unreleased]: https://github.com/siemens/wfx/compare/v0.2.0...HEAD
