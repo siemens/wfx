@@ -31,6 +31,8 @@ func TestCreateJob(t *testing.T) {
 	})
 	assert.NoError(t, err)
 	assert.NotEmpty(t, job.Status.DefinitionHash)
+	require.NotNil(t, job.Workflow)
+	assert.Equal(t, wf.Name, job.Workflow.Name)
 }
 
 func TestCreateJob_Notification(t *testing.T) {

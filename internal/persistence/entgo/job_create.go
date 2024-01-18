@@ -65,7 +65,8 @@ func createJobHelper(ctx context.Context, tx *ent.Tx, job *model.Job) (*model.Jo
 		log.Error().Err(err).Msg("Failed to fetch workflow from database")
 		return nil, fault.Wrap(err)
 	}
-	group := wfutil.FindStateGroup(convertWorkflow(wfEntity), job.Status.State)
+	wf := convertWorkflow(wfEntity)
+	group := wfutil.FindStateGroup(wf, job.Status.State)
 
 	// start tags
 	n := len(job.Tags)
@@ -135,8 +136,8 @@ func createJobHelper(ctx context.Context, tx *ent.Tx, job *model.Job) (*model.Jo
 	}
 
 	result := convertJob(entity)
-	// tags are not fetched by entgo, so we have to add them manually
+	// tags and workflow are not fetched by entgo, so we have to add them manually
 	result.Tags = job.Tags
-
+	result.Workflow = wf
 	return result, nil
 }

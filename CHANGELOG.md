@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Compilation for Windows (not officially supported though)
+- Include workflow definition in response when creating jobs
 
 ### Changed
 
