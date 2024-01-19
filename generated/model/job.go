@@ -34,6 +34,8 @@ type Job struct {
 	Definition map[string]interface{} `json:"definition,omitempty"`
 
 	// The job's history. Last in, first out (LIFO). Array is truncated if its length exceeds the maximum allowed length.
+	// By default, the job history is omitted from responses unless explicitly requested by the client (see the `history` URL parameter).
+	//
 	// Max Items: 8192
 	History []*History `json:"history,omitempty"`
 
