@@ -106,8 +106,14 @@ After a job has been created, its `definition`, `status`, and `tags` can be upda
 the changes. To simplify things for client authors, wfx automatically updates the `status.definitionHash` whenever the
 `definition` changes. This provides a mechanism for detecting changes in the `definition`.
 
-wfx stores the previous `status` of the job, as well as the previous `definition`, in the job `history` array. This
-allows reviewing job updates later on and diagnose problems.
+### Job History
+
+Whenever a job's `status` or `definition` changes, wfx prepends the current value to the job's `history` array.
+This allows for reviewing job updates later on and diagnosing problems.
+
+**Note**: By default, the job history is omitted from all `Job` responses, primarily due to its diagnostic nature but
+also for bandwidth reasons. Clients requiring a job's historical data must explicitly request the specific job and
+include the `history=true` parameter in their request.
 
 ### Deleting Jobs
 

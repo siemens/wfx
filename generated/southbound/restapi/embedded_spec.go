@@ -1164,7 +1164,7 @@ func init() {
           "example": "{ \"userDefined\": {} }\n"
         },
         "history": {
-          "description": "The job's history. Last in, first out (LIFO). Array is truncated if its length exceeds the maximum allowed length.",
+          "description": "The job's history. Last in, first out (LIFO). Array is truncated if its length exceeds the maximum allowed length.\nBy default, the job history is omitted from responses unless explicitly requested by the client (see the ` + "`" + `history` + "`" + ` URL parameter).\n",
           "type": "array",
           "maxItems": 8192,
           "items": {
@@ -2885,7 +2885,7 @@ func init() {
           "example": "{ \"userDefined\": {} }\n"
         },
         "history": {
-          "description": "The job's history. Last in, first out (LIFO). Array is truncated if its length exceeds the maximum allowed length.",
+          "description": "The job's history. Last in, first out (LIFO). Array is truncated if its length exceeds the maximum allowed length.\nBy default, the job history is omitted from responses unless explicitly requested by the client (see the ` + "`" + `history` + "`" + ` URL parameter).\n",
           "type": "array",
           "maxItems": 8192,
           "items": {
