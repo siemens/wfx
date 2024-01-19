@@ -27,7 +27,7 @@ ALL_TARGETS := wfx wfxctl wfx-viewer wfx-loadtest
 
 .PHONY: default
 default:
-	@make -s $(ALL_TARGETS)
+	@$(MAKE) -s $(ALL_TARGETS)
 
 .PHONY: test
 test:
@@ -52,8 +52,8 @@ plugins:
 
 .PHONY: contrib
 contrib:
-	make -s -C contrib/remote-access
-	make -s -C contrib/config-deployment
+	$(MAKE) -s -C contrib/remote-access
+	$(MAKE) -s -C contrib/config-deployment
 
 .PHONY: clean
 clean:
