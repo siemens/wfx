@@ -290,7 +290,9 @@ definitions:
         readOnly: true
         x-nullable: true
       history:
-        description: The job's history. Last in, first out (LIFO). Array is truncated if its length exceeds the maximum allowed length.
+        description: |
+          The job's history. Last in, first out (LIFO). Array is truncated if its length exceeds the maximum allowed length.
+          By default, the job history is omitted from responses unless explicitly requested by the client (see the `history` URL parameter).
         type: array
         x-omitempty: true
         <<: *maxHistoryCount
