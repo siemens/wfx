@@ -9,7 +9,7 @@ package errutil
  */
 
 import (
-	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"reflect"
@@ -18,17 +18,24 @@ import (
 	"github.com/siemens/wfx/generated/model"
 )
 
+type codeFn interface {
+	Code() int
+}
+
 // ProcessErrorResponse extracts the Payload from an ErrorResponse.
 func ProcessErrorResponse(w io.Writer, err error) {
-	errors := extractErrors(err)
-	if len(errors) > 0 {
+	if errors := extractErrors(err); len(errors) > 0 {
 		for _, msg := range errors {
 			fmt.Fprintf(w, "ERROR: %s (code=%s, logref=%s)\n", msg.Message, msg.Code, msg.Logref)
 		}
-	} else {
-		b, _ := json.Marshal(err)
-		fmt.Fprintf(w, "ERROR: %s\n", b)
+		return
 	}
+	var fn codeFn
+	if errors.As(err, &fn) {
+		fmt.Fprintf(w, "ERROR: HTTP status %d\n", fn.Code())
+		return
+	}
+	fmt.Fprintf(w, "ERROR: %s\n", err)
 }
 
 func extractErrors(val any) []*model.Error {
@@ -41,17 +48,14 @@ func extractErrors(val any) []*model.Error {
 	 }
 	*/
 	var zeroValue reflect.Value
-	value := reflect.ValueOf(val)
-	if value.Kind() == reflect.Ptr {
-		value2 := value.Elem()
-		field := value2.FieldByName("Payload")
-		if field != zeroValue {
+	if value := reflect.ValueOf(val); value.Kind() == reflect.Ptr {
+		if field := value.Elem().FieldByName("Payload"); field != zeroValue {
 			if resp, ok := field.Interface().(*model.ErrorResponse); ok {
 				return resp.Errors
 			}
 		}
 	}
-	return []*model.Error{}
+	return nil
 }
 
 // Must is a utility function that takes a value and an error as parameters and returns the value if the error is nil.

@@ -9,10 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Log HTTP response code
+
 ### Fixed
 
 - Compilation for Windows (not officially supported though)
 - Include workflow definition in response when creating jobs
+- Correctly log non-JSON response body of plugins
 
 ### Changed
 
