@@ -23,9 +23,13 @@ type responseWriter struct {
 	statusCode   int
 }
 
-func newMyResponseWriter(w http.ResponseWriter) *responseWriter {
+func newMyResponseWriter(w http.ResponseWriter, interceptBody bool) *responseWriter {
 	var result responseWriter
-	result.bodyWriter = io.MultiWriter(w, &result.responseBody)
+	if interceptBody {
+		result.bodyWriter = io.MultiWriter(w, &result.responseBody)
+	} else {
+		result.bodyWriter = w
+	}
 	result.httpWriter = w
 	return &result
 }

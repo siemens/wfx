@@ -21,7 +21,7 @@ import (
 func TestWriter(t *testing.T) {
 	recorder := httptest.NewRecorder()
 
-	w := newMyResponseWriter(recorder)
+	w := newMyResponseWriter(recorder, true)
 	w.WriteHeader(http.StatusOK)
 
 	assert.NotNil(t, w.Header())
@@ -37,12 +37,21 @@ func TestWriter(t *testing.T) {
 	defer result.Body.Close()
 
 	assert.Equal(t, "hello world", string(body))
+	assert.Equal(t, "hello world", w.responseBody.String())
 }
 
 func TestWriterImplementsFlusher(t *testing.T) {
 	recorder := httptest.NewRecorder()
-	var w http.ResponseWriter = newMyResponseWriter(recorder)
+	var w http.ResponseWriter = newMyResponseWriter(recorder, true)
 	flusher, ok := w.(http.Flusher)
 	assert.True(t, ok)
 	flusher.Flush()
+}
+
+func TestWriterIgnoreBody(t *testing.T) {
+	recorder := httptest.NewRecorder()
+	w := newMyResponseWriter(recorder, false)
+	_, err := w.Write([]byte("hello world"))
+	require.NoError(t, err)
+	assert.Empty(t, w.responseBody.String())
 }

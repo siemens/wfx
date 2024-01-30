@@ -11,6 +11,7 @@ package logging
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"io"
 	"net/http"
 	"time"
@@ -51,29 +52,31 @@ func (mw MW) Wrap(next http.Handler) http.Handler {
 		ctx := context.WithValue(r.Context(), KeyRequestLogger, l)
 		r = r.WithContext(ctx)
 
-		if contextLogger.GetLevel() <= zerolog.TraceLevel {
+		tracing := contextLogger.GetLevel() <= zerolog.TraceLevel
+		writer := newMyResponseWriter(w, tracing)
+		if tracing {
 			request, err := PeekBody(r)
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
-
-			myResponseWriter := newMyResponseWriter(w)
-			next.ServeHTTP(myResponseWriter, r)
-
 			contextLogger.Trace().
 				Bytes("request", request).
 				Msg("Request")
-			if len(myResponseWriter.responseBody.Bytes()) > 0 {
-				contextLogger.Trace().
-					RawJSON("response", myResponseWriter.responseBody.Bytes()).
-					Msg("Response")
-			}
-		} else {
-			next.ServeHTTP(w, r)
 		}
-		contextLogger.Debug().
+
+		next.ServeHTTP(writer, r)
+		if response := writer.responseBody.Bytes(); len(response) > 0 {
+			if json.Valid(response) {
+				contextLogger.Trace().RawJSON("response", response).Msg("Response")
+			} else { // body is not in JSON format
+				contextLogger.Trace().Bytes("response", response).Msg("Response")
+			}
+		}
+
+		contextLogger.Info().
 			TimeDiff("duration", time.Now(), start).
+			Int("code", writer.statusCode).
 			Msg("Finished request")
 	})
 }

@@ -61,12 +61,12 @@ func (mw *MW) Wrap(next http.Handler) http.Handler {
 		log.Debug().Msg("Waiting for plugin response")
 		resp := <-msg.response
 		duration := time.Since(start)
-		log.Info().Dur("duration", duration).Msg("Received plugin response")
+		log.Debug().Dur("duration", duration).Msg("Received plugin response")
 
 		if resp.Payload != nil {
 			switch resp.Payload.Type {
 			case genPlugin.Payloadgenerated_plugin_client_Response:
-				log.Info().Msg("Sending client response provided by plugin")
+				log.Debug().Msg("Sending response provided by plugin")
 				val := resp.Payload.Value.(*client.ResponseT)
 				for _, h := range val.Envelope {
 					for _, value := range h.Values {
