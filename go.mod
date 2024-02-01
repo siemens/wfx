@@ -41,7 +41,7 @@ require (
 	github.com/steinfletcher/apitest v1.5.15
 	github.com/steinfletcher/apitest-jsonpath v1.7.2
 	github.com/stretchr/testify v1.8.4
-	github.com/tmaxmax/go-sse v0.7.0
+	github.com/tmaxmax/go-sse v0.8.0
 	github.com/tsenart/vegeta/v12 v12.11.1
 	github.com/yourbasic/graph v0.0.0-20210606180040-8ecfec1c2869
 	go.uber.org/automaxprocs v1.5.3
@@ -93,7 +93,6 @@ require (
 
 require (
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
-	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-openapi/analysis v0.22.2 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
