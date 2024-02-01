@@ -7,7 +7,7 @@ toolchain go1.21.5
 require (
 	entgo.io/ent v0.12.5
 	github.com/OpenPeeDeeP/xdg v1.0.0
-	github.com/Southclaws/fault v0.8.0
+	github.com/Southclaws/fault v0.8.1
 	github.com/alexliesenfeld/health v0.8.0
 	github.com/cnf/structhash v0.0.0-20201127153200-e1b16c1ebc08
 	github.com/coreos/go-systemd/v22 v22.5.0
