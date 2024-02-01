@@ -16,6 +16,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/Southclaws/fault"
 	"github.com/go-openapi/runtime"
@@ -89,9 +90,16 @@ func (t SSETransport) Submit(op *runtime.ClientOperation) (interface{}, error) {
 	httpClient.Timeout = 0
 
 	client := sse.Client{
-		HTTPClient:              httpClient,
-		DefaultReconnectionTime: sse.DefaultClient.DefaultReconnectionTime,
-		ResponseValidator:       validator(t.out),
+		HTTPClient: httpClient,
+		Backoff: sse.Backoff{
+			InitialInterval: 5 * time.Second,
+			Multiplier:      1.5,
+			Jitter:          0.5,
+			MaxInterval:     60 * time.Second,
+			MaxElapsedTime:  15 * time.Minute,
+			MaxRetries:      -1,
+		},
+		ResponseValidator: validator(t.out),
 	}
 
 	conn := client.NewConnection(req)
