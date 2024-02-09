@@ -36,7 +36,7 @@ var Command = &cobra.Command{
 wfxctl job get --id=1
 `,
 	TraverseChildren: true,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		baseCmd := flags.NewBaseCmd()
 		history := flags.Koanf.Bool(historyFlag)
 		client := errutil.Must(baseCmd.CreateHTTPClient())

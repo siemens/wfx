@@ -34,7 +34,7 @@ func init() {
 	rootCmd.AddCommand(&cobra.Command{
 		Use:   "man",
 		Short: "Generate man page and exit",
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(*cobra.Command, []string) {
 			manPage, err := mcobra.NewManPage(1, rootCmd)
 			if err != nil {
 				log.Fatal().Err(err).Msg("Failed to generate man page")
@@ -72,7 +72,7 @@ var rootCmd = &cobra.Command{
 	Use:     "wfx-loadtest",
 	Short:   "Run a loadtest against wfx",
 	Example: "wfx-loadtest --duration 10s",
-	PreRun: func(cmd *cobra.Command, args []string) {
+	PreRun: func(cmd *cobra.Command, _ []string) {
 		if err := k.Load(env.Provider("WFX_", ".", func(s string) string {
 			result := strings.ReplaceAll(
 				strings.ToLower(strings.TrimPrefix(s, "WFX_")), "_", "-")
@@ -94,7 +94,7 @@ var rootCmd = &cobra.Command{
 			zerolog.SetGlobalLevel(lvl)
 		}
 	},
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(*cobra.Command, []string) error {
 		return fault.Wrap(loadtest.Run(k))
 	},
 }

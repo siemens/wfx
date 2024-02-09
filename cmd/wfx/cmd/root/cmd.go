@@ -49,7 +49,7 @@ var Command = &cobra.Command{
 Each workflow is modeled as a state machine running in the storage, with tasks to be executed by clients.
 
 Examples of tasks are installation of firmware or other types of commands issued to clients.`,
-	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+	PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
 		f := cmd.Flags()
 		knownOptions := make(map[string]bool, 64)
 		f.VisitAll(func(flag *pflag.Flag) {
@@ -108,7 +108,7 @@ Examples of tasks are installation of firmware or other types of commands issued
 
 		// start watching config
 		if fileProvider != nil {
-			err := fileProvider.Watch(func(event interface{}, err error) {
+			err := fileProvider.Watch(func(_ interface{}, err error) {
 				if err == nil {
 					k.Write(func(k *koanf.Koanf) {
 						if err := k.Load(fileProvider, yaml.Parser(), mergeFn); err == nil {
@@ -126,7 +126,7 @@ Examples of tasks are installation of firmware or other types of commands issued
 
 		return nil
 	},
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(*cobra.Command, []string) error {
 		var username string
 		if u, err := user.Current(); err == nil {
 			username = u.Username

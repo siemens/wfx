@@ -35,7 +35,7 @@ func TestFileServerMiddleware_Fallback(t *testing.T) {
 
 	fsMW, err := NewFileServerMiddleware(k)
 	require.Nil(t, err)
-	handler := fsMW.Wrap(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	handler := fsMW.Wrap(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		fmt.Fprintln(w, "Hello, client")
 	}))
 
@@ -63,7 +63,7 @@ func TestFileServerMiddleware_Download(t *testing.T) {
 
 	fsMW, err := NewFileServerMiddleware(k)
 	require.Nil(t, err)
-	handler := fsMW.Wrap(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	handler := fsMW.Wrap(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		fmt.Fprintln(w, "Hello, client")
 	}))
 
@@ -107,7 +107,7 @@ func TestFileServerMiddleware_404(t *testing.T) {
 	k := config.New()
 	fsMW, err := NewFileServerMiddleware(k)
 	require.Nil(t, err)
-	handler := fsMW.Wrap(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	handler := fsMW.Wrap(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 	}))
 

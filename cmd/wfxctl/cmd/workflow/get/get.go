@@ -32,7 +32,7 @@ var Command = &cobra.Command{
 	Long:             `Get an existing workflow`,
 	Example:          "wfxctl workflow get --name=wfx.workflow.kanban",
 	TraverseChildren: true,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		baseCmd := flags.NewBaseCmd()
 		client := errutil.Must(baseCmd.CreateHTTPClient())
 		params := workflows.NewGetWorkflowsNameParams().

@@ -37,7 +37,7 @@ var Command = &cobra.Command{
 wfxctl workflow query
 `,
 	TraverseChildren: true,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		baseCmd := flags.NewBaseCmd()
 
 		offset := flags.Koanf.Int64(offsetFlag)

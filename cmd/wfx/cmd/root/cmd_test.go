@@ -151,7 +151,7 @@ func TestLaunchServer_UDS(t *testing.T) {
 	require.NoError(t, err)
 
 	srv := myServer{
-		Srv: &http.Server{Handler: http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		Srv: &http.Server{Handler: http.HandlerFunc(func(rw http.ResponseWriter, _ *http.Request) {
 			rw.WriteHeader(http.StatusOK)
 		})},
 		Listener: func() (net.Listener, error) {
@@ -203,7 +203,7 @@ func TestLaunchServer_ListenerClosed(t *testing.T) {
 	_ = ln.Close()
 
 	srv := myServer{
-		Srv: &http.Server{Handler: http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		Srv: &http.Server{Handler: http.HandlerFunc(func(rw http.ResponseWriter, _ *http.Request) {
 			rw.WriteHeader(http.StatusOK)
 		})},
 		Listener: func() (net.Listener, error) {

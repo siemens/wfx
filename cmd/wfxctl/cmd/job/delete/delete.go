@@ -31,7 +31,7 @@ var Command = &cobra.Command{
 	Short:            "Delete an existing job",
 	Long:             `Delete an existing job`,
 	TraverseChildren: true,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		baseCmd := flags.NewBaseCmd()
 		client := errutil.Must(baseCmd.CreateHTTPClient())
 		params := jobs.NewDeleteJobsIDParams().

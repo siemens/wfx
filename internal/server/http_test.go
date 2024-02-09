@@ -25,7 +25,7 @@ func TestNewHTTPServer(t *testing.T) {
 		CleanupTimeout: 5 * time.Minute,
 	}
 
-	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	handler := http.HandlerFunc(func(http.ResponseWriter, *http.Request) {})
 	server := NewHTTPServer(settings, handler)
 
 	assert.Equal(t, 1024, server.MaxHeaderBytes)

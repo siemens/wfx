@@ -84,9 +84,7 @@ func TestCreateServers_TLS(t *testing.T) {
 		_ = k.Set(tlsCaFlag, caCrtFile)
 	})
 
-	handler := http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-	})
-
+	handler := http.HandlerFunc(func(http.ResponseWriter, *http.Request) {})
 	servers, err := createServers([]string{kindHTTPS.String()}, handler, server.HTTPSettings{})
 	require.Nil(t, err)
 	require.Len(t, servers, 1)

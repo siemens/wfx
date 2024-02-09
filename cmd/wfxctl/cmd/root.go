@@ -47,7 +47,7 @@ Tip: Shell completion is available for Bash, Fish and Zsh. See wfxctl completion
 `,
 	SilenceUsage:     true,
 	TraverseChildren: true,
-	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+	PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
 		f := cmd.Flags()
 		if level, err := f.GetString(logLevelFlag); err == nil {
 			if lvl, err := zerolog.ParseLevel(level); err == nil {
@@ -103,7 +103,7 @@ func init() {
 	RootCmd.AddCommand(&cobra.Command{
 		Use:   "man",
 		Short: "Generate man page and exit",
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(cmd *cobra.Command, _ []string) {
 			manPage, err := mcobra.NewManPage(1, RootCmd)
 			if err != nil {
 				log.Fatal().Err(err).Msg("Failed to generate man page")

@@ -125,15 +125,15 @@ var Command = &cobra.Command{
 wfxctl job events --job-id=1 --job-id=2 --client-id=foo
 `,
 	TraverseChildren: true,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		params := jobs.NewGetJobsEventsParams()
 
 		if jobIDs := flags.Koanf.Strings(jobIDFlag); len(jobIDs) > 0 {
 			s := strings.Join(jobIDs, ",")
 			params.WithJobIds(&s)
 		}
-		if clientIds := flags.Koanf.Strings(clientIDFlag); len(clientIds) > 0 {
-			s := strings.Join(clientIds, ",")
+		if clientIDs := flags.Koanf.Strings(clientIDFlag); len(clientIDs) > 0 {
+			s := strings.Join(clientIDs, ",")
 			params.WithClientIds(&s)
 		}
 		if workflowNames := flags.Koanf.Strings(workflowNameFlag); len(workflowNames) > 0 {
