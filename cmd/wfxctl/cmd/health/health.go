@@ -50,7 +50,7 @@ var Command = &cobra.Command{
 	Short:            "Check health of wfx",
 	Long:             "Check health wfx",
 	TraverseChildren: true,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		tty := isatty.IsTerminal(os.Stdout.Fd())
 
 		colorMode := flags.Koanf.String(colorFlag)

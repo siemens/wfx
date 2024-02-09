@@ -38,7 +38,7 @@ var Command = &cobra.Command{
 wfxctl job update-definition
 `,
 	TraverseChildren: true,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		baseCmd := flags.NewBaseCmd()
 
 		b, err := io.ReadAll(bufio.NewReader(cmd.InOrStdin()))

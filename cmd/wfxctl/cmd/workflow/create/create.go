@@ -62,7 +62,7 @@ EOF
 `, kanbanExample),
 	TraverseChildren: true,
 	Args:             cobra.OnlyValidArgs,
-	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	ValidArgsFunction: func(*cobra.Command, []string, string) ([]string, cobra.ShellCompDirective) {
 		return []string{"yaml", "yml"}, cobra.ShellCompDirectiveFilterFileExt
 	},
 	Run: func(cmd *cobra.Command, args []string) {

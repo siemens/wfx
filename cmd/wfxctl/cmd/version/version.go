@@ -25,7 +25,7 @@ var Command = &cobra.Command{
 	Use:   "version",
 	Short: "Retrieve version of wfx",
 	Long:  "Retrieve version of wfx",
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		baseCmd := flags.NewBaseCmd()
 		client := errutil.Must(baseCmd.CreateHTTPClient())
 

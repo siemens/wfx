@@ -32,7 +32,7 @@ wfxctl workflow validate wfx.workflow.dau.direct.yml
 `,
 	TraverseChildren: true,
 	Args:             cobra.OnlyValidArgs,
-	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	ValidArgsFunction: func(*cobra.Command, []string, string) ([]string, cobra.ShellCompDirective) {
 		return []string{"yaml", "yml"}, cobra.ShellCompDirectiveFilterFileExt
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {

@@ -47,7 +47,7 @@ var Command = &cobra.Command{
 	Example: `
 wfxctl job update-status --id=1 --client-id=client42 --state=DOWNLOAD
 `,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		baseCmd := flags.NewBaseCmd()
 		req := model.JobStatus{
 			ClientID: flags.Koanf.String(clientIDFlag),

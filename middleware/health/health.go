@@ -63,16 +63,17 @@ func (mw MW) Shutdown() {
 }
 
 func statusListener(_ context.Context, state health.CheckerState) {
-	childLog := log.Warn()
+	logFn := log.Warn
 	switch state.Status {
 	case health.StatusDown:
-		childLog = log.Error()
+		logFn = log.Error
 	case health.StatusUp:
-		childLog = log.Info()
+		logFn = log.Info
 	case health.StatusUnknown:
-		childLog = log.Warn()
+		logFn = log.Warn
 	}
 
+	childLog := logFn()
 	for k, v := range state.CheckState {
 		childLog.Str(k, string(v.Status))
 	}

@@ -57,7 +57,7 @@ func (d *dfsData) dfsVisit(g graph.Iterator, v int) {
 	d.Color[v] = gray
 	d.Time++
 	d.Discover[v] = d.Time
-	g.Visit(v, func(w int, c int64) (skip bool) {
+	g.Visit(v, func(w int, _ int64) (skip bool) {
 		if d.Color[w] == white {
 			d.Prev[w] = v
 			d.dfsVisit(g, w)

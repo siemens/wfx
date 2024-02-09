@@ -74,7 +74,7 @@ func TestNewMiddleware_ModifyRequest(t *testing.T) {
 	require.Nil(t, err)
 	t.Cleanup(mw.Shutdown)
 
-	handler := mw.Wrap(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {}))
+	handler := mw.Wrap(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {}))
 	recorder := httptest.NewRecorder()
 	httpReq := &http.Request{
 		Method: http.MethodGet,
@@ -113,7 +113,7 @@ func TestNewMiddleware_SendResponse(t *testing.T) {
 	require.Nil(t, err)
 	t.Cleanup(mw.Shutdown)
 
-	handler := mw.Wrap(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {}))
+	handler := mw.Wrap(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {}))
 
 	recorder := httptest.NewRecorder()
 	httpReq := &http.Request{
@@ -152,7 +152,7 @@ func TestNewMiddleware_Unavailable(t *testing.T) {
 	require.Nil(t, err)
 	t.Cleanup(mw.Shutdown)
 
-	handler := mw.Wrap(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {}))
+	handler := mw.Wrap(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {}))
 
 	recorder := httptest.NewRecorder()
 	httpReq := &http.Request{

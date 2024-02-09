@@ -30,10 +30,10 @@ Do not use this for confidential information.
 `,
 	Example: "wfx-viewer --output-format svg --output wfx.workflow.dau.direct.svg wfx.workflow.dau.direct.yml",
 	Args:    cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
-	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	ValidArgsFunction: func(*cobra.Command, []string, string) ([]string, cobra.ShellCompDirective) {
 		return []string{"yaml", "yml", "json"}, cobra.ShellCompDirectiveFilterFileExt
 	},
-	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+	PersistentPreRun: func(*cobra.Command, []string) {
 		log.Logger = zerolog.New(zerolog.ConsoleWriter{
 			Out:        os.Stderr,
 			TimeFormat: time.Stamp,

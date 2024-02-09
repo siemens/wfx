@@ -28,7 +28,7 @@ import (
 // - ctx: The context for managing the lifecycle of the stream. If canceled, streaming stops.
 // - source: A read-only channel of events to be transmitted.
 func Responder(ctx context.Context, source <-chan emitter.Event) middleware.ResponderFunc {
-	return func(w http.ResponseWriter, p runtime.Producer) {
+	return func(w http.ResponseWriter, _ runtime.Producer) {
 		log := logging.LoggerFromCtx(ctx)
 
 		flusher, _ := w.(http.Flusher)

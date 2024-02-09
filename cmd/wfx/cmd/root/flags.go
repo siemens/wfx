@@ -66,7 +66,7 @@ func init() {
 	Command.AddCommand(&cobra.Command{
 		Use:   "man",
 		Short: "Generate man page and exit",
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(*cobra.Command, []string) {
 			manPage, err := mcobra.NewManPage(1, Command)
 			if err != nil {
 				log.Fatal().Err(err).Msg("Failed to generate man page")
