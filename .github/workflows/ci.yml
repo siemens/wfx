@@ -217,7 +217,10 @@ jobs:
       image: archlinux
     steps:
       - name: Install packages
-        run: pacman -Syu --noconfirm python-yaml git just go flatbuffers go-swagger gofumpt
+        run: pacman -Syu --noconfirm python-yaml git just flatbuffers go-swagger gofumpt
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "<1.22.0"
       - uses: actions/checkout@v4
       - name: Disable git security features
         run: git config --global safe.directory '*'
