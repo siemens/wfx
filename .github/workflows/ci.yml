@@ -226,6 +226,6 @@ jobs:
         run: git config --global safe.directory '*'
       - uses: brokeyourbike/go-mockery-action@v0
         with:
-          mockery-version: "2.39.2"
+          mockery-version: "2.40.2"
       - run: just generate
       - run: git diff --exit-code
