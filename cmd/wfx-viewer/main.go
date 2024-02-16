@@ -10,12 +10,15 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/Southclaws/fault"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/siemens/wfx/cmd/wfx-viewer/output"
 	"github.com/siemens/wfx/cmd/wfx/metadata"
 	"github.com/spf13/cobra"
 )
@@ -39,21 +42,17 @@ Do not use this for confidential information.
 			TimeFormat: time.Stamp,
 		}).With().Timestamp().Logger()
 	},
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		f := cmd.PersistentFlags()
 
 		input := args[0]
-		output, err := f.GetString(outputFlag)
+		dest, err := f.GetString(outputFlag)
 		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to get outputFlag")
+			return fault.Wrap(err)
 		}
 		outputFormat, err := f.GetString(outputFormatFlag)
 		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to get outputFormat")
-		}
-		krokiURL, err := f.GetString(krokiURLFlag)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to get krokiURL")
+			return fault.Wrap(err)
 		}
 
 		var inFile, outFile *os.File
@@ -67,14 +66,14 @@ Do not use this for confidential information.
 		}()
 		inFile, err = os.OpenFile(input, os.O_RDONLY, 0o644)
 		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to open input file")
+			return fault.Wrap(err)
 		}
 		cmd.SetIn(bufio.NewReader(inFile))
-		if output != "" {
+		if dest != "" {
 			var err error
-			outFile, err = os.OpenFile(output, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o644)
+			outFile, err = os.OpenFile(dest, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o644)
 			if err != nil {
-				log.Fatal().Err(err).Msg("Failed to open output file")
+				return fault.Wrap(err)
 			}
 			cmd.SetOut(outFile)
 		}
@@ -83,25 +82,21 @@ Do not use this for confidential information.
 		outWriter := bufio.NewWriter(cmd.OutOrStdout())
 
 		outputFormat = strings.ToLower(outputFormat)
-		switch outputFormat {
-		case "plantuml":
-			generatePlantUML(outWriter, workflow)
-		case "svg":
-			if err := generateSvg(outWriter, krokiURL, workflow); err != nil {
-				log.Fatal().Err(err).Msg("Failed to generate svg")
-			}
-		default:
-			log.Fatal().Str("outputFormat", outputFormat).Msg("Unsupported format")
+		gen, ok := output.Generators[outputFormat]
+		if !ok {
+			return fmt.Errorf("unsupported output format: %s", outputFormat)
 		}
-
+		if err := gen.Generate(outWriter, workflow); err != nil {
+			return fault.Wrap(err)
+		}
 		outWriter.Flush()
+		return nil
 	},
 }
 
 func main() {
 	rootCmd.Version = metadata.Version
-	err := rootCmd.Execute()
-	if err != nil {
-		os.Exit(1)
+	if err := rootCmd.Execute(); err != nil {
+		log.Fatal().Err(err).Msg("wfx-viewer encountered an error")
 	}
 }
