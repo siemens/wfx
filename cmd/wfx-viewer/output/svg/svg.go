@@ -1,4 +1,4 @@
-package main
+package svg
 
 /*
  * SPDX-FileCopyrightText: 2023 Siemens AG
@@ -15,10 +15,27 @@ import (
 	"net/http"
 
 	"github.com/Southclaws/fault"
+	"github.com/siemens/wfx/cmd/wfx-viewer/output/plantuml"
 	"github.com/siemens/wfx/generated/model"
+	"github.com/spf13/pflag"
 )
 
-func generateSvg(out io.Writer, krokiURL string, workflow *model.Workflow) error {
+const krokiURLFlag = "kroki-url"
+
+type Generator struct {
+	f *pflag.FlagSet
+}
+
+func NewGenerator() *Generator {
+	return &Generator{}
+}
+
+func (s *Generator) RegisterFlags(f *pflag.FlagSet) {
+	f.String(krokiURLFlag, "https://kroki.io/plantuml/svg", "url to kroki (used for svg)")
+	s.f = f
+}
+
+func (s *Generator) Generate(out io.Writer, workflow *model.Workflow) error {
 	body := new(bytes.Buffer)
 	writer := multipart.NewWriter(body)
 	w, err := writer.CreateFormFile("file", "workflow")
@@ -26,9 +43,16 @@ func generateSvg(out io.Writer, krokiURL string, workflow *model.Workflow) error
 		return fault.Wrap(err)
 	}
 
-	generatePlantUML(w, workflow)
+	if err := plantuml.NewGenerator().Generate(w, workflow); err != nil {
+		return fault.Wrap(err)
+	}
 
 	err = writer.Close()
+	if err != nil {
+		return fault.Wrap(err)
+	}
+
+	krokiURL, err := s.f.GetString(krokiURLFlag)
 	if err != nil {
 		return fault.Wrap(err)
 	}

@@ -1,4 +1,4 @@
-package main
+package plantuml
 
 /*
  * SPDX-FileCopyrightText: 2023 Siemens AG
@@ -15,6 +15,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"github.com/siemens/wfx/generated/model"
+	"github.com/spf13/pflag"
 	"gopkg.in/go-playground/colors.v1"
 )
 
@@ -23,7 +24,15 @@ const (
 	defaultBackgroundColor = "#000000"
 )
 
-func generatePlantUML(out io.Writer, workflow *model.Workflow) {
+type Generator struct{}
+
+func NewGenerator() *Generator {
+	return &Generator{}
+}
+
+func (g *Generator) RegisterFlags(_ *pflag.FlagSet) {}
+
+func (g *Generator) Generate(out io.Writer, workflow *model.Workflow) error {
 	mustWrite := func(s string) {
 		_, err := out.Write([]byte(s))
 		if err != nil {
@@ -148,4 +157,5 @@ func generatePlantUML(out io.Writer, workflow *model.Workflow) {
 	mustWrite("endlegend\n")
 
 	mustWrite("@enduml\n")
+	return nil
 }

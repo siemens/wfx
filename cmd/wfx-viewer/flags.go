@@ -10,17 +10,19 @@ package main
 
 import (
 	"fmt"
+	"sort"
+	"strings"
 
 	mcobra "github.com/muesli/mango-cobra"
 	"github.com/muesli/roff"
 	"github.com/rs/zerolog/log"
+	"github.com/siemens/wfx/cmd/wfx-viewer/output"
 	"github.com/spf13/cobra"
 )
 
 const (
 	outputFlag       = "output"
 	outputFormatFlag = "output-format"
-	krokiURLFlag     = "kroki-url"
 )
 
 func init() {
@@ -40,6 +42,12 @@ func init() {
 
 	f := rootCmd.PersistentFlags()
 	f.String(outputFlag, "", "output file (default: stdout)")
-	f.String(outputFormatFlag, "plantuml", "output format. possible values: plantuml, svg")
-	f.String(krokiURLFlag, "https://kroki.io/plantuml/svg", "url to kroki (used for svg)")
+
+	allFormats := make([]string, 0, len(output.Generators))
+	for format, gen := range output.Generators {
+		allFormats = append(allFormats, format)
+		gen.RegisterFlags(f)
+	}
+	sort.Strings(allFormats)
+	f.String(outputFormatFlag, allFormats[0], fmt.Sprintf("output format. possible values: %s", strings.Join(allFormats, ",")))
 }
