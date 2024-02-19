@@ -54,12 +54,6 @@ func TestCreateJob_Notification(t *testing.T) {
 	assert.Equal(t, job.ID, jobEvent.Job.ID)
 }
 
-func TestFindInitial(t *testing.T) {
-	wf := dau.DirectWorkflow()
-	initial := findInitial(wf)
-	assert.Equal(t, "INSTALL", *initial)
-}
-
 func newInMemoryDB(t *testing.T) persistence.Storage {
 	db := &entgo.SQLite{}
 	err := db.Initialize(context.Background(), "file:wfx?mode=memory&cache=shared&_fk=1")

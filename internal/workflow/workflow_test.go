@@ -45,3 +45,16 @@ func TestFollowTransitions(t *testing.T) {
 	actual := FollowImmediateTransitions(&model.Workflow{Transitions: transitions}, "a")
 	assert.Equal(t, d, actual, "should warp from a to d")
 }
+
+func TestFindInitialState(t *testing.T) {
+	wf := dau.DirectWorkflow()
+	initial := FindInitialState(wf)
+	assert.Equal(t, "INSTALL", *initial)
+}
+
+func TestFindFinalStates(t *testing.T) {
+	wf := dau.DirectWorkflow()
+	finaleStates := FindFinalStates(wf)
+	assert.Equal(t, []string{"ACTIVATED", "TERMINATED"}, finaleStates)
+	assert.IsIncreasing(t, finaleStates)
+}
