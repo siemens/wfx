@@ -93,6 +93,7 @@ require (
 
 require (
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
+	github.com/approvals/go-approval-tests v0.0.0-20220530063708-32d5677069bd // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-openapi/analysis v0.22.2 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect

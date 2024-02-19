@@ -12,6 +12,7 @@ import (
 	"io"
 
 	"github.com/siemens/wfx/cmd/wfx-viewer/output/plantuml"
+	"github.com/siemens/wfx/cmd/wfx-viewer/output/smcat"
 	"github.com/siemens/wfx/cmd/wfx-viewer/output/svg"
 	"github.com/siemens/wfx/generated/model"
 	"github.com/spf13/pflag"
@@ -27,4 +28,5 @@ var Generators = make(map[string]Generator)
 func init() {
 	Generators["svg"] = svg.NewGenerator()
 	Generators["plantuml"] = plantuml.NewGenerator()
+	Generators["smcat"] = smcat.NewGenerator()
 }

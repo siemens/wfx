@@ -34,7 +34,7 @@ func CreateJob(ctx context.Context, storage persistence.Storage, request *model.
 		return nil, fault.Wrap(err)
 	}
 
-	initial := findInitial(wf)
+	initial := workflow.FindInitialState(wf)
 	if initial == nil {
 		// should be caught by workflow validation
 		return nil, errors.New("workflow has no initial state")
@@ -76,23 +76,4 @@ func CreateJob(ctx context.Context, storage persistence.Storage, request *model.
 
 	contextLogger.Info().Str("id", job.ID).Msg("Created new job")
 	return createdJob, nil
-}
-
-func findInitial(workflow *model.Workflow) *string {
-	parent := make(map[string]string, len(workflow.States))
-	for _, state := range workflow.States {
-		parent[state.Name] = ""
-	}
-	for _, transition := range workflow.Transitions {
-		if transition.From != transition.To {
-			parent[transition.To] = transition.From
-		}
-	}
-	// we know that there must be exactly one initial state due to model validation
-	for node, predecessor := range parent {
-		if predecessor == "" {
-			return &node
-		}
-	}
-	return nil
 }
