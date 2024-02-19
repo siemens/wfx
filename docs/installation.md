@@ -29,7 +29,7 @@ The above command produces the following binaries:
 - `wfx`: The server component providing the RESTful APIs for managing workflows and jobs.
 - `wfxctl`: Command line client for interacting with the wfx.
 - `wfx-loadtest`: Command line tool for load-testing a wfx instance.
-- `wfx-viewer`: Convenience tool to visualize workflows in PlantUML or SVG format.
+- `wfx-viewer`: Convenience tool to visualize workflows in different formats (e.g. PlantUML, Mermaid).
 
 All binaries have extensive help texts when invoked with `--help`.
 

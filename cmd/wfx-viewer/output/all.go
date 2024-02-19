@@ -11,6 +11,7 @@ package output
 import (
 	"io"
 
+	"github.com/siemens/wfx/cmd/wfx-viewer/output/mermaid"
 	"github.com/siemens/wfx/cmd/wfx-viewer/output/plantuml"
 	"github.com/siemens/wfx/cmd/wfx-viewer/output/smcat"
 	"github.com/siemens/wfx/cmd/wfx-viewer/output/svg"
@@ -29,4 +30,5 @@ func init() {
 	Generators["svg"] = svg.NewGenerator()
 	Generators["plantuml"] = plantuml.NewGenerator()
 	Generators["smcat"] = smcat.NewGenerator()
+	Generators["mermaid"] = mermaid.NewGenerator()
 }
