@@ -11,6 +11,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"time"
@@ -20,7 +21,9 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/siemens/wfx/cmd/wfx-viewer/output"
 	"github.com/siemens/wfx/cmd/wfx/metadata"
+	"github.com/siemens/wfx/generated/model"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 )
 
 var rootCmd = &cobra.Command{
@@ -78,7 +81,17 @@ Do not use this for confidential information.
 			cmd.SetOut(outFile)
 		}
 
-		workflow := readInput(cmd.InOrStdin())
+		var workflow model.Workflow
+		{ // parse workflow
+			b, err := io.ReadAll(cmd.InOrStdin())
+			if err != nil {
+				return fault.Wrap(err)
+			}
+			if err = yaml.Unmarshal(b, &workflow); err != nil {
+				return fault.Wrap(err)
+			}
+		}
+
 		outWriter := bufio.NewWriter(cmd.OutOrStdout())
 
 		outputFormat = strings.ToLower(outputFormat)
@@ -86,7 +99,7 @@ Do not use this for confidential information.
 		if !ok {
 			return fmt.Errorf("unsupported output format: %s", outputFormat)
 		}
-		if err := gen.Generate(outWriter, workflow); err != nil {
+		if err := gen.Generate(outWriter, &workflow); err != nil {
 			return fault.Wrap(err)
 		}
 		outWriter.Flush()
