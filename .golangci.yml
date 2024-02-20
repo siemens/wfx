@@ -104,3 +104,6 @@ linters-settings:
       - github.com/siemens/wfx/internal/errutil
       - google.golang.org/protobuf/*
       - io
+  dupword:
+    keywords:
+      - "INSTALLING"
