@@ -14,8 +14,6 @@ ignore:
   - "generated/**"
   # exclude test code
   - "cmd/wfx-loadtest/**"
-  # TODO: would be nice to have some tests even if it's just a dev tool
-  - "cmd/wfx-viewer/**"
 
 coverage:
   status:
