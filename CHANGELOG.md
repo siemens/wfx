@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Log HTTP response code
+- wfx-viewer: additional output formats mermaid.js and state-machine-cat
 
 ### Fixed
 
