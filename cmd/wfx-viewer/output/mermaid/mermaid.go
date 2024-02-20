@@ -65,6 +65,7 @@ func (g *Generator) Generate(out io.Writer, wf *model.Workflow) error {
 		lines = append(lines, fmt.Sprintf(`<font color="%s">%s</font> - %s`, hex, group.Name, group.Description))
 	}
 	_, _ = out.Write([]byte(strings.Join(lines, "<br/>")))
+	_, _ = out.Write([]byte("\n"))
 
 	return nil
 }

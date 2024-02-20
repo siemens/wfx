@@ -38,6 +38,6 @@ func TestGenerate(t *testing.T) {
 	buf := new(bytes.Buffer)
 	err := gen.Generate(buf, dau.DirectWorkflow())
 	require.NoError(t, err)
-	assert.Equal(t, "Hello world", buf.String())
+	assert.Equal(t, "Hello world\n", buf.String())
 	assert.Contains(t, string(body), "@startuml")
 }

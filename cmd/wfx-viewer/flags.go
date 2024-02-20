@@ -15,6 +15,7 @@ import (
 
 	mcobra "github.com/muesli/mango-cobra"
 	"github.com/muesli/roff"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/siemens/wfx/cmd/wfx-viewer/output"
 	"github.com/spf13/cobra"
@@ -41,6 +42,15 @@ func init() {
 	})
 
 	f := rootCmd.PersistentFlags()
+	f.String("log-level", "info", fmt.Sprintf("set log level. one of: %s,%s,%s,%s,%s,%s,%s",
+		zerolog.TraceLevel.String(),
+		zerolog.DebugLevel.String(),
+		zerolog.InfoLevel.String(),
+		zerolog.WarnLevel.String(),
+		zerolog.ErrorLevel.String(),
+		zerolog.FatalLevel.String(),
+		zerolog.PanicLevel.String()))
+
 	f.String(outputFlag, "", "output file (default: stdout)")
 
 	allFormats := make([]string, 0, len(output.Generators))
