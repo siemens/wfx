@@ -39,24 +39,29 @@ Do not use this for confidential information.
 	ValidArgsFunction: func(*cobra.Command, []string, string) ([]string, cobra.ShellCompDirective) {
 		return []string{"yaml", "yml", "json"}, cobra.ShellCompDirectiveFilterFileExt
 	},
-	PersistentPreRun: func(*cobra.Command, []string) {
+	PersistentPreRun: func(cmd *cobra.Command, _ []string) {
 		log.Logger = zerolog.New(zerolog.ConsoleWriter{
-			Out:        os.Stderr,
+			Out:        cmd.ErrOrStderr(),
 			TimeFormat: time.Stamp,
 		}).With().Timestamp().Logger()
+		logLevel, _ := cmd.PersistentFlags().GetString("log-level")
+		if lvl, err := zerolog.ParseLevel(logLevel); err == nil {
+			zerolog.SetGlobalLevel(lvl)
+		}
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		f := cmd.PersistentFlags()
 
-		input := args[0]
+		src := args[0]
 		dest, err := f.GetString(outputFlag)
 		if err != nil {
 			return fault.Wrap(err)
 		}
-		outputFormat, err := f.GetString(outputFormatFlag)
+		format, err := f.GetString(outputFormatFlag)
 		if err != nil {
 			return fault.Wrap(err)
 		}
+		log.Debug().Str("src", src).Str("dest", dest).Str("format", format).Msg("Starting conversion")
 
 		var inFile, outFile *os.File
 		defer func() {
@@ -67,7 +72,7 @@ Do not use this for confidential information.
 				outFile.Close()
 			}
 		}()
-		inFile, err = os.OpenFile(input, os.O_RDONLY, 0o644)
+		inFile, err = os.OpenFile(src, os.O_RDONLY, 0o644)
 		if err != nil {
 			return fault.Wrap(err)
 		}
@@ -91,18 +96,21 @@ Do not use this for confidential information.
 				return fault.Wrap(err)
 			}
 		}
+		log.Debug().Str("name", workflow.Name).Msg("Workflow parsed")
 
 		outWriter := bufio.NewWriter(cmd.OutOrStdout())
 
-		outputFormat = strings.ToLower(outputFormat)
-		gen, ok := output.Generators[outputFormat]
+		format = strings.ToLower(format)
+		gen, ok := output.Generators[format]
 		if !ok {
-			return fmt.Errorf("unsupported output format: %s", outputFormat)
+			return fmt.Errorf("unsupported output format: %s", format)
 		}
+		log.Debug().Msg("Generating output")
 		if err := gen.Generate(outWriter, &workflow); err != nil {
 			return fault.Wrap(err)
 		}
-		outWriter.Flush()
+		_ = outWriter.Flush()
+		log.Debug().Msg("Successfully generated output")
 		return nil
 	},
 }

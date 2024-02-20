@@ -73,6 +73,7 @@ func (s *Generator) Generate(out io.Writer, workflow *model.Workflow) error {
 	if err := resp.Body.Close(); err != nil {
 		return fault.Wrap(err)
 	}
+	_, _ = out.Write([]byte("\n"))
 
 	return nil
 }
