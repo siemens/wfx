@@ -24,7 +24,7 @@ wrapping the &lt;code>go build&lt;/code> commands is required to build wfx and i
 &lt;li>&lt;code>wfx&lt;/code>: The server component providing the RESTful APIs for managing workflows and jobs.&lt;/li>
 &lt;li>&lt;code>wfxctl&lt;/code>: Command line client for interacting with the wfx.&lt;/li>
 &lt;li>&lt;code>wfx-loadtest&lt;/code>: Command line tool for load-testing a wfx instance.&lt;/li>
-&lt;li>&lt;code>wfx-viewer&lt;/code>: Convenience tool to visualize workflows in PlantUML or SVG format.&lt;/li>
+&lt;li>&lt;code>wfx-viewer&lt;/code>: Convenience tool to visualize workflows in different formats (e.g. PlantUML, Mermaid).&lt;/li>
 &lt;/ul>
 &lt;p>All binaries have extensive help texts when invoked with &lt;code>--help&lt;/code>.&lt;/p>
 &lt;h3 id="build-tags">Build Tags&lt;/h3>
