@@ -10,12 +10,16 @@ package root
  * Author: Michael Adler <michael.adler@siemens.com>
  */
 
-import "github.com/siemens/wfx/middleware"
+import (
+	"errors"
+
+	"github.com/siemens/wfx/middleware"
+)
 
 func LoadNorthboundPlugins(chan error) ([]middleware.IntermediateMW, error) {
-	return []middleware.IntermediateMW{}, nil
+	return nil, errors.New("this binary was built without plugin support")
 }
 
 func LoadSouthboundPlugins(chan error) ([]middleware.IntermediateMW, error) {
-	return []middleware.IntermediateMW{}, nil
+	return nil, errors.New("this binary was built without plugin support")
 }

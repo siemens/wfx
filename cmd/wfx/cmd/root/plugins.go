@@ -24,21 +24,6 @@ import (
 	"github.com/siemens/wfx/middleware/plugin"
 )
 
-const (
-	clientPluginsDirFlag = "client-plugins-dir"
-	mgmtPluginsDirFlag   = "mgmt-plugins-dir"
-)
-
-func init() {
-	f := Command.PersistentFlags()
-
-	_ = Command.MarkPersistentFlagDirname(clientPluginsDirFlag)
-	f.String(clientPluginsDirFlag, "", "directory containing client plugins")
-
-	_ = Command.MarkPersistentFlagDirname(mgmtPluginsDirFlag)
-	f.String(mgmtPluginsDirFlag, "", "directory containing management plugins")
-}
-
 func LoadNorthboundPlugins(chQuit chan error) ([]middleware.IntermediateMW, error) {
 	return loadPluginSet(mgmtPluginsDirFlag, chQuit)
 }
