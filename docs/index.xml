@@ -1,4 +1,4 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>– Documentation</title><link>https://siemens.github.io/wfx/docs/</link><description>Recent content in Documentation on</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="https://siemens.github.io/wfx/docs/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs: Build and Installation</title><link>https://siemens.github.io/wfx/docs/installation/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://siemens.github.io/wfx/docs/installation/</guid><description>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>– Documentation</title><link>/docs/</link><description>Recent content in Documentation on</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="/docs/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs: Build and Installation</title><link>/docs/installation/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/docs/installation/</guid><description>
 &lt;p>Pre-built binaries, as well as Debian and RPM packages, are available
 &lt;a href="https://github.com/siemens/wfx/releases" target="_blank">here&lt;/a>
 for Linux, specifically
@@ -61,7 +61,7 @@ persistent storage selection build tags are available:&lt;/p>
 &lt;tr>
 &lt;td style="text-align:left">&lt;code>plugin&lt;/code>&lt;/td>
 &lt;td style="text-align:left">Enable support for
-&lt;a href="https://siemens.github.io/wfx/docs/operations/#Plugins">external plugins&lt;/a>&lt;/td>
+&lt;a href="/docs/operations/#Plugins">external plugins&lt;/a>&lt;/td>
 &lt;/tr>
 &lt;/tbody>
 &lt;/table>
@@ -89,7 +89,7 @@ although if available, it&amp;rsquo;s recommended to pick the distro packages (e
 &lt;a href="https://www.gnu.org/software/bash/" target="_blank">Bash&lt;/a>,
 &lt;a href="https://fishshell.com" target="_blank">Fish&lt;/a> and
 &lt;a href="https://www.zsh.org" target="_blank">Zsh&lt;/a>. To install the
-completions, refer to the binary&amp;rsquo;s &lt;code>completion --help&lt;/code> output, e.g. &lt;code>wfx completion bash --help&lt;/code>.&lt;/p></description></item><item><title>Docs: Configuration</title><link>https://siemens.github.io/wfx/docs/configuration/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://siemens.github.io/wfx/docs/configuration/</guid><description>
+completions, refer to the binary&amp;rsquo;s &lt;code>completion --help&lt;/code> output, e.g. &lt;code>wfx completion bash --help&lt;/code>.&lt;/p></description></item><item><title>Docs: Configuration</title><link>/docs/configuration/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/docs/configuration/</guid><description>
 &lt;p>wfx is configured in the following order of precedence using&lt;/p>
 &lt;ol>
 &lt;li>command line parameters (e.g. &lt;code>--log-level&lt;/code>),&lt;/li>
@@ -103,11 +103,11 @@ need for restarting it.&lt;/p>
 &lt;p>Without configuration,&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>/usr/bin/wfx
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>starts wfx using the built-in SQLite-based persistent storage. The northbound (management) API is available at
-&lt;a href="http://127.0.0.1:8081/api/wfx/v1/" target="_blank">
-&lt;a href="http://127.0.0.1:8081/api/wfx/v1/" target="_blank">http://127.0.0.1:8081/api/wfx/v1/&lt;/a>&lt;/a>, whereas the southbound (client) API is
-available at a different port:
-&lt;a href="http://127.0.0.1:8080/api/wfx/v1" target="_blank">
-&lt;a href="http://127.0.0.1:8080/api/wfx/v1" target="_blank">http://127.0.0.1:8080/api/wfx/v1&lt;/a>&lt;/a>.&lt;/p>
+[
+&lt;a href="http" target="_blank">[http://127.0.0.1:8081/api/wfx/v1/\(http](http](http://127.0.0.1:8081/api/wfx/v1/](http&lt;/a>://127.0.0.1:8081/api/wfx/v1/](http)://127.0.0.1:8081/api/wfx/v1/),
+whereas the southbound (client) API is available at a different port:
+[
+&lt;a href="http" target="_blank">[http://127.0.0.1:8080/api/wfx/v1\(http](http](http://127.0.0.1:8080/api/wfx/v1](http&lt;/a>://127.0.0.1:8080/api/wfx/v1](http)://127.0.0.1:8080/api/wfx/v1).&lt;/p>
 &lt;h2 id="systemd-integration">Systemd Integration&lt;/h2>
 &lt;p>For production deployments, it&amp;rsquo;s recommended to run wfx under a service supervisor such as
 &lt;a href="https://systemd.io" target="_blank">systemd&lt;/a>. The &lt;code>share/systemd&lt;/code> directory provides pre-configured systemd service units. These units
@@ -258,7 +258,7 @@ in HTTPS-only mode:&lt;/p>
 &lt;p>wfx comes with a built-in file server that serves artifacts at &lt;code>http://&amp;lt;wfx host:{client,mgmt} port&amp;gt;/download/&lt;/code>. This
 feature is particularly useful for dynamic deployments or when an external file storage solution is unavailable. To
 configure the directory that backs the file server URL&amp;rsquo;s contents, use the &lt;code>--simple-fileserver=/path/to/folder&lt;/code> option.&lt;/p>
-&lt;p>Note that this feature is disabled by default and must be explicitly enabled at run-time using this option.&lt;/p></description></item><item><title>Docs: Device Artifact Update (DAU)</title><link>https://siemens.github.io/wfx/docs/workflows/dau/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://siemens.github.io/wfx/docs/workflows/dau/</guid><description>
+&lt;p>Note that this feature is disabled by default and must be explicitly enabled at run-time using this option.&lt;/p></description></item><item><title>Docs: Device Artifact Update (DAU)</title><link>/docs/workflows/dau/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/docs/workflows/dau/</guid><description>
 &lt;p>The Device Artifact Update Workflow Family has been specifically designed for updating software on devices.&lt;/p>
 &lt;p>The following clients have support for the Device Artifact Update Workflow Family:&lt;/p>
 &lt;ul>
@@ -269,9 +269,9 @@ for Embedded Linux Devices.&lt;/li>
 &lt;h2 id="workflows">Workflows&lt;/h2>
 &lt;p>Currently, the DAU Workflow Family comprises two workflows that model the software update process for devices:&lt;/p>
 &lt;p>The
-&lt;a href="https://siemens.github.io/wfx/wfx.workflow.dau.direct.yml">&lt;code>wfx.workflow.dau.direct&lt;/code>&lt;/a> workflow caters for the fully automated software update
+&lt;a href="/wfx.workflow.dau.direct.yml">&lt;code>wfx.workflow.dau.direct&lt;/code>&lt;/a> workflow caters for the fully automated software update
 use case while the
-&lt;a href="https://siemens.github.io/wfx/wfx.workflow.dau.phased.yml">&lt;code>wfx.workflow.dau.phased&lt;/code>&lt;/a> workflow operates in distinct phases
+&lt;a href="/wfx.workflow.dau.phased.yml">&lt;code>wfx.workflow.dau.phased&lt;/code>&lt;/a> workflow operates in distinct phases
 requiring external input to advance the workflow.&lt;/p>
 &lt;h3 id="installation">Installation&lt;/h3>
 &lt;p>wfx does not come with any pre-loaded or pre-seeded workflows, thus requiring the creation of workflows either locally&lt;/p>
@@ -294,7 +294,7 @@ transitions to the next stage automatically while in case of &lt;code>wfx.workfl
 e.g., from an operator.&lt;/p>
 &lt;h3 id="wfxworkflowdaudirect">wfx.workflow.dau.direct&lt;/h3>
 &lt;p>The
-&lt;a href="https://siemens.github.io/wfx/wfx.workflow.dau.direct.yml">&lt;code>wfx.workflow.dau.direct&lt;/code>&lt;/a> workflow consists of the two stages &lt;em>installation&lt;/em> and
+&lt;a href="/wfx.workflow.dau.direct.yml">&lt;code>wfx.workflow.dau.direct&lt;/code>&lt;/a> workflow consists of the two stages &lt;em>installation&lt;/em> and
 &lt;em>activation&lt;/em>: During the installation stage, the device downloads and installs the update artifacts. In the subsequent
 activation stage, the device takes action to activate the update. Depending on the type of artifact(s), this activation
 action varies as, e.g., container images need a different activation action than firmware disk images (see below Section
@@ -321,7 +321,7 @@ descriptions and transition eligibles for legibility:&lt;/p>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ACTIVATED TERMINATED
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="wfxworkflowdauphased">wfx.workflow.dau.phased&lt;/h3>
 &lt;p>The
-&lt;a href="https://siemens.github.io/wfx/wfx.workflow.dau.phased.yml">&lt;code>wfx.workflow.dau.phased&lt;/code>&lt;/a> workflow is similar to the &lt;code>wfx.workflow.dau.direct&lt;/code>
+&lt;a href="/wfx.workflow.dau.phased.yml">&lt;code>wfx.workflow.dau.phased&lt;/code>&lt;/a> workflow is similar to the &lt;code>wfx.workflow.dau.direct&lt;/code>
 workflow but starts in the &lt;code>CREATED&lt;/code> state instead and introduces another &lt;em>download&lt;/em> stage in between installation and
 activation to decouple artifact download from its installation: The initial state &lt;code>CREATED&lt;/code> serves as an anchor to
 actually kickstart the external input-driven CFC scheme. With the additional download stage, a maintenance window could
@@ -371,7 +371,7 @@ that can be of any form such as, e.g., firmware disk images, container images, o
 has to take care to only assign jobs to devices that are known to be able to digest this type of update artifact. wfx
 doesn&amp;rsquo;t exercise any checks on compatibility.&lt;/p>
 &lt;p>An exemplary job for a device called &lt;code>example&lt;/code> (utilizing the
-&lt;a href="https://siemens.github.io/wfx/docs/configuration/#file-server">built-in simple file
+&lt;a href="/docs/configuration/#file-server">built-in simple file
 server&lt;/a>) may be created as follows:&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-json" data-lang="json">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a61717;background-color:#e3d2d2">cat&lt;/span> &lt;span style="color:#a61717;background-color:#e3d2d2">&amp;lt;&amp;lt;EOF&lt;/span> &lt;span style="color:#a61717;background-color:#e3d2d2">|&lt;/span> &lt;span style="color:#a61717;background-color:#e3d2d2">wfxctl&lt;/span> &lt;span style="color:#a61717;background-color:#e3d2d2">job&lt;/span> &lt;span style="color:#a61717;background-color:#e3d2d2">create&lt;/span> &lt;span style="color:#a61717;background-color:#e3d2d2">--client-id&lt;/span> &lt;span style="color:#a61717;background-color:#e3d2d2">example&lt;/span> &lt;span style="color:#a61717;background-color:#e3d2d2">--workflow&lt;/span> &lt;span style="color:#a61717;background-color:#e3d2d2">wfx.workflow.dau.direct&lt;/span> &lt;span style="color:#a61717;background-color:#e3d2d2">-&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>{
@@ -393,7 +393,7 @@ images or a configuration change.&lt;/p>
 test-reboot into the new firmware.&lt;/p>
 &lt;p>Since wfx isn&amp;rsquo;t concerned with the job definition except for conveying it to the device, it can be adapted to specific
 needs by feeding in a different job definition into the wfx on job creation and having a client on the device that can
-digest it.&lt;/p></description></item><item><title>Docs: Operations</title><link>https://siemens.github.io/wfx/docs/operations/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://siemens.github.io/wfx/docs/operations/</guid><description>
+digest it.&lt;/p></description></item><item><title>Docs: Operations</title><link>/docs/operations/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/docs/operations/</guid><description>
 &lt;h2 id="api">API&lt;/h2>
 &lt;p>wfx provides two RESTful APIs to interact with it: the northbound operator/management interface and the southbound
 interface used by clients as illustrated in the following figure:&lt;/p>
@@ -413,13 +413,13 @@ interface used by clients as illustrated in the following figure:&lt;/p>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The northbound API is used to create jobs and execute server-side state transitions, whereas the southbound API is used
 for client-side transitions.&lt;/p>
 &lt;p>The complete
-&lt;a href="https://siemens.github.io/wfx/wfx.swagger.yml">wfx API specification&lt;/a> is accessible at runtime via the &lt;code>/swagger.json&lt;/code> endpoint.
+&lt;a href="/wfx.swagger.yml">wfx API specification&lt;/a> is accessible at runtime via the &lt;code>/swagger.json&lt;/code> endpoint.
 Clients may inspect this specification at run-time so to obey the various limits imposed, e.g, for parameter value
 ranges and array lengths.&lt;/p>
 &lt;p>For convenience, wfx includes a built-in Swagger UI accessible at runtime via
 &lt;a href="http://localhost:8080/api/wfx/v1/docs" target="_blank">http://localhost:8080/api/wfx/v1/docs&lt;/a>,
 assuming default listening host and port
-&lt;a href="https://siemens.github.io/wfx/docs/configuration/">configuration&lt;/a>.&lt;/p>
+&lt;a href="/docs/configuration/">configuration&lt;/a>.&lt;/p>
 &lt;h3 id="job-events">Job Events&lt;/h3>
 &lt;p>Job events provide a notification mechanism that informs clients about certain operations happening on jobs. This
 approach eliminates the need for clients to continuously poll wfx, thus optimizing network usage and client resources.
@@ -550,7 +550,7 @@ client&amp;rsquo;s responsibility to handle the filtered response properly ― w
 &lt;pre>&lt;code>curl http://localhost:8080/health
 &lt;/code>&lt;/pre>
 &lt;p>in standard
-&lt;a href="https://siemens.github.io/wfx/docs/configuration/">configuration&lt;/a> or, alternatively,&lt;/p>
+&lt;a href="/docs/configuration/">configuration&lt;/a> or, alternatively,&lt;/p>
 &lt;pre>&lt;code>wfxctl health
 &lt;/code>&lt;/pre>
 &lt;h3 id="wfx-version">wfx Version&lt;/h3>
@@ -558,7 +558,7 @@ client&amp;rsquo;s responsibility to handle the filtered response properly ― w
 &lt;pre>&lt;code>curl http://localhost:8080/version
 &lt;/code>&lt;/pre>
 &lt;p>in standard
-&lt;a href="https://siemens.github.io/wfx/docs/configuration/">configuration&lt;/a> or, alternatively,&lt;/p>
+&lt;a href="/docs/configuration/">configuration&lt;/a> or, alternatively,&lt;/p>
 &lt;pre>&lt;code>wfxctl version
 &lt;/code>&lt;/pre>
 &lt;h2 id="deployment">Deployment&lt;/h2>
@@ -636,7 +636,7 @@ executed in lexicographic order based on their filenames during the startup of w
 &lt;p>Communication between wfx and a plugin is achieved by exchanging
 &lt;a href="https://flatbuffers.dev/" target="_blank">flatbuffer&lt;/a> messages via
 stdin/stdout. The flatbuffer specification is available in the
-&lt;a href="https://siemens.github.io/wfx/fbs">fbs&lt;/a> directory. A plugin can use &lt;code>stderr&lt;/code> for
+&lt;a href="/fbs">fbs&lt;/a> directory. A plugin can use &lt;code>stderr&lt;/code> for
 logging purposes (&lt;code>stderr&lt;/code> is forwarded and prefixed by wfx).&lt;/p>
 &lt;p>For every incoming request, wfx generates a unique number called &lt;code>cookie&lt;/code>. The &lt;code>cookie&lt;/code>, along with the complete request
 (e.g., headers and body in the case of HTTP), is written to the plugin&amp;rsquo;s stdin. The plugin then sends its response,
@@ -667,7 +667,7 @@ from which wfx was launched.&lt;/li>
 &lt;/ul>
 &lt;h3 id="example">Example&lt;/h3>
 &lt;p>An
-&lt;a href="https://siemens.github.io/wfx/plugin">example plugin&lt;/a> written in Go demonstrates denying access to the &lt;code>/api/wfx/v1/workflows&lt;/code> endpoint.&lt;/p>
+&lt;a href="/plugin">example plugin&lt;/a> written in Go demonstrates denying access to the &lt;code>/api/wfx/v1/workflows&lt;/code> endpoint.&lt;/p>
 &lt;h2 id="telemetry">Telemetry&lt;/h2>
 &lt;p>No telemetry or user data is collected or processed by wfx.&lt;/p>
 &lt;p>Note that there is an indirect dependency on &lt;code>go.opentelemetry.io/otel&lt;/code> via
@@ -679,7 +679,7 @@ tracing via OpenTelemetry&lt;/a> for details.&lt;/p>
 &lt;p>wfx has been designed with performance and horizontal scalability in mind.&lt;/p>
 &lt;p>To regress-test and gauge the performance of wfx in particular scenarios, the &lt;code>wfx-loadtest&lt;/code> tool stressing the REST API
 can be helpful. It&amp;rsquo;s build by default alongside the other wfx binaries, see Section
-&lt;a href="https://siemens.github.io/wfx/docs/installation/#building-wfx">Building
+&lt;a href="/docs/installation/#building-wfx">Building
 wfx&lt;/a>.&lt;/p>
 &lt;p>As an example, the following commands execute a benchmark of the default SQLite persistent storage:&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>wfx --log-format json --log-level warn &amp;amp;
@@ -704,8 +704,8 @@ percentile was 1.062 milliseconds. All requests were successful with a success r
 that a total of 5,625 status updates were sent with HTTP error code 200 and 375 jobs were created with HTTP error code
 201. No errors were reported.&lt;/p>
 &lt;p>The latency over time distribution is illustrated in the following figure:
-&lt;a href="https://siemens.github.io/wfx/benchmark.png">&lt;img src="https://siemens.github.io/wfx/benchmark.png" alt="benchmark
-plot" />&lt;/a>&lt;/p></description></item><item><title>Docs: Use Cases</title><link>https://siemens.github.io/wfx/docs/use-cases/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://siemens.github.io/wfx/docs/use-cases/</guid><description>
+&lt;a href="/benchmark.png">&lt;img src="/benchmark.png" alt="benchmark
+plot" />&lt;/a>&lt;/p></description></item><item><title>Docs: Use Cases</title><link>/docs/use-cases/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/docs/use-cases/</guid><description>
 &lt;p>This document presents a collection of use cases for employing wfx. Owing to wfx&amp;rsquo;s versatility, the list provided here
 is not exhaustive. Should you identify an important use case missing, please feel free to
 &lt;a href="https://github.com/siemens/wfx/tree/main/CONTRIBUTING.md" target="_blank">contribute&lt;/a>.&lt;/p>
@@ -714,7 +714,7 @@ such client exists yet, this implies writing custom code.&lt;/p>
 &lt;h2 id="software-update">Software Update&lt;/h2>
 &lt;p>Perform over-the-air (OTA) firmware updates using
 &lt;a href="https://swupdate.org/" target="_blank">SWUpdate&lt;/a> and the
-&lt;a href="https://siemens.github.io/wfx/docs/workflows/dau/">Device Artifact Update
+&lt;a href="/docs/workflows/dau/">Device Artifact Update
 (DAU) Workflow Family&lt;/a>. See also SWUpdate&amp;rsquo;s
 &lt;a href="https://github.com/sbabic/swupdate/blob/master/doc/source/suricatta.rst#support-for-wfx" target="_blank">Suricatta
 documentation&lt;/a>.&lt;/p>
