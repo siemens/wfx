@@ -38,7 +38,7 @@ jobs:
           # https://github.com/actions/setup-node/blob/main/docs/advanced-usage.md#caching-packages-data
           cache-dependency-path: "**/package-lock.json"
 
-      - uses: extractions/setup-just@v1
+      - uses: extractions/setup-just@v2
       - uses: r-lib/actions/setup-pandoc@v2
       - run: sudo apt-get update -q && sudo apt-get install -y --no-install-recommends make imagemagick librsvg2-bin
 
