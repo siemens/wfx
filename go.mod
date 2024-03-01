@@ -9,6 +9,7 @@ require (
 	github.com/OpenPeeDeeP/xdg v1.0.0
 	github.com/Southclaws/fault v0.8.1
 	github.com/alexliesenfeld/health v0.8.0
+	github.com/approvals/go-approval-tests v0.0.0-20220530063708-32d5677069bd
 	github.com/cnf/structhash v0.0.0-20201127153200-e1b16c1ebc08
 	github.com/coreos/go-systemd/v22 v22.5.0
 	github.com/go-openapi/errors v0.21.0
@@ -17,7 +18,7 @@ require (
 	github.com/go-openapi/spec v0.20.14
 	github.com/go-openapi/strfmt v0.22.0
 	github.com/go-openapi/swag v0.22.9
-	github.com/go-openapi/validate v0.22.6
+	github.com/go-openapi/validate v0.23.0
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/golang-migrate/migrate/v4 v4.17.0
 	github.com/google/flatbuffers v23.5.26+incompatible
@@ -93,7 +94,6 @@ require (
 
 require (
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
-	github.com/approvals/go-approval-tests v0.0.0-20220530063708-32d5677069bd // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-openapi/analysis v0.22.2 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
