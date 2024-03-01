@@ -48,12 +48,10 @@ type HistoryEdges struct {
 // JobOrErr returns the Job value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e HistoryEdges) JobOrErr() (*Job, error) {
-	if e.loadedTypes[0] {
-		if e.Job == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: job.Label}
-		}
+	if e.Job != nil {
 		return e.Job, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: job.Label}
 	}
 	return nil, &NotLoadedError{edge: "job"}
 }

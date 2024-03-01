@@ -5,7 +5,7 @@ go 1.21
 toolchain go1.21.5
 
 require (
-	entgo.io/ent v0.12.5
+	entgo.io/ent v0.13.1
 	github.com/OpenPeeDeeP/xdg v1.0.0
 	github.com/Southclaws/fault v0.8.1
 	github.com/alexliesenfeld/health v0.8.0
@@ -53,7 +53,7 @@ require (
 )
 
 require (
-	ariga.io/atlas v0.18.0 // indirect
+	ariga.io/atlas v0.19.1-0.20240203083654-5948b60a8e43 // indirect
 	github.com/PaesslerAG/gval v1.2.0 // indirect
 	github.com/PaesslerAG/jsonpath v0.1.1 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
@@ -88,7 +88,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.21.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	golang.org/x/crypto v0.18.0 // indirect
-	golang.org/x/mod v0.14.0 // indirect
+	golang.org/x/mod v0.15.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 )
 
