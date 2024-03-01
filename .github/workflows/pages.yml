@@ -23,7 +23,8 @@ jobs:
       - name: Setup Hugo
         uses: peaceiris/actions-hugo@v2
         with:
-          hugo-version: latest
+          # note: hugo >= 0.123.0 and <= 0.123.6 is broken for us
+          hugo-version: "0.122.0"
           extended: true
 
       - name: Setup Node
@@ -47,7 +48,9 @@ jobs:
       - run: just check-md-links
 
       - run: cd hugo && npm ci
-      - run: env HUGO_BASEURL=https://siemens.github.io/wfx/ just pages
+      - run: just pages
+        env:
+          HUGO_BASEURL: ${{ vars.HUGO_BASEURL }}
       - run: ls -al public/
 
       - name: Deploy
