@@ -9,6 +9,7 @@ require (
 	github.com/OpenPeeDeeP/xdg v1.0.0
 	github.com/Southclaws/fault v0.8.1
 	github.com/alexliesenfeld/health v0.8.0
+	github.com/approvals/go-approval-tests v0.0.0-20220530063708-32d5677069bd
 	github.com/cnf/structhash v0.0.0-20201127153200-e1b16c1ebc08
 	github.com/coreos/go-systemd/v22 v22.5.0
 	github.com/go-openapi/errors v0.21.0
@@ -28,7 +29,7 @@ require (
 	github.com/knadh/koanf/providers/env v0.1.0
 	github.com/knadh/koanf/providers/file v0.1.0
 	github.com/knadh/koanf/providers/posflag v0.1.0
-	github.com/knadh/koanf/v2 v2.0.1
+	github.com/knadh/koanf/v2 v2.1.0
 	github.com/mattn/go-isatty v0.0.20
 	github.com/mattn/go-sqlite3 v1.14.19
 	github.com/muesli/mango-cobra v1.2.0
@@ -93,9 +94,9 @@ require (
 
 require (
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
-	github.com/approvals/go-approval-tests v0.0.0-20220530063708-32d5677069bd // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-openapi/analysis v0.22.2 // indirect
+	github.com/go-viper/mapstructure/v2 v2.0.0-alpha.1 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/influxdata/tdigest v0.0.1 // indirect
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
