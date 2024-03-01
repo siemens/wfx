@@ -47,7 +47,7 @@ require (
 	github.com/yourbasic/graph v0.0.0-20210606180040-8ecfec1c2869
 	go.uber.org/automaxprocs v1.5.3
 	go.uber.org/goleak v1.3.0
-	golang.org/x/term v0.16.0
+	golang.org/x/term v0.17.0
 	gopkg.in/go-playground/colors.v1 v1.2.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -113,5 +113,5 @@ require (
 	golang.org/x/exp v0.0.0-20240112132812-db7319d0e0e3 // indirect
 	golang.org/x/net v0.20.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
-	golang.org/x/sys v0.16.0 // indirect
+	golang.org/x/sys v0.17.0 // indirect
 )
