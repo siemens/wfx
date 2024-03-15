@@ -44,7 +44,7 @@ jobs:
       - run: sudo apt-get update -q && sudo apt-get install -y --no-install-recommends make imagemagick librsvg2-bin
 
       # check for broken links
-      - run: sudo npm install -g markdown-link-check
+      - run: sudo npm install -g markdown-link-check@3.11.2
       - run: just check-md-links
 
       - run: cd hugo && npm ci
