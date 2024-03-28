@@ -146,7 +146,6 @@ nfpms:
       - deb
       - rpm
     bindir: /usr/bin
-    version_metadata: git
     section: default
     priority: extra
     scripts:
@@ -184,7 +183,6 @@ nfpms:
     formats:
       - deb
     bindir: /usr/bin
-    version_metadata: git
     section: default
     priority: extra
     contents:
@@ -214,7 +212,6 @@ nfpms:
     formats:
       - deb
     bindir: /usr/bin
-    version_metadata: git
     section: default
     priority: extra
     contents:
