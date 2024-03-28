@@ -222,12 +222,12 @@ jobs:
         run: pacman -Syu --noconfirm python-yaml git just flatbuffers go-swagger gofumpt
       - uses: actions/setup-go@v5
         with:
-          go-version: "<1.22.0"
+          go-version: stable
       - uses: actions/checkout@v4
       - name: Disable git security features
         run: git config --global safe.directory '*'
       - uses: brokeyourbike/go-mockery-action@v0
         with:
-          mockery-version: "2.40.2"
+          mockery-version: "2.42.1"
       - run: just generate
       - run: git diff --exit-code
