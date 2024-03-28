@@ -146,8 +146,7 @@ nfpms:
       - deb
       - rpm
     bindir: /usr/bin
-    version_metadata: git
-    section: default
+    section: net
     priority: extra
     scripts:
       postinstall: .ci/goreleaser/postinstall.sh
@@ -184,8 +183,7 @@ nfpms:
     formats:
       - deb
     bindir: /usr/bin
-    version_metadata: git
-    section: default
+    section: net
     priority: extra
     contents:
       # it's the same content for all architectures
@@ -214,8 +212,7 @@ nfpms:
     formats:
       - deb
     bindir: /usr/bin
-    version_metadata: git
-    section: default
+    section: utils
     priority: extra
     contents:
       # it's the same content for all architectures
