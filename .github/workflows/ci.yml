@@ -19,7 +19,7 @@ jobs:
           go-version: stable
       - uses: korandoru/setup-zig@v1
         with:
-          zig-version: 0.10.1
+          zig-version: 0.12.0
       - run: |
           # goreleaser requires an absolute path to the compiler
           install -m0755 .ci/zcc /usr/local/bin/zcc

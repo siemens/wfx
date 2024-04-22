@@ -29,7 +29,7 @@ mkShell {
 
     gnumake
     goreleaser
-    zig_0_10
+    zig_0_12
     just
     git
     go
