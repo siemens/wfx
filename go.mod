@@ -18,7 +18,7 @@ require (
 	github.com/go-openapi/spec v0.21.0
 	github.com/go-openapi/strfmt v0.23.0
 	github.com/go-openapi/swag v0.23.0
-	github.com/go-openapi/validate v0.23.0
+	github.com/go-openapi/validate v0.24.0
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/golang-migrate/migrate/v4 v4.17.0
 	github.com/google/flatbuffers v23.5.26+incompatible
