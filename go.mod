@@ -12,11 +12,11 @@ require (
 	github.com/approvals/go-approval-tests v0.0.0-20220530063708-32d5677069bd
 	github.com/cnf/structhash v0.0.0-20201127153200-e1b16c1ebc08
 	github.com/coreos/go-systemd/v22 v22.5.0
-	github.com/go-openapi/errors v0.21.0
-	github.com/go-openapi/loads v0.21.5
+	github.com/go-openapi/errors v0.22.0
+	github.com/go-openapi/loads v0.22.0
 	github.com/go-openapi/runtime v0.27.1
 	github.com/go-openapi/spec v0.21.0
-	github.com/go-openapi/strfmt v0.22.0
+	github.com/go-openapi/strfmt v0.23.0
 	github.com/go-openapi/swag v0.23.0
 	github.com/go-openapi/validate v0.23.0
 	github.com/go-sql-driver/mysql v1.8.1
@@ -96,7 +96,7 @@ require (
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
-	github.com/go-openapi/analysis v0.22.2 // indirect
+	github.com/go-openapi/analysis v0.23.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.0.0-alpha.1 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/influxdata/tdigest v0.0.1 // indirect
@@ -110,7 +110,7 @@ require (
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/tsenart/go-tsz v0.0.0-20180814235614-0bd30b3df1c3 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
-	go.mongodb.org/mongo-driver v1.13.1 // indirect
+	go.mongodb.org/mongo-driver v1.14.0 // indirect
 	go.opentelemetry.io/otel/metric v1.21.0 // indirect
 	golang.org/x/exp v0.0.0-20240112132812-db7319d0e0e3 // indirect
 	golang.org/x/net v0.23.0 // indirect
