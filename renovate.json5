@@ -1,0 +1,56 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: [
+    "config:best-practices",
+    ":gitSignOff",
+    ":semanticCommits",
+    ":prHourlyLimitNone",
+    ":prConcurrentLimitNone",
+    "schedule:monthly",
+  ],
+  assigneesFromCodeOwners: true,
+  separateMajorMinor: true,
+  customManagers: [
+    {
+      customType: "regex",
+      fileMatch: [".ci/packages/versions.env"],
+      matchStringsStrategy: "any",
+      matchStrings: [
+        "export .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s",
+      ],
+    },
+  ],
+  packageRules: [
+    // NOTE: Renovate will evaluate all packageRules and not stop once it gets a first match. Therefore, you should
+    // order your packageRules in order of importance so that later rules can override settings from earlier rules if
+    // necessary. If multiple rules match and set the same config option e.g. groupName the last one wins as the later
+    // rules overwrite the result from the earlier ones.
+    //
+    // group-slug is used for the branch name
+    {
+      groupName: "all non-major dependencies",
+      groupSlug: "all-minor-patch",
+      matchPackagePatterns: ["*"],
+      matchUpdateTypes: ["minor", "patch", "digest"],
+    },
+    {
+      // needed to maintain our hugo dependencies
+      matchManagers: ["gomod"],
+      matchDepTypes: ["indirect"],
+      enabled: true,
+    },
+    {
+      groupName: "all custom dependencies",
+      groupSlug: "all-custom",
+      matchFileNames: [".ci/packages/versions.env"],
+    },
+    {
+      groupName: "all pages dependencies",
+      groupSlug: "all-pages",
+      matchPackagePatterns: [
+        "github.com/google/docsy", // docsy and hugo must be compatible with each other
+        "gohugoio/hugo",
+      ],
+    },
+  ],
+}
