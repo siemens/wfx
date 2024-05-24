@@ -25,6 +25,14 @@ export MYSQL_ROOT_PASSWORD := env_var_or_default("MYSQL_PASSWORD", "root")
 export MYSQL_DATABASE := env_var_or_default("MYSQL_DATABASE", "wfx")
 export MYSQL_HOST := env_var_or_default("MYSQL_HOST", "localhost")
 
+build:
+    #!/usr/bin/env bash
+    set -euxo pipefail
+    # goreleaser requires an absolute path to the compiler
+    export CC=$(pwd)/.ci/zcc
+    goreleaser build --clean --single-target --snapshot
+    make -s plugins contrib
+
 # Update dependencies
 update-deps:
     #!/usr/bin/env bash
@@ -55,7 +63,6 @@ lint:
     export CGO_ENABLED=0
     golangci-lint run -v --build-tags=sqlite,testing
     staticcheck -tags=sqlite,testing ./...
-    reuse lint || true
     go list ./... 2>/dev/null | sed -e 's,github.com/siemens/wfx/,,' | grep -v "^generated" | sort | uniq | while read -r pkg; do
         if [[ "$pkg" == *tests* ]]; then
             continue
@@ -168,7 +175,7 @@ postgres-integration-test:
     #!/usr/bin/env bash
     set -eux
     # note: sqlite is needed for in-memory tests
-    go test -tags testing,integration,postgres,sqlite -count=1 ./...
+    go test -tags testing,integration,postgres,sqlite,plugin -count=1 ./...
 
 # Start wfx and connect to Postgres database
 @postgres-wfx: postgres-start
@@ -237,7 +244,7 @@ mysql-integration-test:
     #!/usr/bin/env bash
     set -eux
     # note: sqlite is needed for in-memory tests
-    go test -tags testing,integration,mysql,sqlite -count=1 ./...
+    go test -tags testing,integration,mysql,sqlite,plugin -count=1 ./...
 
 # Start wfx and connect to MySQL container.
 mysql-wfx: mysql-start
