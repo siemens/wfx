@@ -98,9 +98,9 @@ func worker() {
 			if credential := job.Definition["credential"].(string); credential != "" {
 				args = append(args, "--credential", credential)
 			}
-			args = append(args, "bash", "-l")
-			ttydCmd = exec.Command("ttyd", args...)
-			ttydCmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+
+			ttydCmd := createTtyCmd(args)
+
 			updateJobStatus(c, job, "OPENING", nil)
 			err := ttydCmd.Start()
 			if err != nil {
@@ -143,24 +143,5 @@ func updateJobStatus(c *client.WorkflowExecutor, job *model.Job, state string, e
 		WithNewJobStatus(job.Status))
 	if err != nil {
 		log.Println("Failed to update job status:", err)
-	}
-}
-
-func terminate() {
-	if ttydCmd != nil {
-		// ensure ttyd and children are stopped
-		pid := ttydCmd.Process.Pid
-		ttydCmd = nil
-		if err := syscall.Kill(-pid, 0); err == nil {
-			// process still running
-			log.Println("Sending SIGTERM to", pid)
-			syscall.Kill(-pid, syscall.SIGTERM)
-		}
-		time.Sleep(3 * time.Second)
-		if err := syscall.Kill(-pid, 0); err == nil {
-			// process still running
-			log.Println("Sending SIGKILL to", pid)
-			syscall.Kill(-pid, syscall.SIGKILL)
-		}
 	}
 }
