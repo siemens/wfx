@@ -15,44 +15,21 @@ jobs:
     runs-on: ubuntu-latest
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
+    container: golang:1.22.3@sha256:f43c6f049f04cbbaeb28f0aad3eea15274a7d0a7899a617d0037aec48d7ab010
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Fetch all history for .GitInfo and .Lastmod
-
-      - name: Setup Hugo
-        uses: peaceiris/actions-hugo@v3
-        with:
-          # note: hugo >= 0.123.0 and <= 0.123.6 is broken for us
-          hugo-version: "0.122.0"
-          extended: true
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          # see https://github.com/nodejs/Release/blob/main/CODENAMES.md
-          node-version: lts/Hydrogen
-          cache: "npm"
-          # The action defaults to search for the dependency file (package-lock.json,
-          # npm-shrinkwrap.json or yarn.lock) in the repository root, and uses its
-          # hash as a part of the cache key.
-          # https://github.com/actions/setup-node/blob/main/docs/advanced-usage.md#caching-packages-data
-          cache-dependency-path: "**/package-lock.json"
-
-      - uses: extractions/setup-just@v2
-      - uses: r-lib/actions/setup-pandoc@v2
-      - run: sudo apt-get update -q && sudo apt-get install -y --no-install-recommends make imagemagick librsvg2-bin
-
+      - name: Disable git security features
+        run: git config --global safe.directory '*'
+      - run: .ci/setup-pages.sh
       # check for broken links
-      - run: sudo npm install -g markdown-link-check@3.11.2
       - run: just check-md-links
-
       - run: cd hugo && npm ci
       - run: just pages
         env:
           HUGO_BASEURL: ${{ vars.HUGO_BASEURL }}
       - run: ls -al public/
-
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4
         if: ${{ github.ref == 'refs/heads/main' }}

@@ -17,21 +17,17 @@ permissions:
 jobs:
   wfx:
     runs-on: ubuntu-latest
+    container: golang:1.22.3@sha256:f43c6f049f04cbbaeb28f0aad3eea15274a7d0a7899a617d0037aec48d7ab010
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: stable
-      - uses: korandoru/setup-zig@v1
-        with:
-          zig-version: 0.12.0
-      - run: |
-          # goreleaser requires an absolute path to the compiler
-          install -m0755 .ci/zcc /usr/local/bin/zcc
+      - name: Disable git security features
+        run: git config --global safe.directory '*'
+      - run: .ci/setup-build.sh
+      # goreleaser requires an absolute path to the compiler
+      - run: install -m0755 .ci/zcc /usr/local/bin/zcc
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -39,11 +35,7 @@ jobs:
           username: ${{ secrets.PACKAGE_DEPLOY_USER }}
           password: ${{ secrets.PACKAGE_DEPLOY_TOKEN }}
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v5
-        with:
-          distribution: goreleaser
-          version: latest
-          args: release --clean
+        run: goreleaser release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.PACKAGE_DEPLOY_TOKEN }}
           CC: /usr/local/bin/zcc
