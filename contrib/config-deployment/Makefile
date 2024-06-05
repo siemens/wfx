@@ -8,7 +8,7 @@ build: config-deployer
 
 .PHONY: config-deployer
 config-deployer:
-	@CGO_ENABLED=0 go build -trimpath -ldflags '-s -w' -o $@ ./client
+	@export CGO_ENABLED=0; cd client; go build -trimpath -ldflags '-s -w' -o ../$@
 	@echo "$@: build successful"
 
 .PHONY: clean
