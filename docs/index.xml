@@ -103,11 +103,11 @@ need for restarting it.&lt;/p>
 &lt;p>Without configuration,&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>/usr/bin/wfx
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>starts wfx using the built-in SQLite-based persistent storage. The northbound (management) API is available at
-&lt;a href="http://127.0.0.1:8081/api/wfx/v1/" target="_blank">
-&lt;a href="http://127.0.0.1:8081/api/wfx/v1/" target="_blank">http://127.0.0.1:8081/api/wfx/v1/&lt;/a>&lt;/a>, whereas the southbound (client) API is
-available at a different port:
-&lt;a href="http://127.0.0.1:8080/api/wfx/v1" target="_blank">
-&lt;a href="http://127.0.0.1:8080/api/wfx/v1" target="_blank">http://127.0.0.1:8080/api/wfx/v1&lt;/a>&lt;/a>.&lt;/p>
+[[
+&lt;a href="http://127.0.0.1:8081/api/wfx/v1/%5c]%28http://127.0.0.1:8081/api/wfx/v1/%29]%28http://127.0.0.1:8081/api/wfx/v1/]%28http://127.0.0.1:8081/api/wfx/v1/%29%29" target="_blank">http://127.0.0.1:8081/api/wfx/v1/\(http://127.0.0.1:8081/api/wfx/v1/)](http://127.0.0.1:8081/api/wfx/v1/](http://127.0.0.1:8081/api/wfx/v1/))&lt;/a>,
+whereas the southbound (client) API is available at a different port:
+[[
+&lt;a href="http://127.0.0.1:8080/api/wfx/v1%5c]%28http://127.0.0.1:8080/api/wfx/v1%29]%28http://127.0.0.1:8080/api/wfx/v1]%28http://127.0.0.1:8080/api/wfx/v1%29%29" target="_blank">http://127.0.0.1:8080/api/wfx/v1\(http://127.0.0.1:8080/api/wfx/v1)](http://127.0.0.1:8080/api/wfx/v1](http://127.0.0.1:8080/api/wfx/v1))&lt;/a>.&lt;/p>
 &lt;h2 id="systemd-integration">Systemd Integration&lt;/h2>
 &lt;p>For production deployments, it&amp;rsquo;s recommended to run wfx under a service supervisor such as
 &lt;a href="https://systemd.io" target="_blank">systemd&lt;/a>. The &lt;code>share/systemd&lt;/code> directory provides pre-configured systemd service units. These units
