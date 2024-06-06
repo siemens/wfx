@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: 2023 Siemens AG
 #
 # SPDX-License-Identifier: Apache-2.0
-canonifyURLs = true
 
 contentDir = "content"
 defaultContentLanguage = "en"
@@ -64,7 +63,7 @@ prism_syntax_highlighting = false
 #  Set to true to disable breadcrumb navigation.
 breadcrumb_disable = false
 # Set to true to disable the About link in the site footer
-footer_about_disable = false
+footer_about_enable = true
 # Set to false if you don't want to display a logo (/assets/icons/logo.svg) in the top navbar
 navbar_logo = true
 # Set to true if you don't want the top navbar to be translucent when over a `block/cover`, like on the homepage.
@@ -99,6 +98,9 @@ enable = false
   url = "https://opensource.siemens.com/"
   icon = "fa fa-heart"
   desc = "Siemens loves Open Source!"
+
+[security.gotemplates]
+allowActionJSTmpl = true
 
 # hugo module configuration
 
