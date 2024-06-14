@@ -11,6 +11,7 @@ package jobs
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -101,11 +102,11 @@ func (o *GetJobsEventsOK) Code() int {
 }
 
 func (o *GetJobsEventsOK) Error() string {
-	return fmt.Sprintf("[GET /jobs/events][%d] getJobsEventsOK ", 200)
+	return fmt.Sprintf("[GET /jobs/events][%d] getJobsEventsOK", 200)
 }
 
 func (o *GetJobsEventsOK) String() string {
-	return fmt.Sprintf("[GET /jobs/events][%d] getJobsEventsOK ", 200)
+	return fmt.Sprintf("[GET /jobs/events][%d] getJobsEventsOK", 200)
 }
 
 func (o *GetJobsEventsOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -158,11 +159,13 @@ func (o *GetJobsEventsBadRequest) Code() int {
 }
 
 func (o *GetJobsEventsBadRequest) Error() string {
-	return fmt.Sprintf("[GET /jobs/events][%d] getJobsEventsBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /jobs/events][%d] getJobsEventsBadRequest %s", 400, payload)
 }
 
 func (o *GetJobsEventsBadRequest) String() string {
-	return fmt.Sprintf("[GET /jobs/events][%d] getJobsEventsBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /jobs/events][%d] getJobsEventsBadRequest %s", 400, payload)
 }
 
 func (o *GetJobsEventsBadRequest) GetPayload() *model.ErrorResponse {
@@ -226,11 +229,13 @@ func (o *GetJobsEventsNotFound) Code() int {
 }
 
 func (o *GetJobsEventsNotFound) Error() string {
-	return fmt.Sprintf("[GET /jobs/events][%d] getJobsEventsNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /jobs/events][%d] getJobsEventsNotFound %s", 404, payload)
 }
 
 func (o *GetJobsEventsNotFound) String() string {
-	return fmt.Sprintf("[GET /jobs/events][%d] getJobsEventsNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /jobs/events][%d] getJobsEventsNotFound %s", 404, payload)
 }
 
 func (o *GetJobsEventsNotFound) GetPayload() *model.ErrorResponse {
@@ -296,11 +301,11 @@ func (o *GetJobsEventsDefault) Code() int {
 }
 
 func (o *GetJobsEventsDefault) Error() string {
-	return fmt.Sprintf("[GET /jobs/events][%d] GetJobsEvents default ", o._statusCode)
+	return fmt.Sprintf("[GET /jobs/events][%d] GetJobsEvents default", o._statusCode)
 }
 
 func (o *GetJobsEventsDefault) String() string {
-	return fmt.Sprintf("[GET /jobs/events][%d] GetJobsEvents default ", o._statusCode)
+	return fmt.Sprintf("[GET /jobs/events][%d] GetJobsEvents default", o._statusCode)
 }
 
 func (o *GetJobsEventsDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

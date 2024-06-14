@@ -11,6 +11,7 @@ package jobs
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -96,11 +97,13 @@ func (o *GetJobsIDTagsOK) Code() int {
 }
 
 func (o *GetJobsIDTagsOK) Error() string {
-	return fmt.Sprintf("[GET /jobs/{id}/tags][%d] getJobsIdTagsOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /jobs/{id}/tags][%d] getJobsIdTagsOK %s", 200, payload)
 }
 
 func (o *GetJobsIDTagsOK) String() string {
-	return fmt.Sprintf("[GET /jobs/{id}/tags][%d] getJobsIdTagsOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /jobs/{id}/tags][%d] getJobsIdTagsOK %s", 200, payload)
 }
 
 func (o *GetJobsIDTagsOK) GetPayload() []string {
@@ -162,11 +165,13 @@ func (o *GetJobsIDTagsNotFound) Code() int {
 }
 
 func (o *GetJobsIDTagsNotFound) Error() string {
-	return fmt.Sprintf("[GET /jobs/{id}/tags][%d] getJobsIdTagsNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /jobs/{id}/tags][%d] getJobsIdTagsNotFound %s", 404, payload)
 }
 
 func (o *GetJobsIDTagsNotFound) String() string {
-	return fmt.Sprintf("[GET /jobs/{id}/tags][%d] getJobsIdTagsNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /jobs/{id}/tags][%d] getJobsIdTagsNotFound %s", 404, payload)
 }
 
 func (o *GetJobsIDTagsNotFound) GetPayload() *model.ErrorResponse {
@@ -232,11 +237,11 @@ func (o *GetJobsIDTagsDefault) Code() int {
 }
 
 func (o *GetJobsIDTagsDefault) Error() string {
-	return fmt.Sprintf("[GET /jobs/{id}/tags][%d] GetJobsIDTags default ", o._statusCode)
+	return fmt.Sprintf("[GET /jobs/{id}/tags][%d] GetJobsIDTags default", o._statusCode)
 }
 
 func (o *GetJobsIDTagsDefault) String() string {
-	return fmt.Sprintf("[GET /jobs/{id}/tags][%d] GetJobsIDTags default ", o._statusCode)
+	return fmt.Sprintf("[GET /jobs/{id}/tags][%d] GetJobsIDTags default", o._statusCode)
 }
 
 func (o *GetJobsIDTagsDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

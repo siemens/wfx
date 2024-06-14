@@ -11,6 +11,7 @@ package workflows
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -102,11 +103,13 @@ func (o *GetWorkflowsNameOK) Code() int {
 }
 
 func (o *GetWorkflowsNameOK) Error() string {
-	return fmt.Sprintf("[GET /workflows/{name}][%d] getWorkflowsNameOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /workflows/{name}][%d] getWorkflowsNameOK %s", 200, payload)
 }
 
 func (o *GetWorkflowsNameOK) String() string {
-	return fmt.Sprintf("[GET /workflows/{name}][%d] getWorkflowsNameOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /workflows/{name}][%d] getWorkflowsNameOK %s", 200, payload)
 }
 
 func (o *GetWorkflowsNameOK) GetPayload() *model.Workflow {
@@ -170,11 +173,13 @@ func (o *GetWorkflowsNameBadRequest) Code() int {
 }
 
 func (o *GetWorkflowsNameBadRequest) Error() string {
-	return fmt.Sprintf("[GET /workflows/{name}][%d] getWorkflowsNameBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /workflows/{name}][%d] getWorkflowsNameBadRequest %s", 400, payload)
 }
 
 func (o *GetWorkflowsNameBadRequest) String() string {
-	return fmt.Sprintf("[GET /workflows/{name}][%d] getWorkflowsNameBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /workflows/{name}][%d] getWorkflowsNameBadRequest %s", 400, payload)
 }
 
 func (o *GetWorkflowsNameBadRequest) GetPayload() *model.ErrorResponse {
@@ -238,11 +243,13 @@ func (o *GetWorkflowsNameNotFound) Code() int {
 }
 
 func (o *GetWorkflowsNameNotFound) Error() string {
-	return fmt.Sprintf("[GET /workflows/{name}][%d] getWorkflowsNameNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /workflows/{name}][%d] getWorkflowsNameNotFound %s", 404, payload)
 }
 
 func (o *GetWorkflowsNameNotFound) String() string {
-	return fmt.Sprintf("[GET /workflows/{name}][%d] getWorkflowsNameNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /workflows/{name}][%d] getWorkflowsNameNotFound %s", 404, payload)
 }
 
 func (o *GetWorkflowsNameNotFound) GetPayload() *model.ErrorResponse {
@@ -308,11 +315,11 @@ func (o *GetWorkflowsNameDefault) Code() int {
 }
 
 func (o *GetWorkflowsNameDefault) Error() string {
-	return fmt.Sprintf("[GET /workflows/{name}][%d] GetWorkflowsName default ", o._statusCode)
+	return fmt.Sprintf("[GET /workflows/{name}][%d] GetWorkflowsName default", o._statusCode)
 }
 
 func (o *GetWorkflowsNameDefault) String() string {
-	return fmt.Sprintf("[GET /workflows/{name}][%d] GetWorkflowsName default ", o._statusCode)
+	return fmt.Sprintf("[GET /workflows/{name}][%d] GetWorkflowsName default", o._statusCode)
 }
 
 func (o *GetWorkflowsNameDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

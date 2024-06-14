@@ -11,6 +11,7 @@ package jobs
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -96,11 +97,13 @@ func (o *GetJobsIDStatusOK) Code() int {
 }
 
 func (o *GetJobsIDStatusOK) Error() string {
-	return fmt.Sprintf("[GET /jobs/{id}/status][%d] getJobsIdStatusOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /jobs/{id}/status][%d] getJobsIdStatusOK %s", 200, payload)
 }
 
 func (o *GetJobsIDStatusOK) String() string {
-	return fmt.Sprintf("[GET /jobs/{id}/status][%d] getJobsIdStatusOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /jobs/{id}/status][%d] getJobsIdStatusOK %s", 200, payload)
 }
 
 func (o *GetJobsIDStatusOK) GetPayload() *model.JobStatus {
@@ -164,11 +167,13 @@ func (o *GetJobsIDStatusNotFound) Code() int {
 }
 
 func (o *GetJobsIDStatusNotFound) Error() string {
-	return fmt.Sprintf("[GET /jobs/{id}/status][%d] getJobsIdStatusNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /jobs/{id}/status][%d] getJobsIdStatusNotFound %s", 404, payload)
 }
 
 func (o *GetJobsIDStatusNotFound) String() string {
-	return fmt.Sprintf("[GET /jobs/{id}/status][%d] getJobsIdStatusNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /jobs/{id}/status][%d] getJobsIdStatusNotFound %s", 404, payload)
 }
 
 func (o *GetJobsIDStatusNotFound) GetPayload() *model.ErrorResponse {
@@ -234,11 +239,11 @@ func (o *GetJobsIDStatusDefault) Code() int {
 }
 
 func (o *GetJobsIDStatusDefault) Error() string {
-	return fmt.Sprintf("[GET /jobs/{id}/status][%d] GetJobsIDStatus default ", o._statusCode)
+	return fmt.Sprintf("[GET /jobs/{id}/status][%d] GetJobsIDStatus default", o._statusCode)
 }
 
 func (o *GetJobsIDStatusDefault) String() string {
-	return fmt.Sprintf("[GET /jobs/{id}/status][%d] GetJobsIDStatus default ", o._statusCode)
+	return fmt.Sprintf("[GET /jobs/{id}/status][%d] GetJobsIDStatus default", o._statusCode)
 }
 
 func (o *GetJobsIDStatusDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

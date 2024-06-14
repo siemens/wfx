@@ -11,6 +11,7 @@ package jobs
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -96,11 +97,13 @@ func (o *PostJobsCreated) Code() int {
 }
 
 func (o *PostJobsCreated) Error() string {
-	return fmt.Sprintf("[POST /jobs][%d] postJobsCreated  %+v", 201, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /jobs][%d] postJobsCreated %s", 201, payload)
 }
 
 func (o *PostJobsCreated) String() string {
-	return fmt.Sprintf("[POST /jobs][%d] postJobsCreated  %+v", 201, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /jobs][%d] postJobsCreated %s", 201, payload)
 }
 
 func (o *PostJobsCreated) GetPayload() *model.Job {
@@ -164,11 +167,13 @@ func (o *PostJobsBadRequest) Code() int {
 }
 
 func (o *PostJobsBadRequest) Error() string {
-	return fmt.Sprintf("[POST /jobs][%d] postJobsBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /jobs][%d] postJobsBadRequest %s", 400, payload)
 }
 
 func (o *PostJobsBadRequest) String() string {
-	return fmt.Sprintf("[POST /jobs][%d] postJobsBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /jobs][%d] postJobsBadRequest %s", 400, payload)
 }
 
 func (o *PostJobsBadRequest) GetPayload() *model.ErrorResponse {
@@ -234,11 +239,11 @@ func (o *PostJobsDefault) Code() int {
 }
 
 func (o *PostJobsDefault) Error() string {
-	return fmt.Sprintf("[POST /jobs][%d] PostJobs default ", o._statusCode)
+	return fmt.Sprintf("[POST /jobs][%d] PostJobs default", o._statusCode)
 }
 
 func (o *PostJobsDefault) String() string {
-	return fmt.Sprintf("[POST /jobs][%d] PostJobs default ", o._statusCode)
+	return fmt.Sprintf("[POST /jobs][%d] PostJobs default", o._statusCode)
 }
 
 func (o *PostJobsDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
