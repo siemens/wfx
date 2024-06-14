@@ -11,6 +11,7 @@ package jobs
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -102,11 +103,13 @@ func (o *GetJobsIDOK) Code() int {
 }
 
 func (o *GetJobsIDOK) Error() string {
-	return fmt.Sprintf("[GET /jobs/{id}][%d] getJobsIdOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /jobs/{id}][%d] getJobsIdOK %s", 200, payload)
 }
 
 func (o *GetJobsIDOK) String() string {
-	return fmt.Sprintf("[GET /jobs/{id}][%d] getJobsIdOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /jobs/{id}][%d] getJobsIdOK %s", 200, payload)
 }
 
 func (o *GetJobsIDOK) GetPayload() *model.Job {
@@ -170,11 +173,13 @@ func (o *GetJobsIDBadRequest) Code() int {
 }
 
 func (o *GetJobsIDBadRequest) Error() string {
-	return fmt.Sprintf("[GET /jobs/{id}][%d] getJobsIdBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /jobs/{id}][%d] getJobsIdBadRequest %s", 400, payload)
 }
 
 func (o *GetJobsIDBadRequest) String() string {
-	return fmt.Sprintf("[GET /jobs/{id}][%d] getJobsIdBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /jobs/{id}][%d] getJobsIdBadRequest %s", 400, payload)
 }
 
 func (o *GetJobsIDBadRequest) GetPayload() *model.ErrorResponse {
@@ -238,11 +243,13 @@ func (o *GetJobsIDNotFound) Code() int {
 }
 
 func (o *GetJobsIDNotFound) Error() string {
-	return fmt.Sprintf("[GET /jobs/{id}][%d] getJobsIdNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /jobs/{id}][%d] getJobsIdNotFound %s", 404, payload)
 }
 
 func (o *GetJobsIDNotFound) String() string {
-	return fmt.Sprintf("[GET /jobs/{id}][%d] getJobsIdNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /jobs/{id}][%d] getJobsIdNotFound %s", 404, payload)
 }
 
 func (o *GetJobsIDNotFound) GetPayload() *model.ErrorResponse {
@@ -308,11 +315,11 @@ func (o *GetJobsIDDefault) Code() int {
 }
 
 func (o *GetJobsIDDefault) Error() string {
-	return fmt.Sprintf("[GET /jobs/{id}][%d] GetJobsID default ", o._statusCode)
+	return fmt.Sprintf("[GET /jobs/{id}][%d] GetJobsID default", o._statusCode)
 }
 
 func (o *GetJobsIDDefault) String() string {
-	return fmt.Sprintf("[GET /jobs/{id}][%d] GetJobsID default ", o._statusCode)
+	return fmt.Sprintf("[GET /jobs/{id}][%d] GetJobsID default", o._statusCode)
 }
 
 func (o *GetJobsIDDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

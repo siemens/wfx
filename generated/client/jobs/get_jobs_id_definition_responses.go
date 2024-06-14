@@ -11,6 +11,7 @@ package jobs
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -96,11 +97,13 @@ func (o *GetJobsIDDefinitionOK) Code() int {
 }
 
 func (o *GetJobsIDDefinitionOK) Error() string {
-	return fmt.Sprintf("[GET /jobs/{id}/definition][%d] getJobsIdDefinitionOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /jobs/{id}/definition][%d] getJobsIdDefinitionOK %s", 200, payload)
 }
 
 func (o *GetJobsIDDefinitionOK) String() string {
-	return fmt.Sprintf("[GET /jobs/{id}/definition][%d] getJobsIdDefinitionOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /jobs/{id}/definition][%d] getJobsIdDefinitionOK %s", 200, payload)
 }
 
 func (o *GetJobsIDDefinitionOK) GetPayload() map[string]interface{} {
@@ -162,11 +165,13 @@ func (o *GetJobsIDDefinitionNotFound) Code() int {
 }
 
 func (o *GetJobsIDDefinitionNotFound) Error() string {
-	return fmt.Sprintf("[GET /jobs/{id}/definition][%d] getJobsIdDefinitionNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /jobs/{id}/definition][%d] getJobsIdDefinitionNotFound %s", 404, payload)
 }
 
 func (o *GetJobsIDDefinitionNotFound) String() string {
-	return fmt.Sprintf("[GET /jobs/{id}/definition][%d] getJobsIdDefinitionNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /jobs/{id}/definition][%d] getJobsIdDefinitionNotFound %s", 404, payload)
 }
 
 func (o *GetJobsIDDefinitionNotFound) GetPayload() *model.ErrorResponse {
@@ -232,11 +237,11 @@ func (o *GetJobsIDDefinitionDefault) Code() int {
 }
 
 func (o *GetJobsIDDefinitionDefault) Error() string {
-	return fmt.Sprintf("[GET /jobs/{id}/definition][%d] GetJobsIDDefinition default ", o._statusCode)
+	return fmt.Sprintf("[GET /jobs/{id}/definition][%d] GetJobsIDDefinition default", o._statusCode)
 }
 
 func (o *GetJobsIDDefinitionDefault) String() string {
-	return fmt.Sprintf("[GET /jobs/{id}/definition][%d] GetJobsIDDefinition default ", o._statusCode)
+	return fmt.Sprintf("[GET /jobs/{id}/definition][%d] GetJobsIDDefinition default", o._statusCode)
 }
 
 func (o *GetJobsIDDefinitionDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

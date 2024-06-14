@@ -11,6 +11,7 @@ package workflows
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -90,11 +91,13 @@ func (o *GetWorkflowsOK) Code() int {
 }
 
 func (o *GetWorkflowsOK) Error() string {
-	return fmt.Sprintf("[GET /workflows][%d] getWorkflowsOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /workflows][%d] getWorkflowsOK %s", 200, payload)
 }
 
 func (o *GetWorkflowsOK) String() string {
-	return fmt.Sprintf("[GET /workflows][%d] getWorkflowsOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /workflows][%d] getWorkflowsOK %s", 200, payload)
 }
 
 func (o *GetWorkflowsOK) GetPayload() *model.PaginatedWorkflowList {
@@ -160,11 +163,11 @@ func (o *GetWorkflowsDefault) Code() int {
 }
 
 func (o *GetWorkflowsDefault) Error() string {
-	return fmt.Sprintf("[GET /workflows][%d] GetWorkflows default ", o._statusCode)
+	return fmt.Sprintf("[GET /workflows][%d] GetWorkflows default", o._statusCode)
 }
 
 func (o *GetWorkflowsDefault) String() string {
-	return fmt.Sprintf("[GET /workflows][%d] GetWorkflows default ", o._statusCode)
+	return fmt.Sprintf("[GET /workflows][%d] GetWorkflows default", o._statusCode)
 }
 
 func (o *GetWorkflowsDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

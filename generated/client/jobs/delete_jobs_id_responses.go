@@ -11,6 +11,7 @@ package jobs
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -95,11 +96,11 @@ func (o *DeleteJobsIDNoContent) Code() int {
 }
 
 func (o *DeleteJobsIDNoContent) Error() string {
-	return fmt.Sprintf("[DELETE /jobs/{id}][%d] deleteJobsIdNoContent ", 204)
+	return fmt.Sprintf("[DELETE /jobs/{id}][%d] deleteJobsIdNoContent", 204)
 }
 
 func (o *DeleteJobsIDNoContent) String() string {
-	return fmt.Sprintf("[DELETE /jobs/{id}][%d] deleteJobsIdNoContent ", 204)
+	return fmt.Sprintf("[DELETE /jobs/{id}][%d] deleteJobsIdNoContent", 204)
 }
 
 func (o *DeleteJobsIDNoContent) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -152,11 +153,13 @@ func (o *DeleteJobsIDNotFound) Code() int {
 }
 
 func (o *DeleteJobsIDNotFound) Error() string {
-	return fmt.Sprintf("[DELETE /jobs/{id}][%d] deleteJobsIdNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /jobs/{id}][%d] deleteJobsIdNotFound %s", 404, payload)
 }
 
 func (o *DeleteJobsIDNotFound) String() string {
-	return fmt.Sprintf("[DELETE /jobs/{id}][%d] deleteJobsIdNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /jobs/{id}][%d] deleteJobsIdNotFound %s", 404, payload)
 }
 
 func (o *DeleteJobsIDNotFound) GetPayload() *model.ErrorResponse {
@@ -222,11 +225,11 @@ func (o *DeleteJobsIDDefault) Code() int {
 }
 
 func (o *DeleteJobsIDDefault) Error() string {
-	return fmt.Sprintf("[DELETE /jobs/{id}][%d] DeleteJobsID default ", o._statusCode)
+	return fmt.Sprintf("[DELETE /jobs/{id}][%d] DeleteJobsID default", o._statusCode)
 }
 
 func (o *DeleteJobsIDDefault) String() string {
-	return fmt.Sprintf("[DELETE /jobs/{id}][%d] DeleteJobsID default ", o._statusCode)
+	return fmt.Sprintf("[DELETE /jobs/{id}][%d] DeleteJobsID default", o._statusCode)
 }
 
 func (o *DeleteJobsIDDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

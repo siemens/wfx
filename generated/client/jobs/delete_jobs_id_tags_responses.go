@@ -11,6 +11,7 @@ package jobs
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -102,11 +103,13 @@ func (o *DeleteJobsIDTagsOK) Code() int {
 }
 
 func (o *DeleteJobsIDTagsOK) Error() string {
-	return fmt.Sprintf("[DELETE /jobs/{id}/tags][%d] deleteJobsIdTagsOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /jobs/{id}/tags][%d] deleteJobsIdTagsOK %s", 200, payload)
 }
 
 func (o *DeleteJobsIDTagsOK) String() string {
-	return fmt.Sprintf("[DELETE /jobs/{id}/tags][%d] deleteJobsIdTagsOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /jobs/{id}/tags][%d] deleteJobsIdTagsOK %s", 200, payload)
 }
 
 func (o *DeleteJobsIDTagsOK) GetPayload() []string {
@@ -168,11 +171,13 @@ func (o *DeleteJobsIDTagsBadRequest) Code() int {
 }
 
 func (o *DeleteJobsIDTagsBadRequest) Error() string {
-	return fmt.Sprintf("[DELETE /jobs/{id}/tags][%d] deleteJobsIdTagsBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /jobs/{id}/tags][%d] deleteJobsIdTagsBadRequest %s", 400, payload)
 }
 
 func (o *DeleteJobsIDTagsBadRequest) String() string {
-	return fmt.Sprintf("[DELETE /jobs/{id}/tags][%d] deleteJobsIdTagsBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /jobs/{id}/tags][%d] deleteJobsIdTagsBadRequest %s", 400, payload)
 }
 
 func (o *DeleteJobsIDTagsBadRequest) GetPayload() *model.ErrorResponse {
@@ -236,11 +241,13 @@ func (o *DeleteJobsIDTagsNotFound) Code() int {
 }
 
 func (o *DeleteJobsIDTagsNotFound) Error() string {
-	return fmt.Sprintf("[DELETE /jobs/{id}/tags][%d] deleteJobsIdTagsNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /jobs/{id}/tags][%d] deleteJobsIdTagsNotFound %s", 404, payload)
 }
 
 func (o *DeleteJobsIDTagsNotFound) String() string {
-	return fmt.Sprintf("[DELETE /jobs/{id}/tags][%d] deleteJobsIdTagsNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /jobs/{id}/tags][%d] deleteJobsIdTagsNotFound %s", 404, payload)
 }
 
 func (o *DeleteJobsIDTagsNotFound) GetPayload() *model.ErrorResponse {
@@ -306,11 +313,11 @@ func (o *DeleteJobsIDTagsDefault) Code() int {
 }
 
 func (o *DeleteJobsIDTagsDefault) Error() string {
-	return fmt.Sprintf("[DELETE /jobs/{id}/tags][%d] DeleteJobsIDTags default ", o._statusCode)
+	return fmt.Sprintf("[DELETE /jobs/{id}/tags][%d] DeleteJobsIDTags default", o._statusCode)
 }
 
 func (o *DeleteJobsIDTagsDefault) String() string {
-	return fmt.Sprintf("[DELETE /jobs/{id}/tags][%d] DeleteJobsIDTags default ", o._statusCode)
+	return fmt.Sprintf("[DELETE /jobs/{id}/tags][%d] DeleteJobsIDTags default", o._statusCode)
 }
 
 func (o *DeleteJobsIDTagsDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

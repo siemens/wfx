@@ -11,6 +11,7 @@ package workflows
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -96,11 +97,13 @@ func (o *PostWorkflowsCreated) Code() int {
 }
 
 func (o *PostWorkflowsCreated) Error() string {
-	return fmt.Sprintf("[POST /workflows][%d] postWorkflowsCreated  %+v", 201, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /workflows][%d] postWorkflowsCreated %s", 201, payload)
 }
 
 func (o *PostWorkflowsCreated) String() string {
-	return fmt.Sprintf("[POST /workflows][%d] postWorkflowsCreated  %+v", 201, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /workflows][%d] postWorkflowsCreated %s", 201, payload)
 }
 
 func (o *PostWorkflowsCreated) GetPayload() *model.Workflow {
@@ -164,11 +167,13 @@ func (o *PostWorkflowsBadRequest) Code() int {
 }
 
 func (o *PostWorkflowsBadRequest) Error() string {
-	return fmt.Sprintf("[POST /workflows][%d] postWorkflowsBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /workflows][%d] postWorkflowsBadRequest %s", 400, payload)
 }
 
 func (o *PostWorkflowsBadRequest) String() string {
-	return fmt.Sprintf("[POST /workflows][%d] postWorkflowsBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /workflows][%d] postWorkflowsBadRequest %s", 400, payload)
 }
 
 func (o *PostWorkflowsBadRequest) GetPayload() *model.ErrorResponse {
@@ -234,11 +239,11 @@ func (o *PostWorkflowsDefault) Code() int {
 }
 
 func (o *PostWorkflowsDefault) Error() string {
-	return fmt.Sprintf("[POST /workflows][%d] PostWorkflows default ", o._statusCode)
+	return fmt.Sprintf("[POST /workflows][%d] PostWorkflows default", o._statusCode)
 }
 
 func (o *PostWorkflowsDefault) String() string {
-	return fmt.Sprintf("[POST /workflows][%d] PostWorkflows default ", o._statusCode)
+	return fmt.Sprintf("[POST /workflows][%d] PostWorkflows default", o._statusCode)
 }
 
 func (o *PostWorkflowsDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

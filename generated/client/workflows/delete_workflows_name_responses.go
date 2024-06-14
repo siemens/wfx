@@ -11,6 +11,7 @@ package workflows
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -95,11 +96,11 @@ func (o *DeleteWorkflowsNameNoContent) Code() int {
 }
 
 func (o *DeleteWorkflowsNameNoContent) Error() string {
-	return fmt.Sprintf("[DELETE /workflows/{name}][%d] deleteWorkflowsNameNoContent ", 204)
+	return fmt.Sprintf("[DELETE /workflows/{name}][%d] deleteWorkflowsNameNoContent", 204)
 }
 
 func (o *DeleteWorkflowsNameNoContent) String() string {
-	return fmt.Sprintf("[DELETE /workflows/{name}][%d] deleteWorkflowsNameNoContent ", 204)
+	return fmt.Sprintf("[DELETE /workflows/{name}][%d] deleteWorkflowsNameNoContent", 204)
 }
 
 func (o *DeleteWorkflowsNameNoContent) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -152,11 +153,13 @@ func (o *DeleteWorkflowsNameNotFound) Code() int {
 }
 
 func (o *DeleteWorkflowsNameNotFound) Error() string {
-	return fmt.Sprintf("[DELETE /workflows/{name}][%d] deleteWorkflowsNameNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /workflows/{name}][%d] deleteWorkflowsNameNotFound %s", 404, payload)
 }
 
 func (o *DeleteWorkflowsNameNotFound) String() string {
-	return fmt.Sprintf("[DELETE /workflows/{name}][%d] deleteWorkflowsNameNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /workflows/{name}][%d] deleteWorkflowsNameNotFound %s", 404, payload)
 }
 
 func (o *DeleteWorkflowsNameNotFound) GetPayload() *model.ErrorResponse {
@@ -222,11 +225,11 @@ func (o *DeleteWorkflowsNameDefault) Code() int {
 }
 
 func (o *DeleteWorkflowsNameDefault) Error() string {
-	return fmt.Sprintf("[DELETE /workflows/{name}][%d] DeleteWorkflowsName default ", o._statusCode)
+	return fmt.Sprintf("[DELETE /workflows/{name}][%d] DeleteWorkflowsName default", o._statusCode)
 }
 
 func (o *DeleteWorkflowsNameDefault) String() string {
-	return fmt.Sprintf("[DELETE /workflows/{name}][%d] DeleteWorkflowsName default ", o._statusCode)
+	return fmt.Sprintf("[DELETE /workflows/{name}][%d] DeleteWorkflowsName default", o._statusCode)
 }
 
 func (o *DeleteWorkflowsNameDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

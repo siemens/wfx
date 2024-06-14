@@ -11,6 +11,7 @@ package jobs
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -102,11 +103,13 @@ func (o *PutJobsIDDefinitionOK) Code() int {
 }
 
 func (o *PutJobsIDDefinitionOK) Error() string {
-	return fmt.Sprintf("[PUT /jobs/{id}/definition][%d] putJobsIdDefinitionOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /jobs/{id}/definition][%d] putJobsIdDefinitionOK %s", 200, payload)
 }
 
 func (o *PutJobsIDDefinitionOK) String() string {
-	return fmt.Sprintf("[PUT /jobs/{id}/definition][%d] putJobsIdDefinitionOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /jobs/{id}/definition][%d] putJobsIdDefinitionOK %s", 200, payload)
 }
 
 func (o *PutJobsIDDefinitionOK) GetPayload() map[string]interface{} {
@@ -168,11 +171,13 @@ func (o *PutJobsIDDefinitionBadRequest) Code() int {
 }
 
 func (o *PutJobsIDDefinitionBadRequest) Error() string {
-	return fmt.Sprintf("[PUT /jobs/{id}/definition][%d] putJobsIdDefinitionBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /jobs/{id}/definition][%d] putJobsIdDefinitionBadRequest %s", 400, payload)
 }
 
 func (o *PutJobsIDDefinitionBadRequest) String() string {
-	return fmt.Sprintf("[PUT /jobs/{id}/definition][%d] putJobsIdDefinitionBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /jobs/{id}/definition][%d] putJobsIdDefinitionBadRequest %s", 400, payload)
 }
 
 func (o *PutJobsIDDefinitionBadRequest) GetPayload() *model.ErrorResponse {
@@ -236,11 +241,13 @@ func (o *PutJobsIDDefinitionNotFound) Code() int {
 }
 
 func (o *PutJobsIDDefinitionNotFound) Error() string {
-	return fmt.Sprintf("[PUT /jobs/{id}/definition][%d] putJobsIdDefinitionNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /jobs/{id}/definition][%d] putJobsIdDefinitionNotFound %s", 404, payload)
 }
 
 func (o *PutJobsIDDefinitionNotFound) String() string {
-	return fmt.Sprintf("[PUT /jobs/{id}/definition][%d] putJobsIdDefinitionNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /jobs/{id}/definition][%d] putJobsIdDefinitionNotFound %s", 404, payload)
 }
 
 func (o *PutJobsIDDefinitionNotFound) GetPayload() *model.ErrorResponse {
@@ -306,11 +313,11 @@ func (o *PutJobsIDDefinitionDefault) Code() int {
 }
 
 func (o *PutJobsIDDefinitionDefault) Error() string {
-	return fmt.Sprintf("[PUT /jobs/{id}/definition][%d] PutJobsIDDefinition default ", o._statusCode)
+	return fmt.Sprintf("[PUT /jobs/{id}/definition][%d] PutJobsIDDefinition default", o._statusCode)
 }
 
 func (o *PutJobsIDDefinitionDefault) String() string {
-	return fmt.Sprintf("[PUT /jobs/{id}/definition][%d] PutJobsIDDefinition default ", o._statusCode)
+	return fmt.Sprintf("[PUT /jobs/{id}/definition][%d] PutJobsIDDefinition default", o._statusCode)
 }
 
 func (o *PutJobsIDDefinitionDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
