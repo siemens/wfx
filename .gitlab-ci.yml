@@ -40,7 +40,7 @@ test:
 test-postgres:
   stage: test
   services:
-    - postgres:15@sha256:4b4da96c37fefd6f28c3f58e7470bbc6d2cb34ac5641b9df7221d962eb4bc55d
+    - postgres:16@sha256:46aa2ee5d664b275f05d1a963b30fff60fb422b4b594d509765c42db46d48881
   needs: []
   variables:
     CGO_ENABLED: 1
@@ -89,7 +89,7 @@ cli-tests:
   stage: test
   needs: []
   services:
-    - postgres:15@sha256:4b4da96c37fefd6f28c3f58e7470bbc6d2cb34ac5641b9df7221d962eb4bc55d
+    - postgres:16@sha256:46aa2ee5d664b275f05d1a963b30fff60fb422b4b594d509765c42db46d48881
     - mysql:8-debian@sha256:49f4fcb0087318aa1c222c7e8ceacbb541cdc457c6307d45e6ee4313f4902e33
   variables:
     GIT_SUBMODULE_STRATEGY: recursive

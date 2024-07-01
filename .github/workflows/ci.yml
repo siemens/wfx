@@ -64,7 +64,7 @@ jobs:
     container: golang:1.22.3@sha256:f43c6f049f04cbbaeb28f0aad3eea15274a7d0a7899a617d0037aec48d7ab010
     services:
       postgres:
-        image: postgres:15@sha256:4b4da96c37fefd6f28c3f58e7470bbc6d2cb34ac5641b9df7221d962eb4bc55d
+        image: postgres:16@sha256:46aa2ee5d664b275f05d1a963b30fff60fb422b4b594d509765c42db46d48881
         env:
           # see https://hub.docker.com/_/postgres
           POSTGRES_HOST: postgres
@@ -173,7 +173,7 @@ jobs:
           --health-timeout 5s
           --health-retries 20
       postgres:
-        image: postgres:15@sha256:4b4da96c37fefd6f28c3f58e7470bbc6d2cb34ac5641b9df7221d962eb4bc55d
+        image: postgres:16@sha256:46aa2ee5d664b275f05d1a963b30fff60fb422b4b594d509765c42db46d48881
         env:
           # see https://hub.docker.com/_/postgres
           POSTGRES_HOST: postgres
