@@ -1,0 +1,34 @@
+# SPDX-FileCopyrightText: 2024 Siemens AG
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Author: Michael Adler <michael.adler@siemens.com>
+---
+name: Chore
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  go-mod-tidy:
+    runs-on: ubuntu-latest
+    container: golang:1.22.5@sha256:fcae9e0e7313c6467a7c6632ebb5e5fab99bd39bd5eb6ee34a211353e647827a
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - run: |
+          # find all go.mod files, except in the hugo directory, and run `go mod tidy` inside
+          find . -path ./hugo -prune -o -type f -name go.mod -exec dirname {} \; | while read -r dir; do
+              cd "$dir"
+              go mod tidy
+              cd -
+          done
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "chore: go mod tidy"
+          signoff: true
+          branch: chore/go-mod-tidy
+          title: "chore: go mod tidy"
