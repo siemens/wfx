@@ -17,7 +17,6 @@ permissions:
 jobs:
   wfx:
     runs-on: ubuntu-latest
-    container: golang:1.22.5@sha256:fcae9e0e7313c6467a7c6632ebb5e5fab99bd39bd5eb6ee34a211353e647827a
     steps:
       - name: Checkout
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
@@ -25,9 +24,19 @@ jobs:
           fetch-depth: 0
       - name: Disable git security features
         run: git config --global safe.directory '*'
-      - run: .ci/setup-build.sh
+      - name: Export Golang version as env variable
+        run: |
+          GO_VERSION=$(grep -E '^go\s*[0-9]+\.[0-9]+\.[0-9]+$' go.mod | sed 's/^go\s*//')
+          # You can make an environment variable available to any subsequent
+          # steps in a workflow job by defining or updating the environment
+          # variable and writing this to the GITHUB_ENV environment file.
+          echo "GO_VERSION=$GO_VERSION" | tee -a "$GITHUB_ENV"
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "${{ env.GO_VERSION }}"
+      - run: sudo .ci/setup-build.sh
       # goreleaser requires an absolute path to the compiler
-      - run: install -m0755 .ci/zcc /usr/local/bin/zcc
+      - run: sudo install -m0755 .ci/zcc /usr/local/bin/zcc
       - name: Login to GitHub Container Registry
         uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # v3
         with:
