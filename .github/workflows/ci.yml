@@ -12,7 +12,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    container: golang:1.22.4@sha256:a66eda637829ce891e9cf61ff1ee0edf544e1f6c5b0e666c7310dce231a66f28
+    container: golang:1.22.5@sha256:fcae9e0e7313c6467a7c6632ebb5e5fab99bd39bd5eb6ee34a211353e647827a
     strategy:
       matrix:
         # even though Windows is not officially supported, we want it to at least compile successfully
@@ -39,7 +39,7 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
-    container: golang:1.22.4@sha256:a66eda637829ce891e9cf61ff1ee0edf544e1f6c5b0e666c7310dce231a66f28
+    container: golang:1.22.5@sha256:fcae9e0e7313c6467a7c6632ebb5e5fab99bd39bd5eb6ee34a211353e647827a
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
       - name: Setup Golang caches
@@ -61,10 +61,10 @@ jobs:
   test-postgres:
     runs-on: ubuntu-latest
     name: Test PostgreSQL
-    container: golang:1.22.4@sha256:a66eda637829ce891e9cf61ff1ee0edf544e1f6c5b0e666c7310dce231a66f28
+    container: golang:1.22.5@sha256:fcae9e0e7313c6467a7c6632ebb5e5fab99bd39bd5eb6ee34a211353e647827a
     services:
       postgres:
-        image: postgres:16@sha256:46aa2ee5d664b275f05d1a963b30fff60fb422b4b594d509765c42db46d48881
+        image: postgres:16@sha256:0aafd2ae7e6c391f39fb6b7621632d79f54068faebc726caf469e87bd1d301c0
         env:
           # see https://hub.docker.com/_/postgres
           POSTGRES_HOST: postgres
@@ -109,7 +109,7 @@ jobs:
   test-mysql:
     runs-on: ubuntu-latest
     name: Test MySQL
-    container: golang:1.22.4@sha256:a66eda637829ce891e9cf61ff1ee0edf544e1f6c5b0e666c7310dce231a66f28
+    container: golang:1.22.5@sha256:fcae9e0e7313c6467a7c6632ebb5e5fab99bd39bd5eb6ee34a211353e647827a
     services:
       mysql:
         image: mysql:8-debian@sha256:49f4fcb0087318aa1c222c7e8ceacbb541cdc457c6307d45e6ee4313f4902e33
@@ -155,7 +155,7 @@ jobs:
   cli-tests:
     name: CLI Tests
     runs-on: ubuntu-latest
-    container: golang:1.22.4@sha256:a66eda637829ce891e9cf61ff1ee0edf544e1f6c5b0e666c7310dce231a66f28
+    container: golang:1.22.5@sha256:fcae9e0e7313c6467a7c6632ebb5e5fab99bd39bd5eb6ee34a211353e647827a
     services:
       mysql:
         image: mysql:8-debian@sha256:49f4fcb0087318aa1c222c7e8ceacbb541cdc457c6307d45e6ee4313f4902e33
@@ -173,7 +173,7 @@ jobs:
           --health-timeout 5s
           --health-retries 20
       postgres:
-        image: postgres:16@sha256:46aa2ee5d664b275f05d1a963b30fff60fb422b4b594d509765c42db46d48881
+        image: postgres:16@sha256:0aafd2ae7e6c391f39fb6b7621632d79f54068faebc726caf469e87bd1d301c0
         env:
           # see https://hub.docker.com/_/postgres
           POSTGRES_HOST: postgres
@@ -226,7 +226,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     name: Lint
-    container: golang:1.22.4@sha256:a66eda637829ce891e9cf61ff1ee0edf544e1f6c5b0e666c7310dce231a66f28
+    container: golang:1.22.5@sha256:fcae9e0e7313c6467a7c6632ebb5e5fab99bd39bd5eb6ee34a211353e647827a
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
       - name: Disable git security features
@@ -245,7 +245,7 @@ jobs:
   generate:
     name: Generate Code
     runs-on: ubuntu-latest
-    container: golang:1.22.4@sha256:a66eda637829ce891e9cf61ff1ee0edf544e1f6c5b0e666c7310dce231a66f28
+    container: golang:1.22.5@sha256:fcae9e0e7313c6467a7c6632ebb5e5fab99bd39bd5eb6ee34a211353e647827a
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
       - name: Install packages

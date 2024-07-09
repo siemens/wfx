@@ -1,8 +1,6 @@
 module github.com/siemens/wfx
 
-go 1.22.3
-
-toolchain go1.22.4
+go 1.22.5
 
 require (
 	entgo.io/ent v0.13.1
@@ -47,13 +45,13 @@ require (
 	github.com/yourbasic/graph v0.0.0-20210606180040-8ecfec1c2869
 	go.uber.org/automaxprocs v1.5.3
 	go.uber.org/goleak v1.3.0
-	golang.org/x/term v0.21.0
+	golang.org/x/term v0.22.0
 	gopkg.in/go-playground/colors.v1 v1.2.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
-	ariga.io/atlas v0.24.0 // indirect
+	ariga.io/atlas v0.25.0 // indirect
 	github.com/PaesslerAG/gval v1.2.2 // indirect
 	github.com/PaesslerAG/jsonpath v0.1.1 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
@@ -83,11 +81,11 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/zclconf/go-cty v1.14.4 // indirect
-	go.opentelemetry.io/otel v1.27.0 // indirect
-	go.opentelemetry.io/otel/trace v1.27.0 // indirect
+	go.opentelemetry.io/otel v1.28.0 // indirect
+	go.opentelemetry.io/otel/trace v1.28.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
-	golang.org/x/crypto v0.24.0 // indirect
-	golang.org/x/mod v0.18.0 // indirect
+	golang.org/x/crypto v0.25.0 // indirect
+	golang.org/x/mod v0.19.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
 )
 
@@ -111,10 +109,10 @@ require (
 	github.com/tsenart/go-tsz v0.0.0-20180814235614-0bd30b3df1c3 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	go.mongodb.org/mongo-driver v1.16.0 // indirect
-	go.opentelemetry.io/otel/metric v1.27.0 // indirect
-	golang.org/x/exp v0.0.0-20240613232115-7f521ea00fb8 // indirect
-	golang.org/x/net v0.26.0 // indirect
+	go.opentelemetry.io/otel/metric v1.28.0 // indirect
+	golang.org/x/exp v0.0.0-20240707233637-46b078467d37 // indirect
+	golang.org/x/net v0.27.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
-	golang.org/x/sys v0.21.0 // indirect
-	golang.org/x/tools v0.22.0 // indirect
+	golang.org/x/sys v0.22.0 // indirect
+	golang.org/x/tools v0.23.0 // indirect
 )
