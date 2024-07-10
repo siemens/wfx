@@ -7,7 +7,7 @@ go 1.22.5
 require (
 	github.com/cavaliergopher/grab/v3 v3.0.1
 	github.com/go-openapi/strfmt v0.23.0
-	github.com/siemens/wfx v0.3.0
+	github.com/siemens/wfx v0.3.1
 	github.com/spf13/pflag v1.0.5
 )
 
