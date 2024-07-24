@@ -13,9 +13,9 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/generated/ent/history"
 	"github.com/siemens/wfx/generated/ent/job"
-	"github.com/siemens/wfx/generated/model"
 )
 
 // History is the model entity for the History schema.
@@ -26,7 +26,7 @@ type History struct {
 	// modification time
 	Mtime time.Time `json:"mtime,omitempty"`
 	// Status holds the value of the "status" field.
-	Status model.JobStatus `json:"status,omitempty"`
+	Status api.JobStatus `json:"status,omitempty"`
 	// Definition holds the value of the "definition" field.
 	Definition map[string]interface{} `json:"definition,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.

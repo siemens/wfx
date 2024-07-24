@@ -13,9 +13,9 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/generated/ent/job"
 	"github.com/siemens/wfx/generated/ent/workflow"
-	"github.com/siemens/wfx/generated/model"
 )
 
 // Job is the model entity for the Job schema.
@@ -32,7 +32,7 @@ type Job struct {
 	// Definition holds the value of the "definition" field.
 	Definition map[string]interface{} `json:"definition,omitempty"`
 	// Status holds the value of the "status" field.
-	Status model.JobStatus `json:"status,omitempty"`
+	Status api.JobStatus `json:"status,omitempty"`
 	// Group holds the value of the "group" field.
 	Group string `json:"group,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.

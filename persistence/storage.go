@@ -11,14 +11,14 @@ package persistence
 import (
 	"context"
 
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 )
 
 // Storage represents an interface for a persistence layer (such as PostgreSQL, SQLite).
 // It provides methods for managing jobs and workflows in the storage.
 type Storage interface {
 	// Initialize sets up the storage using the provided options string.
-	Initialize(ctx context.Context, options string) error
+	Initialize(options string) error
 
 	// Shutdown gracefully closes the storage connection.
 	Shutdown()
@@ -27,40 +27,40 @@ type Storage interface {
 	CheckHealth(ctx context.Context) error
 
 	// CreateJob adds a new job to the storage.
-	CreateJob(ctx context.Context, job *model.Job) (*model.Job, error)
+	CreateJob(ctx context.Context, job *api.Job) (*api.Job, error)
 
 	// GetJob retrieves an existing job identified by jobID from the storage.
 	// If an issue occurs during the fetch operation, the method returns an error.
-	GetJob(ctx context.Context, jobID string, fetchParams FetchParams) (*model.Job, error)
+	GetJob(ctx context.Context, jobID string, fetchParams FetchParams) (*api.Job, error)
 
 	// UpdateJob modifies an existing job in the storage based on the provided JobUpdate request.
-	UpdateJob(ctx context.Context, job *model.Job, request JobUpdate) (*model.Job, error)
+	UpdateJob(ctx context.Context, job *api.Job, request JobUpdate) (*api.Job, error)
 
 	// DeleteJob removes an existing job identified by jobID from the storage.
 	DeleteJob(ctx context.Context, jobID string) error
 
 	// QueryJobs retrieves jobs that satisfy the filterParams, sortParams, and paginationParams.
-	QueryJobs(ctx context.Context, filterParams FilterParams, sortParams SortParams, paginationParams PaginationParams) (*model.PaginatedJobList, error)
+	QueryJobs(ctx context.Context, filterParams FilterParams, sortParams SortParams, paginationParams PaginationParams) (*api.PaginatedJobList, error)
 
 	// CreateWorkflow adds a new workflow to the storage.
-	CreateWorkflow(ctx context.Context, workflow *model.Workflow) (*model.Workflow, error)
+	CreateWorkflow(ctx context.Context, workflow *api.Workflow) (*api.Workflow, error)
 
 	// GetWorkflow retrieves an existing workflow identified by name from the storage.
 	// If an issue occurs during the fetch operation, the method returns an error.
-	GetWorkflow(ctx context.Context, name string) (*model.Workflow, error)
+	GetWorkflow(ctx context.Context, name string) (*api.Workflow, error)
 
 	// DeleteWorkflow removes an existing workflow identified by name from the storage.
 	DeleteWorkflow(ctx context.Context, name string) error
 
 	// QueryWorkflows retrieves all workflows from the storage respecting the paginationParams.
-	QueryWorkflows(ctx context.Context, paginationParams PaginationParams) (*model.PaginatedWorkflowList, error)
+	QueryWorkflows(ctx context.Context, sortParams SortParams, paginationParams PaginationParams) (*api.PaginatedWorkflowList, error)
 }
 
 // JobUpdate encapsulates the properties of a job that can be updated.
 // If a property is nil, its corresponding value in the job will not be changed.
 type JobUpdate struct {
 	// Status is the new job status. If provided, it replaces the existing status of the job.
-	Status *model.JobStatus
+	Status *api.JobStatus
 	// Definition is the new job definition. If provided, it replaces the existing job definition.
 	Definition *map[string]any
 	// AddTags is a list of tags to be added to the job. If provided, these tags will be added to the existing tags.

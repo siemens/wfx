@@ -9,29 +9,43 @@ package version
  */
 
 import (
-	"bytes"
+	"encoding/json"
+	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"testing"
+	"time"
 
-	"github.com/siemens/wfx/cmd/wfxctl/flags"
-	"github.com/siemens/wfx/middleware/version"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestVersion(t *testing.T) {
-	server := httptest.NewServer(version.MW{}.Wrap(nil))
-	defer server.Close()
+	const expectedPath = "/api/wfx/v1/version"
+	var actualPath string
 
-	parsedURL, _ := url.Parse(server.URL)
-	_ = flags.Koanf.Set(flags.ClientHostFlag, parsedURL.Hostname())
-	_ = flags.Koanf.Set(flags.ClientPortFlag, parsedURL.Port())
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		actualPath = r.URL.Path
 
-	buf := new(bytes.Buffer)
-	Command.SetOut(buf)
-	err := Command.Execute()
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		version := api.GetVersion200JSONResponse{
+			ApiVersion: "1.0",
+			BuildDate:  time.Now(),
+			Commit:     "036d0ad9eae6e3d6e4cead4558c630a49a116219",
+			Version:    "0.0.0",
+		}
+		_ = json.NewEncoder(w).Encode(version)
+	}))
+	defer ts.Close()
+
+	u, _ := url.Parse(ts.URL)
+	t.Setenv("WFX_CLIENT_HOST", u.Hostname())
+	t.Setenv("WFX_CLIENT_PORT", u.Port())
+
+	cmd := NewCommand()
+	err := cmd.Execute()
 	require.NoError(t, err)
-
-	assert.Contains(t, buf.String(), "version:")
+	assert.Equal(t, expectedPath, actualPath)
 }

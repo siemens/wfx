@@ -14,17 +14,16 @@ import (
 
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/ftag"
-	"github.com/go-openapi/strfmt"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/generated/ent"
 	"github.com/siemens/wfx/generated/ent/history"
 	"github.com/siemens/wfx/generated/ent/job"
 	"github.com/siemens/wfx/generated/ent/tag"
-	"github.com/siemens/wfx/generated/model"
 	"github.com/siemens/wfx/middleware/logging"
 	"github.com/siemens/wfx/persistence"
 )
 
-func (db Database) GetJob(ctx context.Context, jobID string, fetchParams persistence.FetchParams) (*model.Job, error) {
+func (db Database) GetJob(ctx context.Context, jobID string, fetchParams persistence.FetchParams) (*api.Job, error) {
 	log := logging.LoggerFromCtx(ctx)
 	contextLogger := log.With().Str("id", jobID).Logger()
 	contextLogger.Debug().Msg("Fetching job")
@@ -45,7 +44,7 @@ func (db Database) GetJob(ctx context.Context, jobID string, fetchParams persist
 		})
 	}
 
-	job, err := builder.Only(ctx)
+	entity, err := builder.Only(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			contextLogger.Debug().Msg("Job not found")
@@ -55,42 +54,44 @@ func (db Database) GetJob(ctx context.Context, jobID string, fetchParams persist
 		return nil, fault.Wrap(err)
 	}
 	contextLogger.Debug().Msg("Fetched job")
-	return convertJob(job), nil
+	job := convertJob(entity)
+	return &job, nil
 }
 
-func convertJob(entity *ent.Job) *model.Job {
-	var wf *model.Workflow
+func convertJob(entity *ent.Job) api.Job {
+	var wf api.Workflow
 	if entity.Edges.Workflow != nil {
 		wf = convertWorkflow(entity.Edges.Workflow)
 	}
 
-	stime := strfmt.DateTime(entity.Stime)
-	mtime := strfmt.DateTime(entity.Mtime)
-	job := model.Job{
+	stime := entity.Stime
+	mtime := entity.Mtime
+	tags := convertTags(entity.Edges.Tags)
+	job := api.Job{
 		ID:         entity.ID,
 		ClientID:   entity.ClientID,
 		Definition: entity.Definition,
 		Stime:      &stime,
 		Mtime:      &mtime,
 		Status:     &entity.Status,
-		Tags:       convertTags(entity.Edges.Tags),
-		Workflow:   wf,
+		Tags:       tags,
+		Workflow:   &wf,
 	}
 
 	n := len(entity.Edges.History)
 	if n > 0 {
-		job.History = make([]*model.History, n)
+		history := make([]api.History, n)
 		for i, entity := range entity.Edges.History {
-			hist := convertHistory(entity)
-			job.History[i] = &hist
+			history[i] = convertHistory(entity)
 		}
+		job.History = &history
 	}
-	return &job
+	return job
 }
 
-func convertHistory(entity *ent.History) model.History {
-	return model.History{
-		Mtime:  strfmt.DateTime(entity.Mtime),
+func convertHistory(entity *ent.History) api.History {
+	return api.History{
+		Mtime:  &entity.Mtime,
 		Status: &entity.Status,
 	}
 }

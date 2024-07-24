@@ -12,7 +12,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/workflow/dau"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -23,10 +23,10 @@ func TestGet(t *testing.T) {
 
 	wf, err := db.CreateWorkflow(context.Background(), dau.DirectWorkflow())
 	require.NoError(t, err)
-	job, err := db.CreateJob(context.Background(), &model.Job{
+	job, err := db.CreateJob(context.Background(), &api.Job{
 		ClientID: "foo",
 		Workflow: wf,
-		Status:   &model.JobStatus{State: "CREATED"},
+		Status:   &api.JobStatus{State: "CREATED"},
 		Tags:     []string{"foo", "bar"},
 	})
 	require.NoError(t, err)
@@ -41,10 +41,10 @@ func TestGetEmpty(t *testing.T) {
 
 	wf, err := db.CreateWorkflow(context.Background(), dau.DirectWorkflow())
 	require.NoError(t, err)
-	job, err := db.CreateJob(context.Background(), &model.Job{
+	job, err := db.CreateJob(context.Background(), &api.Job{
 		ClientID: "foo",
 		Workflow: wf,
-		Status:   &model.JobStatus{State: "CREATED"},
+		Status:   &api.JobStatus{State: "CREATED"},
 	})
 	require.NoError(t, err)
 

@@ -16,7 +16,7 @@ import (
 	"github.com/olebedev/emitter"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/middleware/logging"
 )
 
@@ -24,7 +24,7 @@ type JobEvent struct {
 	// Ctime is the time when the event was created
 	Ctime  strfmt.DateTime `json:"ctime"`
 	Action Action          `json:"action"`
-	Job    *model.Job      `json:"job"`
+	Job    *api.Job        `json:"job"`
 	Tags   []string        `json:"tags"`
 }
 
@@ -72,11 +72,12 @@ func AddSubscriber(ctx context.Context, filter FilterParams, tags []string) (<-c
 
 // ShutdownSubscribers disconnects all subscribers.
 func ShutdownSubscribers() {
+	count := len(e.Topics())
 	for _, topic := range e.Topics() {
 		log.Debug().Str("topic", topic).Msg("Closing subscribers")
 		e.Off(topic)
 	}
-	log.Info().Msg("Unsubscribed all subscribers")
+	log.Info().Int("count", count).Msg("Subscriber shutdown complete")
 }
 
 // SubscriberCount counts the total number of subscribers across all topics.

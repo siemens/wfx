@@ -14,12 +14,12 @@ import (
 
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/ftag"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/generated/ent"
 	"github.com/siemens/wfx/generated/ent/workflow"
-	"github.com/siemens/wfx/generated/model"
 )
 
-func (db Database) GetWorkflow(ctx context.Context, name string) (*model.Workflow, error) {
+func (db Database) GetWorkflow(ctx context.Context, name string) (*api.Workflow, error) {
 	wf, err := db.client.Workflow.
 		Query().
 		Where(workflow.Name(name)).
@@ -30,11 +30,12 @@ func (db Database) GetWorkflow(ctx context.Context, name string) (*model.Workflo
 		}
 		return nil, fault.Wrap(err)
 	}
-	return convertWorkflow(wf), nil
+	result := convertWorkflow(wf)
+	return &result, nil
 }
 
-func convertWorkflow(wf *ent.Workflow) *model.Workflow {
-	return &model.Workflow{
+func convertWorkflow(wf *ent.Workflow) api.Workflow {
+	return api.Workflow{
 		Name:        wf.Name,
 		Description: wf.Description,
 		States:      wf.States,

@@ -1,5 +1,13 @@
 package validate
 
+/*
+ * SPDX-FileCopyrightText: 2023 Siemens AG
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Author: Michael Adler <michael.adler@siemens.com>
+ */
+
 import (
 	"bytes"
 	"os"
@@ -10,16 +18,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-/*
- * SPDX-FileCopyrightText: 2023 Siemens AG
- *
- * SPDX-License-Identifier: Apache-2.0
- *
- * Author: Michael Adler <michael.adler@siemens.com>
- */
-
 func TestCommand_NoWorkflowGiven(t *testing.T) {
-	err := Command.Execute()
+	err := NewCommand().Execute()
 	require.Error(t, err)
 	assert.ErrorContains(t, err, "workflow must be provided either via file or stdin")
 }
@@ -27,10 +27,10 @@ func TestCommand_NoWorkflowGiven(t *testing.T) {
 func TestCommand_Stdin(t *testing.T) {
 	buf := new(bytes.Buffer)
 	_, _ = buf.WriteString(dau.DirectYAML)
-	Command.SetIn(buf)
-	Command.SetArgs([]string{"-"})
-
-	err := Command.Execute()
+	cmd := NewCommand()
+	cmd.SetIn(buf)
+	cmd.SetArgs([]string{"-"})
+	err := cmd.Execute()
 	require.NoError(t, err)
 }
 
@@ -40,8 +40,8 @@ func TestCommand_Fname(t *testing.T) {
 	_ = tmpFile.Close()
 	defer os.Remove(tmpFile.Name())
 
-	Command.SetArgs([]string{tmpFile.Name()})
-
-	err := Command.Execute()
+	cmd := NewCommand()
+	cmd.SetArgs([]string{tmpFile.Name()})
+	err := cmd.Execute()
 	require.NoError(t, err)
 }

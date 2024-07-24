@@ -14,7 +14,7 @@ import (
 	"github.com/Southclaws/fault"
 )
 
-func (db Database) CheckHealth(_ context.Context) error {
-	_, err := db.client.ExecContext(context.Background(), "SELECT 1")
+func (db Database) CheckHealth(ctx context.Context) error {
+	_, err := db.client.ExecContext(ctx, "SELECT 1")
 	return fault.Wrap(err)
 }

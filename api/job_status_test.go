@@ -14,7 +14,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/internal/handler/job"
 	"github.com/siemens/wfx/internal/handler/workflow"
 	"github.com/siemens/wfx/workflow/dau"
@@ -66,7 +66,7 @@ func TestJobStatusUpdate(t *testing.T) {
 	wf, err := workflow.CreateWorkflow(context.Background(), db, dau.PhasedWorkflow())
 	require.NoError(t, err)
 
-	jobReq := model.JobRequest{
+	jobReq := api.JobRequest{
 		ClientID: "foo",
 		Workflow: wf.Name,
 	}

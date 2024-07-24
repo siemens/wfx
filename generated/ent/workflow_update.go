@@ -14,10 +14,10 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/generated/ent/job"
 	"github.com/siemens/wfx/generated/ent/predicate"
 	"github.com/siemens/wfx/generated/ent/workflow"
-	"github.com/siemens/wfx/generated/model"
 )
 
 // WorkflowUpdate is the builder for updating Workflow entities.
@@ -68,38 +68,38 @@ func (wu *WorkflowUpdate) ClearDescription() *WorkflowUpdate {
 }
 
 // SetStates sets the "states" field.
-func (wu *WorkflowUpdate) SetStates(m []*model.State) *WorkflowUpdate {
-	wu.mutation.SetStates(m)
+func (wu *WorkflowUpdate) SetStates(a []api.State) *WorkflowUpdate {
+	wu.mutation.SetStates(a)
 	return wu
 }
 
-// AppendStates appends m to the "states" field.
-func (wu *WorkflowUpdate) AppendStates(m []*model.State) *WorkflowUpdate {
-	wu.mutation.AppendStates(m)
+// AppendStates appends a to the "states" field.
+func (wu *WorkflowUpdate) AppendStates(a []api.State) *WorkflowUpdate {
+	wu.mutation.AppendStates(a)
 	return wu
 }
 
 // SetTransitions sets the "transitions" field.
-func (wu *WorkflowUpdate) SetTransitions(m []*model.Transition) *WorkflowUpdate {
-	wu.mutation.SetTransitions(m)
+func (wu *WorkflowUpdate) SetTransitions(a []api.Transition) *WorkflowUpdate {
+	wu.mutation.SetTransitions(a)
 	return wu
 }
 
-// AppendTransitions appends m to the "transitions" field.
-func (wu *WorkflowUpdate) AppendTransitions(m []*model.Transition) *WorkflowUpdate {
-	wu.mutation.AppendTransitions(m)
+// AppendTransitions appends a to the "transitions" field.
+func (wu *WorkflowUpdate) AppendTransitions(a []api.Transition) *WorkflowUpdate {
+	wu.mutation.AppendTransitions(a)
 	return wu
 }
 
 // SetGroups sets the "groups" field.
-func (wu *WorkflowUpdate) SetGroups(m []*model.Group) *WorkflowUpdate {
-	wu.mutation.SetGroups(m)
+func (wu *WorkflowUpdate) SetGroups(a []api.Group) *WorkflowUpdate {
+	wu.mutation.SetGroups(a)
 	return wu
 }
 
-// AppendGroups appends m to the "groups" field.
-func (wu *WorkflowUpdate) AppendGroups(m []*model.Group) *WorkflowUpdate {
-	wu.mutation.AppendGroups(m)
+// AppendGroups appends a to the "groups" field.
+func (wu *WorkflowUpdate) AppendGroups(a []api.Group) *WorkflowUpdate {
+	wu.mutation.AppendGroups(a)
 	return wu
 }
 
@@ -331,38 +331,38 @@ func (wuo *WorkflowUpdateOne) ClearDescription() *WorkflowUpdateOne {
 }
 
 // SetStates sets the "states" field.
-func (wuo *WorkflowUpdateOne) SetStates(m []*model.State) *WorkflowUpdateOne {
-	wuo.mutation.SetStates(m)
+func (wuo *WorkflowUpdateOne) SetStates(a []api.State) *WorkflowUpdateOne {
+	wuo.mutation.SetStates(a)
 	return wuo
 }
 
-// AppendStates appends m to the "states" field.
-func (wuo *WorkflowUpdateOne) AppendStates(m []*model.State) *WorkflowUpdateOne {
-	wuo.mutation.AppendStates(m)
+// AppendStates appends a to the "states" field.
+func (wuo *WorkflowUpdateOne) AppendStates(a []api.State) *WorkflowUpdateOne {
+	wuo.mutation.AppendStates(a)
 	return wuo
 }
 
 // SetTransitions sets the "transitions" field.
-func (wuo *WorkflowUpdateOne) SetTransitions(m []*model.Transition) *WorkflowUpdateOne {
-	wuo.mutation.SetTransitions(m)
+func (wuo *WorkflowUpdateOne) SetTransitions(a []api.Transition) *WorkflowUpdateOne {
+	wuo.mutation.SetTransitions(a)
 	return wuo
 }
 
-// AppendTransitions appends m to the "transitions" field.
-func (wuo *WorkflowUpdateOne) AppendTransitions(m []*model.Transition) *WorkflowUpdateOne {
-	wuo.mutation.AppendTransitions(m)
+// AppendTransitions appends a to the "transitions" field.
+func (wuo *WorkflowUpdateOne) AppendTransitions(a []api.Transition) *WorkflowUpdateOne {
+	wuo.mutation.AppendTransitions(a)
 	return wuo
 }
 
 // SetGroups sets the "groups" field.
-func (wuo *WorkflowUpdateOne) SetGroups(m []*model.Group) *WorkflowUpdateOne {
-	wuo.mutation.SetGroups(m)
+func (wuo *WorkflowUpdateOne) SetGroups(a []api.Group) *WorkflowUpdateOne {
+	wuo.mutation.SetGroups(a)
 	return wuo
 }
 
-// AppendGroups appends m to the "groups" field.
-func (wuo *WorkflowUpdateOne) AppendGroups(m []*model.Group) *WorkflowUpdateOne {
-	wuo.mutation.AppendGroups(m)
+// AppendGroups appends a to the "groups" field.
+func (wuo *WorkflowUpdateOne) AppendGroups(a []api.Group) *WorkflowUpdateOne {
+	wuo.mutation.AppendGroups(a)
 	return wuo
 }
 

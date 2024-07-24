@@ -9,49 +9,40 @@ package getdefinition
  */
 
 import (
-	"github.com/rs/zerolog/log"
+	"errors"
+
+	"github.com/Southclaws/fault"
 	"github.com/spf13/cobra"
 
 	"github.com/siemens/wfx/cmd/wfxctl/errutil"
 	"github.com/siemens/wfx/cmd/wfxctl/flags"
-	"github.com/siemens/wfx/generated/client/jobs"
 )
 
-const (
-	idFlag = "id"
-)
-
-func init() {
-	f := Command.Flags()
-	f.String(idFlag, "", "job id")
-}
-
-var Command = &cobra.Command{
-	Use:   "get-definition",
-	Short: "Get definition of an existing job",
-	Long:  "Get definition of an existing job",
-	Example: `
-wfxctl job get-definition --id=1
+func NewCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "get-definition",
+		Short: "Get definition of an existing job",
+		Long:  "Get definition of an existing job",
+		Example: `
+wfxctl job get-definition --id=8ea1e9d7-28e6-4f1f-b444-a8d2d1ad7618
 `,
-	TraverseChildren: true,
-	Run: func(cmd *cobra.Command, _ []string) {
-		baseCmd := flags.NewBaseCmd()
-		client := errutil.Must(baseCmd.CreateHTTPClient())
-		params := jobs.NewGetJobsIDDefinitionParams().
-			WithHTTPClient(client).
-			WithID(flags.Koanf.String(idFlag))
+		TraverseChildren: true,
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			baseCmd := flags.NewBaseCmd(cmd.Flags())
+			id := baseCmd.ID
+			if id == "" {
+				return errors.New("id missing")
+			}
+			client := errutil.Must(baseCmd.CreateClient())
+			resp, err := client.GetJobsIdDefinition(cmd.Context(), id, nil)
+			if err != nil {
+				return fault.Wrap(err)
+			}
+			return fault.Wrap(baseCmd.ProcessResponse(resp, cmd.OutOrStdout()))
+		},
+	}
 
-		if params.ID == "" {
-			log.Fatal().Msg("Job ID missing")
-		}
-
-		resp, err := baseCmd.CreateClient().Jobs.GetJobsIDDefinition(params)
-		if err != nil {
-			errutil.ProcessErrorResponse(cmd.OutOrStderr(), err)
-			log.Fatal().Msg("Failed to get job definition")
-		}
-		if err := baseCmd.DumpResponse(cmd.OutOrStdout(), resp.GetPayload()); err != nil {
-			log.Fatal().Err(err).Msg("Failed to dump response")
-		}
-	},
+	f := cmd.Flags()
+	f.String(flags.IDFlag, "", "job id")
+	return cmd
 }

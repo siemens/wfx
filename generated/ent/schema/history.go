@@ -10,7 +10,7 @@ import (
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 )
 
 // History holds the schema definition for the Job entity.
@@ -32,7 +32,7 @@ func (History) Fields() []ent.Field {
 			SchemaType(map[string]string{
 				dialect.MySQL: "TIMESTAMP(6)", // microsecond precision
 			}),
-		field.JSON("status", model.JobStatus{}).Optional(),
+		field.JSON("status", api.JobStatus{}).Optional(),
 		field.JSON("definition", map[string]any{}).Optional(),
 	}
 }

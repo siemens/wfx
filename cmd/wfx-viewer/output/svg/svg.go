@@ -16,7 +16,7 @@ import (
 
 	"github.com/Southclaws/fault"
 	"github.com/siemens/wfx/cmd/wfx-viewer/output/plantuml"
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/spf13/pflag"
 )
 
@@ -35,7 +35,7 @@ func (s *Generator) RegisterFlags(f *pflag.FlagSet) {
 	s.f = f
 }
 
-func (s *Generator) Generate(out io.Writer, workflow *model.Workflow) error {
+func (s *Generator) Generate(out io.Writer, workflow *api.Workflow) error {
 	body := new(bytes.Buffer)
 	writer := multipart.NewWriter(body)
 	w, err := writer.CreateFormFile("file", "workflow")

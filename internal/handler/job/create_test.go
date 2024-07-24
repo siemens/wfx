@@ -12,7 +12,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/internal/handler/job/events"
 	"github.com/siemens/wfx/internal/persistence/entgo"
 	"github.com/siemens/wfx/persistence"
@@ -25,7 +25,7 @@ func TestCreateJob(t *testing.T) {
 	db := newInMemoryDB(t)
 	wf := createDirectWorkflow(t, db)
 
-	job, err := CreateJob(context.Background(), db, &model.JobRequest{
+	job, err := CreateJob(context.Background(), db, &api.JobRequest{
 		ClientID: "foo",
 		Workflow: wf.Name,
 	})
@@ -42,7 +42,7 @@ func TestCreateJob_Notification(t *testing.T) {
 	ch, err := events.AddSubscriber(context.Background(), events.FilterParams{}, nil)
 	require.NoError(t, err)
 
-	job, err := CreateJob(context.Background(), db, &model.JobRequest{
+	job, err := CreateJob(context.Background(), db, &api.JobRequest{
 		ClientID: "foo",
 		Workflow: wf.Name,
 	})
@@ -56,7 +56,7 @@ func TestCreateJob_Notification(t *testing.T) {
 
 func newInMemoryDB(t *testing.T) persistence.Storage {
 	db := &entgo.SQLite{}
-	err := db.Initialize(context.Background(), "file:wfx?mode=memory&cache=shared&_fk=1")
+	err := db.Initialize("file:wfx?mode=memory&cache=shared&_fk=1")
 	require.NoError(t, err)
 	t.Cleanup(db.Shutdown)
 
@@ -70,7 +70,7 @@ func newInMemoryDB(t *testing.T) persistence.Storage {
 			}
 		}
 		{
-			list, _ := db.QueryWorkflows(context.Background(), persistence.PaginationParams{Limit: 100})
+			list, _ := db.QueryWorkflows(context.Background(), persistence.SortParams{}, persistence.PaginationParams{Limit: 100})
 			for _, wf := range list.Content {
 				_ = db.DeleteWorkflow(context.Background(), wf.Name)
 			}
@@ -79,7 +79,7 @@ func newInMemoryDB(t *testing.T) persistence.Storage {
 	return db
 }
 
-func createDirectWorkflow(t *testing.T, db persistence.Storage) *model.Workflow {
+func createDirectWorkflow(t *testing.T, db persistence.Storage) *api.Workflow {
 	wf, err := db.CreateWorkflow(context.Background(), dau.DirectWorkflow())
 	require.NoError(t, err)
 	return wf

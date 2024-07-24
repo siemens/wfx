@@ -11,7 +11,7 @@ package dau
 import (
 	_ "embed"
 
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"gopkg.in/yaml.v3"
 )
 
@@ -21,14 +21,14 @@ var DirectYAML string
 //go:embed wfx.workflow.dau.phased.yml
 var PhasedYAML string
 
-func DirectWorkflow() *model.Workflow {
-	var result model.Workflow
+func DirectWorkflow() *api.Workflow {
+	var result api.Workflow
 	_ = yaml.Unmarshal([]byte(DirectYAML), &result)
 	return &result
 }
 
-func PhasedWorkflow() *model.Workflow {
-	var result model.Workflow
+func PhasedWorkflow() *api.Workflow {
+	var result api.Workflow
 	_ = yaml.Unmarshal([]byte(PhasedYAML), &result)
 	return &result
 }

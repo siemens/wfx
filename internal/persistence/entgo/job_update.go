@@ -14,16 +14,16 @@ import (
 	"time"
 
 	"github.com/Southclaws/fault"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/generated/ent"
 	"github.com/siemens/wfx/generated/ent/tag"
-	"github.com/siemens/wfx/generated/model"
 	"github.com/siemens/wfx/internal/workflow"
 	"github.com/siemens/wfx/middleware/logging"
 	"github.com/siemens/wfx/persistence"
 )
 
 // UpdateJob updates an existing job and its history.
-func (db Database) UpdateJob(ctx context.Context, job *model.Job, request persistence.JobUpdate) (*model.Job, error) {
+func (db Database) UpdateJob(ctx context.Context, job *api.Job, request persistence.JobUpdate) (*api.Job, error) {
 	log := logging.LoggerFromCtx(ctx).With().Str("id", job.ID).Logger()
 
 	tx, err := db.client.Tx(ctx)
@@ -48,14 +48,13 @@ func (db Database) UpdateJob(ctx context.Context, job *model.Job, request persis
 	}
 
 	log.Debug().
-		Str("message", updatedJob.Status.Message).
 		Str("state", updatedJob.Status.State).
 		Msg("Updated job")
 
 	return updatedJob, nil
 }
 
-func doUpdateJob(ctx context.Context, tx *ent.Tx, job *model.Job, request persistence.JobUpdate) (*model.Job, error) {
+func doUpdateJob(ctx context.Context, tx *ent.Tx, job *api.Job, request persistence.JobUpdate) (*api.Job, error) {
 	log := logging.LoggerFromCtx(ctx).With().Str("id", job.ID).Logger()
 
 	updater := tx.Job.UpdateOneID(job.ID)
@@ -154,7 +153,7 @@ func doUpdateJob(ctx context.Context, tx *ent.Tx, job *model.Job, request persis
 		if request.Status != nil {
 			history.SetStatus(*job.Status)
 		}
-		if request.Definition != nil {
+		if request.Definition != nil && job.Definition != nil {
 			history.SetDefinition(job.Definition)
 		}
 		if _, err = history.Save(ctx); err != nil {
@@ -165,11 +164,13 @@ func doUpdateJob(ctx context.Context, tx *ent.Tx, job *model.Job, request persis
 	updatedJob := convertJob(entity)
 
 	// XXX: this feels like a bug in entgo, shouldn't be necessary to set Tags
-	updatedJob.Tags = make([]string, 0, len(allTags))
+	tags := make([]string, 0, len(allTags))
 	for t := range allTags {
-		updatedJob.Tags = append(updatedJob.Tags, t)
+		tags = append(tags, t)
 	}
-	sort.Strings(updatedJob.Tags)
+	sort.Strings(tags)
 
-	return updatedJob, nil
+	updatedJob.Tags = tags
+
+	return &updatedJob, nil
 }

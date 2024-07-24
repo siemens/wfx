@@ -13,12 +13,12 @@ import (
 
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/ftag"
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/middleware/logging"
 	"github.com/siemens/wfx/persistence"
 )
 
-func GetWorkflow(ctx context.Context, storage persistence.Storage, name string) (*model.Workflow, error) {
+func GetWorkflow(ctx context.Context, storage persistence.Storage, name string) (*api.Workflow, error) {
 	log := logging.LoggerFromCtx(ctx).With().Str("name", name).Logger()
 	log.Debug().Str("name", name).Msg("Fetching workflow")
 	workflow, err := storage.GetWorkflow(ctx, name)

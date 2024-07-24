@@ -58,7 +58,7 @@ An exemplary [Kanban](https://en.wikipedia.org/wiki/Kanban)-inspired [workflow](
   - Extendable modularized source code architecture
   - Lightweight, no dependencies (statically linked binaries)
   - Efficient, native code for a wide variety of platforms and operating systems (as supported by the [Go](https://golang.org/) Language)
-  - Fully documented REST API, see [wfx OpenAPI Specification](spec/wfx.swagger.yml)
+  - Fully documented REST API, see [wfx OpenAPI Specification](spec/wfx.openapiv3.yml)
   - Extensive test suite including load tests
 - Deployment / Usability
   - Load / Unload workflows at run-time

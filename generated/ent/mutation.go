@@ -14,12 +14,12 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/generated/ent/history"
 	"github.com/siemens/wfx/generated/ent/job"
 	"github.com/siemens/wfx/generated/ent/predicate"
 	"github.com/siemens/wfx/generated/ent/tag"
 	"github.com/siemens/wfx/generated/ent/workflow"
-	"github.com/siemens/wfx/generated/model"
 )
 
 const (
@@ -44,7 +44,7 @@ type HistoryMutation struct {
 	typ           string
 	id            *int
 	mtime         *time.Time
-	status        *model.JobStatus
+	status        *api.JobStatus
 	definition    *map[string]interface{}
 	clearedFields map[string]struct{}
 	job           *string
@@ -189,12 +189,12 @@ func (m *HistoryMutation) ResetMtime() {
 }
 
 // SetStatus sets the "status" field.
-func (m *HistoryMutation) SetStatus(ms model.JobStatus) {
-	m.status = &ms
+func (m *HistoryMutation) SetStatus(as api.JobStatus) {
+	m.status = &as
 }
 
 // Status returns the value of the "status" field in the mutation.
-func (m *HistoryMutation) Status() (r model.JobStatus, exists bool) {
+func (m *HistoryMutation) Status() (r api.JobStatus, exists bool) {
 	v := m.status
 	if v == nil {
 		return
@@ -205,7 +205,7 @@ func (m *HistoryMutation) Status() (r model.JobStatus, exists bool) {
 // OldStatus returns the old "status" field's value of the History entity.
 // If the History object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *HistoryMutation) OldStatus(ctx context.Context) (v model.JobStatus, err error) {
+func (m *HistoryMutation) OldStatus(ctx context.Context) (v api.JobStatus, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
 	}
@@ -415,7 +415,7 @@ func (m *HistoryMutation) SetField(name string, value ent.Value) error {
 		m.SetMtime(v)
 		return nil
 	case history.FieldStatus:
-		v, ok := value.(model.JobStatus)
+		v, ok := value.(api.JobStatus)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -589,7 +589,7 @@ type JobMutation struct {
 	mtime           *time.Time
 	client_id       *string
 	definition      *map[string]interface{}
-	status          *model.JobStatus
+	status          *api.JobStatus
 	group           *string
 	clearedFields   map[string]struct{}
 	workflow        *int
@@ -867,12 +867,12 @@ func (m *JobMutation) ResetDefinition() {
 }
 
 // SetStatus sets the "status" field.
-func (m *JobMutation) SetStatus(ms model.JobStatus) {
-	m.status = &ms
+func (m *JobMutation) SetStatus(as api.JobStatus) {
+	m.status = &as
 }
 
 // Status returns the value of the "status" field in the mutation.
-func (m *JobMutation) Status() (r model.JobStatus, exists bool) {
+func (m *JobMutation) Status() (r api.JobStatus, exists bool) {
 	v := m.status
 	if v == nil {
 		return
@@ -883,7 +883,7 @@ func (m *JobMutation) Status() (r model.JobStatus, exists bool) {
 // OldStatus returns the old "status" field's value of the Job entity.
 // If the Job object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *JobMutation) OldStatus(ctx context.Context) (v model.JobStatus, err error) {
+func (m *JobMutation) OldStatus(ctx context.Context) (v api.JobStatus, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
 	}
@@ -1230,7 +1230,7 @@ func (m *JobMutation) SetField(name string, value ent.Value) error {
 		m.SetDefinition(v)
 		return nil
 	case job.FieldStatus:
-		v, ok := value.(model.JobStatus)
+		v, ok := value.(api.JobStatus)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -1884,12 +1884,12 @@ type WorkflowMutation struct {
 	id                *int
 	name              *string
 	description       *string
-	states            *[]*model.State
-	appendstates      []*model.State
-	transitions       *[]*model.Transition
-	appendtransitions []*model.Transition
-	groups            *[]*model.Group
-	appendgroups      []*model.Group
+	states            *[]api.State
+	appendstates      []api.State
+	transitions       *[]api.Transition
+	appendtransitions []api.Transition
+	groups            *[]api.Group
+	appendgroups      []api.Group
 	clearedFields     map[string]struct{}
 	jobs              map[string]struct{}
 	removedjobs       map[string]struct{}
@@ -2083,13 +2083,13 @@ func (m *WorkflowMutation) ResetDescription() {
 }
 
 // SetStates sets the "states" field.
-func (m *WorkflowMutation) SetStates(value []*model.State) {
-	m.states = &value
+func (m *WorkflowMutation) SetStates(a []api.State) {
+	m.states = &a
 	m.appendstates = nil
 }
 
 // States returns the value of the "states" field in the mutation.
-func (m *WorkflowMutation) States() (r []*model.State, exists bool) {
+func (m *WorkflowMutation) States() (r []api.State, exists bool) {
 	v := m.states
 	if v == nil {
 		return
@@ -2100,7 +2100,7 @@ func (m *WorkflowMutation) States() (r []*model.State, exists bool) {
 // OldStates returns the old "states" field's value of the Workflow entity.
 // If the Workflow object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *WorkflowMutation) OldStates(ctx context.Context) (v []*model.State, err error) {
+func (m *WorkflowMutation) OldStates(ctx context.Context) (v []api.State, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldStates is only allowed on UpdateOne operations")
 	}
@@ -2114,13 +2114,13 @@ func (m *WorkflowMutation) OldStates(ctx context.Context) (v []*model.State, err
 	return oldValue.States, nil
 }
 
-// AppendStates adds value to the "states" field.
-func (m *WorkflowMutation) AppendStates(value []*model.State) {
-	m.appendstates = append(m.appendstates, value...)
+// AppendStates adds a to the "states" field.
+func (m *WorkflowMutation) AppendStates(a []api.State) {
+	m.appendstates = append(m.appendstates, a...)
 }
 
 // AppendedStates returns the list of values that were appended to the "states" field in this mutation.
-func (m *WorkflowMutation) AppendedStates() ([]*model.State, bool) {
+func (m *WorkflowMutation) AppendedStates() ([]api.State, bool) {
 	if len(m.appendstates) == 0 {
 		return nil, false
 	}
@@ -2134,13 +2134,13 @@ func (m *WorkflowMutation) ResetStates() {
 }
 
 // SetTransitions sets the "transitions" field.
-func (m *WorkflowMutation) SetTransitions(value []*model.Transition) {
-	m.transitions = &value
+func (m *WorkflowMutation) SetTransitions(a []api.Transition) {
+	m.transitions = &a
 	m.appendtransitions = nil
 }
 
 // Transitions returns the value of the "transitions" field in the mutation.
-func (m *WorkflowMutation) Transitions() (r []*model.Transition, exists bool) {
+func (m *WorkflowMutation) Transitions() (r []api.Transition, exists bool) {
 	v := m.transitions
 	if v == nil {
 		return
@@ -2151,7 +2151,7 @@ func (m *WorkflowMutation) Transitions() (r []*model.Transition, exists bool) {
 // OldTransitions returns the old "transitions" field's value of the Workflow entity.
 // If the Workflow object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *WorkflowMutation) OldTransitions(ctx context.Context) (v []*model.Transition, err error) {
+func (m *WorkflowMutation) OldTransitions(ctx context.Context) (v []api.Transition, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldTransitions is only allowed on UpdateOne operations")
 	}
@@ -2165,13 +2165,13 @@ func (m *WorkflowMutation) OldTransitions(ctx context.Context) (v []*model.Trans
 	return oldValue.Transitions, nil
 }
 
-// AppendTransitions adds value to the "transitions" field.
-func (m *WorkflowMutation) AppendTransitions(value []*model.Transition) {
-	m.appendtransitions = append(m.appendtransitions, value...)
+// AppendTransitions adds a to the "transitions" field.
+func (m *WorkflowMutation) AppendTransitions(a []api.Transition) {
+	m.appendtransitions = append(m.appendtransitions, a...)
 }
 
 // AppendedTransitions returns the list of values that were appended to the "transitions" field in this mutation.
-func (m *WorkflowMutation) AppendedTransitions() ([]*model.Transition, bool) {
+func (m *WorkflowMutation) AppendedTransitions() ([]api.Transition, bool) {
 	if len(m.appendtransitions) == 0 {
 		return nil, false
 	}
@@ -2185,13 +2185,13 @@ func (m *WorkflowMutation) ResetTransitions() {
 }
 
 // SetGroups sets the "groups" field.
-func (m *WorkflowMutation) SetGroups(value []*model.Group) {
-	m.groups = &value
+func (m *WorkflowMutation) SetGroups(a []api.Group) {
+	m.groups = &a
 	m.appendgroups = nil
 }
 
 // Groups returns the value of the "groups" field in the mutation.
-func (m *WorkflowMutation) Groups() (r []*model.Group, exists bool) {
+func (m *WorkflowMutation) Groups() (r []api.Group, exists bool) {
 	v := m.groups
 	if v == nil {
 		return
@@ -2202,7 +2202,7 @@ func (m *WorkflowMutation) Groups() (r []*model.Group, exists bool) {
 // OldGroups returns the old "groups" field's value of the Workflow entity.
 // If the Workflow object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *WorkflowMutation) OldGroups(ctx context.Context) (v []*model.Group, err error) {
+func (m *WorkflowMutation) OldGroups(ctx context.Context) (v []api.Group, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldGroups is only allowed on UpdateOne operations")
 	}
@@ -2216,13 +2216,13 @@ func (m *WorkflowMutation) OldGroups(ctx context.Context) (v []*model.Group, err
 	return oldValue.Groups, nil
 }
 
-// AppendGroups adds value to the "groups" field.
-func (m *WorkflowMutation) AppendGroups(value []*model.Group) {
-	m.appendgroups = append(m.appendgroups, value...)
+// AppendGroups adds a to the "groups" field.
+func (m *WorkflowMutation) AppendGroups(a []api.Group) {
+	m.appendgroups = append(m.appendgroups, a...)
 }
 
 // AppendedGroups returns the list of values that were appended to the "groups" field in this mutation.
-func (m *WorkflowMutation) AppendedGroups() ([]*model.Group, bool) {
+func (m *WorkflowMutation) AppendedGroups() ([]api.Group, bool) {
 	if len(m.appendgroups) == 0 {
 		return nil, false
 	}
@@ -2400,21 +2400,21 @@ func (m *WorkflowMutation) SetField(name string, value ent.Value) error {
 		m.SetDescription(v)
 		return nil
 	case workflow.FieldStates:
-		v, ok := value.([]*model.State)
+		v, ok := value.([]api.State)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetStates(v)
 		return nil
 	case workflow.FieldTransitions:
-		v, ok := value.([]*model.Transition)
+		v, ok := value.([]api.Transition)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetTransitions(v)
 		return nil
 	case workflow.FieldGroups:
-		v, ok := value.([]*model.Group)
+		v, ok := value.([]api.Group)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

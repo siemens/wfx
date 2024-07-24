@@ -23,7 +23,7 @@ func TestQueryWorkflow(t *testing.T) {
 	wf, err := CreateWorkflow(context.Background(), db, dau.DirectWorkflow())
 	require.NoError(t, err)
 
-	list, err := QueryWorkflows(context.Background(), db, persistence.PaginationParams{Limit: 10})
+	list, err := QueryWorkflows(context.Background(), db, persistence.PaginationParams{Limit: 10}, nil)
 	assert.NoError(t, err)
 	assert.Len(t, list.Content, 1)
 	assert.Equal(t, wf.Name, list.Content[0].Name)

@@ -15,7 +15,6 @@ cmd/wfx-viewer/wfx-viewer
 coverage*
 *.log
 /results
-generated/wfx.swagger.yml
 /out
 *.cov
 /wfx.db*

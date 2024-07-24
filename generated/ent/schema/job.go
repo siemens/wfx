@@ -14,7 +14,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 	"github.com/google/uuid"
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 )
 
 // Job holds the schema definition for the Job entity.
@@ -57,7 +57,7 @@ func (Job) Fields() []ent.Field {
 		field.String("client_id"),
 		field.JSON("definition", map[string]any{}).Optional(),
 		// JobStatus
-		field.JSON("status", model.JobStatus{}),
+		field.JSON("status", api.JobStatus{}),
 		field.String("group").Optional(),
 	}
 }

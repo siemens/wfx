@@ -9,40 +9,79 @@ package server
  */
 
 import (
+	"crypto/tls"
+	"crypto/x509"
+	"fmt"
 	"net/http"
-	"time"
+	"os"
 
-	"github.com/go-openapi/runtime/flagext"
+	"github.com/Southclaws/fault"
+	"github.com/rs/zerolog/log"
+	"github.com/siemens/wfx/cmd/wfx/cmd/config"
 )
 
-type HTTPSettings struct {
-	Host           string
-	Port           int
-	TLSHost        string
-	TLSPort        int
-	UDSPath        string
-	MaxHeaderSize  flagext.ByteSize
-	KeepAlive      time.Duration
-	ReadTimeout    time.Duration
-	WriteTimeout   time.Duration
-	CleanupTimeout time.Duration
+func NewHTTPServer(cfg *config.AppConfig, handler http.Handler) (*http.Server, error) {
+	server := new(http.Server)
+	server.MaxHeaderBytes = int(cfg.MaxHeaderSize())
+	server.ReadTimeout = cfg.ReadTimeout()
+	server.WriteTimeout = cfg.WriteTimeout()
+	server.SetKeepAlivesEnabled(cfg.KeepAlive())
+
+	if cfg.CleanupTimeout() > 0 {
+		server.IdleTimeout = cfg.CleanupTimeout()
+	}
+	if err := configureTLS(server, cfg.TLSCACertificate()); err != nil {
+		return nil, fault.Wrap(err)
+	}
+	server.Handler = handler
+	return server, nil
 }
 
-func NewHTTPServer(settings *HTTPSettings, handler http.Handler) *http.Server {
-	server := new(http.Server)
-	server.MaxHeaderBytes = int(settings.MaxHeaderSize)
-	server.ReadTimeout = settings.ReadTimeout
-	server.WriteTimeout = settings.WriteTimeout
-	server.SetKeepAlivesEnabled(int64(settings.KeepAlive) > 0)
-
-	if int64(settings.CleanupTimeout) > 0 {
-		server.IdleTimeout = settings.CleanupTimeout
+func configureTLS(server *http.Server, caCert string) error {
+	// Inspired by https://blog.bracebin.com/achieving-perfect-ssl-labs-score-with-go
+	server.TLSConfig = &tls.Config{
+		// Causes servers to use Go's default ciphersuite preferences,
+		// which are tuned to avoid attacks. Does nothing on clients.
+		PreferServerCipherSuites: true,
+		// Only use curves which have assembly implementations
+		// https://github.com/golang/go/tree/master/src/crypto/elliptic
+		CurvePreferences: []tls.CurveID{tls.CurveP256},
+		// Use modern tls mode https://wiki.mozilla.org/Security/Server_Side_TLS#Modern_compatibility
+		NextProtos: []string{"h2", "http/1.1"},
+		// https://www.owasp.org/index.php/Transport_Layer_Protection_Cheat_Sheet#Rule_-_Only_Support_Strong_Protocols
+		MinVersion: tls.VersionTLS12,
+		// These ciphersuites support Forward Secrecy: https://en.wikipedia.org/wiki/Forward_secrecy
+		CipherSuites: []uint16{
+			tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+			tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,
+			tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,
+		},
 	}
 
-	if int64(settings.CleanupTimeout) > 0 {
-		server.IdleTimeout = settings.CleanupTimeout
+	if caCert != "" {
+		log.Debug().
+			Str("caCertificates", caCert).
+			Msg("Loading CA certs")
+		// include specified CA certificate
+		caCert, caCertErr := os.ReadFile(caCert)
+		if caCertErr != nil {
+			return fault.Wrap(caCertErr)
+		}
+		caCertPool, err := x509.SystemCertPool()
+		if err != nil {
+			log.Warn().Err(err).Msg("Failed to load system cert pool, using empty pool")
+			caCertPool = x509.NewCertPool()
+		}
+		caCertPool.AppendCertsFromPEM(caCert)
+		ok := caCertPool.AppendCertsFromPEM(caCert)
+		if !ok {
+			return fmt.Errorf("cannot parse CA certificate")
+		}
+		server.TLSConfig.ClientCAs = caCertPool
+		server.TLSConfig.ClientAuth = tls.RequireAndVerifyClientCert
 	}
-
-	server.Handler = handler
-	return server
+	return nil
 }

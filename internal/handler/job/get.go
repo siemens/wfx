@@ -12,12 +12,12 @@ import (
 	"context"
 
 	"github.com/Southclaws/fault"
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/middleware/logging"
 	"github.com/siemens/wfx/persistence"
 )
 
-func GetJob(ctx context.Context, storage persistence.Storage, id string, history bool) (*model.Job, error) {
+func GetJob(ctx context.Context, storage persistence.Storage, id string, history bool) (*api.Job, error) {
 	fetchParams := persistence.FetchParams{History: history}
 	job, err := storage.GetJob(ctx, id, fetchParams)
 	if err != nil {

@@ -10,17 +10,20 @@ package flags
 
 import (
 	"bytes"
+	"encoding/json"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 
+	"github.com/rs/zerolog"
+	"github.com/siemens/wfx/generated/api"
+	"github.com/spf13/pflag"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestCreateHTTPClientTLS(t *testing.T) {
-	_ = Koanf.Set(EnableTLSFlag, true)
-
 	cert := []byte(`
 -----BEGIN CERTIFICATE-----
 MIIDrzCCApegAwIBAgIQCDvgVpBCRrGhdWrJWZHHSjANBgkqhkiG9w0BAQUFADBh
@@ -45,20 +48,21 @@ YSEY1QSteDwsOoBrp+uvFRTp2InBuThs4pFsiv9kuXclVzDAGySj4dzp30d8tbQk
 CAUw7C29C79Fv1C5qfPrmAESrciIxpg0X40KPMbp1ZWVbd4=
 -----END CERTIFICATE-----
 	`)
-	tmpFile, _ := os.CreateTemp(os.TempDir(), "wfx-cert-")
+	tmpFile, _ := os.CreateTemp("", "wfx-cert-")
 	_, _ = tmpFile.Write(cert)
 	defer os.Remove(tmpFile.Name())
 
-	_ = Koanf.Set(TLSCaFlag, tmpFile.Name())
+	b := NewBaseCmd(pflag.NewFlagSet("wfx", pflag.ExitOnError))
+	b.EnableTLS = true
+	b.TLSCa = tmpFile.Name()
 
-	b := NewBaseCmd()
 	client, _ := b.CreateHTTPClient()
 	transport := client.Transport.(*http.Transport)
 	assert.NotEmpty(t, transport.TLSClientConfig.RootCAs)
 }
 
 func TestCreateHTTPClient_AmbiguousSockets(t *testing.T) {
-	b := NewBaseCmd()
+	b := NewBaseCmd(pflag.NewFlagSet("wfx", pflag.ExitOnError))
 	b.Socket = "foo"
 	b.MgmtSocket = "bar"
 	_, err := b.CreateHTTPClient()
@@ -66,80 +70,184 @@ func TestCreateHTTPClient_AmbiguousSockets(t *testing.T) {
 }
 
 func TestCreateHTTPClient_Socket(t *testing.T) {
-	b := NewBaseCmd()
-	b.Socket = "foo"
+	b := NewBaseCmd(pflag.NewFlagSet("wfx", pflag.ExitOnError))
+	b.Socket = "/tmp/foo.sock"
 	_, err := b.CreateHTTPClient()
 	require.NoError(t, err)
 }
 
-func TestCreateClient(t *testing.T) {
-	b := NewBaseCmd()
+func TestCreateClient_TLS(t *testing.T) {
+	b := NewBaseCmd(pflag.NewFlagSet("wfx", pflag.ExitOnError))
 	b.EnableTLS = true
-	client := b.CreateClient()
+	client, err := b.CreateClient()
 	assert.NotNil(t, client)
+	assert.NoError(t, err)
 }
 
 func TestCreateClient_NoTLS(t *testing.T) {
-	b := NewBaseCmd()
+	b := NewBaseCmd(pflag.NewFlagSet("wfx", pflag.ExitOnError))
 	b.EnableTLS = false
-	client := b.CreateClient()
+	client, err := b.CreateClient()
 	assert.NotNil(t, client)
+	assert.NoError(t, err)
 }
 
 func TestCreateMgmtClient(t *testing.T) {
-	b := NewBaseCmd()
+	b := NewBaseCmd(pflag.NewFlagSet("wfx", pflag.ExitOnError))
 	b.EnableTLS = true
-	client := b.CreateMgmtClient()
+	client, err := b.CreateMgmtClient()
 	assert.NotNil(t, client)
+	assert.NoError(t, err)
 }
 
 func TestCreateMgmtClient_NoTLS(t *testing.T) {
-	b := NewBaseCmd()
+	b := NewBaseCmd(pflag.NewFlagSet("wfx", pflag.ExitOnError))
 	b.EnableTLS = false
-	client := b.CreateMgmtClient()
+	client, err := b.CreateMgmtClient()
 	assert.NotNil(t, client)
+	assert.NoError(t, err)
 }
 
 func TestDumpPlain(t *testing.T) {
-	payload := map[string]string{
-		"id":  "1",
-		"foo": "bar",
-	}
-
+	payload := []byte("{\n  \"foo\": \"bar\",\n  \"id\": \"1\"\n}\n")
 	var buf bytes.Buffer
 
-	b := NewBaseCmd()
+	b := NewBaseCmd(pflag.NewFlagSet("wfx", pflag.ExitOnError))
 	b.Filter = ""
 
-	err := b.DumpResponse(&buf, payload)
+	err := b.dumpResponse(&buf, payload)
 	assert.NoError(t, err)
 	assert.JSONEq(t, "{\n  \"foo\": \"bar\",\n  \"id\": \"1\"\n}\n", buf.String())
 }
 
 func TestDumpFilter(t *testing.T) {
-	payload := map[string]string{
-		"id":  "1",
-		"foo": "bar",
-	}
+	payload := []byte("{\n  \"foo\": \"bar\",\n  \"id\": \"1\"\n}\n")
 	var buf bytes.Buffer
 
-	b := NewBaseCmd()
+	b := NewBaseCmd(pflag.NewFlagSet("wfx", pflag.ExitOnError))
 	b.Filter = ".id"
 	b.RawOutput = false
 
-	err := b.DumpResponse(&buf, payload)
+	err := b.dumpResponse(&buf, payload)
 	assert.NoError(t, err)
 	assert.JSONEq(t, "\"1\"", buf.String())
 }
 
 func TestDumpFilterRaw(t *testing.T) {
-	payload := map[string]string{
-		"id":  "1",
-		"foo": "bar",
-	}
-
+	payload := []byte("{\n  \"foo\": \"bar\",\n  \"id\": \"1\"\n}\n")
 	var buf bytes.Buffer
 	err := dumpFiltered(payload, ".id", true, &buf)
 	assert.NoError(t, err)
 	assert.JSONEq(t, "1", buf.String())
+}
+
+func TestProcessResponse(t *testing.T) {
+	recorder := httptest.NewRecorder()
+	recorder.WriteHeader(http.StatusOK)
+	_, _ = recorder.WriteString(`{"foo": "bar"}`)
+	resp := recorder.Result()
+	buf := new(bytes.Buffer)
+	b := NewBaseCmd(pflag.NewFlagSet("wfx", pflag.ExitOnError))
+	err := b.ProcessResponse(resp, buf)
+	assert.NoError(t, err)
+}
+
+func TestProcessResponse_Empty(t *testing.T) {
+	recorder := httptest.NewRecorder()
+	recorder.WriteHeader(http.StatusNoContent)
+	resp := recorder.Result()
+	buf := new(bytes.Buffer)
+	b := NewBaseCmd(pflag.NewFlagSet("wfx", pflag.ExitOnError))
+	err := b.ProcessResponse(resp, buf)
+	assert.NoError(t, err)
+}
+
+func TestProcessResponse_Error(t *testing.T) {
+	recorder := httptest.NewRecorder()
+	recorder.WriteHeader(http.StatusInternalServerError)
+	resp := recorder.Result()
+	buf := new(bytes.Buffer)
+	b := NewBaseCmd(pflag.NewFlagSet("wfx", pflag.ExitOnError))
+	err := b.ProcessResponse(resp, buf)
+	assert.Error(t, err)
+}
+
+func TestProcessResponse_ErrorResponse(t *testing.T) {
+	recorder := httptest.NewRecorder()
+	recorder.WriteHeader(http.StatusInternalServerError)
+	errResp := api.ErrorResponse{
+		Errors: &[]api.Error{
+			{Code: "foo", Message: "bar", Logref: "baz"},
+		},
+	}
+	_ = json.NewEncoder(recorder).Encode(errResp)
+	resp := recorder.Result()
+	buf := new(bytes.Buffer)
+	b := NewBaseCmd(pflag.NewFlagSet("wfx", pflag.ExitOnError))
+	err := b.ProcessResponse(resp, buf)
+	assert.Error(t, err)
+}
+
+func TestSortParam_Asc(t *testing.T) {
+	b := NewBaseCmd(pflag.NewFlagSet("wfx", pflag.ExitOnError))
+	b.Sort = "asc"
+	val, err := b.SortParam()
+	assert.NoError(t, err)
+	assert.Equal(t, api.Asc, *val)
+}
+
+func TestSortParam_Desc(t *testing.T) {
+	b := NewBaseCmd(pflag.NewFlagSet("wfx", pflag.ExitOnError))
+	b.Sort = "desc"
+	val, err := b.SortParam()
+	assert.NoError(t, err)
+	assert.Equal(t, api.Desc, *val)
+}
+
+func TestSortParam_Empty(t *testing.T) {
+	b := NewBaseCmd(pflag.NewFlagSet("wfx", pflag.ExitOnError))
+	b.Sort = ""
+	val, err := b.SortParam()
+	assert.NoError(t, err)
+	assert.Equal(t, api.Asc, *val)
+}
+
+func TestSortParam_Invalid(t *testing.T) {
+	b := NewBaseCmd(pflag.NewFlagSet("wfx", pflag.ExitOnError))
+	b.Sort = "foo"
+	val, err := b.SortParam()
+	assert.Error(t, err)
+	assert.Nil(t, val)
+}
+
+func TestNewBaseCmd_LogLevel(t *testing.T) {
+	f := pflag.NewFlagSet("test", pflag.ContinueOnError)
+	f.String(LogLevelFlag, "trace", "log level")
+	_ = NewBaseCmd(f)
+	assert.Equal(t, zerolog.TraceLevel, zerolog.GlobalLevel())
+}
+
+func TestNewBaseCmd_ConfigFile(t *testing.T) {
+	tmpfile, err := os.CreateTemp("", "test-log-level-*.yaml")
+	require.NoError(t, err)
+	t.Log(tmpfile.Name())
+	defer os.Remove(tmpfile.Name())
+
+	content := []byte("log-level: trace\n")
+	_, err = tmpfile.Write(content)
+	require.NoError(t, err)
+	err = tmpfile.Close()
+	require.NoError(t, err)
+
+	f := pflag.NewFlagSet("test", pflag.ContinueOnError)
+	f.StringSlice(ConfigFlag, []string{tmpfile.Name()}, "config files")
+	_ = NewBaseCmd(f)
+	assert.Equal(t, zerolog.TraceLevel, zerolog.GlobalLevel())
+}
+
+func TestNewBaseCmd_EnvVariables(t *testing.T) {
+	t.Setenv("WFX_LOG_LEVEL", "trace")
+	f := pflag.NewFlagSet("test", pflag.ContinueOnError)
+	NewBaseCmd(f)
+	assert.Equal(t, zerolog.TraceLevel, zerolog.GlobalLevel())
 }

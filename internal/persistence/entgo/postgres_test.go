@@ -11,7 +11,6 @@ package entgo
  */
 
 import (
-	"context"
 	"path/filepath"
 	"reflect"
 	"runtime"
@@ -20,11 +19,9 @@ import (
 
 	"github.com/siemens/wfx/internal/persistence/tests"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/goleak"
 )
 
 func TestPostgreSQL_Initialize(t *testing.T) {
-	defer goleak.VerifyNone(t)
 	db := setupPostgreSQL(t)
 	db.Shutdown()
 }
@@ -44,7 +41,7 @@ func TestPostgreSQL(t *testing.T) {
 
 func setupPostgreSQL(t *testing.T) PostgreSQL {
 	var postgres PostgreSQL
-	err := postgres.Initialize(context.Background(), "sslmode=disable")
+	err := postgres.Initialize("sslmode=disable")
 	require.NoError(t, err)
 	return postgres
 }

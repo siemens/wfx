@@ -14,7 +14,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/internal/handler/job"
 	"github.com/siemens/wfx/internal/handler/workflow"
 	"github.com/siemens/wfx/workflow/dau"
@@ -29,7 +29,7 @@ func TestJobTagGet(t *testing.T) {
 	wf, err := workflow.CreateWorkflow(context.Background(), db, dau.DirectWorkflow())
 	require.NoError(t, err)
 
-	jobReq := model.JobRequest{
+	jobReq := api.JobRequest{
 		ClientID: "foo",
 		Workflow: wf.Name,
 		Tags:     []string{"foo", "bar"},
@@ -59,7 +59,7 @@ func TestJobTagPost(t *testing.T) {
 	wf, err := workflow.CreateWorkflow(context.Background(), db, dau.DirectWorkflow())
 	require.NoError(t, err)
 
-	jobReq := model.JobRequest{
+	jobReq := api.JobRequest{
 		ClientID: "foo",
 		Workflow: wf.Name,
 		Tags:     []string{"tag1"},
@@ -85,8 +85,10 @@ func TestJobTagPost(t *testing.T) {
 		apitest.New().
 			Handler(south).
 			Post(jobPath).
+			ContentType("application/json").
+			Body(`["bar", "foo"]`).
 			Expect(t).
-			Status(http.StatusMethodNotAllowed).
+			Status(http.StatusForbidden).
 			End()
 	})
 }
@@ -98,7 +100,7 @@ func TestJobTagDelete(t *testing.T) {
 	wf, err := workflow.CreateWorkflow(context.Background(), db, dau.DirectWorkflow())
 	require.NoError(t, err)
 
-	jobReq := model.JobRequest{
+	jobReq := api.JobRequest{
 		ClientID: "foo",
 		Workflow: wf.Name,
 		Tags:     []string{"foo", "bar"},
@@ -124,8 +126,10 @@ func TestJobTagDelete(t *testing.T) {
 		apitest.New().
 			Handler(south).
 			Delete(jobPath).
+			ContentType("application/json").
+			Body(`["foo"]`).
 			Expect(t).
-			Status(http.StatusMethodNotAllowed).
+			Status(http.StatusForbidden).
 			End()
 	})
 }

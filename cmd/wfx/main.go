@@ -9,15 +9,15 @@ package main
  */
 
 import (
-	"github.com/rs/zerolog/log"
+	"fmt"
+	"os"
 
 	"github.com/siemens/wfx/cmd/wfx/cmd/root"
-	"github.com/siemens/wfx/cmd/wfx/metadata"
 )
 
 func main() {
-	root.Command.Version = metadata.Version
-	if err := root.Command.Execute(); err != nil {
-		log.Fatal().Err(err).Msg("wfx encountered an error")
+	if err := root.NewCommand().Execute(); err != nil {
+		fmt.Fprintf(os.Stderr, "wfx encountered an error: %+v\n", err)
+		os.Exit(1)
 	}
 }

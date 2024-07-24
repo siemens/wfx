@@ -23,8 +23,8 @@ import (
 )
 
 func TestLog(t *testing.T) {
-	mw := MW{}
-	handler := mw.Wrap(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+	mw := NewLoggingMiddleware()
+	handler := mw(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		fmt.Fprintln(w, "Hello, client")
 	}))
 
@@ -39,11 +39,10 @@ func TestLog(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, "Hello, client\n", string(greeting))
-	mw.Shutdown()
 }
 
 func TestLogDebug(t *testing.T) {
-	handler := MW{}.Wrap(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+	handler := NewLoggingMiddleware()(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		fmt.Fprintln(w, "Hello, client")
 	}))
 
@@ -88,7 +87,7 @@ func TestPeekBody_ReadFailure(t *testing.T) {
 	_, err := PeekBody(r)
 	assert.NotNil(t, err)
 
-	handler := MW{}.Wrap(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+	handler := NewLoggingMiddleware()(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		fmt.Fprintln(w, "Hello, client")
 	}))
 	rec := httptest.NewRecorder()

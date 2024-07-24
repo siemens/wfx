@@ -24,25 +24,25 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var Command = &cobra.Command{
-	Use:              "job",
-	Short:            "manage jobs",
-	Long:             "subcommand to manage jobs (CRUD)",
-	TraverseChildren: true,
-	SilenceUsage:     true,
-}
-
-func init() {
-	Command.AddCommand(create.Command)
-	Command.AddCommand(delete.Command)
-	Command.AddCommand(get.Command)
-	Command.AddCommand(query.Command)
-	Command.AddCommand(updatestatus.Command)
-	Command.AddCommand(getstatus.Command)
-	Command.AddCommand(updatedefinition.Command)
-	Command.AddCommand(getdefinition.Command)
-	Command.AddCommand(addtags.Command)
-	Command.AddCommand(deltags.Command)
-	Command.AddCommand(gettags.Command)
-	Command.AddCommand(events.Command)
+func NewCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:              "job",
+		Short:            "manage jobs",
+		Long:             "subcommand to manage jobs (CRUD)",
+		TraverseChildren: true,
+		SilenceUsage:     true,
+	}
+	cmd.AddCommand(create.NewCommand())
+	cmd.AddCommand(delete.NewCommand())
+	cmd.AddCommand(get.NewCommand())
+	cmd.AddCommand(query.NewCommand())
+	cmd.AddCommand(updatestatus.NewCommand())
+	cmd.AddCommand(getstatus.NewCommand())
+	cmd.AddCommand(updatedefinition.NewCommand())
+	cmd.AddCommand(getdefinition.NewCommand())
+	cmd.AddCommand(addtags.NewCommand())
+	cmd.AddCommand(deltags.NewCommand())
+	cmd.AddCommand(gettags.NewCommand())
+	cmd.AddCommand(events.NewCommand())
+	return cmd
 }

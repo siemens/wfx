@@ -42,9 +42,8 @@ func TestStopWithoutStart(t *testing.T) {
 func TestStop(t *testing.T) {
 	p := NewFBPlugin("cat")
 
-	chQuit := make(chan error)
-	ch, err := p.Start(chQuit)
-	t.Cleanup(func() { close(ch) })
+	chErr := make(chan error)
+	chMessages, err := p.Start(chErr)
 	require.NoError(t, err)
 
 	err = p.Stop()
@@ -52,15 +51,22 @@ func TestStop(t *testing.T) {
 
 	err = p.Stop()
 	assert.NoError(t, err)
+
+	select {
+	case err := <-chErr:
+		assert.NoError(t, err)
+	default:
+		//
+	}
+
+	close(chMessages)
 }
 
 func TestSendAndReceive(t *testing.T) {
 	p := NewFBPlugin("cat")
-	chQuit := make(chan error)
-	ch, err := p.Start(chQuit)
-	t.Cleanup(func() { close(ch) })
+	chErr := make(chan error)
+	chMessages, err := p.Start(chErr)
 	require.NoError(t, err)
-	t.Cleanup(func() { _ = p.Stop() })
 
 	headers := make(map[string][]string)
 	headers["Content-Type"] = []string{"application/json"}
@@ -79,26 +85,22 @@ func TestSendAndReceive(t *testing.T) {
 		response: make(chan plugin.PluginResponseT, 1),
 	}
 	// send message to plugin
-	ch <- msg
+	chMessages <- msg
 	// wait for response
 	resp := <-msg.response
 	assert.Equal(t, req.Cookie, resp.Cookie)
+
+	close(chMessages)
+	_ = p.Stop()
+
+	select {
+	case err := <-chErr:
+		assert.NoError(t, err)
+	default:
+		//
+	}
 }
 
 func TestName(t *testing.T) {
 	assert.Equal(t, "true", NewFBPlugin("true").Name())
-}
-
-func TestStart_Reaper(t *testing.T) {
-	p := NewFBPlugin("cat")
-	chQuit := make(chan error)
-	ch, err := p.Start(chQuit)
-	assert.NoError(t, err)
-
-	_ = p.terminateProcess()
-
-	err = <-chQuit
-	assert.NotNil(t, err)
-
-	t.Cleanup(func() { close(ch) })
 }

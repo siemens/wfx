@@ -11,7 +11,7 @@ package workflow
 import (
 	"testing"
 
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/workflow/dau"
 	"github.com/stretchr/testify/assert"
 )
@@ -34,15 +34,15 @@ func TestFollowTransitions(t *testing.T) {
 	c := "c"
 	d := "d"
 
-	eligibleWfx := model.EligibleEnumWFX
-
-	transitions := []*model.Transition{
-		{From: a, To: b, Eligible: eligibleWfx, Action: model.ActionEnumIMMEDIATE},
-		{From: b, To: c, Eligible: eligibleWfx, Action: model.ActionEnumIMMEDIATE},
-		{From: c, To: d, Eligible: eligibleWfx, Action: model.ActionEnumIMMEDIATE},
+	eligibleWfx := api.WFX
+	immediate := api.IMMEDIATE
+	transitions := []api.Transition{
+		{From: a, To: b, Eligible: eligibleWfx, Action: &immediate},
+		{From: b, To: c, Eligible: eligibleWfx, Action: &immediate},
+		{From: c, To: d, Eligible: eligibleWfx, Action: &immediate},
 	}
 
-	actual := FollowImmediateTransitions(&model.Workflow{Transitions: transitions}, "a")
+	actual := FollowImmediateTransitions(&api.Workflow{Transitions: transitions}, "a")
 	assert.Equal(t, d, actual, "should warp from a to d")
 }
 

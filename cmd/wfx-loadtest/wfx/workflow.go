@@ -9,33 +9,46 @@ package wfx
  */
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"time"
 
-	"github.com/go-openapi/strfmt"
+	"github.com/Southclaws/fault"
 	"github.com/rs/zerolog/log"
-	"github.com/siemens/wfx/generated/client"
-	"github.com/siemens/wfx/generated/client/workflows"
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/cmd/wfxctl/errutil"
+	"github.com/siemens/wfx/generated/api"
 )
 
-func CreateWorkflow(host string, port int, workflow *model.Workflow) error {
-	log.Debug().Str("name", workflow.Name).Msg("Creating workflow")
-
-	params := workflows.NewPostWorkflowsParams().
-		WithHTTPClient(&http.Client{
-			Timeout: time.Second * 10,
-		}).
-		WithWorkflow(workflow)
-
-	cfg := client.DefaultTransportConfig().WithHost(fmt.Sprintf("%s:%d", host, port))
-	client := client.NewHTTPClientWithConfig(strfmt.Default, cfg)
-
-	_, err := client.Workflows.PostWorkflows(params)
+func CreateWorkflow(host string, port int, workflow api.Workflow) error {
+	swagger := errutil.Must(api.GetSwagger())
+	basePath := errutil.Must(swagger.Servers.BasePath())
+	server := fmt.Sprintf("http://%s:%d%s", host, port, basePath)
+	log.Info().Str("server", server).Str("name", workflow.Name).Msg("Creating workflow")
+	client, err := api.NewClientWithResponses(server, api.WithHTTPClient(&http.Client{
+		Timeout: time.Second * 10,
+	}))
 	if err != nil {
-		log.Warn().Err(err).Msg("Failed to create workflow")
+		return fault.Wrap(err)
 	}
-	log.Info().Str("name", workflow.Name).Msg("Created workflow")
+	{
+		resp, err := client.GetWorkflowsNameWithResponse(context.Background(), workflow.Name, nil)
+		if err != nil {
+			return fault.Wrap(err)
+		}
+		if resp.JSON200 != nil {
+			return nil
+		}
+	}
+	resp, err := client.PostWorkflowsWithResponse(context.Background(), nil, api.PostWorkflowsJSONRequestBody(workflow))
+	if err != nil {
+		return fault.Wrap(err)
+	}
+	if resp.JSON201 != nil {
+		log.Info().Str("name", workflow.Name).Msg("Created workflow")
+		return nil
+	}
+	body := string(resp.Body)
+	log.Warn().Str("body", body).Msg("Failed to create workflow")
 	return nil
 }

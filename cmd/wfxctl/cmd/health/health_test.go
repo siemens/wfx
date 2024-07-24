@@ -1,32 +1,69 @@
 package health
 
-import (
-	"bytes"
-	"encoding/json"
-	"net/http"
-	"net/http/httptest"
-	"testing"
-
-	"github.com/alexliesenfeld/health"
-	"github.com/siemens/wfx/cmd/wfxctl/flags"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-)
-
 /*
- * SPDX-FileCopyrightText: 2023 Siemens AG
+ * SPDX-FileCopyrightText: 2024 Siemens AG
  *
  * SPDX-License-Identifier: Apache-2.0
  *
  * Author: Michael Adler <michael.adler@siemens.com>
  */
 
-func TestCommand_Color(t *testing.T) {
-	for _, c := range []string{colorAlways, colorAuto, colorNever, "foo"} {
-		_ = flags.Koanf.Set(colorFlag, c)
-		err := Command.Execute()
+import (
+	"bytes"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"net/url"
+	"testing"
+
+	"github.com/siemens/wfx/generated/api"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+func TestNewCommand(t *testing.T) {
+	cmd := NewCommand()
+	err := cmd.Execute()
+	require.NoError(t, err)
+}
+
+func TestNewCommand_Up(t *testing.T) {
+	var actualPath string
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		actualPath = r.URL.Path
+
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		response := api.GetHealth200JSONResponse{
+			Body: api.CheckerResult{
+				Status: api.Up,
+			},
+		}
+		_ = json.NewEncoder(w).Encode(response)
+	}))
+	defer ts.Close()
+
+	u, _ := url.Parse(ts.URL)
+	t.Setenv("WFX_CLIENT_HOST", u.Hostname())
+	t.Setenv("WFX_CLIENT_PORT", u.Port())
+
+	cmd := NewCommand()
+	err := cmd.Execute()
+	require.NoError(t, err)
+	assert.Equal(t, "/api/wfx/v1/health", actualPath)
+}
+
+func TestNewCommand_ColorModes(t *testing.T) {
+	for _, mode := range []string{colorAlways, colorAuto, colorNever} {
+		cmd := NewCommand()
+		cmd.SetArgs([]string{"--color", mode})
+		err := cmd.Execute()
 		require.NoError(t, err)
 	}
+	cmd := NewCommand()
+	cmd.SetArgs([]string{"--color", "foo"})
+	err := cmd.Execute()
+	assert.ErrorContains(t, err, "unsupported color mode: foo")
 }
 
 func TestPrettyReport_Empty(t *testing.T) {
@@ -39,54 +76,13 @@ func TestPrettyReport_Empty(t *testing.T) {
 func TestPrettyReport(t *testing.T) {
 	buf := new(bytes.Buffer)
 
-	allEndpoints := []endpoint{
-		{Name: "Foo", URL: "http://127.0.0.1", Status: health.StatusUp},
-		{Name: "Foo", URL: "http://127.0.0.2", Status: health.StatusDown},
-		{Name: "Foo", URL: "http://127.0.0.3", Status: health.StatusUnknown},
+	allEndpoints := []Endpoint{
+		{Name: "Foo", Server: "http://127.0.0.1", Response: &api.GetHealthResponse{JSON200: &api.CheckerResult{Status: api.Up}}},
+		{Name: "Foo", Server: "http://127.0.0.2", Response: &api.GetHealthResponse{JSON503: &api.CheckerResult{Status: api.Down}}},
+		{Name: "Foo", Server: "http://127.0.0.3", Response: &api.GetHealthResponse{JSON503: &api.CheckerResult{Status: api.Unknown}}},
 	}
 
 	prettyReport(buf, false, allEndpoints)
 	prettyReport(buf, true, allEndpoints)
 	assert.NotEmpty(t, buf)
-}
-
-func TestUpdateStatus_Down(t *testing.T) {
-	ep := endpoint{Name: "Foo", URL: "http://127.0.0.1", Status: health.StatusUp}
-	updateStatus(&ep, &http.Client{})
-	assert.Equal(t, health.StatusDown, ep.Status)
-}
-
-type mockHTTPClient struct {
-	Status      health.AvailabilityStatus
-	InvalidJSON bool
-}
-
-func (m mockHTTPClient) Get(string) (resp *http.Response, err error) {
-	result := health.CheckerResult{
-		Status: m.Status,
-	}
-	body, _ := json.Marshal(result)
-
-	fakeResp := httptest.NewRecorder()
-	fakeResp.WriteHeader(http.StatusOK)
-	fakeResp.Header().Set("Content-Type", "application/json")
-	_, _ = fakeResp.Write(body)
-	if m.InvalidJSON {
-		_, _ = fakeResp.Write([]byte("invalid!!!"))
-	}
-	return fakeResp.Result(), nil
-}
-
-func TestUpdateStatus_Up(t *testing.T) {
-	ep := endpoint{Name: "Foo", URL: "http://127.0.0.1", Status: health.StatusUnknown}
-	mock := mockHTTPClient{Status: health.StatusUp}
-	updateStatus(&ep, mock)
-	assert.Equal(t, health.StatusUp, ep.Status)
-}
-
-func TestUpdateStatus_DownInvalidJSON(t *testing.T) {
-	ep := endpoint{Name: "Foo", URL: "http://127.0.0.1", Status: health.StatusUnknown}
-	mock := mockHTTPClient{Status: health.StatusUp, InvalidJSON: true}
-	updateStatus(&ep, mock)
-	assert.Equal(t, health.StatusDown, ep.Status)
 }
