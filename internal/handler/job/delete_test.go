@@ -14,7 +14,7 @@ import (
 	"testing"
 
 	"github.com/Southclaws/fault/ftag"
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/internal/handler/job/events"
 	"github.com/siemens/wfx/persistence"
 	"github.com/stretchr/testify/assert"
@@ -48,10 +48,10 @@ func TestDeleteJob_NotFound(t *testing.T) {
 }
 
 func TestDeleteJob_Error(t *testing.T) {
-	dbMock := persistence.NewMockStorage(t)
+	dbMock := persistence.NewHealthyMockStorage(t)
 	ctx := context.Background()
 	jobID := "42"
-	dbMock.EXPECT().GetJob(ctx, jobID, persistence.FetchParams{History: false}).Return(&model.Job{ID: jobID}, nil)
+	dbMock.EXPECT().GetJob(ctx, jobID, persistence.FetchParams{History: false}).Return(&api.Job{ID: jobID}, nil)
 	dbMock.EXPECT().DeleteJob(ctx, jobID).Return(errors.New("something went wrong"))
 	err := DeleteJob(ctx, dbMock, jobID)
 	assert.Equal(t, ftag.Internal, ftag.Get(err))

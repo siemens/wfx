@@ -23,7 +23,7 @@ type Plugin interface {
 	//
 	// After a successful call to Start the Stop method must be called in
 	// order to release associated system resources.
-	Start(chQuit chan error) (chan Message, error)
+	Start(chan error) (chan Message, error)
 
 	// Stop stops the plugin and release system resources.
 	Stop() error

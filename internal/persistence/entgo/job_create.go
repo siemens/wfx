@@ -15,17 +15,17 @@ import (
 
 	"github.com/Southclaws/fault"
 	"github.com/rs/zerolog/log"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/generated/ent"
 	"github.com/siemens/wfx/generated/ent/predicate"
 	"github.com/siemens/wfx/generated/ent/tag"
 	"github.com/siemens/wfx/generated/ent/workflow"
-	"github.com/siemens/wfx/generated/model"
 	wfutil "github.com/siemens/wfx/internal/workflow"
 	"github.com/siemens/wfx/middleware/logging"
 )
 
 // CreateJob persists a new job and sets the job ID field.
-func (db Database) CreateJob(ctx context.Context, job *model.Job) (*model.Job, error) {
+func (db Database) CreateJob(ctx context.Context, job *api.Job) (*api.Job, error) {
 	log := logging.LoggerFromCtx(ctx)
 
 	tx, err := db.client.Tx(ctx)
@@ -50,11 +50,15 @@ func (db Database) CreateJob(ctx context.Context, job *model.Job) (*model.Job, e
 	return createdJob, nil
 }
 
-func createJobHelper(ctx context.Context, tx *ent.Tx, job *model.Job) (*model.Job, error) {
+func createJobHelper(ctx context.Context, tx *ent.Tx, job *api.Job) (*api.Job, error) {
+	tags := make([]string, 0)
+	if job.Tags != nil {
+		tags = job.Tags
+	}
 	log.Debug().
 		Str("workflow", job.Workflow.Name).
 		Str("state", job.Status.State).
-		Strs("tags", job.Tags).
+		Strs("tags", tags).
 		Msg("Creating new job")
 
 	wfEntity, err := tx.Workflow.
@@ -66,14 +70,14 @@ func createJobHelper(ctx context.Context, tx *ent.Tx, job *model.Job) (*model.Jo
 		return nil, fault.Wrap(err)
 	}
 	wf := convertWorkflow(wfEntity)
-	group := wfutil.FindStateGroup(wf, job.Status.State)
+	group := wfutil.FindStateGroup(&wf, job.Status.State)
 
 	// start tags
-	n := len(job.Tags)
+	n := len(tags)
 	allTagIDs := make([]int, 0, n)
 	if n > 0 {
 		tagPreds := make([]predicate.Tag, n)
-		for i, name := range job.Tags {
+		for i, name := range tags {
 			tagPreds[i] = tag.Name(name)
 		}
 
@@ -90,10 +94,10 @@ func createJobHelper(ctx context.Context, tx *ent.Tx, job *model.Job) (*model.Jo
 		}
 
 		{ // create missing tags
-			delta := len(job.Tags) - len(existingTags)
+			delta := len(tags) - len(existingTags)
 			if delta > 0 {
 				missingTags := make([]*ent.TagCreate, 0, delta)
-				for _, name := range job.Tags {
+				for _, name := range tags {
 					if _, found := existingTags[name]; !found {
 						missingTags = append(missingTags, tx.Tag.Create().SetName(name))
 					}
@@ -118,9 +122,9 @@ func createJobHelper(ctx context.Context, tx *ent.Tx, job *model.Job) (*model.Jo
 		SetClientID(job.ClientID).
 		SetStatus(*job.Status).
 		SetWorkflowID(wfEntity.ID).
-		SetDefinition(job.Definition).
 		AddTagIDs(allTagIDs...).
-		SetGroup(group)
+		SetGroup(group).
+		SetDefinition(job.Definition)
 
 	if job.Stime != nil {
 		builder.SetStime(time.Time(*job.Stime))
@@ -138,6 +142,6 @@ func createJobHelper(ctx context.Context, tx *ent.Tx, job *model.Job) (*model.Jo
 	result := convertJob(entity)
 	// tags and workflow are not fetched by entgo, so we have to add them manually
 	result.Tags = job.Tags
-	result.Workflow = wf
-	return result, nil
+	result.Workflow = &wf
+	return &result, nil
 }

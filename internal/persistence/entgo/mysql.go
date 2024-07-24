@@ -37,7 +37,7 @@ func init() {
 	persistence.RegisterStorage("mysql", &MySQL{})
 }
 
-func (wrapper *MySQL) Initialize(ctx context.Context, options string) error {
+func (wrapper *MySQL) Initialize(options string) error {
 	// parse user-supplied dsn and enrich it
 	cfg, err := driver.ParseDSN(options)
 	if err != nil {
@@ -57,7 +57,7 @@ func (wrapper *MySQL) Initialize(ctx context.Context, options string) error {
 	}
 
 	db := sql.OpenDB(connector)
-	if err := db.PingContext(ctx); err != nil {
+	if err := db.Ping(); err != nil {
 		log.Error().Err(err).Msg("Failed to ping MySQL database")
 		_ = db.Close()
 		return fault.Wrap(err)
@@ -70,6 +70,7 @@ func (wrapper *MySQL) Initialize(ctx context.Context, options string) error {
 			return fault.Wrap(err)
 		}
 
+		ctx := context.Background()
 		conn, err := db.Conn(ctx)
 		if err != nil {
 			return fault.Wrap(err)

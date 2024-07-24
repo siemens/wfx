@@ -15,13 +15,13 @@ import (
 	"github.com/siemens/wfx/cmd/wfx-viewer/output/plantuml"
 	"github.com/siemens/wfx/cmd/wfx-viewer/output/smcat"
 	"github.com/siemens/wfx/cmd/wfx-viewer/output/svg"
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/spf13/pflag"
 )
 
 type Generator interface {
 	RegisterFlags(f *pflag.FlagSet)
-	Generate(out io.Writer, workflow *model.Workflow) error
+	Generate(out io.Writer, workflow *api.Workflow) error
 }
 
 var Generators = make(map[string]Generator)

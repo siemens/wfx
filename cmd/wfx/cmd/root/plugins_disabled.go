@@ -13,17 +13,12 @@ package root
 import (
 	"errors"
 
-	"github.com/knadh/koanf/v2"
-	"github.com/siemens/wfx/middleware"
+	"github.com/siemens/wfx/middleware/plugin"
 )
 
-func loadPluginSet(flag string, _ chan error) ([]middleware.IntermediateMW, error) {
-	var pluginsDir string
-	k.Read(func(k *koanf.Koanf) {
-		pluginsDir = k.String(flag)
-	})
-	if pluginsDir != "" {
+func loadPlugins(dir string) ([]plugin.Plugin, error) {
+	if dir != "" {
 		return nil, errors.New("this binary was built without plugin support")
 	}
-	return []middleware.IntermediateMW{}, nil
+	return []plugin.Plugin{}, nil
 }

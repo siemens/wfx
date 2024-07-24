@@ -14,12 +14,12 @@ import (
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/ftag"
 	"github.com/rs/zerolog/log"
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/persistence"
 	"github.com/siemens/wfx/workflow"
 )
 
-func CreateWorkflow(ctx context.Context, storage persistence.Storage, wf *model.Workflow) (*model.Workflow, error) {
+func CreateWorkflow(ctx context.Context, storage persistence.Storage, wf *api.Workflow) (*api.Workflow, error) {
 	if err := workflow.ValidateWorkflow(wf); err != nil {
 		return nil, fault.Wrap(err, ftag.With(ftag.InvalidArgument))
 	}

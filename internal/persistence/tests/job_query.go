@@ -12,17 +12,13 @@ package tests
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strconv"
 	"testing"
 	"time"
 
-	"github.com/go-openapi/strfmt"
-	"github.com/itchyny/gojq"
 	"github.com/rs/zerolog"
-	"github.com/siemens/wfx/generated/model"
-	"github.com/siemens/wfx/generated/southbound/restapi"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/persistence"
 	"github.com/siemens/wfx/workflow/dau"
 	"github.com/stretchr/testify/assert"
@@ -46,13 +42,14 @@ func TestQueryJobsFilter(t *testing.T, db persistence.Storage) {
 
 	now := time.Now()
 
-	firstJob, err := db.CreateJob(context.Background(), &model.Job{
+	tags := []string{"bar", "foo"}
+	firstJob, err := db.CreateJob(context.Background(), &api.Job{
 		ClientID: clientID,
 		Workflow: wf,
-		Status: &model.JobStatus{
+		Status: &api.JobStatus{
 			State: installedState,
 		},
-		Tags: []string{"bar", "foo"},
+		Tags: tags,
 	})
 	require.NoError(t, err)
 	assert.NotNil(t, firstJob.Stime)
@@ -60,22 +57,22 @@ func TestQueryJobsFilter(t *testing.T, db persistence.Storage) {
 	assert.True(t, time.Time(*firstJob.Stime).After(now) || time.Time(*firstJob.Stime).Equal(now))
 	assert.True(t, time.Time(*firstJob.Mtime).After(now) || time.Time(*firstJob.Mtime).Equal(now))
 
-	secondStime := strfmt.DateTime(now.Add(time.Second))
-	secondJob, err := db.CreateJob(context.Background(), &model.Job{
+	secondStime := now.Add(time.Second)
+	secondJob, err := db.CreateJob(context.Background(), &api.Job{
 		ClientID: clientID,
 		Workflow: wf,
-		Status: &model.JobStatus{
+		Status: &api.JobStatus{
 			State: installState,
 		},
 		Stime: &secondStime,
 	})
 	require.NoError(t, err)
 
-	thirdStime := strfmt.DateTime(now.Add(2 * time.Second))
-	thirdJob, err := db.CreateJob(context.Background(), &model.Job{
+	thirdStime := now.Add(2 * time.Second)
+	thirdJob, err := db.CreateJob(context.Background(), &api.Job{
 		ClientID: clientID,
 		Workflow: wf,
-		Status: &model.JobStatus{
+		Status: &api.JobStatus{
 			State: activatedState,
 		},
 		Tags:  []string{"meh"},
@@ -170,7 +167,7 @@ func TestQueryJobsFilter(t *testing.T, db persistence.Storage) {
 func TestGetJobsSorted(t *testing.T, db persistence.Storage) {
 	clientID := "my_client"
 
-	var first, second, third *model.Job
+	var first, second, third *api.Job
 	var err error
 
 	{
@@ -178,7 +175,7 @@ func TestGetJobsSorted(t *testing.T, db persistence.Storage) {
 		_, err := db.CreateWorkflow(context.Background(), tmp.Workflow)
 		require.NoError(t, err)
 
-		stime := strfmt.DateTime(time.Now().Add(-2 * time.Minute))
+		stime := time.Now().Add(-2 * time.Minute)
 		tmp.Stime = &stime
 		first, err = db.CreateJob(context.Background(), tmp)
 		require.NoError(t, err)
@@ -186,7 +183,7 @@ func TestGetJobsSorted(t *testing.T, db persistence.Storage) {
 
 	{
 		tmp := newValidJob(clientID)
-		mtime := strfmt.DateTime(time.Now().Add(-time.Minute))
+		mtime := time.Now().Add(-time.Minute)
 		tmp.Mtime = &mtime
 		second, err = db.CreateJob(context.Background(), tmp)
 		require.NoError(t, err)
@@ -233,25 +230,15 @@ func TestGetJobMaxHistorySize(t *testing.T, db persistence.Storage) {
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	defer zerolog.SetGlobalLevel(oldLevel)
 
-	var n int
-	{
-		// introspect SwaggerJSON and extract history maxItems
-		b, _ := restapi.SwaggerJSON.MarshalJSON()
-		var spec any
-		_ = json.Unmarshal(b, &spec)
-		query, _ := gojq.Parse(".definitions.Job.properties.history.maxItems")
-		iter := query.Run(spec)
-		v, ok := iter.Next()
-		assert.True(t, ok)
-		n = int(v.(float64))
-	}
+	maxEntries := 8192
 
 	var jobID string
 
 	{
 		// job which we are going to update often
 		tmp := newValidJob("foo")
-		tmp.Status.Message = "0"
+		message := "0"
+		tmp.Status.Message = message
 		_, err := db.CreateWorkflow(context.Background(), tmp.Workflow)
 		require.NoError(t, err)
 		job, err := db.CreateJob(context.Background(), tmp)
@@ -266,10 +253,10 @@ func TestGetJobMaxHistorySize(t *testing.T, db persistence.Storage) {
 		require.Equal(t, job.Status.Message, "0")
 
 		// update the job n+1 times
-		for i := 1; i <= n+1; i++ {
+		for i := 1; i <= maxEntries+1; i++ {
 			msg := fmt.Sprintf("%d", i)
 			job, err = db.UpdateJob(context.Background(), job, persistence.JobUpdate{
-				Status: &model.JobStatus{
+				Status: &api.JobStatus{
 					State:   job.Status.State,
 					Message: msg,
 				},
@@ -282,18 +269,19 @@ func TestGetJobMaxHistorySize(t *testing.T, db persistence.Storage) {
 	job, err := db.GetJob(context.Background(), jobID, persistence.FetchParams{History: true})
 	require.NoError(t, err)
 	require.NotNil(t, job.History)
-	require.Len(t, job.History, n)
+	require.Len(t, *job.History, maxEntries)
 
-	ids := make([]int, len(job.History))
-	for i, hist := range job.History {
+	history := *job.History
+	ids := make([]int, 0, len(history))
+	for _, hist := range history {
 		id, _ := strconv.Atoi(hist.Status.Message)
-		ids[i] = id
+		ids = append(ids, id)
 	}
 	t.Log(ids)
 	assert.IsDecreasing(t, ids)
 
-	assert.Equal(t, fmt.Sprintf("%d", n), job.History[0].Status.Message)
-	assert.Equal(t, "1", job.History[len(job.History)-1].Status.Message)
+	assert.Equal(t, fmt.Sprintf("%d", maxEntries), history[0].Status.Message)
+	assert.Equal(t, "1", history[len(history)-1].Status.Message)
 }
 
 func TestJobsPagination(t *testing.T, db persistence.Storage) {

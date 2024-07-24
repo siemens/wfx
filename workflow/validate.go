@@ -12,11 +12,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/Southclaws/fault"
-	"github.com/go-openapi/strfmt"
 	"github.com/yourbasic/graph"
 
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 )
 
 type edge struct {
@@ -24,13 +22,9 @@ type edge struct {
 	To   string
 }
 
-func ValidateWorkflow(workflow *model.Workflow) error {
-	if err := workflow.Validate(strfmt.Default); err != nil {
-		return fault.Wrap(err)
-	}
-
-	stateCount := len(workflow.States)
-	stateToNode := make(map[string]int, stateCount)
+func ValidateWorkflow(workflow *api.Workflow) error {
+	numStates := len(workflow.States)
+	stateToNode := make(map[string]int, numStates)
 
 	for i, s := range workflow.States {
 		if _, found := stateToNode[s.Name]; found {
@@ -40,39 +34,37 @@ func ValidateWorkflow(workflow *model.Workflow) error {
 		stateToNode[s.Name] = i
 	}
 
-	{
-		// for each state, count in how many groups we can find it
-		stateCount := make(map[string]int)
-		groupNameCount := make(map[string]int)
-		for _, group := range workflow.Groups {
-			for _, s := range group.States {
-				stateCount[s]++
-			}
-			groupNameCount[group.Name]++
+	// for each state, count in how many groups we can find it
+	stateCount := make(map[string]int)
+	groupNameCount := make(map[string]int)
+	for _, group := range workflow.Groups {
+		for _, s := range group.States {
+			stateCount[s]++
 		}
+		groupNameCount[group.Name]++
+	}
 
-		// check groups do not overlap
-		for state, count := range stateCount {
-			if count > 1 {
-				return fmt.Errorf("state %s belongs to more than one group", state)
-			}
+	// check groups do not overlap
+	for state, count := range stateCount {
+		if count > 1 {
+			return fmt.Errorf("state %s belongs to more than one group", state)
 		}
+	}
 
-		// ensure that no two groups have the same name
-		for name, count := range groupNameCount {
-			if count > 1 {
-				return fmt.Errorf("group name %s used multiple times", name)
-			}
+	// ensure that no two groups have the same name
+	for name, count := range groupNameCount {
+		if count > 1 {
+			return fmt.Errorf("group name %s used multiple times", name)
 		}
 	}
 
 	// build a graph from the transitions
-	g := graph.New(stateCount)
+	g := graph.New(numStates)
 
 	// (from, to) -> [client, wfx]
-	transitions := make(map[edge]([]model.EligibleEnum))
+	transitions := make(map[edge]([]api.EligibleEnum))
 	// for each edge (from, _), count the ones containing actor WFX
-	outgoingActions := make(map[string]([]model.ActionEnum))
+	outgoingActions := make(map[string]([]api.ActionEnum))
 
 	for _, t := range workflow.Transitions {
 		from, foundFrom := stateToNode[t.From]
@@ -84,11 +76,12 @@ func ValidateWorkflow(workflow *model.Workflow) error {
 		transitions[e] = append(transitions[e], t.Eligible)
 
 		action := t.Action
-		if action == "" {
+		if action == nil {
 			// default action
-			action = model.ActionEnumWAIT
+			wait := api.WAIT
+			action = &wait
 		}
-		outgoingActions[t.From] = append(outgoingActions[t.From], action)
+		outgoingActions[t.From] = append(outgoingActions[t.From], *action)
 
 		if from != to {
 			// we allow trivial loops
@@ -108,7 +101,7 @@ func ValidateWorkflow(workflow *model.Workflow) error {
 		// count immediate actions
 		count := 0
 		for _, act := range actions {
-			if act == model.ActionEnumIMMEDIATE {
+			if act == api.IMMEDIATE {
 				count++
 			}
 		}
