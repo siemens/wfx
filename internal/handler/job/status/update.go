@@ -16,14 +16,14 @@ import (
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/ftag"
 	"github.com/go-openapi/strfmt"
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/internal/handler/job/events"
 	"github.com/siemens/wfx/internal/workflow"
 	"github.com/siemens/wfx/middleware/logging"
 	"github.com/siemens/wfx/persistence"
 )
 
-func Update(ctx context.Context, storage persistence.Storage, jobID string, newStatus *model.JobStatus, actor model.EligibleEnum) (*model.JobStatus, error) {
+func Update(ctx context.Context, storage persistence.Storage, jobID string, newStatus *api.JobStatus, actor api.EligibleEnum) (*api.JobStatus, error) {
 	contextLogger := logging.LoggerFromCtx(ctx).With().Str("id", jobID).Str("actor", string(actor)).Logger()
 
 	job, err := storage.GetJob(ctx, jobID, persistence.FetchParams{History: false})
@@ -66,7 +66,7 @@ func Update(ctx context.Context, storage persistence.Storage, jobID string, newS
 	newTo := workflow.FollowImmediateTransitions(job.Workflow, to)
 	if newTo != to {
 		contextLogger.Debug().Str("to", to).Str("newTo", newTo).Msg("Resetting state since we moved the transition forward")
-		newStatus = &model.JobStatus{}
+		newStatus = &api.JobStatus{}
 	}
 	newStatus.State = newTo
 	// override any definitionHash provided by client
@@ -81,10 +81,10 @@ func Update(ctx context.Context, storage persistence.Storage, jobID string, newS
 	_ = events.PublishEvent(ctx, &events.JobEvent{
 		Ctime:  strfmt.DateTime(time.Now()),
 		Action: events.ActionUpdateStatus,
-		Job: &model.Job{
+		Job: &api.Job{
 			ID:       result.ID,
 			ClientID: result.ClientID,
-			Workflow: &model.Workflow{Name: job.Workflow.Name},
+			Workflow: &api.Workflow{Name: job.Workflow.Name},
 			Status:   result.Status,
 		},
 	})

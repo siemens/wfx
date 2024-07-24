@@ -14,7 +14,7 @@ import (
 
 	"github.com/Southclaws/fault"
 	"github.com/go-openapi/strfmt"
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/internal/handler/job/events"
 	"github.com/siemens/wfx/middleware/logging"
 	"github.com/siemens/wfx/persistence"
@@ -37,10 +37,10 @@ func DeleteJob(ctx context.Context, storage persistence.Storage, jobID string) e
 	_ = events.PublishEvent(ctx, &events.JobEvent{
 		Ctime:  strfmt.DateTime(time.Now()),
 		Action: events.ActionDelete,
-		Job: &model.Job{
+		Job: &api.Job{
 			ID:       jobID,
 			ClientID: job.ClientID,
-			Workflow: &model.Workflow{Name: job.Workflow.Name},
+			Workflow: &api.Workflow{Name: job.Workflow.Name},
 		},
 	})
 

@@ -17,18 +17,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var Command = &cobra.Command{
-	Use:              "workflow",
-	Short:            "manage workflows",
-	Long:             "subcommand to manage workflows (CRUD)",
-	TraverseChildren: true,
-	SilenceUsage:     true,
-}
-
-func init() {
-	Command.AddCommand(create.Command)
-	Command.AddCommand(delete.Command)
-	Command.AddCommand(get.Command)
-	Command.AddCommand(query.Command)
-	Command.AddCommand(validate.Command)
+func NewCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:              "workflow",
+		Short:            "manage workflows",
+		Long:             "subcommand to manage workflows (CRUD)",
+		TraverseChildren: true,
+		SilenceUsage:     true,
+	}
+	cmd.AddCommand(create.NewCommand())
+	cmd.AddCommand(delete.NewCommand())
+	cmd.AddCommand(get.NewCommand())
+	cmd.AddCommand(query.NewCommand())
+	cmd.AddCommand(validate.NewCommand())
+	return cmd
 }

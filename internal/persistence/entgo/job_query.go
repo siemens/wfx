@@ -15,11 +15,11 @@ import (
 	"entgo.io/ent/dialect/sql/sqljson"
 	"github.com/Southclaws/fault"
 
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/generated/ent"
 	"github.com/siemens/wfx/generated/ent/job"
 	"github.com/siemens/wfx/generated/ent/tag"
 	"github.com/siemens/wfx/generated/ent/workflow"
-	"github.com/siemens/wfx/generated/model"
 	"github.com/siemens/wfx/middleware/logging"
 	"github.com/siemens/wfx/persistence"
 )
@@ -29,7 +29,7 @@ func (db Database) QueryJobs(ctx context.Context,
 	filterParams persistence.FilterParams,
 	sortParams persistence.SortParams,
 	paginationParams persistence.PaginationParams,
-) (*model.PaginatedJobList, error) {
+) (*api.PaginatedJobList, error) {
 	log := logging.LoggerFromCtx(ctx)
 	builder := db.client.Job.Query().WithWorkflow().WithTags(func(q *ent.TagQuery) {
 		q.Order(ent.Asc(tag.FieldName))
@@ -83,16 +83,17 @@ func (db Database) QueryJobs(ctx context.Context,
 		return nil, fault.Wrap(err)
 	}
 
-	result := model.PaginatedJobList{
-		Pagination: &model.PaginatedJobListPagination{
+	content := make([]api.Job, 0, len(jobs))
+	for _, entity := range jobs {
+		content = append(content, convertJob(entity))
+	}
+	result := api.PaginatedJobList{
+		Pagination: api.Pagination{
 			Total:  int64(total),
 			Limit:  paginationParams.Limit,
 			Offset: paginationParams.Offset,
 		},
-		Content: make([]*model.Job, 0, len(jobs)),
-	}
-	for _, entity := range jobs {
-		result.Content = append(result.Content, convertJob(entity))
+		Content: content,
 	}
 
 	log.Debug().

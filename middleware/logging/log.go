@@ -28,60 +28,58 @@ const (
 	KeyRequestLogger key = iota
 )
 
-type MW struct{}
-
-func (mw MW) Wrap(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-		reqID := uuid.New().String()
-		var path string
-		if r.URL != nil {
-			path = r.URL.Path
-		}
-		contextLogger := log.With().
-			Str("reqID", reqID).
-			Str("remoteAddr", r.RemoteAddr).
-			Str("method", r.Method).
-			Str("path", path).
-			Str("host", r.Host).
-			Bool("tls", r.TLS != nil).
-			Logger()
-		contextLogger.Debug().Msg("Processing incoming request")
-
-		l := log.With().Str("reqID", reqID).Logger()
-		ctx := context.WithValue(r.Context(), KeyRequestLogger, l)
-		r = r.WithContext(ctx)
-
-		tracing := contextLogger.GetLevel() <= zerolog.TraceLevel
-		writer := newMyResponseWriter(w, tracing)
-		if tracing {
-			request, err := PeekBody(r)
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				return
+func NewLoggingMiddleware() func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			start := time.Now()
+			reqID := uuid.New().String()
+			var path string
+			if r.URL != nil {
+				path = r.URL.Path
 			}
-			contextLogger.Trace().
-				Bytes("request", request).
-				Msg("Request")
-		}
+			contextLogger := log.With().
+				Str("reqID", reqID).
+				Str("remoteAddr", r.RemoteAddr).
+				Str("method", r.Method).
+				Str("path", path).
+				Str("host", r.Host).
+				Bool("tls", r.TLS != nil).
+				Logger()
+			contextLogger.Debug().Msg("Processing incoming request")
 
-		next.ServeHTTP(writer, r)
-		if response := writer.responseBody.Bytes(); len(response) > 0 {
-			if json.Valid(response) {
-				contextLogger.Trace().RawJSON("response", response).Msg("Response")
-			} else { // body is not in JSON format
-				contextLogger.Trace().Bytes("response", response).Msg("Response")
+			l := log.With().Str("reqID", reqID).Logger()
+			ctx := context.WithValue(r.Context(), KeyRequestLogger, l)
+			r = r.WithContext(ctx)
+
+			tracing := contextLogger.GetLevel() <= zerolog.TraceLevel
+			writer := newMyResponseWriter(w, tracing)
+			if tracing {
+				request, err := PeekBody(r)
+				if err != nil {
+					w.WriteHeader(http.StatusInternalServerError)
+					return
+				}
+				contextLogger.Trace().
+					Bytes("request", request).
+					Msg("Request")
 			}
-		}
 
-		contextLogger.Info().
-			TimeDiff("duration", time.Now(), start).
-			Int("code", writer.statusCode).
-			Msg("Finished request")
-	})
+			next.ServeHTTP(writer, r)
+			if response := writer.responseBody.Bytes(); len(response) > 0 {
+				if json.Valid(response) {
+					contextLogger.Trace().RawJSON("response", response).Msg("Response")
+				} else { // body is not in JSON format
+					contextLogger.Trace().Bytes("response", response).Msg("Response")
+				}
+			}
+
+			contextLogger.Info().
+				TimeDiff("duration", time.Now(), start).
+				Int("code", writer.statusCode).
+				Msg("Finished request")
+		})
+	}
 }
-
-func (mw MW) Shutdown() {}
 
 func LoggerFromCtx(ctx context.Context) zerolog.Logger {
 	if log, ok := ctx.Value(KeyRequestLogger).(zerolog.Logger); ok {

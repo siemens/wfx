@@ -13,36 +13,17 @@ package root
 import (
 	"testing"
 
-	"github.com/knadh/koanf/v2"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestLoadNorthboundPlugins(t *testing.T) {
-	k.Write(func(k *koanf.Koanf) {
-		_ = k.Set(mgmtPluginsDirFlag, "/plugins")
-	})
-	mw, err := LoadNorthboundPlugins(nil)
-	assert.Nil(t, mw)
+func TestLoadPlugins(t *testing.T) {
+	plugins, err := loadPlugins("/plugins")
+	assert.Nil(t, plugins)
 	assert.ErrorContains(t, err, "this binary was built without plugin support")
 }
 
 func TestLoadNorthboundPlugins_None(t *testing.T) {
-	mw, err := LoadNorthboundPlugins(nil)
+	plugins, err := loadPlugins("")
 	assert.NoError(t, err)
-	assert.Empty(t, mw)
-}
-
-func TestLoadSouthboundPlugins(t *testing.T) {
-	k.Write(func(k *koanf.Koanf) {
-		_ = k.Set(clientPluginsDirFlag, "/plugins")
-	})
-	mw, err := LoadSouthboundPlugins(nil)
-	assert.Nil(t, mw)
-	assert.ErrorContains(t, err, "this binary was built without plugin support")
-}
-
-func TestLoadSouthboundPlugins_None(t *testing.T) {
-	mw, err := LoadSouthboundPlugins(nil)
-	assert.NoError(t, err)
-	assert.Empty(t, mw)
+	assert.Empty(t, plugins)
 }

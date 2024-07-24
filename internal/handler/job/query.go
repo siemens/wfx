@@ -13,12 +13,12 @@ import (
 	"strings"
 
 	"github.com/Southclaws/fault"
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/middleware/logging"
 	"github.com/siemens/wfx/persistence"
 )
 
-func QueryJobs(ctx context.Context, storage persistence.Storage, filterParams persistence.FilterParams, paginationParams persistence.PaginationParams, sort *string) (*model.PaginatedJobList, error) {
+func QueryJobs(ctx context.Context, storage persistence.Storage, filterParams persistence.FilterParams, paginationParams persistence.PaginationParams, sort *string) (*api.PaginatedJobList, error) {
 	log := logging.LoggerFromCtx(ctx)
 
 	var sortParams persistence.SortParams

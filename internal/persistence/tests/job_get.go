@@ -15,8 +15,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-openapi/strfmt"
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/persistence"
 	"github.com/siemens/wfx/workflow/dau"
 	"github.com/stretchr/testify/assert"
@@ -53,18 +52,20 @@ func TestGetJobWithHistory(t *testing.T, db persistence.Storage) {
 	job, err := db.CreateJob(context.Background(), tmpJob)
 	require.NoError(t, err)
 
+	var progress int32 = 42
+	message := "First Update"
 	_, err = db.UpdateJob(context.Background(), job,
-		persistence.JobUpdate{Status: &model.JobStatus{Progress: 42, Message: "First Update", State: "DOWNLOADING"}})
+		persistence.JobUpdate{Status: &api.JobStatus{Progress: &progress, Message: message, State: "DOWNLOADING"}})
 	require.NoError(t, err)
 
 	{
 		job, err := db.GetJob(context.Background(), job.ID, persistence.FetchParams{History: true})
 		require.NoError(t, err)
-		assert.Len(t, job.History, 1)
+		assert.Len(t, *job.History, 1)
 
 		job, err = db.GetJob(context.Background(), job.ID, persistence.FetchParams{History: false})
 		require.NoError(t, err)
-		assert.Len(t, job.History, 0)
+		assert.Nil(t, job.History)
 	}
 
 	result, err := db.QueryJobs(context.Background(), persistence.FilterParams{ClientID: &clientID}, sortAsc, defaultPaginationParams)
@@ -73,18 +74,18 @@ func TestGetJobWithHistory(t *testing.T, db persistence.Storage) {
 	assert.Len(t, actualJobs, 1)
 	assert.Equal(t, job.ID, actualJobs[0].ID)
 	// query jobs does not fetch history
-	assert.Len(t, actualJobs[0].History, 0)
+	assert.Nil(t, actualJobs[0].History)
 }
 
 // Create a new, *unpersisted* job entity.
-func newValidJob(clientID string) *model.Job {
-	now := strfmt.DateTime(time.Now())
-	return &model.Job{
+func newValidJob(clientID string) *api.Job {
+	now := time.Now()
+	return &api.Job{
 		Mtime:    &now,
 		Stime:    &now,
 		ClientID: clientID,
-		Status: &model.JobStatus{
-			ClientID: "foo",
+		Status: &api.JobStatus{
+			ClientID: clientID,
 			State:    "CREATED",
 		},
 		Tags: []string{
@@ -92,6 +93,6 @@ func newValidJob(clientID string) *model.Job {
 			"tag2",
 		},
 		Workflow: dau.DirectWorkflow(),
-		History:  []*model.History{},
+		History:  &[]api.History{},
 	}
 }

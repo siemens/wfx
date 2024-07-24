@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/deepmap/oapi-codegen/HEAD/configuration-schema.json
+package: api
+generate:
+  std-http-server: true
+  strict-server: true
+  embedded-spec: true
+  models: true
+  client: true
+output: ../generated/api/wfx.openapi.gen.go

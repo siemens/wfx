@@ -28,7 +28,7 @@ func TestCreateWorkflow(t *testing.T) {
 
 func newInMemoryDB(t *testing.T) persistence.Storage {
 	var db entgo.SQLite
-	err := db.Initialize(context.Background(), "file:wfx?mode=memory&cache=shared&_fk=1")
+	err := db.Initialize("file:wfx?mode=memory&cache=shared&_fk=1")
 	require.NoError(t, err)
 	t.Cleanup(db.Shutdown)
 	t.Cleanup(func() {

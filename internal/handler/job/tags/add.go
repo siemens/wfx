@@ -14,7 +14,7 @@ import (
 
 	"github.com/Southclaws/fault"
 	"github.com/go-openapi/strfmt"
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/internal/handler/job/events"
 	"github.com/siemens/wfx/middleware/logging"
 	"github.com/siemens/wfx/persistence"
@@ -39,7 +39,7 @@ func Add(ctx context.Context, storage persistence.Storage, jobID string, tags []
 	_ = events.PublishEvent(ctx, &events.JobEvent{
 		Ctime:  strfmt.DateTime(time.Now()),
 		Action: events.ActionAddTags,
-		Job: &model.Job{
+		Job: &api.Job{
 			ID:       updatedJob.ID,
 			ClientID: updatedJob.ClientID,
 			Workflow: updatedJob.Workflow,

@@ -20,7 +20,7 @@ import (
 	"github.com/knadh/koanf/v2"
 	"github.com/rs/zerolog/log"
 	"github.com/siemens/wfx/cmd/wfx-loadtest/wfx"
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/workflow/dau"
 	vegeta "github.com/tsenart/vegeta/v12/lib"
 	"github.com/tsenart/vegeta/v12/lib/plot"
@@ -43,7 +43,7 @@ var (
 	jobCounter uint64
 	workflow   = dau.DirectWorkflow()
 
-	queue      = make([]*model.JobStatus, 0, 10)
+	queue      = make([]*api.JobStatus, 0, 10)
 	queueMutex sync.RWMutex
 
 	host     string
@@ -62,7 +62,7 @@ func Run(k *koanf.Koanf) error {
 		return errors.New("host or mgmtHost not set")
 	}
 
-	if err := wfx.CreateWorkflow(mgmtHost, mgmtPort, workflow); err != nil {
+	if err := wfx.CreateWorkflow(mgmtHost, mgmtPort, *workflow); err != nil {
 		return fault.Wrap(err)
 	}
 
@@ -118,17 +118,18 @@ func Run(k *koanf.Koanf) error {
 
 			if res.Code == http.StatusCreated {
 				// we know it must be a job
-				var job model.Job
+				var job api.Job
 				err := json.Unmarshal(res.Body, &job)
 				if err != nil {
 					log.Error().Err(err).Bytes("body", res.Body).Msg("Failed to unmarshal body")
 					continue
 				}
+
 				if job.Status.Context == nil {
-					job.Status.Context = make(map[string]any)
+					job.Status.Context = &map[string]any{}
 				}
 				// ensure job id is available
-				job.Status.Context["id"] = job.ID
+				(*job.Status.Context)["id"] = job.ID
 
 				queueMutex.Lock()
 				queue = append(queue, job.Status)
@@ -136,7 +137,7 @@ func Run(k *koanf.Koanf) error {
 
 			} else if res.Code == http.StatusOK {
 				// status was updated
-				var status model.JobStatus
+				var status api.JobStatus
 				err := json.Unmarshal(res.Body, &status)
 				if err != nil {
 					log.Error().Err(err).Bytes("body", res.Body).Msg("Failed to unmarshal body")

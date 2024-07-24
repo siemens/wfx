@@ -12,9 +12,9 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/generated/ent/job"
 	"github.com/siemens/wfx/generated/ent/workflow"
-	"github.com/siemens/wfx/generated/model"
 )
 
 // WorkflowCreate is the builder for creating a Workflow entity.
@@ -45,20 +45,20 @@ func (wc *WorkflowCreate) SetNillableDescription(s *string) *WorkflowCreate {
 }
 
 // SetStates sets the "states" field.
-func (wc *WorkflowCreate) SetStates(m []*model.State) *WorkflowCreate {
-	wc.mutation.SetStates(m)
+func (wc *WorkflowCreate) SetStates(a []api.State) *WorkflowCreate {
+	wc.mutation.SetStates(a)
 	return wc
 }
 
 // SetTransitions sets the "transitions" field.
-func (wc *WorkflowCreate) SetTransitions(m []*model.Transition) *WorkflowCreate {
-	wc.mutation.SetTransitions(m)
+func (wc *WorkflowCreate) SetTransitions(a []api.Transition) *WorkflowCreate {
+	wc.mutation.SetTransitions(a)
 	return wc
 }
 
 // SetGroups sets the "groups" field.
-func (wc *WorkflowCreate) SetGroups(m []*model.Group) *WorkflowCreate {
-	wc.mutation.SetGroups(m)
+func (wc *WorkflowCreate) SetGroups(a []api.Group) *WorkflowCreate {
+	wc.mutation.SetGroups(a)
 	return wc
 }
 

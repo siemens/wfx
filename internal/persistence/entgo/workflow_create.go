@@ -13,23 +13,23 @@ import (
 
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/ftag"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/generated/ent"
-	"github.com/siemens/wfx/generated/model"
 	"github.com/siemens/wfx/middleware/logging"
 )
 
 // CreateWorkflow creates a new workflow.
-func (db Database) CreateWorkflow(ctx context.Context, workflow *model.Workflow) (*model.Workflow, error) {
+func (db Database) CreateWorkflow(ctx context.Context, workflow *api.Workflow) (*api.Workflow, error) {
 	log := logging.LoggerFromCtx(ctx)
 
-	entity, err := db.client.Workflow.
+	builder := db.client.Workflow.
 		Create().
 		SetName(workflow.Name).
-		SetDescription(workflow.Description).
 		SetStates(workflow.States).
 		SetTransitions(workflow.Transitions).
 		SetGroups(workflow.Groups).
-		Save(ctx)
+		SetDescription(workflow.Description)
+	entity, err := builder.Save(ctx)
 	if err != nil {
 		if ent.IsConstraintError(err) {
 			log.Error().Err(err).Msg("Failed to persist workflow due to constraints")
@@ -38,5 +38,6 @@ func (db Database) CreateWorkflow(ctx context.Context, workflow *model.Workflow)
 		log.Error().Err(err).Msg("Failed to persist workflow due to internal problem")
 		return nil, fault.Wrap(err, ftag.With(ftag.Internal))
 	}
-	return convertWorkflow(entity), nil
+	wf := convertWorkflow(entity)
+	return &wf, nil
 }

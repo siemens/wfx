@@ -13,9 +13,9 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/generated/ent/history"
 	"github.com/siemens/wfx/generated/ent/job"
-	"github.com/siemens/wfx/generated/model"
 )
 
 // HistoryCreate is the builder for creating a History entity.
@@ -32,15 +32,15 @@ func (hc *HistoryCreate) SetMtime(t time.Time) *HistoryCreate {
 }
 
 // SetStatus sets the "status" field.
-func (hc *HistoryCreate) SetStatus(ms model.JobStatus) *HistoryCreate {
-	hc.mutation.SetStatus(ms)
+func (hc *HistoryCreate) SetStatus(as api.JobStatus) *HistoryCreate {
+	hc.mutation.SetStatus(as)
 	return hc
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (hc *HistoryCreate) SetNillableStatus(ms *model.JobStatus) *HistoryCreate {
-	if ms != nil {
-		hc.SetStatus(*ms)
+func (hc *HistoryCreate) SetNillableStatus(as *api.JobStatus) *HistoryCreate {
+	if as != nil {
+		hc.SetStatus(*as)
 	}
 	return hc
 }

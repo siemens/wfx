@@ -8,10 +8,14 @@ package main
  * Author: Michael Adler <michael.adler@siemens.com>
  */
 
-import "github.com/rs/zerolog/log"
+import (
+	"fmt"
+	"os"
+)
 
 func main() {
-	if err := rootCmd.Execute(); err != nil {
-		log.Fatal().Err(err).Msg("Failed to execute")
+	if err := NewCommand().Execute(); err != nil {
+		fmt.Fprintf(os.Stderr, "error: %+v\n", err)
+		os.Exit(1)
 	}
 }

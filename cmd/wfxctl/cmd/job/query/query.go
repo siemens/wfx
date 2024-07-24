@@ -9,81 +9,69 @@ package query
  */
 
 import (
-	"github.com/rs/zerolog/log"
+	"github.com/Southclaws/fault"
 	"github.com/spf13/cobra"
 
 	"github.com/siemens/wfx/cmd/wfxctl/errutil"
 	"github.com/siemens/wfx/cmd/wfxctl/flags"
-	"github.com/siemens/wfx/generated/client/jobs"
+	"github.com/siemens/wfx/generated/api"
 )
 
-const (
-	clientIDFlag = "client-id"
-	stateFlag    = "state"
-	workflowFlag = "workflow"
-	sortFlag     = "sort"
-	groupFlag    = "group"
-	offsetFlag   = "offset"
-	limitFlag    = "limit"
-	tagFlag      = "tag"
-)
-
-func init() {
-	f := Command.Flags()
-	f.String(clientIDFlag, "", "Filter jobs belonging to a specific client with clientId")
-	f.StringSlice(groupFlag, []string{}, "Filter jobs based on the group they belong to")
-	f.String(stateFlag, "", "Filter jobs based on the current state value")
-	f.String(workflowFlag, "", "Filter jobs based on workflow name")
-	f.StringSlice(tagFlag, []string{}, "Filter jobs by tags")
-	f.Int32(offsetFlag, 0, "0-based index of the page")
-	f.Int32(limitFlag, 10, "maximum number of elements returned in one page ")
-	f.String(sortFlag, "", "sort order. possible values: asc, desc")
-}
-
-var Command = &cobra.Command{
-	Use:   "query",
-	Short: "Query existing jobs",
-	Long:  `Query existing jobs`,
-	Example: `
+func NewCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "query",
+		Short: "Query existing jobs",
+		Long:  `Query existing jobs`,
+		Example: `
 wfxctl job query --state=CREATED
 `,
-	TraverseChildren: true,
-	Run: func(cmd *cobra.Command, _ []string) {
-		baseCmd := flags.NewBaseCmd()
-		client := errutil.Must(baseCmd.CreateHTTPClient())
-		params := jobs.NewGetJobsParams().
-			WithHTTPClient(client)
+		TraverseChildren: true,
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			baseCmd := flags.NewBaseCmd(cmd.Flags())
 
-		if clientID := flags.Koanf.String(clientIDFlag); clientID != "" {
-			params = params.WithClientID(&clientID)
-		}
-		if state := flags.Koanf.String(stateFlag); state != "" {
-			params = params.WithState(&state)
-		}
-		if modelKey := flags.Koanf.String(workflowFlag); modelKey != "" {
-			params = params.WithWorkflow(&modelKey)
-		}
-		if sort := flags.Koanf.String(sortFlag); sort != "" {
-			params = params.WithSort(&sort)
-		}
-		groups := flags.Koanf.Strings(groupFlag)
-		tags := flags.Koanf.Strings(tagFlag)
-
-		offset := flags.Koanf.Int64(offsetFlag)
-		limit := int32(flags.Koanf.Int(limitFlag))
-		params = params.
-			WithOffset(&offset).
-			WithLimit(&limit).
-			WithTag(tags).
-			WithGroup(groups)
-
-		resp, err := baseCmd.CreateClient().Jobs.GetJobs(params)
-		if err != nil {
-			errutil.ProcessErrorResponse(cmd.OutOrStderr(), err)
-		} else {
-			if err := baseCmd.DumpResponse(cmd.OutOrStdout(), resp.GetPayload()); err != nil {
-				log.Fatal().Err(err).Msg("Failed to dump response")
+			params := new(api.GetJobsParams)
+			if clientID := baseCmd.ClientID; clientID != "" {
+				params.ParamClientID = &clientID
 			}
-		}
-	},
+			if state := baseCmd.State; state != "" {
+				params.ParamState = &state
+			}
+			if workflow := baseCmd.Workflow; workflow != "" {
+				params.ParamWorkflow = &workflow
+			}
+			{
+				var err error
+				params.ParamSort, err = baseCmd.SortParam()
+				if err != nil {
+					return fault.Wrap(err)
+				}
+			}
+			if groups := baseCmd.Groups; len(groups) > 0 {
+				params.ParamGroup = &groups
+			}
+			if tags := baseCmd.Tags; len(tags) > 0 {
+				params.ParamTag = &tags
+			}
+
+			params.ParamOffset = &baseCmd.Offset
+			params.ParamLimit = &baseCmd.Limit
+
+			client := errutil.Must(baseCmd.CreateClient())
+			resp, err := client.GetJobs(cmd.Context(), params)
+			if err != nil {
+				return fault.Wrap(err)
+			}
+			return fault.Wrap(baseCmd.ProcessResponse(resp, cmd.OutOrStdout()))
+		},
+	}
+	f := cmd.Flags()
+	f.String(flags.ClientIDFlag, "", "Filter jobs belonging to a specific client with clientId")
+	f.StringSlice(flags.GroupFlag, []string{}, "Filter jobs based on the group they belong to")
+	f.String(flags.StateFlag, "", "Filter jobs based on the current state value")
+	f.String(flags.WorkflowFlag, "", "Filter jobs based on workflow name")
+	f.StringSlice(flags.TagFlag, []string{}, "Filter jobs by tags")
+	f.Int64(flags.OffsetFlag, 0, "0-based index of the page")
+	f.Int32(flags.LimitFlag, 10, "maximum number of elements returned in one page ")
+	f.String(flags.SortFlag, "", "sort order. possible values: asc, desc")
+	return cmd
 }

@@ -14,12 +14,12 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/generated/ent/history"
 	"github.com/siemens/wfx/generated/ent/job"
 	"github.com/siemens/wfx/generated/ent/predicate"
 	"github.com/siemens/wfx/generated/ent/tag"
 	"github.com/siemens/wfx/generated/ent/workflow"
-	"github.com/siemens/wfx/generated/model"
 )
 
 // JobUpdate is the builder for updating Job entities.
@@ -82,15 +82,15 @@ func (ju *JobUpdate) ClearDefinition() *JobUpdate {
 }
 
 // SetStatus sets the "status" field.
-func (ju *JobUpdate) SetStatus(ms model.JobStatus) *JobUpdate {
-	ju.mutation.SetStatus(ms)
+func (ju *JobUpdate) SetStatus(as api.JobStatus) *JobUpdate {
+	ju.mutation.SetStatus(as)
 	return ju
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (ju *JobUpdate) SetNillableStatus(ms *model.JobStatus) *JobUpdate {
-	if ms != nil {
-		ju.SetStatus(*ms)
+func (ju *JobUpdate) SetNillableStatus(as *api.JobStatus) *JobUpdate {
+	if as != nil {
+		ju.SetStatus(*as)
 	}
 	return ju
 }
@@ -472,15 +472,15 @@ func (juo *JobUpdateOne) ClearDefinition() *JobUpdateOne {
 }
 
 // SetStatus sets the "status" field.
-func (juo *JobUpdateOne) SetStatus(ms model.JobStatus) *JobUpdateOne {
-	juo.mutation.SetStatus(ms)
+func (juo *JobUpdateOne) SetStatus(as api.JobStatus) *JobUpdateOne {
+	juo.mutation.SetStatus(as)
 	return juo
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (juo *JobUpdateOne) SetNillableStatus(ms *model.JobStatus) *JobUpdateOne {
-	if ms != nil {
-		juo.SetStatus(*ms)
+func (juo *JobUpdateOne) SetNillableStatus(as *api.JobStatus) *JobUpdateOne {
+	if as != nil {
+		juo.SetStatus(*as)
 	}
 	return juo
 }

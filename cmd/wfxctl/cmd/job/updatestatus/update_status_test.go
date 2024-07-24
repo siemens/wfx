@@ -13,11 +13,10 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"strconv"
 	"testing"
 
 	"github.com/siemens/wfx/cmd/wfxctl/flags"
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -36,18 +35,19 @@ func TestUpdateJobStatus(t *testing.T) {
 	defer ts.Close()
 
 	u, _ := url.Parse(ts.URL)
-	_ = flags.Koanf.Set(flags.ClientHostFlag, u.Hostname())
-	port, _ := strconv.Atoi(u.Port())
-	_ = flags.Koanf.Set(flags.ClientPortFlag, port)
+	t.Setenv("WFX_CLIENT_HOST", u.Hostname())
+	t.Setenv("WFX_CLIENT_PORT", u.Port())
 
-	_ = flags.Koanf.Set(clientIDFlag, "foo")
-	_ = flags.Koanf.Set(messageFlag, "this is a test")
-	_ = flags.Koanf.Set(progressFlag, int32(42))
-	_ = flags.Koanf.Set(stateFlag, "DOWNLOADED")
-	_ = flags.Koanf.Set(idFlag, "1")
-	_ = flags.Koanf.Set(actorFlag, model.EligibleEnumCLIENT)
-
-	err := Command.Execute()
+	cmd := NewCommand()
+	cmd.SetArgs([]string{
+		"--" + flags.ClientIDFlag, "foo",
+		"--" + flags.MessageFlag, "this is a test",
+		"--" + flags.ProgressFlag, "42",
+		"--" + flags.StateFlag, "DOWNLOADED",
+		"--" + flags.IDFlag, "1",
+		"--" + flags.ActorFlag, string(api.CLIENT),
+	})
+	err := cmd.Execute()
 	assert.NoError(t, err)
 
 	assert.Equal(t, "/api/wfx/v1/jobs/1/status", actualPath)

@@ -11,14 +11,10 @@ package root
  */
 
 import (
-	"context"
-	"io"
 	"os"
 	"path"
 	"testing"
 
-	"github.com/knadh/koanf/v2"
-	"github.com/siemens/wfx/persistence"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -26,7 +22,7 @@ import (
 func TestLoadPluginsEmpty(t *testing.T) {
 	t.Parallel()
 
-	dir, _ := os.MkdirTemp("", "TestLoadPluginsEmpty")
+	dir, _ := os.MkdirTemp("", t.Name())
 	t.Cleanup(func() {
 		_ = os.Remove(dir)
 	})
@@ -38,7 +34,7 @@ func TestLoadPluginsEmpty(t *testing.T) {
 func TestLoadPlugins(t *testing.T) {
 	t.Parallel()
 
-	dir, _ := os.MkdirTemp("", "TestLoadPlugins")
+	dir, _ := os.MkdirTemp("", t.Name())
 	t.Cleanup(func() {
 		_ = os.RemoveAll(dir)
 	})
@@ -56,7 +52,7 @@ func TestLoadPlugins(t *testing.T) {
 func TestLoadPluginsIgnoreNonExecutable(t *testing.T) {
 	t.Parallel()
 
-	dir, _ := os.MkdirTemp("", "TestLoadPluginsIgnoreNonExecutable")
+	dir, _ := os.MkdirTemp("", t.Name())
 	t.Cleanup(func() {
 		_ = os.RemoveAll(dir)
 	})
@@ -72,7 +68,7 @@ func TestLoadPluginsIgnoreNonExecutable(t *testing.T) {
 func TestLoadPluginsSymlink(t *testing.T) {
 	t.Parallel()
 
-	baseDir, _ := os.MkdirTemp("", "TestLoadPluginsSymlink")
+	baseDir, _ := os.MkdirTemp("", t.Name())
 	t.Cleanup(func() {
 		_ = os.RemoveAll(baseDir)
 	})
@@ -97,7 +93,7 @@ func TestLoadPluginsSymlink(t *testing.T) {
 func TestLoadPluginsSymlinkIgnoreNonExecutable(t *testing.T) {
 	t.Parallel()
 
-	baseDir, _ := os.MkdirTemp("", "TestLoadPluginsSymlinkIgnoreNonExecutable")
+	baseDir, _ := os.MkdirTemp("", t.Name())
 	t.Cleanup(func() {
 		_ = os.RemoveAll(baseDir)
 	})
@@ -117,120 +113,30 @@ func TestLoadPluginsSymlinkIgnoreNonExecutable(t *testing.T) {
 	assert.Len(t, plugins, 0)
 }
 
-func TestCreatePluginMiddlewares_InvalidDir(t *testing.T) {
-	chQuit := make(chan error)
-	mws, err := createPluginMiddlewares("", chQuit)
-	assert.Nil(t, mws)
-	assert.NotNil(t, err)
+func TestLoadPlugins_EmptyArg(t *testing.T) {
+	t.Parallel()
+
+	mws, err := loadPlugins("")
+	assert.Empty(t, mws)
+	assert.Nil(t, err)
 }
 
-func TestCreatePluginMiddlewares_EmptyDir(t *testing.T) {
-	baseDir, _ := os.MkdirTemp("", "TestCreatePluginMiddlewares_EmptydDir")
+func TestLoadPlugins_EmptyDir(t *testing.T) {
+	t.Parallel()
+
+	baseDir, _ := os.MkdirTemp("", t.Name())
 	t.Cleanup(func() {
 		_ = os.RemoveAll(baseDir)
 	})
-	chQuit := make(chan error)
-	mws, err := createPluginMiddlewares(baseDir, chQuit)
+	mws, err := loadPlugins(baseDir)
 	assert.Empty(t, mws)
 	assert.NoError(t, err)
 }
 
-func TestCreatePluginMiddlewares_PluginFailure(t *testing.T) {
-	baseDir, _ := os.MkdirTemp("", "TestCreatePluginMiddlewares_PluginFailure")
-	t.Cleanup(func() {
-		_ = os.RemoveAll(baseDir)
-	})
+func TestLoadPlugins_DirNotExist(t *testing.T) {
+	t.Parallel()
 
-	f, err := os.CreateTemp(baseDir, "plugin*.sh")
-	require.NoError(t, err)
-	t.Cleanup(func() {
-		_ = os.Remove(f.Name())
-	})
-	_, _ = io.WriteString(f, "no shebang")
-	fname := f.Name()
-	_ = f.Close()
-	_ = os.Chmod(fname, os.FileMode(0o700))
-
-	chQuit := make(chan error)
-	mws, err := createPluginMiddlewares(baseDir, chQuit)
-	assert.Nil(t, mws)
+	mws, err := loadPlugins("/does/not/exist")
 	assert.Error(t, err)
-}
-
-func TestCreatePluginMiddlewares(t *testing.T) {
-	baseDir, _ := os.MkdirTemp("", "TestCreatePluginMiddlewares")
-	t.Cleanup(func() {
-		_ = os.RemoveAll(baseDir)
-	})
-
-	f, err := os.CreateTemp(baseDir, "plugin*.sh")
-	require.NoError(t, err)
-	t.Cleanup(func() {
-		_ = os.Remove(f.Name())
-	})
-	_, _ = io.WriteString(f, `#!/bin/sh
-while true; do
-	sleep 1
-done
-`)
-	fname := f.Name()
-	_ = f.Close()
-	_ = os.Chmod(fname, os.FileMode(0o700))
-
-	chQuit := make(chan error)
-	mws, err := createPluginMiddlewares(baseDir, chQuit)
-	assert.Len(t, mws, 1)
-	assert.NoError(t, err)
-	mws[0].Shutdown()
-}
-
-func TestCreateNorthboundCollection_PluginsDir(t *testing.T) {
-	dir, _ := os.MkdirTemp("", "TestCreateNorthboundCollection_PluginsDir.*")
-	t.Cleanup(func() { os.RemoveAll(dir) })
-	k.Write(func(k *koanf.Koanf) {
-		_ = k.Set(mgmtPluginsDirFlag, dir)
-	})
-	dbMock := persistence.NewMockStorage(t)
-	chQuit := make(chan error)
-	sc, err := createNorthboundCollection([]string{"http"}, dbMock, chQuit)
-	t.Cleanup(func() { sc.Shutdown(context.Background()) })
-	assert.NoError(t, err)
-	assert.NotNil(t, sc)
-}
-
-func TestCreateNorthboundCollection_PluginsDirError(t *testing.T) {
-	k.Write(func(k *koanf.Koanf) {
-		_ = k.Set(mgmtPluginsDirFlag, "/does/not/exist")
-	})
-	dbMock := persistence.NewMockStorage(t)
-	chQuit := make(chan error)
-	sc, err := createNorthboundCollection([]string{"http"}, dbMock, chQuit)
-	assert.Error(t, err)
-	assert.Nil(t, sc)
-}
-
-func TestCreateSouthboundCollection_PluginsDir(t *testing.T) {
-	dir, _ := os.MkdirTemp("", "TestCreateSouthboundCollection_PluginsDir.*")
-	t.Cleanup(func() { os.RemoveAll(dir) })
-	k.Write(func(k *koanf.Koanf) {
-		_ = k.Set(clientPluginsDirFlag, dir)
-	})
-	dbMock := persistence.NewMockStorage(t)
-	chQuit := make(chan error)
-	sc, err := createSouthboundCollection([]string{"http"}, dbMock, chQuit)
-	t.Cleanup(func() { sc.Shutdown(context.Background()) })
-	assert.NoError(t, err)
-	assert.NotNil(t, sc)
-}
-
-func TestCreateSouthboundCollection_PluginsDirError(t *testing.T) {
-	k.Write(func(k *koanf.Koanf) {
-		_ = k.Set(clientPluginsDirFlag, "/does/not/exist")
-	})
-
-	dbMock := persistence.NewMockStorage(t)
-	chQuit := make(chan error)
-	sc, err := createSouthboundCollection([]string{"http"}, dbMock, chQuit)
-	assert.Error(t, err)
-	assert.Nil(t, sc)
+	assert.Empty(t, mws)
 }

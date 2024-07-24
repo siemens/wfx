@@ -20,7 +20,7 @@ content/docs/use-cases.md
 
 static/benchmark.png
 static/favicons/
-static/wfx.swagger.yml
+static/wfx.openapi.yml
 static/wfx.workflow.dau.direct.yml
 static/wfx.workflow.dau.phased.yml
 static/wfx.workflow.config.deployment.yml

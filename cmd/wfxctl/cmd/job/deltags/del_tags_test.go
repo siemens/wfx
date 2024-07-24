@@ -13,11 +13,11 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"strconv"
 	"testing"
 
 	"github.com/siemens/wfx/cmd/wfxctl/flags"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDelTags(t *testing.T) {
@@ -35,16 +35,13 @@ func TestDelTags(t *testing.T) {
 	defer ts.Close()
 
 	u, _ := url.Parse(ts.URL)
-	_ = flags.Koanf.Set(flags.MgmtHostFlag, u.Hostname())
-	port, _ := strconv.Atoi(u.Port())
-	_ = flags.Koanf.Set(flags.MgmtPortFlag, port)
+	t.Setenv("WFX_MGMT_HOST", u.Hostname())
+	t.Setenv("WFX_MGMT_PORT", u.Port())
 
-	_ = flags.Koanf.Set(idFlag, "1")
-	Command.SetArgs([]string{"bar"})
-
-	err := Command.Execute()
-	assert.NoError(t, err)
-
+	cmd := NewCommand()
+	cmd.SetArgs([]string{"--" + flags.IDFlag, "1", "bar"})
+	err := cmd.Execute()
+	require.NoError(t, err)
 	assert.Equal(t, "/api/wfx/v1/jobs/1/tags", actualPath)
 	assert.JSONEq(t, `["bar"]`, string(body))
 }

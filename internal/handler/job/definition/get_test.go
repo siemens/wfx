@@ -13,7 +13,7 @@ import (
 	"testing"
 
 	"github.com/Southclaws/fault/ftag"
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/internal/persistence/entgo"
 	"github.com/siemens/wfx/persistence"
 	"github.com/siemens/wfx/workflow/dau"
@@ -26,10 +26,10 @@ func TestGetJobDefinition(t *testing.T) {
 	wf, err := db.CreateWorkflow(context.Background(), dau.PhasedWorkflow())
 	require.NoError(t, err)
 
-	job, err := db.CreateJob(context.Background(), &model.Job{
+	job, err := db.CreateJob(context.Background(), &api.Job{
 		ClientID: "abc",
 		Workflow: wf,
-		Status:   &model.JobStatus{State: "CREATED"},
+		Status:   &api.JobStatus{State: "CREATED"},
 		Definition: map[string]any{
 			"foo": "bar",
 		},
@@ -50,7 +50,7 @@ func TestGetJobDefinition_NotFound(t *testing.T) {
 
 func newInMemoryDB(t *testing.T) persistence.Storage {
 	db := &entgo.SQLite{}
-	err := db.Initialize(context.Background(), "file:wfx?mode=memory&cache=shared&_fk=1")
+	err := db.Initialize("file:wfx?mode=memory&cache=shared&_fk=1")
 	require.NoError(t, err)
 	t.Cleanup(db.Shutdown)
 	t.Cleanup(func() {
@@ -62,7 +62,7 @@ func newInMemoryDB(t *testing.T) persistence.Storage {
 			}
 		}
 		{
-			list, _ := db.QueryWorkflows(context.Background(), persistence.PaginationParams{Limit: 100})
+			list, _ := db.QueryWorkflows(context.Background(), persistence.SortParams{}, persistence.PaginationParams{Limit: 100})
 			for _, wf := range list.Content {
 				_ = db.DeleteWorkflow(context.Background(), wf.Name)
 			}

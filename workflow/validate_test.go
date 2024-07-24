@@ -13,7 +13,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/workflow/dau"
 )
 
@@ -23,8 +23,8 @@ var (
 	state3 = "state3"
 	state4 = "state4"
 
-	eligibleClient = model.EligibleEnumCLIENT
-	eligibleWfx    = model.EligibleEnumWFX
+	eligibleClient = api.CLIENT
+	eligibleWfx    = api.WFX
 
 	groupOpen = "OPEN"
 
@@ -32,7 +32,7 @@ var (
 )
 
 func TestValidateWorkflow_NoStates(t *testing.T) {
-	err := ValidateWorkflow(&model.Workflow{})
+	err := ValidateWorkflow(&api.Workflow{})
 	assert.Error(t, err)
 }
 
@@ -45,10 +45,10 @@ func TestValidateWorkflow_Dau(t *testing.T) {
 }
 
 func TestValidateWorkflow_StateNamesMustBeUnique(t *testing.T) {
-	eligible := model.EligibleEnumWFX
-	m := model.Workflow{
+	eligible := api.WFX
+	m := api.Workflow{
 		Name: name,
-		States: []*model.State{
+		States: []api.State{
 			{
 				Name: state1,
 			},
@@ -56,7 +56,7 @@ func TestValidateWorkflow_StateNamesMustBeUnique(t *testing.T) {
 				Name: state1,
 			},
 		},
-		Transitions: []*model.Transition{
+		Transitions: []api.Transition{
 			{From: state1, To: state1, Eligible: eligible},
 		},
 	}
@@ -65,9 +65,9 @@ func TestValidateWorkflow_StateNamesMustBeUnique(t *testing.T) {
 }
 
 func TestValidateWorkflow_TransitionsMustExist(t *testing.T) {
-	m := model.Workflow{
+	m := api.Workflow{
 		Name: name,
-		States: []*model.State{
+		States: []api.State{
 			{
 				Name: state1,
 			},
@@ -75,7 +75,7 @@ func TestValidateWorkflow_TransitionsMustExist(t *testing.T) {
 				Name: state2,
 			},
 		},
-		Transitions: []*model.Transition{
+		Transitions: []api.Transition{
 			{
 				From:     state1,
 				To:       state4,
@@ -88,9 +88,9 @@ func TestValidateWorkflow_TransitionsMustExist(t *testing.T) {
 }
 
 func TestValidateWorkflow_DuplicateTransition(t *testing.T) {
-	m := model.Workflow{
+	m := api.Workflow{
 		Name: name,
-		States: []*model.State{
+		States: []api.State{
 			{
 				Name: state1,
 			},
@@ -98,7 +98,7 @@ func TestValidateWorkflow_DuplicateTransition(t *testing.T) {
 				Name: state2,
 			},
 		},
-		Transitions: []*model.Transition{
+		Transitions: []api.Transition{
 			{
 				From:     state1,
 				To:       state2,
@@ -116,9 +116,9 @@ func TestValidateWorkflow_DuplicateTransition(t *testing.T) {
 }
 
 func TestValidateWorkflow_ReachableFromInitial(t *testing.T) {
-	m := model.Workflow{
+	m := api.Workflow{
 		Name: name,
-		States: []*model.State{
+		States: []api.State{
 			{
 				Name: state1,
 			},
@@ -129,7 +129,7 @@ func TestValidateWorkflow_ReachableFromInitial(t *testing.T) {
 				Name: state3,
 			},
 		},
-		Transitions: []*model.Transition{
+		Transitions: []api.Transition{
 			{
 				From:     state1,
 				To:       state2,
@@ -142,9 +142,9 @@ func TestValidateWorkflow_ReachableFromInitial(t *testing.T) {
 }
 
 func TestValidateWorkflow_NoCycles(t *testing.T) {
-	m := model.Workflow{
+	m := api.Workflow{
 		Name: name,
-		States: []*model.State{
+		States: []api.State{
 			{
 				Name: state1,
 			},
@@ -155,7 +155,7 @@ func TestValidateWorkflow_NoCycles(t *testing.T) {
 				Name: state3,
 			},
 		},
-		Transitions: []*model.Transition{
+		Transitions: []api.Transition{
 			{
 				From:     state1,
 				To:       state2,
@@ -178,9 +178,10 @@ func TestValidateWorkflow_NoCycles(t *testing.T) {
 }
 
 func TestValidateWorkflow_UnambiguousWfxTransition(t *testing.T) {
-	m := model.Workflow{
+	immediate := api.IMMEDIATE
+	m := api.Workflow{
 		Name: name,
-		States: []*model.State{
+		States: []api.State{
 			{
 				Name: state1,
 			},
@@ -191,18 +192,18 @@ func TestValidateWorkflow_UnambiguousWfxTransition(t *testing.T) {
 				Name: state3,
 			},
 		},
-		Transitions: []*model.Transition{
+		Transitions: []api.Transition{
 			{
 				From:     state1,
 				To:       state2,
 				Eligible: eligibleWfx,
-				Action:   model.ActionEnumIMMEDIATE,
+				Action:   &immediate,
 			},
 			{
 				From:     state1,
 				To:       state3,
 				Eligible: eligibleWfx,
-				Action:   model.ActionEnumIMMEDIATE,
+				Action:   &immediate,
 			},
 		},
 	}
@@ -211,10 +212,12 @@ func TestValidateWorkflow_UnambiguousWfxTransition(t *testing.T) {
 }
 
 func TestValidateWorkflow_ImmediateActionUnique(t *testing.T) {
+	immediate := api.IMMEDIATE
+	wait := api.WAIT
 	state3 := "state3"
-	m := model.Workflow{
+	m := api.Workflow{
 		Name: name,
-		States: []*model.State{
+		States: []api.State{
 			{
 				Name: state1,
 			},
@@ -225,18 +228,18 @@ func TestValidateWorkflow_ImmediateActionUnique(t *testing.T) {
 				Name: state3,
 			},
 		},
-		Transitions: []*model.Transition{
+		Transitions: []api.Transition{
 			{
 				From:     state1,
 				To:       state2,
 				Eligible: eligibleWfx,
-				Action:   model.ActionEnumIMMEDIATE,
+				Action:   &immediate,
 			},
 			{
 				From:     state1,
 				To:       state3,
 				Eligible: eligibleWfx,
-				Action:   model.ActionEnumWAIT,
+				Action:   &wait,
 			},
 		},
 	}
@@ -245,9 +248,11 @@ func TestValidateWorkflow_ImmediateActionUnique(t *testing.T) {
 }
 
 func TestValidateWorkflow_ImmediateActionUnique2(t *testing.T) {
-	m := model.Workflow{
+	immediate := api.IMMEDIATE
+	wait := api.WAIT
+	m := api.Workflow{
 		Name: name,
-		States: []*model.State{
+		States: []api.State{
 			{
 				Name: state1,
 			},
@@ -258,18 +263,18 @@ func TestValidateWorkflow_ImmediateActionUnique2(t *testing.T) {
 				Name: state3,
 			},
 		},
-		Transitions: []*model.Transition{
+		Transitions: []api.Transition{
 			{
 				From:     state1,
 				To:       state1,
 				Eligible: eligibleWfx,
-				Action:   model.ActionEnumWAIT,
+				Action:   &wait,
 			},
 			{
 				From:     state1,
 				To:       state2,
 				Eligible: eligibleWfx,
-				Action:   model.ActionEnumIMMEDIATE,
+				Action:   &immediate,
 			},
 			{
 				From:     state2,
@@ -284,9 +289,9 @@ func TestValidateWorkflow_ImmediateActionUnique2(t *testing.T) {
 
 func TestValidateWorkflow_AllowMultipleTransitions(t *testing.T) {
 	state3 := "state3"
-	m := model.Workflow{
+	m := api.Workflow{
 		Name: name,
-		States: []*model.State{
+		States: []api.State{
 			{
 				Name: state1,
 			},
@@ -297,7 +302,7 @@ func TestValidateWorkflow_AllowMultipleTransitions(t *testing.T) {
 				Name: state3,
 			},
 		},
-		Transitions: []*model.Transition{
+		Transitions: []api.Transition{
 			{
 				From:     state1,
 				To:       state2,
@@ -321,9 +326,9 @@ func TestValidateWorkflow_AllowMultipleTransitions(t *testing.T) {
 
 func TestValidateWorkflow_GroupsNoOverlap(t *testing.T) {
 	groupName2 := "CLOSED"
-	m := model.Workflow{
+	m := api.Workflow{
 		Name: name,
-		States: []*model.State{
+		States: []api.State{
 			{
 				Name: state1,
 			},
@@ -331,14 +336,14 @@ func TestValidateWorkflow_GroupsNoOverlap(t *testing.T) {
 				Name: state2,
 			},
 		},
-		Transitions: []*model.Transition{
+		Transitions: []api.Transition{
 			{
 				From:     state1,
 				To:       state2,
 				Eligible: eligibleClient,
 			},
 		},
-		Groups: []*model.Group{
+		Groups: []api.Group{
 			{
 				Name: groupOpen,
 				States: []string{
@@ -359,9 +364,9 @@ func TestValidateWorkflow_GroupsNoOverlap(t *testing.T) {
 
 func TestValidateWorkflow_GroupNamesUnique(t *testing.T) {
 	groupName2 := "OPEN"
-	m := model.Workflow{
+	m := api.Workflow{
 		Name: name,
-		States: []*model.State{
+		States: []api.State{
 			{
 				Name: state1,
 			},
@@ -369,14 +374,14 @@ func TestValidateWorkflow_GroupNamesUnique(t *testing.T) {
 				Name: state2,
 			},
 		},
-		Transitions: []*model.Transition{
+		Transitions: []api.Transition{
 			{
 				From:     state1,
 				To:       state2,
 				Eligible: eligibleClient,
 			},
 		},
-		Groups: []*model.Group{
+		Groups: []api.Group{
 			{
 				Name: groupOpen,
 				States: []string{

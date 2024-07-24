@@ -11,11 +11,11 @@ package workflow
 import (
 	"sort"
 
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 )
 
 // FindStateGroup tries to find the group of a state. If not found, it returns the empty string.
-func FindStateGroup(workflow *model.Workflow, state string) string {
+func FindStateGroup(workflow *api.Workflow, state string) string {
 	for _, group := range workflow.Groups {
 		for _, s := range group.States {
 			if s == state {
@@ -27,11 +27,11 @@ func FindStateGroup(workflow *model.Workflow, state string) string {
 }
 
 // FollowImmediateTransitions follows the edges of type `actor` starting at the `from` state.
-func FollowImmediateTransitions(workflow *model.Workflow, from string) string {
+func FollowImmediateTransitions(workflow *api.Workflow, from string) string {
 	// map of transitions which we handle
 	jump := make(map[string]string, len(workflow.Transitions))
 	for _, t := range workflow.Transitions {
-		if t.Eligible == model.EligibleEnumWFX && t.Action == model.ActionEnumIMMEDIATE {
+		if t.Eligible == api.WFX && t.Action != nil && *t.Action == api.IMMEDIATE {
 			jump[t.From] = t.To
 		}
 	}
@@ -48,7 +48,7 @@ func FollowImmediateTransitions(workflow *model.Workflow, from string) string {
 	}
 }
 
-func FindInitialState(workflow *model.Workflow) *string {
+func FindInitialState(workflow *api.Workflow) *string {
 	parent := make(map[string]string, len(workflow.States))
 	for _, state := range workflow.States {
 		parent[state.Name] = ""
@@ -67,14 +67,16 @@ func FindInitialState(workflow *model.Workflow) *string {
 	return nil
 }
 
-func FindFinalStates(workflow *model.Workflow) []string {
+func FindFinalStates(workflow *api.Workflow) []string {
 	finalStateMap := make(map[string]bool, len(workflow.States))
 	// add all states and then remove the ones that are not final
 	for _, state := range workflow.States {
 		finalStateMap[state.Name] = true
 	}
-	for _, transition := range workflow.Transitions {
-		delete(finalStateMap, transition.From)
+	if workflow.Transitions != nil {
+		for _, transition := range workflow.Transitions {
+			delete(finalStateMap, transition.From)
+		}
 	}
 	finalStates := make([]string, 0, len(finalStateMap))
 	for name := range finalStateMap {

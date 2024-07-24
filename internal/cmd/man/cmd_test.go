@@ -24,7 +24,7 @@ func TestExecuteCommand(t *testing.T) {
 		Short:            "a command for testing purposes",
 		TraverseChildren: true,
 	}
-	dummy.AddCommand(Command)
+	dummy.AddCommand(NewCommand())
 
 	flags := dummy.PersistentFlags()
 	flags.String("foo", "bar", "example argument")

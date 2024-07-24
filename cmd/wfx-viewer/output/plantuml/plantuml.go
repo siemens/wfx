@@ -13,7 +13,7 @@ import (
 	"io"
 
 	"github.com/siemens/wfx/cmd/wfx-viewer/colors"
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/spf13/pflag"
 )
 
@@ -25,10 +25,10 @@ func NewGenerator() *Generator {
 
 func (g *Generator) RegisterFlags(_ *pflag.FlagSet) {}
 
-func (g *Generator) Generate(out io.Writer, workflow *model.Workflow) error {
+func (g *Generator) Generate(out io.Writer, workflow *api.Workflow) error {
 	_, _ = out.Write([]byte("@startuml\n"))
 
-	allStates := make(map[string]*model.State, len(workflow.States))
+	allStates := make(map[string]api.State, len(workflow.States))
 	for _, state := range workflow.States {
 		allStates[state.Name] = state
 	}
@@ -43,8 +43,8 @@ func (g *Generator) Generate(out io.Writer, workflow *model.Workflow) error {
 	// add transitions
 	for _, transition := range workflow.Transitions {
 		_, _ = out.Write([]byte((fmt.Sprintf("%s --> %s: %s", transition.From, transition.To, string(transition.Eligible)))))
-		if string(transition.Action) != "" {
-			_, _ = out.Write([]byte((fmt.Sprintf(" [%s]", string(transition.Action)))))
+		if transition.Action != nil {
+			_, _ = out.Write([]byte((fmt.Sprintf(" [%s]", string(*transition.Action)))))
 		}
 		_, _ = out.Write([]byte("\n"))
 	}

@@ -15,5 +15,5 @@ import (
 )
 
 func TestSubcommands(t *testing.T) {
-	assert.True(t, Command.HasSubCommands())
+	assert.True(t, NewCommand().HasSubCommands())
 }
