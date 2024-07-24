@@ -10,7 +10,7 @@
 
 setup_file() {
     launch_wfx
-    wait_wfx_running
+    wait_wfx_running 2
 }
 
 teardown_file() {

@@ -13,11 +13,11 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"strconv"
 	"testing"
 
 	"github.com/siemens/wfx/cmd/wfxctl/flags"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSubscribeJobStatus(t *testing.T) {
@@ -36,15 +36,13 @@ func TestSubscribeJobStatus(t *testing.T) {
 	t.Cleanup(ts.Close)
 
 	u, _ := url.Parse(ts.URL)
-	_ = flags.Koanf.Set(flags.ClientHostFlag, u.Hostname())
-	port, _ := strconv.Atoi(u.Port())
-	_ = flags.Koanf.Set(flags.ClientPortFlag, port)
+	t.Setenv("WFX_CLIENT_HOST", u.Hostname())
+	t.Setenv("WFX_CLIENT_PORT", u.Port())
 
-	_ = flags.Koanf.Set(jobIDFlag, "1")
-
-	err := Command.Execute()
-	assert.NoError(t, err)
-
+	cmd := NewCommand()
+	cmd.SetArgs([]string{"--" + flags.JobIDFlag, "1"})
+	err := cmd.Execute()
+	require.NoError(t, err)
 	assert.Equal(t, expectedPath, actualPath)
 }
 

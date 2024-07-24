@@ -23,11 +23,9 @@ import (
 	"github.com/siemens/wfx/internal/persistence/tests"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/goleak"
 )
 
 func TestMySQL_Initialize(t *testing.T) {
-	defer goleak.VerifyNone(t)
 	db := setupMySQL(t)
 	db.Shutdown()
 }

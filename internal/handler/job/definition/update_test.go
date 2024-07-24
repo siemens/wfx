@@ -13,7 +13,7 @@ import (
 	"testing"
 
 	"github.com/Southclaws/fault/ftag"
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/internal/handler/job/events"
 	"github.com/siemens/wfx/persistence"
 	"github.com/siemens/wfx/workflow/dau"
@@ -27,10 +27,11 @@ func TestUpdateJobDefinition(t *testing.T) {
 	wf, err := db.CreateWorkflow(context.Background(), dau.PhasedWorkflow())
 	require.NoError(t, err)
 
-	tmpJob := model.Job{
-		ClientID: "abc",
+	clientID := "abc"
+	tmpJob := api.Job{
+		ClientID: clientID,
 		Workflow: wf,
-		Status:   &model.JobStatus{ClientID: "abc", State: "CREATED"},
+		Status:   &api.JobStatus{ClientID: clientID, State: "CREATED"},
 		Definition: map[string]any{
 			"foo": "bar",
 		},

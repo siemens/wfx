@@ -35,24 +35,22 @@ type FBPlugin struct {
 	waited  atomic.Bool
 	stopped atomic.Bool
 
-	chQuit chan error
+	chErr chan error
 }
 
 // NewFBPlugin creates a new plugin instance. In order to start the plugin, call
 // the Start() function.
-func NewFBPlugin(path string) *FBPlugin {
-	return &FBPlugin{path: path}
+func NewFBPlugin(path string, chErr chan error) *FBPlugin {
+	return &FBPlugin{path: path, chErr: chErr}
 }
 
 func (p *FBPlugin) Name() string {
 	return p.path
 }
 
-func (p *FBPlugin) Start(chQuit chan error) (chan Message, error) {
+func (p *FBPlugin) Start() (chan Message, error) {
 	log.Info().Str("path", p.path).Msg("Starting plugin")
 	cmd := createCmd(p.path)
-
-	p.chQuit = chQuit
 
 	// this ensures that a process group is created (needed to kill all child processes)
 	p.responses = make(map[uint64]chan genPlugin.PluginResponseT)
@@ -81,7 +79,7 @@ func (p *FBPlugin) Start(chQuit chan error) (chan Message, error) {
 		_ = cmd.Wait()
 		p.waited.Store(true)
 		if !p.stopped.Load() {
-			chQuit <- fmt.Errorf("plugin '%s' is down, shutdown necessary", p.Name())
+			p.chErr <- fmt.Errorf("plugin '%s' is down, shutdown necessary", p.Name())
 		}
 	}()
 
@@ -140,7 +138,7 @@ func (p *FBPlugin) receiver(r io.Reader) {
 		p.responsesMutex.Unlock()
 		if !ok {
 			log.Warn().Uint64("cookie", cookie).Msg("Received unexpected response from plugin")
-			p.chQuit <- errors.New("received unexpected response from plugin")
+			p.chErr <- errors.New("received unexpected response from plugin")
 			break
 		}
 		chResp <- *resp

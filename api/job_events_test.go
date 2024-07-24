@@ -23,7 +23,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/internal/handler/job"
 	"github.com/siemens/wfx/internal/handler/job/events"
 	"github.com/siemens/wfx/internal/handler/job/status"
@@ -35,6 +35,9 @@ import (
 )
 
 func TestJobEventsSubscribe(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	log.Logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.Stamp})
 
 	db := newInMemoryDB(t)
@@ -42,7 +45,7 @@ func TestJobEventsSubscribe(t *testing.T) {
 	_, err := workflow.CreateWorkflow(context.Background(), db, wf)
 	require.NoError(t, err)
 
-	north, south := createNorthAndSouth(t, db)
+	north, south := createNorthAndSouth(ctx, db)
 
 	handlers := []http.Handler{north, south}
 	for i, name := range allAPIs {
@@ -74,7 +77,7 @@ func TestJobEventsSubscribe(t *testing.T) {
 				events.ShutdownSubscribers()
 			}()
 
-			_, err := job.CreateJob(context.Background(), db, &model.JobRequest{ClientID: clientID, Workflow: wf.Name})
+			_, err := job.CreateJob(context.Background(), db, &api.JobRequest{ClientID: clientID, Workflow: wf.Name})
 			require.NoError(t, err)
 
 			wg.Add(1)
@@ -85,7 +88,7 @@ func TestJobEventsSubscribe(t *testing.T) {
 					time.Sleep(20 * time.Millisecond)
 				}
 				// update job
-				_, err = status.Update(context.Background(), db, *jobID.Load(), &model.JobStatus{State: "INSTALLING"}, model.EligibleEnumCLIENT)
+				_, err = status.Update(context.Background(), db, *jobID.Load(), &api.JobStatus{State: "INSTALLING"}, api.CLIENT)
 				require.NoError(t, err)
 			}()
 

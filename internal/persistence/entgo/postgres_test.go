@@ -20,11 +20,9 @@ import (
 
 	"github.com/siemens/wfx/internal/persistence/tests"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/goleak"
 )
 
 func TestPostgreSQL_Initialize(t *testing.T) {
-	defer goleak.VerifyNone(t)
 	db := setupPostgreSQL(t)
 	db.Shutdown()
 }

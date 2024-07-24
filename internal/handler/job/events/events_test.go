@@ -13,7 +13,7 @@ import (
 	"testing"
 
 	"github.com/olebedev/emitter"
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -29,8 +29,8 @@ func TestAddSubscriberAndShutdown(t *testing.T) {
 }
 
 func TestFiltering(t *testing.T) {
-	job1 := model.Job{ID: "1", Workflow: &model.Workflow{Name: "workflow"}, Status: &model.JobStatus{State: "INITIAL"}}
-	job2 := model.Job{ID: "2", Workflow: &model.Workflow{Name: "workflow"}, Status: &model.JobStatus{State: "INITIAL"}}
+	job1 := api.Job{ID: "1", Workflow: &api.Workflow{Name: "workflow"}, Status: &api.JobStatus{State: "INITIAL"}}
+	job2 := api.Job{ID: "2", Workflow: &api.Workflow{Name: "workflow"}, Status: &api.JobStatus{State: "INITIAL"}}
 
 	ctx := context.Background()
 	ch1, _ := AddSubscriber(ctx, FilterParams{JobIDs: []string{job1.ID}}, nil)

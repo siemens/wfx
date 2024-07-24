@@ -9,6 +9,7 @@ package plugin
  */
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -24,18 +25,18 @@ import (
 type StartFailPlugin struct{}
 
 func (p StartFailPlugin) Name() string { return "StartFailPlugin" }
-func (p StartFailPlugin) Start(chan error) (chan Message, error) {
+func (p StartFailPlugin) Start() (chan Message, error) {
 	return nil, errors.New("failed to start plugin")
 }
 func (p StartFailPlugin) Stop() error { return nil }
 
 func TestNewMiddleware_StartFails(t *testing.T) {
 	p := StartFailPlugin{}
-	chQuit := make(chan error)
-	mw, err := NewMiddleware(p, chQuit)
+	ctx, cancel := context.WithCancel(context.Background())
+	t.Cleanup(cancel)
+	mw, err := NewMiddleware(ctx, p)
 	assert.Error(t, err)
 	assert.Nil(t, mw)
-	_ = p.Stop()
 }
 
 type TestPlugin struct{ chMessage chan Message }
@@ -44,7 +45,7 @@ func NewTestPlugin() *TestPlugin { return &TestPlugin{chMessage: make(chan Messa
 
 func (p *TestPlugin) Name() string { return "TestPlugin" }
 
-func (p *TestPlugin) Start(chan error) (chan Message, error) { return p.chMessage, nil }
+func (p *TestPlugin) Start() (chan Message, error) { return p.chMessage, nil }
 
 func (p *TestPlugin) Stop() error { return nil }
 
@@ -69,12 +70,13 @@ func TestNewMiddleware_ModifyRequest(t *testing.T) {
 		}
 	}()
 
-	chQuit := make(chan error)
-	mw, err := NewMiddleware(p, chQuit)
-	require.Nil(t, err)
-	t.Cleanup(mw.Shutdown)
+	ctx, cancel := context.WithCancel(context.Background())
+	t.Cleanup(cancel)
 
-	handler := mw.Wrap(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {}))
+	mw, err := NewMiddleware(ctx, p)
+	require.Nil(t, err)
+
+	handler := mw(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {}))
 	recorder := httptest.NewRecorder()
 	httpReq := &http.Request{
 		Method: http.MethodGet,
@@ -108,12 +110,12 @@ func TestNewMiddleware_SendResponse(t *testing.T) {
 		}
 	}()
 
-	chQuit := make(chan error)
-	mw, err := NewMiddleware(p, chQuit)
+	ctx, cancel := context.WithCancel(context.Background())
+	t.Cleanup(cancel)
+	mw, err := NewMiddleware(ctx, p)
 	require.Nil(t, err)
-	t.Cleanup(mw.Shutdown)
 
-	handler := mw.Wrap(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {}))
+	handler := mw(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {}))
 
 	recorder := httptest.NewRecorder()
 	httpReq := &http.Request{
@@ -147,12 +149,12 @@ func TestNewMiddleware_Unavailable(t *testing.T) {
 		}
 	}()
 
-	chQuit := make(chan error)
-	mw, err := NewMiddleware(p, chQuit)
+	ctx, cancel := context.WithCancel(context.Background())
+	t.Cleanup(cancel)
+	mw, err := NewMiddleware(ctx, p)
 	require.Nil(t, err)
-	t.Cleanup(mw.Shutdown)
 
-	handler := mw.Wrap(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {}))
+	handler := mw(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {}))
 
 	recorder := httptest.NewRecorder()
 	httpReq := &http.Request{
@@ -196,12 +198,12 @@ func TestNewMiddleware_InvalidResponse(t *testing.T) {
 		}
 	}()
 
-	chQuit := make(chan error, 1)
-	mw, err := NewMiddleware(p, chQuit)
+	ctx, cancel := context.WithCancel(context.Background())
+	t.Cleanup(cancel)
+	mw, err := NewMiddleware(ctx, p)
 	require.Nil(t, err)
-	t.Cleanup(mw.Shutdown)
 
-	handler := mw.Wrap(nil)
+	handler := mw(nil)
 	recorder := httptest.NewRecorder()
 	httpReq := &http.Request{
 		Method: http.MethodGet,
@@ -212,7 +214,4 @@ func TestNewMiddleware_InvalidResponse(t *testing.T) {
 	}
 	handler.ServeHTTP(recorder, httpReq)
 	assert.Equal(t, http.StatusInternalServerError, recorder.Code)
-
-	err = <-chQuit
-	assert.ErrorContains(t, err, "unsupported payload type")
 }

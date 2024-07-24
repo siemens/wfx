@@ -14,7 +14,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/internal/handler/job"
 	"github.com/siemens/wfx/internal/handler/workflow"
 	"github.com/siemens/wfx/workflow/dau"
@@ -24,8 +24,10 @@ import (
 )
 
 func TestJobStatusGet(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	db := newInMemoryDB(t)
-	north, south := createNorthAndSouth(t, db)
+	north, south := createNorthAndSouth(ctx, db)
 	job := persistJob(t, db)
 	jobPath := fmt.Sprintf("/api/wfx/v1/jobs/%s/status", job.ID)
 	handlers := []http.Handler{north, south}
@@ -43,7 +45,9 @@ func TestJobStatusGet(t *testing.T) {
 }
 
 func TestPutJobsIDStatusHandlerNotFound(t *testing.T) {
-	north, south := createNorthAndSouth(t, newInMemoryDB(t))
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	north, south := createNorthAndSouth(ctx, newInMemoryDB(t))
 	handlers := []http.Handler{north, south}
 	for i, handler := range handlers {
 		t.Run(allAPIs[i], func(t *testing.T) {
@@ -60,13 +64,15 @@ func TestPutJobsIDStatusHandlerNotFound(t *testing.T) {
 }
 
 func TestJobStatusUpdate(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	db := newInMemoryDB(t)
-	north, south := createNorthAndSouth(t, db)
+	north, south := createNorthAndSouth(ctx, db)
 
 	wf, err := workflow.CreateWorkflow(context.Background(), db, dau.PhasedWorkflow())
 	require.NoError(t, err)
 
-	jobReq := model.JobRequest{
+	jobReq := api.JobRequest{
 		ClientID: "foo",
 		Workflow: wf.Name,
 	}

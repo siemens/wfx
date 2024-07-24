@@ -17,42 +17,15 @@ import (
 	"sort"
 
 	"github.com/Southclaws/fault"
-	"github.com/knadh/koanf/v2"
 	"github.com/rs/zerolog/log"
-	"github.com/siemens/wfx/internal/errutil"
-	"github.com/siemens/wfx/middleware"
 	"github.com/siemens/wfx/middleware/plugin"
 )
 
-func loadPluginSet(flag string, chQuit chan error) ([]middleware.IntermediateMW, error) {
-	var pluginsDir string
-	k.Read(func(k *koanf.Koanf) {
-		pluginsDir = k.String(flag)
-	})
-	if pluginsDir == "" {
-		return []middleware.IntermediateMW{}, nil
+func loadPlugins(dir string, chErr chan error) ([]plugin.Plugin, error) {
+	if dir == "" {
+		return []plugin.Plugin{}, nil
 	}
-	return errutil.Wrap2(createPluginMiddlewares(pluginsDir, chQuit))
-}
-
-func createPluginMiddlewares(pluginsDir string, chQuit chan error) ([]middleware.IntermediateMW, error) {
-	pluginMws, err := loadPlugins(pluginsDir)
-	if err != nil {
-		return nil, fault.Wrap(err)
-	}
-	result := make([]middleware.IntermediateMW, 0, len(pluginMws))
-	for _, p := range pluginMws {
-		mw, err := plugin.NewMiddleware(p, chQuit)
-		if err != nil {
-			return nil, fault.Wrap(err)
-		}
-		result = append(result, mw)
-	}
-	return result, nil
-}
-
-func loadPlugins(dir string) ([]plugin.Plugin, error) {
-	log.Debug().Msg("Loading plugins")
+	log.Debug().Str("dir", dir).Msg("Loading plugins")
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return nil, fault.Wrap(err)
@@ -71,7 +44,7 @@ func loadPlugins(dir string) ([]plugin.Plugin, error) {
 			}
 			// check if file is executable
 			if (info.Mode() & 0o111) != 0 {
-				result = append(result, plugin.NewFBPlugin(dest))
+				result = append(result, plugin.NewFBPlugin(dest, chErr))
 			} else {
 				log.Warn().Str("dest", dest).Msg("Ignoring non-executable file")
 			}
