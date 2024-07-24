@@ -14,7 +14,6 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/siemens/wfx/middleware/jq"
 	"github.com/siemens/wfx/persistence"
 	"github.com/steinfletcher/apitest"
 	jsonpath "github.com/steinfletcher/apitest-jsonpath"
@@ -46,9 +45,6 @@ func TestJobGetIdFilter(t *testing.T) {
 	north, south := createNorthAndSouth(t, db)
 	job := persistJob(t, db)
 	jobPath := fmt.Sprintf("/api/wfx/v1/jobs/%s", job.ID)
-
-	north = jq.MW{}.Wrap(north)
-	south = jq.MW{}.Wrap(south)
 
 	// read job
 	handlers := []http.Handler{north, south}
@@ -94,7 +90,7 @@ func TestDeleteJob(t *testing.T) {
 		Delete(jobPath).
 		ContentType("application/json").
 		Expect(t).
-		Status(http.StatusMethodNotAllowed).
+		Status(http.StatusForbidden).
 		End()
 
 	// delete job shall succeed for north

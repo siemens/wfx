@@ -18,12 +18,7 @@ import (
 	"golang.org/x/term"
 )
 
-func setupLogging(out *os.File, format string, level string) {
-	lvl, err := zerolog.ParseLevel(level)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Invalid log level: %s\n", level)
-		lvl = zerolog.InfoLevel
-	}
+func setupLogging(out *os.File, format string, lvl zerolog.Level) {
 	zerolog.SetGlobalLevel(lvl)
 
 	var logger zerolog.Logger

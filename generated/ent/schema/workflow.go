@@ -9,7 +9,7 @@ import (
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 )
 
 // Workflow holds the schema definition for the Workflow entity.
@@ -33,9 +33,9 @@ func (Workflow) Fields() []ent.Field {
 		field.String("description").
 			Optional().
 			MaxLen(1024),
-		field.JSON("states", []*model.State{}),
-		field.JSON("transitions", []*model.Transition{}),
-		field.JSON("groups", []*model.Group{}),
+		field.JSON("states", []api.State{}),
+		field.JSON("transitions", []api.Transition{}),
+		field.JSON("groups", []api.Group{}),
 	}
 }
 

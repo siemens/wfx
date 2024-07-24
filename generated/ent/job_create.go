@@ -13,11 +13,11 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/generated/ent/history"
 	"github.com/siemens/wfx/generated/ent/job"
 	"github.com/siemens/wfx/generated/ent/tag"
 	"github.com/siemens/wfx/generated/ent/workflow"
-	"github.com/siemens/wfx/generated/model"
 )
 
 // JobCreate is the builder for creating a Job entity.
@@ -68,8 +68,8 @@ func (jc *JobCreate) SetDefinition(m map[string]interface{}) *JobCreate {
 }
 
 // SetStatus sets the "status" field.
-func (jc *JobCreate) SetStatus(ms model.JobStatus) *JobCreate {
-	jc.mutation.SetStatus(ms)
+func (jc *JobCreate) SetStatus(as api.JobStatus) *JobCreate {
+	jc.mutation.SetStatus(as)
 	return jc
 }
 

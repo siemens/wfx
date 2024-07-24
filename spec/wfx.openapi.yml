@@ -1,0 +1,1330 @@
+# SPDX-FileCopyrightText: 2024 Siemens AG
+#
+# SPDX-License-Identifier: Apache-2.0
+---
+openapi: 3.0.0
+info:
+  title: Workflow Executor
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.1.0
+  x-visibility: external
+servers:
+  - url: /api/wfx/v1
+tags:
+  - name: workflows
+    description: Workflows used to instantiate jobs
+  - name: jobs
+    description: Jobs derived from workflows and executed by a client
+  - name: southbound
+    description: All southbound API endpoints
+  - name: northbound
+    description: All northbound API endpoints
+paths:
+  /health:
+    get:
+      tags:
+        - southbound
+        - northbound
+      summary: Query health status
+      description: Query health status
+      responses:
+        default:
+          description: Other error with any status code and response body format.
+          content: {}
+        "200":
+          description: All systems up and running
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            Expires:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckerResult"
+        "503":
+          description: Some (or all) systems are down
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+            Pragma:
+              schema:
+                type: string
+            Expires:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckerResult"
+
+  /version:
+    get:
+      summary: Get version information
+      description: Returns the version information of the application
+      responses:
+        default:
+          description: Other error with any status code and response body format.
+          content: {}
+        "200":
+          description: Successful response with version information.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  version:
+                    type: string
+                    example: 0.3.1
+                    x-go-type-skip-optional-pointer: true
+                  commit:
+                    type: string
+                    example: 25f4dd3f9828553c9e437a24f7fa451ae60916f2
+                    x-go-type-skip-optional-pointer: true
+                  buildDate:
+                    type: string
+                    format: date-time
+                    example: "2024-07-23T15:28:54+02:00"
+                    x-go-type-skip-optional-pointer: true
+                  apiVersion:
+                    type: string
+                    example: "v1"
+                    x-go-type-skip-optional-pointer: true
+
+  /workflows:
+    get:
+      tags:
+        - southbound
+        - northbound
+      summary: List of available workflows
+      description: List of available workflows
+      parameters:
+        - $ref: "#/components/parameters/responseFilter"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+        - $ref: "#/components/parameters/sort"
+      responses:
+        default:
+          description: Other error with any status code and response body format.
+          content: {}
+        "200":
+          description: A list of workflows
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedWorkflowList"
+    post:
+      tags:
+        - northbound
+      summary: Add a new workflow
+      description: Add a new workflow
+      parameters:
+        - $ref: "#/components/parameters/responseFilter"
+      requestBody:
+        description: Workflow object to be added
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Workflow"
+        required: true
+      responses:
+        default:
+          description: Other error with any status code and response body format.
+          content: {}
+        "201":
+          description: Workflow was created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Workflow"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": workflowNotUniqueError
+                  - "<<": workflowInvalidError
+        "403":
+          description: Forbidden
+
+  /workflows/{name}:
+    get:
+      tags:
+        - southbound
+        - northbound
+      summary: Workflow description for a given name
+      description: Workflow description for a given name
+      parameters:
+        - $ref: "#/components/parameters/responseFilter"
+        - name: name
+          in: path
+          description: Unique name for the workflow
+          required: true
+          schema:
+            type: string
+      responses:
+        default:
+          description: Other error with any status code and response body format.
+          content: {}
+        "200":
+          description: Workflow description with the provided key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Workflow"
+        "400":
+          description: If request is invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": invalidRequestError
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": workflowNotFoundError
+    delete:
+      tags:
+        - northbound
+      summary: Delete an existing workflow
+      description: |
+        Delete an existing workflow
+      parameters:
+        - name: name
+          in: path
+          description: Workflow name
+          required: true
+          schema:
+            type: string
+      responses:
+        default:
+          description: Other error with any status code and response body format.
+          content: {}
+        "204":
+          description: The workflow has been deleted.
+          content: {}
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": workflowNotFoundError
+
+  /jobs:
+    get:
+      tags:
+        - southbound
+        - northbound
+      summary: List of job descriptions
+      description: |
+        List of job descriptions
+        By default, this endpoint returns the list of jobs in a specific order and predetermined paging properties.
+        These defaults are:
+          - Ascending sort on stime
+          - 10 entries per page
+      parameters:
+        - $ref: "#/components/parameters/responseFilter"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+        - $ref: "#/components/parameters/sort"
+        - $ref: "#/components/parameters/state"
+        - $ref: "#/components/parameters/group"
+        - $ref: "#/components/parameters/clientId"
+        - $ref: "#/components/parameters/tag"
+        - name: workflow
+          x-go-name: paramWorkflow
+          in: query
+          description: Filter jobs matching by workflow
+          schema:
+            type: string
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "200":
+          description: A paginated job list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedJobList"
+        "400":
+          description: If request is invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": invalidRequestError
+    post:
+      tags:
+        - northbound
+      summary: Add a new job
+      description: |
+        Add a new job
+      parameters:
+        - $ref: "#/components/parameters/responseFilter"
+      requestBody:
+        description: Job which shall be created
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JobRequest"
+        required: true
+      responses:
+        default:
+          description: Other error with any status code and response body format.
+          content: {}
+        "201":
+          description: Job was created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": invalidRequestError
+        "403":
+          description: Forbidden
+
+  /jobs/events:
+    get:
+      tags:
+        - southbound
+        - northbound
+      summary: Subscribe to job-related events such as status updates
+      description: |
+        Obtain instant notifications when there are job changes matching the criteria. This endpoint utilizes server-sent events (SSE), where responses are "chunked" with double newline breaks. For example, a single event might look like this:
+          data: {"clientId":"example_client","state":"INSTALLING"}\n\n
+      parameters:
+        - name: clientIds
+          in: query
+          description: The job's clientId must be one of these clientIds (comma-separated).
+          schema:
+            type: string
+          x-go-name: ClientIDs
+        - name: jobIds
+          in: query
+          description: The job's id must be one of these ids (comma-separated).
+          schema:
+            type: string
+        - name: workflows
+          in: query
+          description:
+            The job's workflow must be equal to one of the provided workflow
+            names (comma-separated).
+          schema:
+            type: string
+        - name: tags
+          in: query
+          description: |
+            A (comma-separated) list of tags to include into each job event. This can be used to aggregrate events from multiple wfx instances.
+          schema:
+            type: string
+      responses:
+        default:
+          description: Other error with any status code and response body format
+          content: {}
+        "200":
+          description: A stream of server-sent events
+          content:
+            text/event-stream:
+              schema:
+                title: Server Sent Events
+                type: array
+                items:
+                  title: Job Event
+                  type: object
+                  properties:
+                    id:
+                      description: The event ID.
+                      type: integer
+                    data:
+                      $ref: "#/components/schemas/JobEvent"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": jobTerminalStateError
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": jobNotFoundError
+  /jobs/{id}:
+    get:
+      tags:
+        - southbound
+        - northbound
+      summary: Job description for a given ID
+      description: |
+        Job description for a given ID
+      parameters:
+        - $ref: "#/components/parameters/responseFilter"
+        - name: id
+          in: path
+          description: Job ID
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/history"
+      responses:
+        default:
+          description: Other error with any status code and response body format.
+          content: {}
+        "200":
+          description: Job description for for a given ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": invalidRequestError
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": jobNotFoundError
+    delete:
+      tags:
+        - northbound
+      summary: Delete an existing job
+      description: |
+        Delete an existing job
+      parameters:
+        - name: id
+          in: path
+          description: Job ID
+          required: true
+          schema:
+            type: string
+      responses:
+        default:
+          description: Other error with any status code and response body format.
+          content: {}
+        "204":
+          description: The job has been deleted.
+          content: {}
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": workflowNotFoundError
+
+  /jobs/{id}/status:
+    get:
+      tags:
+        - southbound
+        - northbound
+      summary: Get job status
+      description: Retrieve the job status
+      parameters:
+        - $ref: "#/components/parameters/responseFilter"
+        - name: id
+          in: path
+          description: Job ID
+          required: true
+          schema:
+            type: string
+      responses:
+        default:
+          description: Other error with any status code and response body format.
+          content: {}
+        "200":
+          description: Job status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobStatus"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": jobNotFoundError
+    put:
+      tags:
+        - southbound
+        - northbound
+      summary: Modify status of an existing job
+      description: |
+        Modify status of an existing job
+      parameters:
+        - $ref: "#/components/parameters/responseFilter"
+        - name: id
+          in: path
+          description: Job ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: This contains the new job status
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JobStatus"
+        required: true
+      responses:
+        default:
+          description: Other error with any status code and response body format.
+          content: {}
+        "200":
+          description: Job modified successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobStatus"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": invalidRequestError
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": jobNotFoundError
+      x-codegen-request-body-name: New job status
+
+  /jobs/{id}/definition:
+    get:
+      tags:
+        - southbound
+        - northbound
+      summary: Get job definition
+      description: Retrieve the job definition
+      parameters:
+        - $ref: "#/components/parameters/responseFilter"
+        - name: id
+          in: path
+          description: Job ID
+          required: true
+          schema:
+            type: string
+      responses:
+        default:
+          description: Other error with any status code and response body format.
+          content: {}
+        "200":
+          description: Job definition
+          content:
+            application/json:
+              schema:
+                type: object
+                example: |
+                  { "userDefined": {} }
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": jobNotFoundError
+    put:
+      tags:
+        - southbound
+        - northbound
+      summary: Modify job definition
+      description: |
+        Modify the job definition of an existing job
+      parameters:
+        - $ref: "#/components/parameters/responseFilter"
+        - name: id
+          in: path
+          description: Job ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: The new job definition
+        content:
+          application/json:
+            schema:
+              type: object
+              example: |
+                { "userDefined": {} }
+        required: true
+      responses:
+        default:
+          description: Other error with any status code and response body format.
+          content: {}
+        "200":
+          description: Job modified successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                example: |
+                  { "userDefined": {} }
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": invalidRequestError
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": jobNotFoundError
+      x-codegen-request-body-name: JobDefinition
+
+  /jobs/{id}/tags:
+    get:
+      tags:
+        - southbound
+        - northbound
+      summary: Get tags
+      description: Get the tags of a job
+      parameters:
+        - $ref: "#/components/parameters/responseFilter"
+        - name: id
+          in: path
+          description: Job ID
+          required: true
+          schema:
+            type: string
+      responses:
+        default:
+          description: Other error with any status code and response body format.
+          content: {}
+        "200":
+          description: Job tags
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TagList"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": jobNotFoundError
+    post:
+      tags:
+        - northbound
+      summary: Add a tag
+      description: |
+        Add a tag to an existing job
+      parameters:
+        - $ref: "#/components/parameters/responseFilter"
+        - name: id
+          in: path
+          description: Job ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Tags to add
+        content:
+          application/json:
+            schema:
+              minItems: 1
+              type: array
+              items:
+                type: string
+        required: true
+      responses:
+        default:
+          description: Other error with any status code and response body format.
+          content: {}
+        "200":
+          description: Successfully added tag to job
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TagList"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": invalidRequestError
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": jobNotFoundError
+      x-codegen-request-body-name: Tags
+
+    delete:
+      tags:
+        - northbound
+      summary: Delete a tag
+      description: |
+        Delete a tag from an existing job
+      parameters:
+        - $ref: "#/components/parameters/responseFilter"
+        - name: id
+          in: path
+          description: Job ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Tags to delete
+        content:
+          application/json:
+            schema:
+              minItems: 1
+              type: array
+              items:
+                type: string
+        required: true
+      responses:
+        default:
+          description: Other error with any status code and response body format.
+          content: {}
+        "200":
+          description: Successfully deleted tag
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TagList"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": invalidRequestError
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": jobNotFoundError
+      x-codegen-request-body-name: Tags
+
+components:
+  schemas:
+    PaginatedWorkflowList:
+      type: object
+      required:
+        - pagination
+        - content
+      properties:
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/Workflow"
+      description: Paginated list of workflows
+
+    Workflow:
+      required:
+        - name
+        - transitions
+        - states
+      type: object
+      properties:
+        name:
+          maxLength: 64
+          minLength: 1
+          pattern: "^[a-zA-Z0-9\\-\\.]+$"
+          type: string
+          description: User provided unique workflow name
+          nullable: false
+          example: wfx.workflow.dau.direct
+        description:
+          maxLength: 1024
+          type: string
+          description: Description of the workflow
+          example: This is a workflow
+          x-go-type-skip-optional-pointer: true
+        states:
+          type: array
+          maxItems: 4096
+          items:
+            $ref: "#/components/schemas/State"
+          x-omitempty: true
+        groups:
+          type: array
+          maxItems: 1024
+          items:
+            $ref: "#/components/schemas/Group"
+          x-omitempty: true
+          x-go-type-skip-optional-pointer: true
+        transitions:
+          type: array
+          maxItems: 16384
+          items:
+            $ref: "#/components/schemas/Transition"
+          x-omitempty: true
+
+    State:
+      required:
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+          nullable: false
+          example: START
+        description:
+          type: string
+          example: Description of the state
+          x-go-type-skip-optional-pointer: true
+
+    Group:
+      required:
+        - name
+        - states
+      type: object
+      properties:
+        name:
+          type: string
+          nullable: false
+          example: OPEN
+        description:
+          type: string
+          example: Description of the group
+          x-go-type-skip-optional-pointer: true
+        states:
+          minItems: 1
+          type: array
+          description: A list of states belonging to this group
+          items:
+            type: string
+
+    Transition:
+      required:
+        - eligible
+        - from
+        - to
+      type: object
+      properties:
+        from:
+          type: string
+          nullable: false
+          example: START
+        to:
+          type: string
+          nullable: false
+          example: END
+        description:
+          type: string
+          example: Description of the transition
+          x-go-type-skip-optional-pointer: true
+        eligible:
+          $ref: "#/components/schemas/EligibleEnum"
+        action:
+          $ref: "#/components/schemas/ActionEnum"
+
+    EligibleEnum:
+      type: string
+      nullable: false
+      enum:
+        - CLIENT
+        - WFX
+      x-nullable: false
+
+    ActionEnum:
+      type: string
+      enum:
+        - IMMEDIATE
+        - WAIT
+
+    SortEnum:
+      type: string
+      default: asc
+      enum:
+        - asc
+        - desc
+
+    JobRequest:
+      required:
+        - clientId
+        - workflow
+      type: object
+      properties:
+        clientId:
+          type: string
+          description: Create job for the given client ID
+          nullable: false
+          example: client42
+          x-go-name: ClientID
+        workflow:
+          type: string
+          description: Workflow name
+          nullable: false
+          example: wfx.workflow.dau.direct
+        tags:
+          $ref: "#/components/schemas/TagList"
+        definition:
+          type: object
+          description:
+            The existing job definition will be replaced with this if this
+            property is not empty.
+          example: |
+            { "userDefined": {} }
+          x-go-type-skip-optional-pointer: true
+
+    JobStatus:
+      required:
+        - state
+      type: object
+      properties:
+        state:
+          type: string
+          description: Name of the new workflow state
+          nullable: false
+          example: END
+        clientId:
+          type: string
+          description: Client which sent the status update
+          nullable: false
+          example: client42
+          x-go-name: ClientID
+          x-omitempty: true
+          x-go-type-skip-optional-pointer: true
+        progress:
+          maximum: 100
+          type: integer
+          description: Current job progress percentage
+          format: int32
+        message:
+          maxLength: 1024
+          type: string
+          description: "Reason message/info, free text from client"
+          x-omitempty: true
+          x-go-type-skip-optional-pointer: true
+        definitionHash:
+          maxLength: 64
+          type: string
+          description: Job definition hash
+          readOnly: true
+          x-omitempty: true
+          x-go-type-skip-optional-pointer: true
+        context:
+          type: object
+          description:
+            "Client-specific JSON object to report additional context information\
+            \ such as error details, stack traces, etc"
+          example: |
+            {
+              "lines": [ "line1", "line2" ]
+            }
+      description: Job status information
+
+    Job:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          maxLength: 36
+          type: string
+          description: Unique job ID (wfx-generated)
+          nullable: false
+          readOnly: true
+          example: 3307e5cb-074c-49b7-99d4-5e61839a4c2d
+          x-go-name: ID
+          x-go-type-skip-optional-pointer: true
+        clientId:
+          type: string
+          nullable: false
+          example: client42
+          x-go-name: ClientID
+          x-go-type-skip-optional-pointer: true
+        workflow:
+          $ref: "#/components/schemas/Workflow"
+        tags:
+          $ref: "#/components/schemas/TagList"
+        definition:
+          type: object
+          example: |
+            { "userDefined": {} }
+          x-go-type-skip-optional-pointer: true
+        status:
+          $ref: "#/components/schemas/JobStatus"
+        stime:
+          type: string
+          description:
+            "Date and time (ISO8601) when the job was created (set by wfx).\
+            \ Although stime conceptually always exists, it's nullable because we\
+            \ don't want to serialize stime in some cases (e.g. for job events)."
+          format: date-time
+          nullable: true
+          readOnly: true
+        mtime:
+          type: string
+          description:
+            Date and time (ISO8601) when the job was last modified (set
+            by wfx)
+          format: date-time
+          nullable: true
+          readOnly: true
+        history:
+          type: array
+          description: |
+            The job's history. Last in, first out (LIFO). Array is truncated if its length exceeds the maximum allowed length.
+            By default, the job history is omitted from responses unless explicitly requested by the client (see the `history` URL parameter).
+          items:
+            $ref: "#/components/schemas/History"
+          x-omitempty: true
+          maxItems: 8192
+
+    JobEvent:
+      type: object
+      properties:
+        ctime:
+          type: string
+          format: date-time
+          nullable: true
+        action:
+          type: string
+        job:
+          $ref: "#/components/schemas/Job"
+        tags:
+          type: array
+          items:
+            type: string
+
+    History:
+      type: object
+      properties:
+        mtime:
+          type: string
+          description: Date and time (ISO8601) when the job was modified (set by wfx)
+          format: date-time
+          readOnly: true
+        status:
+          $ref: "#/components/schemas/JobStatus"
+        definition:
+          type: object
+          example: |
+            { "userDefined": {} }
+
+    PaginatedJobList:
+      type: object
+      required:
+        - pagination
+        - content
+      properties:
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/Job"
+      description: Paginated list of jobs
+
+    ErrorResponse:
+      type: object
+      properties:
+        errors:
+          type: array
+          maxItems: 128
+          items:
+            $ref: "#/components/schemas/Error"
+    Error:
+      type: object
+      required:
+        - code
+        - logref
+        - message
+      properties:
+        code:
+          type: string
+          description: Identifier code for the reason of the error
+        logref:
+          type: string
+          description: Log correlation ID
+        message:
+          type: string
+          description: Error message
+
+    Pagination:
+      type: object
+      required:
+        - limit
+        - offset
+        - total
+      properties:
+        limit:
+          type: integer
+          format: int32
+          description: the maximum number of items to return
+          example: 20
+          maximum: 1024
+        offset:
+          type: integer
+          format: int64
+          description: the number of items to skip before starting to return results
+          example: 0
+        total:
+          type: integer
+          format: int64
+          description: the total number of items
+          example: 1000
+
+    TagList:
+      type: array
+      maxItems: 16
+      items:
+        type: string
+        example: EUROPE_WEST
+      x-omitempty: true
+      x-go-type-skip-optional-pointer: true
+
+    CheckerResult:
+      type: object
+      properties:
+        info:
+          type: object
+          description: Info contains additional information about this health result.
+        status:
+          $ref: "#/components/schemas/AvailabilityStatus"
+          description: Status is the aggregated system availability status.
+        details:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/CheckResult"
+          description: Details contains health information for all checked components.
+      required:
+        - status
+
+    AvailabilityStatus:
+      type: string
+      description: Enumeration of possible availability statuses.
+      enum:
+        - up
+        - down
+        - unknown
+      x-go-type-skip-optional-pointer: true
+      x-omitempty: true
+
+    CheckResult:
+      type: object
+      description: Health information for a checked component.
+      properties:
+        status:
+          $ref: "#/components/schemas/AvailabilityStatus"
+        timestamp:
+          type: string
+          format: date-time
+          description: The time when the check was executed.
+          example: "2023-10-03T10:15:30Z"
+          x-go-type-skip-optional-pointer: true
+          x-omitempty: true
+        error:
+          type: string
+          description: The check error message, if the check failed.
+          example: "Component not reachable"
+          x-go-type-skip-optional-pointer: true
+          x-omitempty: true
+
+  parameters:
+    state:
+      name: state
+      x-go-name: paramState
+      in: query
+      description: Filter jobs based on the current state value
+      schema:
+        type: string
+    group:
+      name: group
+      x-go-name: paramGroup
+      in: query
+      description: Filter jobs based on the group they are in
+      style: form
+      explode: false
+      schema:
+        type: array
+        items:
+          type: string
+    clientId:
+      name: clientId
+      x-go-name: paramClientID
+      in: query
+      description: Filter jobs belonging to a specific client with clientId
+      schema:
+        type: string
+    workflow:
+      name: workflow
+      x-go-name: paramWorkflow
+      in: query
+      description: Filter jobs matching by workflow
+      schema:
+        type: string
+    history:
+      x-go-name: paramHistory
+      name: history
+      in: query
+      description: Boolean flag to include the transition history of the job
+      schema:
+        type: boolean
+    jobId:
+      name: id
+      x-go-name: paramJobID
+      in: path
+      description: Job ID
+      required: true
+      schema:
+        type: string
+    tag:
+      name: tag
+      x-go-name: paramTag
+      in: query
+      description: A list of tags
+      style: form
+      explode: false
+      schema:
+        $ref: "#/components/schemas/TagList"
+    sort:
+      name: sort
+      x-go-name: paramSort
+      in: query
+      description: the order of returned elements
+      schema:
+        $ref: "#/components/schemas/SortEnum"
+    limit:
+      name: limit
+      x-go-name: paramLimit
+      in: query
+      description: the maximum number of items to return
+      schema:
+        type: integer
+        format: int32
+        default: 10
+    offset:
+      name: offset
+      x-go-name: paramOffset
+      in: query
+      description: the number of items to skip before starting to return results
+      schema:
+        type: integer
+        format: int64
+        default: 0
+    responseFilter:
+      name: X-Response-Filter
+      in: header
+      description: Apply a jq-like filter to the response
+      required: false
+      schema:
+        type: string
+
+x-paths-templates:
+  Errors:
+    invalidRequestError:
+      code: wfx.invalidRequest
+      logref: 96a37ea1f7d205ffbfa12334c6812727
+      message: The request was invalid and could not be completed by the storage
+    jobNotFoundError:
+      code: wfx.jobNotFound
+      logref: 11cc67762090e15b79a1387eca65ba65
+      message: Job ID was not found
+    jobTerminalStateError:
+      code: wfx.jobTerminalState
+      logref: 916f0a913a3e4a52a96bd271e029c201
+      message: The request was invalid because the job is in a terminal state
+    workflowNotFoundError:
+      code: wfx.workflowNotFound
+      logref: c452719774086b6e803bb8f6ecea9899
+      message: Workflow not found for given name
+    workflowNotUniqueError:
+      code: wfx.workflowNotUnique
+      logref: e1ee1f2aea859b9dd34579610e386da6
+      message: Workflow with name already exists
+    workflowInvalidError:
+      code: wfx.workflowInvalid
+      logref: 18f57adc70dd79c7fb4f1246be8a6e04
+      message: Workflow validation failed

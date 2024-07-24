@@ -11,7 +11,6 @@ package entgo
  */
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -23,11 +22,9 @@ import (
 	"github.com/siemens/wfx/internal/persistence/tests"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/goleak"
 )
 
 func TestMySQL_Initialize(t *testing.T) {
-	defer goleak.VerifyNone(t)
 	db := setupMySQL(t)
 	db.Shutdown()
 }
@@ -35,7 +32,7 @@ func TestMySQL_Initialize(t *testing.T) {
 func TestMain_InitializeFail(t *testing.T) {
 	dsn := "foo:bar@tcp(localhost)/wfx"
 	var mysql MySQL
-	err := mysql.Initialize(context.Background(), dsn)
+	err := mysql.Initialize(dsn)
 	assert.NotNil(t, err)
 }
 
@@ -59,7 +56,7 @@ func setupMySQL(t *testing.T) MySQL {
 	db := os.Getenv("MYSQL_DATABASE")
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s", user, pass, host, db)
 	var mysql MySQL
-	err := mysql.Initialize(context.Background(), dsn)
+	err := mysql.Initialize(dsn)
 	require.NoError(t, err)
 	return mysql
 }

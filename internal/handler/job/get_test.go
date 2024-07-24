@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"github.com/Southclaws/fault/ftag"
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,7 +26,7 @@ func TestGetJob(t *testing.T) {
 
 	var jobID string
 	{
-		job, err := CreateJob(context.Background(), db, &model.JobRequest{
+		job, err := CreateJob(context.Background(), db, &api.JobRequest{
 			ClientID:   "foo",
 			Workflow:   wf.Name,
 			Definition: map[string]interface{}{"foo": "bar"},
