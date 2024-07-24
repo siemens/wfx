@@ -13,7 +13,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/internal/handler/job/events"
 	"github.com/siemens/wfx/persistence"
 	"github.com/siemens/wfx/workflow/dau"
@@ -26,10 +26,10 @@ func TestDelete(t *testing.T) {
 
 	wf, err := db.CreateWorkflow(context.Background(), dau.DirectWorkflow())
 	require.NoError(t, err)
-	job, err := db.CreateJob(context.Background(), &model.Job{
+	job, err := db.CreateJob(context.Background(), &api.Job{
 		ClientID: "foo",
 		Workflow: wf,
-		Status:   &model.JobStatus{State: "INSTALL"},
+		Status:   &api.JobStatus{State: "INSTALL"},
 		Tags:     []string{"foo", "bar"},
 	})
 	require.NoError(t, err)
@@ -50,7 +50,7 @@ func TestDelete(t *testing.T) {
 }
 
 func TestDelete_FaultyStorageGet(t *testing.T) {
-	db := persistence.NewMockStorage(t)
+	db := persistence.NewHealthyMockStorage(t)
 	ctx := context.Background()
 	expectedErr := errors.New("mock error")
 	db.On("GetJob", ctx, "1", persistence.FetchParams{History: false}).Return(nil, expectedErr)
@@ -61,11 +61,11 @@ func TestDelete_FaultyStorageGet(t *testing.T) {
 }
 
 func TestDelete_FaultyStorageUpdate(t *testing.T) {
-	db := persistence.NewMockStorage(t)
+	db := persistence.NewHealthyMockStorage(t)
 	ctx := context.Background()
 
 	expectedErr := errors.New("mock error")
-	dummyJob := model.Job{ID: "1"}
+	dummyJob := api.Job{ID: "1"}
 	tags := []string{"foo", "bar"}
 
 	db.On("GetJob", ctx, "1", persistence.FetchParams{History: false}).Return(&dummyJob, nil)

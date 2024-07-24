@@ -13,7 +13,7 @@ MAKEFLAGS += --jobs=$(shell nproc)
 DESTDIR ?=
 prefix ?= /usr/local
 
-GO_TAGS = sqlite,postgres,mysql,plugin
+GO_TAGS = sqlite,postgres,mysql,plugin,swagger
 
 export CGO_ENABLED=1
 

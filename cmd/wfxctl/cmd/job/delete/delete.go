@@ -9,39 +9,31 @@ package delete
  */
 
 import (
-	"github.com/rs/zerolog/log"
+	"github.com/Southclaws/fault"
 	"github.com/spf13/cobra"
 
 	"github.com/siemens/wfx/cmd/wfxctl/errutil"
 	"github.com/siemens/wfx/cmd/wfxctl/flags"
-	"github.com/siemens/wfx/generated/client/jobs"
 )
 
-const (
-	idFlag = "id"
-)
-
-func init() {
-	f := Command.Flags()
-	f.String(idFlag, "", "id of the job which shall be deleted")
-}
-
-var Command = &cobra.Command{
-	Use:              "delete",
-	Short:            "Delete an existing job",
-	Long:             `Delete an existing job`,
-	TraverseChildren: true,
-	Run: func(cmd *cobra.Command, _ []string) {
-		baseCmd := flags.NewBaseCmd()
-		client := errutil.Must(baseCmd.CreateHTTPClient())
-		params := jobs.NewDeleteJobsIDParams().
-			WithHTTPClient(client).
-			WithID(flags.Koanf.String(idFlag))
-
-		// no content
-		if _, err := baseCmd.CreateMgmtClient().Jobs.DeleteJobsID(params); err != nil {
-			errutil.ProcessErrorResponse(cmd.OutOrStderr(), err)
-			log.Fatal().Msg("Failed to delete job")
-		}
-	},
+func NewCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:              "delete",
+		Short:            "Delete an existing job",
+		Long:             `Delete an existing job`,
+		Example:          `wfxctl job delete --id=8ea1e9d7-28e6-4f1f-b444-a8d2d1ad7618`,
+		TraverseChildren: true,
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			baseCmd := flags.NewBaseCmd(cmd.Flags())
+			client := errutil.Must(baseCmd.CreateMgmtClient())
+			resp, err := client.DeleteJobsId(cmd.Context(), baseCmd.ID)
+			if err != nil {
+				return fault.Wrap(err)
+			}
+			return fault.Wrap(baseCmd.ProcessResponse(resp, cmd.OutOrStdout()))
+		},
+	}
+	f := cmd.Flags()
+	f.String(flags.IDFlag, "", "job id")
+	return cmd
 }

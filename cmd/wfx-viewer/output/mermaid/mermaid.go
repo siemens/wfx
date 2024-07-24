@@ -14,7 +14,7 @@ import (
 	"strings"
 
 	"github.com/siemens/wfx/cmd/wfx-viewer/colors"
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/internal/workflow"
 	"github.com/spf13/pflag"
 )
@@ -27,7 +27,7 @@ func NewGenerator() *Generator {
 
 func (g *Generator) RegisterFlags(_ *pflag.FlagSet) {}
 
-func (g *Generator) Generate(out io.Writer, wf *model.Workflow) error {
+func (g *Generator) Generate(out io.Writer, wf *api.Workflow) error {
 	_, _ = out.Write([]byte("stateDiagram-v2\n"))
 
 	initialState := *workflow.FindInitialState(wf)

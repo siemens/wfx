@@ -24,6 +24,9 @@ import (
 	"github.com/siemens/wfx/middleware/plugin/ioutil"
 )
 
+// compile-time check to ensure we fulfill the interface
+var _ Plugin = (*FBPlugin)(nil)
+
 // FBPlugin is a plugin which communicates using FlatBuffer messages.
 type FBPlugin struct {
 	path string
@@ -31,11 +34,10 @@ type FBPlugin struct {
 	responses      map[uint64]chan genPlugin.PluginResponseT
 	responsesMutex sync.Mutex
 
-	cmd     *exec.Cmd
-	waited  atomic.Bool
-	stopped atomic.Bool
-
-	chQuit chan error
+	cmd        *exec.Cmd
+	waited     atomic.Bool
+	stopCalled atomic.Bool
+	chErr      chan error
 }
 
 // NewFBPlugin creates a new plugin instance. In order to start the plugin, call
@@ -48,14 +50,13 @@ func (p *FBPlugin) Name() string {
 	return p.path
 }
 
-func (p *FBPlugin) Start(chQuit chan error) (chan Message, error) {
+func (p *FBPlugin) Start(chErr chan error) (chan Message, error) {
 	log.Info().Str("path", p.path).Msg("Starting plugin")
 	cmd := createCmd(p.path)
 
-	p.chQuit = chQuit
-
 	// this ensures that a process group is created (needed to kill all child processes)
 	p.responses = make(map[uint64]chan genPlugin.PluginResponseT)
+	p.chErr = chErr
 
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
@@ -78,10 +79,12 @@ func (p *FBPlugin) Start(chQuit chan error) (chan Message, error) {
 	log.Debug().Str("path", cmd.Path).Msg("Plugin started")
 
 	go func() { // our reaper
+		defer close(chErr)
 		_ = cmd.Wait()
+		log.Debug().Msg("Plugin subprocess has exited")
 		p.waited.Store(true)
-		if !p.stopped.Load() {
-			chQuit <- fmt.Errorf("plugin '%s' is down, shutdown necessary", p.Name())
+		if !p.stopCalled.Load() {
+			chErr <- fmt.Errorf("plugin '%s' stopped unexpectedly", p.Name())
 		}
 	}()
 
@@ -96,14 +99,14 @@ func (p *FBPlugin) Start(chQuit chan error) (chan Message, error) {
 
 func (p *FBPlugin) Stop() error {
 	log.Info().Str("path", p.path).Msg("Stopping plugin")
-	stopped := p.stopped.Swap(true)
-	if stopped || p.cmd == nil {
+	alreadyStopped := p.stopCalled.Swap(true)
+	alreadyWaited := p.waited.Load()
+	if alreadyStopped || alreadyWaited || p.cmd == nil {
+		log.Debug().Str("path", p.path).Msg("Plugin already stopped")
 		return nil
 	}
-	if !p.waited.Load() {
-		return fault.Wrap(p.terminateProcess())
-	}
-	return nil
+
+	return fault.Wrap(p.terminateProcess())
 }
 
 func (p *FBPlugin) sender(w io.Writer, chMessage <-chan Message) {
@@ -139,8 +142,8 @@ func (p *FBPlugin) receiver(r io.Reader) {
 		delete(p.responses, cookie)
 		p.responsesMutex.Unlock()
 		if !ok {
-			log.Warn().Uint64("cookie", cookie).Msg("Received unexpected response from plugin")
-			p.chQuit <- errors.New("received unexpected response from plugin")
+			log.Error().Uint64("cookie", cookie).Msg("Received unexpected response from plugin")
+			_ = p.terminateProcess() // this results in wfx stopping gracefully because the plugin stops without Stop() being called
 			break
 		}
 		chResp <- *resp

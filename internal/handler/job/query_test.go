@@ -12,7 +12,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/persistence"
 	"github.com/siemens/wfx/workflow/dau"
 	"github.com/stretchr/testify/assert"
@@ -49,16 +49,13 @@ func TestParseSortParamDesc(t *testing.T) {
 	assert.Equal(t, true, sp.Desc)
 }
 
-func newValidJob(clientID, state string) model.Job {
+func newValidJob(clientID, state string) api.Job {
 	wf := dau.DirectWorkflow()
-	return model.Job{
+	return api.Job{
 		ClientID: clientID,
-		Status: &model.JobStatus{
-			State:    state,
-			Progress: 0,
-			Message:  "",
+		Status: &api.JobStatus{
+			State: state,
 		},
 		Workflow: wf,
-		History:  []*model.History{},
 	}
 }

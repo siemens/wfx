@@ -16,6 +16,7 @@ import (
 	"testing"
 
 	"github.com/Southclaws/fault/ftag"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/internal/handler/job"
 	"github.com/siemens/wfx/internal/handler/workflow"
 	"github.com/siemens/wfx/internal/persistence/entgo"
@@ -25,10 +26,6 @@ import (
 	jsonpath "github.com/steinfletcher/apitest-jsonpath"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/siemens/wfx/generated/model"
-	northbound "github.com/siemens/wfx/generated/northbound/restapi"
-	southbound "github.com/siemens/wfx/generated/southbound/restapi"
 )
 
 var allAPIs = []string{"north", "south"}
@@ -101,7 +98,7 @@ func TestDeleteWorkflow(t *testing.T) {
 		Handler(south).
 		Delete(url).
 		Expect(t).
-		Status(http.StatusMethodNotAllowed).
+		Status(http.StatusForbidden).
 		End()
 
 	// delete shall succeed for north
@@ -136,7 +133,7 @@ func TestCreateWorkflow(t *testing.T) {
 		Body(string(wfJSON)).
 		Header("content-type", "application/json").
 		Expect(t).
-		Status(http.StatusMethodNotAllowed).
+		Status(http.StatusForbidden).
 		End()
 
 	// north is allowed
@@ -178,7 +175,7 @@ func TestDeleteWorkflow_NotFound(t *testing.T) {
 
 func newInMemoryDB(t *testing.T) persistence.Storage {
 	db := &entgo.SQLite{}
-	err := db.Initialize(context.Background(), "file:wfx?mode=memory&cache=shared&_fk=1")
+	err := db.Initialize("file:wfx?mode=memory&cache=shared&_fk=1")
 	require.NoError(t, err)
 	t.Cleanup(db.Shutdown)
 	t.Cleanup(func() {
@@ -189,7 +186,7 @@ func newInMemoryDB(t *testing.T) persistence.Storage {
 			}
 		}
 		{
-			list, _ := db.QueryWorkflows(context.Background(), persistence.PaginationParams{Limit: 100})
+			list, _ := db.QueryWorkflows(context.Background(), persistence.SortParams{Desc: false}, persistence.PaginationParams{Limit: 100})
 			for _, wf := range list.Content {
 				_ = db.DeleteWorkflow(context.Background(), wf.Name)
 			}
@@ -199,25 +196,23 @@ func newInMemoryDB(t *testing.T) persistence.Storage {
 }
 
 func createNorthAndSouth(t *testing.T, db persistence.Storage) (http.Handler, http.Handler) {
-	northAPI := NewNorthboundAPI(db)
-	require.NoError(t, northAPI.Validate())
-	north := northbound.ConfigureAPI(northAPI)
-
-	southAPI := NewSouthboundAPI(db)
-	require.NoError(t, southAPI.Validate())
-	south := southbound.ConfigureAPI(southAPI)
-
+	wfx := NewWfxServer(db)
+	t.Cleanup(func() { wfx.Stop() })
+	northAPI := NewNorthboundServer(wfx)
+	north := api.HandlerFromMuxWithBaseURL(api.NewStrictHandler(northAPI, nil), http.NewServeMux(), "/api/wfx/v1")
+	southAPI := NewSouthboundServer(wfx)
+	south := api.HandlerFromMuxWithBaseURL(api.NewStrictHandler(southAPI, nil), http.NewServeMux(), "/api/wfx/v1")
 	return north, south
 }
 
-func persistJob(t *testing.T, db persistence.Storage) *model.Job {
+func persistJob(t *testing.T, db persistence.Storage) *api.Job {
 	wf := dau.DirectWorkflow()
 	if found, _ := workflow.GetWorkflow(context.Background(), db, wf.Name); found == nil {
 		_, err := workflow.CreateWorkflow(context.Background(), db, wf)
 		require.NoError(t, err)
 	}
 
-	jobReq := model.JobRequest{
+	jobReq := api.JobRequest{
 		ClientID: "foo",
 		Workflow: wf.Name,
 	}
