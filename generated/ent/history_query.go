@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -88,7 +89,7 @@ func (hq *HistoryQuery) QueryJob() *JobQuery {
 // First returns the first History entity from the query.
 // Returns a *NotFoundError when no History was found.
 func (hq *HistoryQuery) First(ctx context.Context) (*History, error) {
-	nodes, err := hq.Limit(1).All(setContextOp(ctx, hq.ctx, "First"))
+	nodes, err := hq.Limit(1).All(setContextOp(ctx, hq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -111,7 +112,7 @@ func (hq *HistoryQuery) FirstX(ctx context.Context) *History {
 // Returns a *NotFoundError when no History ID was found.
 func (hq *HistoryQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = hq.Limit(1).IDs(setContextOp(ctx, hq.ctx, "FirstID")); err != nil {
+	if ids, err = hq.Limit(1).IDs(setContextOp(ctx, hq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -134,7 +135,7 @@ func (hq *HistoryQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one History entity is found.
 // Returns a *NotFoundError when no History entities are found.
 func (hq *HistoryQuery) Only(ctx context.Context) (*History, error) {
-	nodes, err := hq.Limit(2).All(setContextOp(ctx, hq.ctx, "Only"))
+	nodes, err := hq.Limit(2).All(setContextOp(ctx, hq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -162,7 +163,7 @@ func (hq *HistoryQuery) OnlyX(ctx context.Context) *History {
 // Returns a *NotFoundError when no entities are found.
 func (hq *HistoryQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = hq.Limit(2).IDs(setContextOp(ctx, hq.ctx, "OnlyID")); err != nil {
+	if ids, err = hq.Limit(2).IDs(setContextOp(ctx, hq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -187,7 +188,7 @@ func (hq *HistoryQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of Histories.
 func (hq *HistoryQuery) All(ctx context.Context) ([]*History, error) {
-	ctx = setContextOp(ctx, hq.ctx, "All")
+	ctx = setContextOp(ctx, hq.ctx, ent.OpQueryAll)
 	if err := hq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -209,7 +210,7 @@ func (hq *HistoryQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if hq.ctx.Unique == nil && hq.path != nil {
 		hq.Unique(true)
 	}
-	ctx = setContextOp(ctx, hq.ctx, "IDs")
+	ctx = setContextOp(ctx, hq.ctx, ent.OpQueryIDs)
 	if err = hq.Select(history.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -227,7 +228,7 @@ func (hq *HistoryQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (hq *HistoryQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, hq.ctx, "Count")
+	ctx = setContextOp(ctx, hq.ctx, ent.OpQueryCount)
 	if err := hq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -245,7 +246,7 @@ func (hq *HistoryQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (hq *HistoryQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, hq.ctx, "Exist")
+	ctx = setContextOp(ctx, hq.ctx, ent.OpQueryExist)
 	switch _, err := hq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -539,7 +540,7 @@ func (hgb *HistoryGroupBy) Aggregate(fns ...AggregateFunc) *HistoryGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (hgb *HistoryGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, hgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, hgb.build.ctx, ent.OpQueryGroupBy)
 	if err := hgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -587,7 +588,7 @@ func (hs *HistorySelect) Aggregate(fns ...AggregateFunc) *HistorySelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (hs *HistorySelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, hs.ctx, "Select")
+	ctx = setContextOp(ctx, hs.ctx, ent.OpQuerySelect)
 	if err := hs.prepareQuery(ctx); err != nil {
 		return err
 	}

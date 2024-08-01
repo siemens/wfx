@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -137,7 +138,7 @@ func (jq *JobQuery) QueryTags() *TagQuery {
 // First returns the first Job entity from the query.
 // Returns a *NotFoundError when no Job was found.
 func (jq *JobQuery) First(ctx context.Context) (*Job, error) {
-	nodes, err := jq.Limit(1).All(setContextOp(ctx, jq.ctx, "First"))
+	nodes, err := jq.Limit(1).All(setContextOp(ctx, jq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +161,7 @@ func (jq *JobQuery) FirstX(ctx context.Context) *Job {
 // Returns a *NotFoundError when no Job ID was found.
 func (jq *JobQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = jq.Limit(1).IDs(setContextOp(ctx, jq.ctx, "FirstID")); err != nil {
+	if ids, err = jq.Limit(1).IDs(setContextOp(ctx, jq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -183,7 +184,7 @@ func (jq *JobQuery) FirstIDX(ctx context.Context) string {
 // Returns a *NotSingularError when more than one Job entity is found.
 // Returns a *NotFoundError when no Job entities are found.
 func (jq *JobQuery) Only(ctx context.Context) (*Job, error) {
-	nodes, err := jq.Limit(2).All(setContextOp(ctx, jq.ctx, "Only"))
+	nodes, err := jq.Limit(2).All(setContextOp(ctx, jq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -211,7 +212,7 @@ func (jq *JobQuery) OnlyX(ctx context.Context) *Job {
 // Returns a *NotFoundError when no entities are found.
 func (jq *JobQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = jq.Limit(2).IDs(setContextOp(ctx, jq.ctx, "OnlyID")); err != nil {
+	if ids, err = jq.Limit(2).IDs(setContextOp(ctx, jq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -236,7 +237,7 @@ func (jq *JobQuery) OnlyIDX(ctx context.Context) string {
 
 // All executes the query and returns a list of Jobs.
 func (jq *JobQuery) All(ctx context.Context) ([]*Job, error) {
-	ctx = setContextOp(ctx, jq.ctx, "All")
+	ctx = setContextOp(ctx, jq.ctx, ent.OpQueryAll)
 	if err := jq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -258,7 +259,7 @@ func (jq *JobQuery) IDs(ctx context.Context) (ids []string, err error) {
 	if jq.ctx.Unique == nil && jq.path != nil {
 		jq.Unique(true)
 	}
-	ctx = setContextOp(ctx, jq.ctx, "IDs")
+	ctx = setContextOp(ctx, jq.ctx, ent.OpQueryIDs)
 	if err = jq.Select(job.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -276,7 +277,7 @@ func (jq *JobQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (jq *JobQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, jq.ctx, "Count")
+	ctx = setContextOp(ctx, jq.ctx, ent.OpQueryCount)
 	if err := jq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -294,7 +295,7 @@ func (jq *JobQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (jq *JobQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, jq.ctx, "Exist")
+	ctx = setContextOp(ctx, jq.ctx, ent.OpQueryExist)
 	switch _, err := jq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -720,7 +721,7 @@ func (jgb *JobGroupBy) Aggregate(fns ...AggregateFunc) *JobGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (jgb *JobGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, jgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, jgb.build.ctx, ent.OpQueryGroupBy)
 	if err := jgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -768,7 +769,7 @@ func (js *JobSelect) Aggregate(fns ...AggregateFunc) *JobSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (js *JobSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, js.ctx, "Select")
+	ctx = setContextOp(ctx, js.ctx, ent.OpQuerySelect)
 	if err := js.prepareQuery(ctx); err != nil {
 		return err
 	}
