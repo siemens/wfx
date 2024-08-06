@@ -30,7 +30,7 @@
     {
       groupName: "all non-major dependencies",
       groupSlug: "all-minor-patch",
-      matchPackagePatterns: ["*"],
+      matchPackageNames: ["*"],
       matchUpdateTypes: ["minor", "patch", "digest"],
     },
     {
@@ -47,9 +47,9 @@
     {
       groupName: "all pages dependencies",
       groupSlug: "all-pages",
-      matchPackagePatterns: [
-        "github.com/google/docsy", // docsy and hugo must be compatible with each other
-        "gohugoio/hugo",
+      matchPackageNames: [
+        "/github.com/google/docsy/", // docsy and hugo must be compatible with each other
+        "/gohugoio/hugo/",
       ],
     },
   ],
