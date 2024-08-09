@@ -14,7 +14,6 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/siemens/wfx/middleware/jq"
 	"github.com/siemens/wfx/persistence"
 	"github.com/steinfletcher/apitest"
 	jsonpath "github.com/steinfletcher/apitest-jsonpath"
@@ -22,8 +21,10 @@ import (
 )
 
 func TestJobGetId(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	db := newInMemoryDB(t)
-	north, south := createNorthAndSouth(t, db)
+	north, south := createNorthAndSouth(ctx, db)
 	job := persistJob(t, db)
 	jobPath := fmt.Sprintf("/api/wfx/v1/jobs/%s", job.ID)
 
@@ -42,13 +43,12 @@ func TestJobGetId(t *testing.T) {
 }
 
 func TestJobGetIdFilter(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	db := newInMemoryDB(t)
-	north, south := createNorthAndSouth(t, db)
+	north, south := createNorthAndSouth(ctx, db)
 	job := persistJob(t, db)
 	jobPath := fmt.Sprintf("/api/wfx/v1/jobs/%s", job.ID)
-
-	north = jq.MW{}.Wrap(north)
-	south = jq.MW{}.Wrap(south)
 
 	// read job
 	handlers := []http.Handler{north, south}
@@ -67,7 +67,9 @@ func TestJobGetIdFilter(t *testing.T) {
 }
 
 func TestGetJobsIDHandlerNotFound(t *testing.T) {
-	north, south := createNorthAndSouth(t, newInMemoryDB(t))
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	north, south := createNorthAndSouth(ctx, newInMemoryDB(t))
 	handlers := []http.Handler{north, south}
 	for i, handler := range handlers {
 		t.Run(allAPIs[i], func(t *testing.T) {
@@ -82,8 +84,10 @@ func TestGetJobsIDHandlerNotFound(t *testing.T) {
 }
 
 func TestDeleteJob(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	db := newInMemoryDB(t)
-	north, south := createNorthAndSouth(t, db)
+	north, south := createNorthAndSouth(ctx, db)
 
 	job := persistJob(t, db)
 	jobPath := fmt.Sprintf("/api/wfx/v1/jobs/%s", job.ID)
@@ -94,7 +98,7 @@ func TestDeleteJob(t *testing.T) {
 		Delete(jobPath).
 		ContentType("application/json").
 		Expect(t).
-		Status(http.StatusMethodNotAllowed).
+		Status(http.StatusForbidden).
 		End()
 
 	// delete job shall succeed for north

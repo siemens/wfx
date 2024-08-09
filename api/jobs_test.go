@@ -14,7 +14,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/internal/handler/workflow"
 	"github.com/siemens/wfx/persistence"
 	"github.com/siemens/wfx/workflow/dau"
@@ -25,23 +25,23 @@ import (
 )
 
 func TestGetJobsHandler_Group(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	db := newInMemoryDB(t)
 
 	workflow, err := db.CreateWorkflow(context.Background(), dau.DirectWorkflow())
 	require.NoError(t, err)
 
-	_, err = db.CreateJob(context.Background(), &model.Job{
+	_, err = db.CreateJob(context.Background(), &api.Job{
 		ClientID: "foo",
-		Status: &model.JobStatus{
-			State:    "INSTALL",
-			Progress: 0,
-			Message:  "",
+		Status: &api.JobStatus{
+			State: "INSTALL",
 		},
-		Workflow: &model.Workflow{Name: workflow.Name},
+		Workflow: &api.Workflow{Name: workflow.Name},
 	})
 	assert.NoError(t, err)
 
-	north, south := createNorthAndSouth(t, db)
+	north, south := createNorthAndSouth(ctx, db)
 	handlers := []http.Handler{north, south}
 	for i, handler := range handlers {
 		t.Run(allAPIs[i], func(t *testing.T) {
@@ -67,8 +67,10 @@ func TestGetJobsHandler_Group(t *testing.T) {
 }
 
 func TestCreateJob(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	db := newInMemoryDB(t)
-	north, _ := createNorthAndSouth(t, db)
+	north, _ := createNorthAndSouth(ctx, db)
 
 	wf, err := workflow.CreateWorkflow(context.Background(), db, dau.DirectWorkflow())
 	require.NoError(t, err)
@@ -102,8 +104,10 @@ func TestCreateJob(t *testing.T) {
 }
 
 func TestCreateJob_SouthNotAllowed(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	db := newInMemoryDB(t)
-	_, south := createNorthAndSouth(t, db)
+	_, south := createNorthAndSouth(ctx, db)
 	// create job shall fail for south
 	apitest.New().
 		Handler(south).
@@ -111,6 +115,6 @@ func TestCreateJob_SouthNotAllowed(t *testing.T) {
 		Body(`{"clientId":"gotest","workflow":"wfx.workflow.kanban","tags":[]}`).
 		ContentType("application/json").
 		Expect(t).
-		Status(http.StatusMethodNotAllowed).
+		Status(http.StatusForbidden).
 		End()
 }

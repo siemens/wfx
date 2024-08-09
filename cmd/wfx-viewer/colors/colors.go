@@ -11,7 +11,7 @@ package colors
 import (
 	"image/color/palette"
 
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"gopkg.in/go-playground/colors.v1"
 )
 
@@ -25,7 +25,7 @@ type ColorPalette struct {
 	groupColor   map[string]colors.RGBAColor
 }
 
-func NewColorPalette(workflow *model.Workflow) ColorPalette {
+func NewColorPalette(workflow *api.Workflow) ColorPalette {
 	cp := ColorPalette{
 		stateToGroup: make(map[string]string, len(workflow.States)),
 		groupColor:   make(map[string]colors.RGBAColor),

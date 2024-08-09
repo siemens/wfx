@@ -19,31 +19,31 @@ import (
 )
 
 func TestNewPlugin(t *testing.T) {
-	p := NewFBPlugin("true")
+	p := NewFBPlugin("true", nil)
 	assert.NotNil(t, p)
 }
 
 func TestNewPluginEmpty(t *testing.T) {
-	p := NewFBPlugin("")
+	p := NewFBPlugin("", nil)
 	assert.NotNil(t, p)
 }
 
 func TestStart_NotFound(t *testing.T) {
-	p := NewFBPlugin("foobar")
+	p := NewFBPlugin("foobar", nil)
 	assert.NotNil(t, p)
 }
 
 func TestStopWithoutStart(t *testing.T) {
-	p := NewFBPlugin("true")
+	p := NewFBPlugin("true", nil)
 	err := p.Stop()
 	assert.NoError(t, err)
 }
 
 func TestStop(t *testing.T) {
-	p := NewFBPlugin("cat")
-
 	chQuit := make(chan error)
-	ch, err := p.Start(chQuit)
+	p := NewFBPlugin("cat", chQuit)
+
+	ch, err := p.Start()
 	t.Cleanup(func() { close(ch) })
 	require.NoError(t, err)
 
@@ -55,9 +55,9 @@ func TestStop(t *testing.T) {
 }
 
 func TestSendAndReceive(t *testing.T) {
-	p := NewFBPlugin("cat")
 	chQuit := make(chan error)
-	ch, err := p.Start(chQuit)
+	p := NewFBPlugin("cat", chQuit)
+	ch, err := p.Start()
 	t.Cleanup(func() { close(ch) })
 	require.NoError(t, err)
 	t.Cleanup(func() { _ = p.Stop() })
@@ -86,13 +86,13 @@ func TestSendAndReceive(t *testing.T) {
 }
 
 func TestName(t *testing.T) {
-	assert.Equal(t, "true", NewFBPlugin("true").Name())
+	assert.Equal(t, "true", NewFBPlugin("true", nil).Name())
 }
 
 func TestStart_Reaper(t *testing.T) {
-	p := NewFBPlugin("cat")
 	chQuit := make(chan error)
-	ch, err := p.Start(chQuit)
+	p := NewFBPlugin("cat", chQuit)
+	ch, err := p.Start()
 	assert.NoError(t, err)
 
 	_ = p.terminateProcess()

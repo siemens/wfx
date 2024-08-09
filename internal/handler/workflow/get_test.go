@@ -34,10 +34,10 @@ func TestGetWorkflow(t *testing.T) {
 func TestGetWorkflow_NotFound(t *testing.T) {
 	ctx := context.Background()
 
-	db := persistence.NewMockStorage(t)
-	db.EXPECT().GetWorkflow(ctx, "foo").Return(nil, fault.Wrap(errors.New("Not found"), ftag.With(ftag.NotFound)))
+	dbMock := persistence.NewHealthyMockStorage(t)
+	dbMock.EXPECT().GetWorkflow(ctx, "foo").Return(nil, fault.Wrap(errors.New("Not found"), ftag.With(ftag.NotFound)))
 
-	wf, err := GetWorkflow(ctx, db, "foo")
+	wf, err := GetWorkflow(ctx, dbMock, "foo")
 	assert.Nil(t, wf)
 	assert.NotNil(t, err)
 }
@@ -45,10 +45,10 @@ func TestGetWorkflow_NotFound(t *testing.T) {
 func TestGetWorkflow_Internal(t *testing.T) {
 	ctx := context.Background()
 
-	db := persistence.NewMockStorage(t)
-	db.EXPECT().GetWorkflow(ctx, "foo").Return(nil, fault.Wrap(errors.New("Not found"), ftag.With(ftag.Internal)))
+	dbMock := persistence.NewHealthyMockStorage(t)
+	dbMock.EXPECT().GetWorkflow(ctx, "foo").Return(nil, fault.Wrap(errors.New("Not found"), ftag.With(ftag.Internal)))
 
-	wf, err := GetWorkflow(ctx, db, "foo")
+	wf, err := GetWorkflow(ctx, dbMock, "foo")
 	assert.Nil(t, wf)
 	assert.NotNil(t, err)
 }

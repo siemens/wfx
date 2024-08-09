@@ -16,7 +16,7 @@ import (
 
 	"github.com/Southclaws/fault"
 	"github.com/rs/zerolog/log"
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	vegeta "github.com/tsenart/vegeta/v12/lib"
 )
 
@@ -28,7 +28,7 @@ func writeTargeter(tgt *vegeta.Target) error {
 	// reset
 	*tgt = vegeta.Target{}
 
-	var status *model.JobStatus
+	var status *api.JobStatus
 	// pop
 	queueMutex.RLock()
 	n := len(queue)
@@ -43,7 +43,7 @@ func writeTargeter(tgt *vegeta.Target) error {
 	if status != nil {
 		from := status.State
 		var to string
-		var eligible model.EligibleEnum
+		var eligible api.EligibleEnum
 		// choose a suitable transition
 		for _, t := range workflow.Transitions {
 			if t.From == from {
@@ -53,10 +53,11 @@ func writeTargeter(tgt *vegeta.Target) error {
 			}
 		}
 		if to != "" {
-			jobID := status.Context["id"].(string)
+			context := *status.Context
+			jobID := context["id"].(string)
 
 			var url string
-			if eligible == model.EligibleEnumCLIENT {
+			if eligible == api.CLIENT {
 				url = fmt.Sprintf("http://%s:%d/api/wfx/v1/jobs/%s/status", host, port, jobID)
 			} else {
 				url = fmt.Sprintf("http://%s:%d/api/wfx/v1/jobs/%s/status", mgmtHost, mgmtPort, jobID)
@@ -71,7 +72,7 @@ func writeTargeter(tgt *vegeta.Target) error {
 				return fault.Wrap(err)
 			}
 			log.Debug().
-				Str("id", status.Context["id"].(string)).
+				Str("id", jobID).
 				Str("from", from).
 				Str("to", to).
 				Str("url", url).
@@ -91,12 +92,13 @@ func writeTargeter(tgt *vegeta.Target) error {
 	}
 
 	log.Debug().Msg("No job available, creating new one")
-	jobReq := model.JobRequest{
-		ClientID: "vegeta",
-		Workflow: workflow.Name,
-		Definition: map[string]any{
-			"jobCounter": atomic.AddUint64(&jobCounter, 1),
-		},
+	definition := map[string]any{
+		"jobCounter": atomic.AddUint64(&jobCounter, 1),
+	}
+	jobReq := api.JobRequest{
+		ClientID:   "vegeta",
+		Workflow:   workflow.Name,
+		Definition: definition,
 	}
 	b, err := json.Marshal(&jobReq)
 	if err != nil {

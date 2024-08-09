@@ -18,13 +18,12 @@ import (
 	"time"
 
 	"github.com/Southclaws/fault"
-	mcobra "github.com/muesli/mango-cobra"
-	"github.com/muesli/roff"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/siemens/wfx/cmd/wfx-viewer/output"
 	"github.com/siemens/wfx/cmd/wfx/metadata"
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
+	"github.com/siemens/wfx/internal/man"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
@@ -36,20 +35,7 @@ const (
 
 func init() {
 	rootCmd.Version = metadata.Version
-	rootCmd.AddCommand(&cobra.Command{
-		Use:   "man",
-		Short: "Generate man page and exit",
-		Run: func(*cobra.Command, []string) {
-			manPage, err := mcobra.NewManPage(1, rootCmd)
-			if err != nil {
-				log.Fatal().Err(err).Msg("Failed to generate man page")
-			}
-			manPage = manPage.WithSection("Copyright", "(C) 2023 Siemens AG.\n"+
-				"Licensed under the Apache License, Version 2.0")
-			fmt.Println(manPage.Build(roff.NewDocument()))
-		},
-	})
-
+	rootCmd.AddCommand(man.NewCommand())
 	f := rootCmd.PersistentFlags()
 	f.String("log-level", "info", fmt.Sprintf("set log level. one of: %s,%s,%s,%s,%s,%s,%s",
 		zerolog.TraceLevel.String(),
@@ -129,7 +115,7 @@ Do not use this for confidential information.
 			cmd.SetOut(outFile)
 		}
 
-		var workflow model.Workflow
+		var workflow api.Workflow
 		{ // parse workflow
 			b, err := io.ReadAll(cmd.InOrStdin())
 			if err != nil {

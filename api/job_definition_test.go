@@ -22,8 +22,10 @@ import (
 )
 
 func TestJobDefinitionGet(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	db := newInMemoryDB(t)
-	north, south := createNorthAndSouth(t, db)
+	north, south := createNorthAndSouth(ctx, db)
 	job := persistJob(t, db)
 	_, err := db.UpdateJob(context.Background(), job, persistence.JobUpdate{
 		Definition: &map[string]any{
@@ -48,8 +50,10 @@ func TestJobDefinitionGet(t *testing.T) {
 }
 
 func TestJobDefinitionUpdate(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	db := newInMemoryDB(t)
-	north, _ := createNorthAndSouth(t, db)
+	north, _ := createNorthAndSouth(ctx, db)
 	job := persistJob(t, db)
 	path := fmt.Sprintf("/api/wfx/v1/jobs/%s/definition", job.ID)
 
