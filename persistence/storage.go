@@ -53,7 +53,7 @@ type Storage interface {
 	DeleteWorkflow(ctx context.Context, name string) error
 
 	// QueryWorkflows retrieves all workflows from the storage respecting the paginationParams.
-	QueryWorkflows(ctx context.Context, paginationParams PaginationParams) (*api.PaginatedWorkflowList, error)
+	QueryWorkflows(ctx context.Context, sortParams SortParams, paginationParams PaginationParams) (*api.PaginatedWorkflowList, error)
 }
 
 // JobUpdate encapsulates the properties of a job that can be updated.
