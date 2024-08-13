@@ -328,7 +328,7 @@ func (server WfxServer) GetWorkflows(ctx context.Context, request api.GetWorkflo
 	}
 	pagination := persistence.PaginationParams{Offset: offset, Limit: limit}
 	log := logging.LoggerFromCtx(ctx)
-	workflows, err := workflow.QueryWorkflows(ctx, server.storage, pagination)
+	workflows, err := workflow.QueryWorkflows(ctx, server.storage, pagination, (*string)(request.Params.ParamSort))
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to query workflows")
 		return nil, fault.Wrap(err)

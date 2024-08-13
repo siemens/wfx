@@ -20,7 +20,7 @@ import (
 )
 
 // QueryWorkflows returns multiple workflows (paginated).
-func (db Database) QueryWorkflows(ctx context.Context, paginationParams persistence.PaginationParams) (*api.PaginatedWorkflowList, error) {
+func (db Database) QueryWorkflows(ctx context.Context, sortParams persistence.SortParams, paginationParams persistence.PaginationParams) (*api.PaginatedWorkflowList, error) {
 	log := logging.LoggerFromCtx(ctx)
 	builder := db.client.Workflow.
 		Query()
@@ -28,11 +28,20 @@ func (db Database) QueryWorkflows(ctx context.Context, paginationParams persiste
 	// need to clone builder because it is unusable after we call `All`
 	counter := builder.Clone()
 
-	workflows, err := builder.
+	builder.
 		Limit(int(paginationParams.Limit)).
-		Offset(int(paginationParams.Offset)).
-		Order(ent.Asc(workflow.FieldName)).
-		All(ctx)
+		Offset(int(paginationParams.Offset))
+
+	// deterministic ordering
+	if sortParams.Desc {
+		log.Debug().Msg("Sorting workflows in descending order")
+		builder.Order(ent.Desc(workflow.FieldName))
+	} else {
+		log.Debug().Msg("Sorting workflows in ascending order")
+		builder.Order(ent.Asc(workflow.FieldName))
+	}
+
+	workflows, err := builder.All(ctx)
 	if err != nil {
 		return nil, fault.Wrap(err)
 	}

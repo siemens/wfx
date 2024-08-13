@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - `wfx` would not start if it was built without plugins support
+- `wfx`: implemented sort functionality for `/workflows` endpoint
 
 ### Changed
 

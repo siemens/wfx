@@ -62,7 +62,7 @@ func newInMemoryDB(t *testing.T) persistence.Storage {
 			}
 		}
 		{
-			list, _ := db.QueryWorkflows(context.Background(), persistence.PaginationParams{Limit: 100})
+			list, _ := db.QueryWorkflows(context.Background(), persistence.SortParams{}, persistence.PaginationParams{Limit: 100})
 			for _, wf := range list.Content {
 				_ = db.DeleteWorkflow(context.Background(), wf.Name)
 			}

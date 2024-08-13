@@ -515,9 +515,9 @@ func (_c *MockStorage_QueryJobs_Call) RunAndReturn(run func(context.Context, Fil
 	return _c
 }
 
-// QueryWorkflows provides a mock function with given fields: ctx, paginationParams
-func (_m *MockStorage) QueryWorkflows(ctx context.Context, paginationParams PaginationParams) (*api.PaginatedWorkflowList, error) {
-	ret := _m.Called(ctx, paginationParams)
+// QueryWorkflows provides a mock function with given fields: ctx, sortParams, paginationParams
+func (_m *MockStorage) QueryWorkflows(ctx context.Context, sortParams SortParams, paginationParams PaginationParams) (*api.PaginatedWorkflowList, error) {
+	ret := _m.Called(ctx, sortParams, paginationParams)
 
 	if len(ret) == 0 {
 		panic("no return value specified for QueryWorkflows")
@@ -525,19 +525,19 @@ func (_m *MockStorage) QueryWorkflows(ctx context.Context, paginationParams Pagi
 
 	var r0 *api.PaginatedWorkflowList
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, PaginationParams) (*api.PaginatedWorkflowList, error)); ok {
-		return rf(ctx, paginationParams)
+	if rf, ok := ret.Get(0).(func(context.Context, SortParams, PaginationParams) (*api.PaginatedWorkflowList, error)); ok {
+		return rf(ctx, sortParams, paginationParams)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, PaginationParams) *api.PaginatedWorkflowList); ok {
-		r0 = rf(ctx, paginationParams)
+	if rf, ok := ret.Get(0).(func(context.Context, SortParams, PaginationParams) *api.PaginatedWorkflowList); ok {
+		r0 = rf(ctx, sortParams, paginationParams)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*api.PaginatedWorkflowList)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, PaginationParams) error); ok {
-		r1 = rf(ctx, paginationParams)
+	if rf, ok := ret.Get(1).(func(context.Context, SortParams, PaginationParams) error); ok {
+		r1 = rf(ctx, sortParams, paginationParams)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -552,14 +552,15 @@ type MockStorage_QueryWorkflows_Call struct {
 
 // QueryWorkflows is a helper method to define mock.On call
 //   - ctx context.Context
+//   - sortParams SortParams
 //   - paginationParams PaginationParams
-func (_e *MockStorage_Expecter) QueryWorkflows(ctx interface{}, paginationParams interface{}) *MockStorage_QueryWorkflows_Call {
-	return &MockStorage_QueryWorkflows_Call{Call: _e.mock.On("QueryWorkflows", ctx, paginationParams)}
+func (_e *MockStorage_Expecter) QueryWorkflows(ctx interface{}, sortParams interface{}, paginationParams interface{}) *MockStorage_QueryWorkflows_Call {
+	return &MockStorage_QueryWorkflows_Call{Call: _e.mock.On("QueryWorkflows", ctx, sortParams, paginationParams)}
 }
 
-func (_c *MockStorage_QueryWorkflows_Call) Run(run func(ctx context.Context, paginationParams PaginationParams)) *MockStorage_QueryWorkflows_Call {
+func (_c *MockStorage_QueryWorkflows_Call) Run(run func(ctx context.Context, sortParams SortParams, paginationParams PaginationParams)) *MockStorage_QueryWorkflows_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(PaginationParams))
+		run(args[0].(context.Context), args[1].(SortParams), args[2].(PaginationParams))
 	})
 	return _c
 }
@@ -569,7 +570,7 @@ func (_c *MockStorage_QueryWorkflows_Call) Return(_a0 *api.PaginatedWorkflowList
 	return _c
 }
 
-func (_c *MockStorage_QueryWorkflows_Call) RunAndReturn(run func(context.Context, PaginationParams) (*api.PaginatedWorkflowList, error)) *MockStorage_QueryWorkflows_Call {
+func (_c *MockStorage_QueryWorkflows_Call) RunAndReturn(run func(context.Context, SortParams, PaginationParams) (*api.PaginatedWorkflowList, error)) *MockStorage_QueryWorkflows_Call {
 	_c.Call.Return(run)
 	return _c
 }

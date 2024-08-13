@@ -255,7 +255,7 @@ func TestGetWorkflows_InternalError(t *testing.T) {
 	for _, orientation := range allOrientations {
 		t.Run(orientation, func(t *testing.T) {
 			dbMock := persistence.NewHealthyMockStorage(t)
-			dbMock.EXPECT().QueryWorkflows(context.Background(), persistence.PaginationParams{Limit: 10}).Return(nil, errors.New("something went wrong"))
+			dbMock.EXPECT().QueryWorkflows(context.Background(), persistence.SortParams{}, persistence.PaginationParams{Limit: 10}).Return(nil, errors.New("something went wrong"))
 
 			server := createServerForTesting(t, orientation, dbMock)
 			resp, err := server.GetWorkflows(context.Background(), api.GetWorkflowsRequestObject{Params: api.GetWorkflowsParams{}})
@@ -269,7 +269,7 @@ func TestGetWorkflows_Empty(t *testing.T) {
 	for _, orientation := range allOrientations {
 		t.Run(orientation, func(t *testing.T) {
 			dbMock := persistence.NewHealthyMockStorage(t)
-			dbMock.EXPECT().QueryWorkflows(context.Background(), persistence.PaginationParams{Limit: 10}).Return(&api.PaginatedWorkflowList{}, nil)
+			dbMock.EXPECT().QueryWorkflows(context.Background(), persistence.SortParams{Desc: false}, persistence.PaginationParams{Limit: 10}).Return(&api.PaginatedWorkflowList{}, nil)
 
 			server := createServerForTesting(t, orientation, dbMock)
 			resp, err := server.GetWorkflows(context.Background(), api.GetWorkflowsRequestObject{Params: api.GetWorkflowsParams{}})

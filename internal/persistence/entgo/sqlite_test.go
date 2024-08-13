@@ -25,11 +25,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestSQLite_Initialize(t *testing.T) {
-	db := setupSQLite(t)
-	db.Shutdown()
-}
-
 func TestSQLite(t *testing.T) {
 	db := setupSQLite(t)
 	t.Cleanup(db.Shutdown)
