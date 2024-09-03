@@ -4,6 +4,7 @@
     "config:best-practices",
     ":gitSignOff",
     ":semanticCommits",
+    ":semanticCommitTypeAll(chore)",
     ":prHourlyLimitNone",
     ":prConcurrentLimitNone",
     "schedule:monthly",
