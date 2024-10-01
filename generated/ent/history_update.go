@@ -14,10 +14,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/generated/ent/history"
 	"github.com/siemens/wfx/generated/ent/job"
 	"github.com/siemens/wfx/generated/ent/predicate"
-	"github.com/siemens/wfx/generated/model"
 )
 
 // HistoryUpdate is the builder for updating History entities.
@@ -48,15 +48,15 @@ func (hu *HistoryUpdate) SetNillableMtime(t *time.Time) *HistoryUpdate {
 }
 
 // SetStatus sets the "status" field.
-func (hu *HistoryUpdate) SetStatus(ms model.JobStatus) *HistoryUpdate {
-	hu.mutation.SetStatus(ms)
+func (hu *HistoryUpdate) SetStatus(as api.JobStatus) *HistoryUpdate {
+	hu.mutation.SetStatus(as)
 	return hu
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (hu *HistoryUpdate) SetNillableStatus(ms *model.JobStatus) *HistoryUpdate {
-	if ms != nil {
-		hu.SetStatus(*ms)
+func (hu *HistoryUpdate) SetNillableStatus(as *api.JobStatus) *HistoryUpdate {
+	if as != nil {
+		hu.SetStatus(*as)
 	}
 	return hu
 }
@@ -224,15 +224,15 @@ func (huo *HistoryUpdateOne) SetNillableMtime(t *time.Time) *HistoryUpdateOne {
 }
 
 // SetStatus sets the "status" field.
-func (huo *HistoryUpdateOne) SetStatus(ms model.JobStatus) *HistoryUpdateOne {
-	huo.mutation.SetStatus(ms)
+func (huo *HistoryUpdateOne) SetStatus(as api.JobStatus) *HistoryUpdateOne {
+	huo.mutation.SetStatus(as)
 	return huo
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (huo *HistoryUpdateOne) SetNillableStatus(ms *model.JobStatus) *HistoryUpdateOne {
-	if ms != nil {
-		huo.SetStatus(*ms)
+func (huo *HistoryUpdateOne) SetNillableStatus(as *api.JobStatus) *HistoryUpdateOne {
+	if as != nil {
+		huo.SetStatus(*as)
 	}
 	return huo
 }

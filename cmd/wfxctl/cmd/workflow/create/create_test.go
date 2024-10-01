@@ -16,11 +16,9 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"os"
-	"strconv"
 	"testing"
 
-	"github.com/siemens/wfx/cmd/wfxctl/flags"
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/workflow/dau"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -40,9 +38,8 @@ func TestCreateWorkflow_YAML(t *testing.T) {
 	defer ts.Close()
 
 	u, _ := url.Parse(ts.URL)
-	_ = flags.Koanf.Set(flags.MgmtHostFlag, u.Hostname())
-	port, _ := strconv.Atoi(u.Port())
-	_ = flags.Koanf.Set(flags.MgmtPortFlag, port)
+	t.Setenv("WFX_MGMT_HOST", u.Hostname())
+	t.Setenv("WFX_MGMT_PORT", u.Port())
 
 	f, err := os.CreateTemp("", "wfx-")
 	require.NoError(t, err)
@@ -56,12 +53,13 @@ func TestCreateWorkflow_YAML(t *testing.T) {
 	workflowYaml := string(b)
 
 	_, _ = f.WriteString(workflowYaml)
-	Command.SetArgs([]string{f.Name()})
+	cmd := NewCommand()
+	cmd.SetArgs([]string{f.Name()})
 
-	err = Command.Execute()
-	assert.NoError(t, err)
+	err = cmd.Execute()
+	require.NoError(t, err)
 
-	var wf model.Workflow
+	var wf api.Workflow
 	_ = yaml.Unmarshal([]byte(workflowYaml), &wf)
 	b, _ = json.Marshal(wf)
 	assert.JSONEq(t, string(b), string(body))

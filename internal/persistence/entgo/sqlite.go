@@ -11,7 +11,6 @@ package entgo
  */
 
 import (
-	"context"
 	"embed"
 	"net/url"
 
@@ -39,7 +38,7 @@ func init() {
 	persistence.RegisterStorage("sqlite", &SQLite{})
 }
 
-func (instance *SQLite) Initialize(_ context.Context, dsn string) error {
+func (instance *SQLite) Initialize(dsn string) error {
 	log.Debug().Str("dsn", dsn).Msg("Connecting to SQLite")
 	drv, err := sql.Open(dialect.SQLite, dsn)
 	if err != nil {

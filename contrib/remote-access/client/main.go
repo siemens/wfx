@@ -9,8 +9,10 @@ package main
  */
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -18,10 +20,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/go-openapi/strfmt"
-	"github.com/siemens/wfx/generated/client"
-	"github.com/siemens/wfx/generated/client/jobs"
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/cmd/wfxctl/errutil"
+	"github.com/siemens/wfx/generated/api"
 	flag "github.com/spf13/pflag"
 )
 
@@ -74,20 +74,27 @@ func worker() {
 	workflow := "wfx.workflow.remote.access"
 	initialState := "OPEN"
 	limit := int32(1)
-	queryParams := jobs.NewGetJobsParams().
-		WithClientID(&clientID).
-		WithWorkflow(&workflow).
-		WithState(&initialState).
-		WithLimit(&limit)
-	cfg := client.DefaultTransportConfig()
-	cfg.Host = fmt.Sprintf("%s:%d", host, port)
-	c := client.NewHTTPClientWithConfig(strfmt.Default, cfg)
+
+	swagger := errutil.Must(api.GetSwagger())
+	basePath := errutil.Must(swagger.Servers.BasePath())
+	server := fmt.Sprintf("http://%s:%d%s", host, port, basePath)
+	httpClient := &http.Client{Timeout: time.Second * 10}
+	client, err := api.NewClientWithResponses(server, api.WithHTTPClient(httpClient))
+	if err != nil {
+		log.Fatalf("Failed to create client: %s", err)
+	}
+
+	params := new(api.GetJobsParams)
+	params.ParamClientID = &clientID
+	params.ParamWorkflow = &workflow
+	params.ParamState = &initialState
+	params.ParamLimit = &limit
 
 	for !done.Load() {
 		log.Println("Polling for new jobs")
-		resp, err := c.Jobs.GetJobs(queryParams)
-		if err == nil && len(resp.Payload.Content) > 0 && !done.Load() {
-			job := resp.Payload.Content[0]
+		resp, err := client.GetJobsWithResponse(context.Background(), params)
+		if err == nil && resp.JSON200 != nil && len(resp.JSON200.Content) > 0 {
+			job := &resp.JSON200.Content[0]
 			log.Println("Found new job with ID", job.ID)
 
 			args := []string{
@@ -101,13 +108,13 @@ func worker() {
 
 			ttydCmd := createTtyCmd(args)
 
-			updateJobStatus(c, job, "OPENING", nil)
+			updateJobStatus(client, job, "OPENING", nil)
 			err := ttydCmd.Start()
 			if err != nil {
-				updateJobStatus(c, job, "FAILED", err)
+				updateJobStatus(client, job, "FAILED", err)
 				continue
 			}
-			updateJobStatus(c, job, "OPENED", nil)
+			updateJobStatus(client, job, "OPENED", nil)
 
 			if s := job.Definition["timeout"].(string); s != "" {
 				if d, err := time.ParseDuration(s); err == nil {
@@ -118,7 +125,7 @@ func worker() {
 				}
 			}
 			_ = ttydCmd.Wait()
-			updateJobStatus(c, job, "CLOSED", nil)
+			updateJobStatus(client, job, "CLOSED", nil)
 		} else {
 			log.Println("Nothing to do")
 			time.Sleep(pollInterval)
@@ -126,22 +133,18 @@ func worker() {
 	}
 }
 
-func updateJobStatus(c *client.WorkflowExecutor, job *model.Job, state string, err error) {
+func updateJobStatus(client *api.ClientWithResponses, job *api.Job, state string, err error) {
+	job.Status = &api.JobStatus{State: state}
 	if err == nil {
 		log.Println("Setting job status to", state)
 	} else {
 		log.Printf("Setting job status to %s, err=%s\n", state, err)
-	}
-	job.Status = &model.JobStatus{State: state}
-	if err != nil {
-		job.Status.Context = map[string]any{
+		job.Status.Context = &map[string]any{
 			"error": err.Error(),
 		}
 	}
-	_, err = c.Jobs.PutJobsIDStatus(jobs.NewPutJobsIDStatusParams().
-		WithID(job.ID).
-		WithNewJobStatus(job.Status))
-	if err != nil {
+	resp, err := client.PutJobsIdStatus(context.Background(), job.ID, nil, *job.Status)
+	if err != nil || resp.StatusCode != http.StatusOK {
 		log.Println("Failed to update job status:", err)
 	}
 }
