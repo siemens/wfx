@@ -4,6 +4,6 @@ replace github.com/siemens/wfx => ../..
 
 go 1.23.0
 
-require github.com/siemens/wfx v0.3.1
+require github.com/siemens/wfx v0.3.2
 
 require github.com/google/flatbuffers v24.3.25+incompatible // indirect
