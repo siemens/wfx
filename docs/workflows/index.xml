@@ -1,4 +1,14 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Workflows on</title><link>https://siemens.github.io/wfx/docs/workflows/</link><description>Recent content in Workflows on</description><generator>Hugo</generator><language>en</language><atom:link href="https://siemens.github.io/wfx/docs/workflows/index.xml" rel="self" type="application/rss+xml"/><item><title>Device Artifact Update (DAU)</title><link>https://siemens.github.io/wfx/docs/workflows/dau/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://siemens.github.io/wfx/docs/workflows/dau/</guid><description>The Device Artifact Update Workflow Family has been specifically designed for updating software on devices.
-The following clients have support for the Device Artifact Update Workflow Family:
-SWUpdate - Software Update for Embedded Linux Devices. Workflows Currently, the DAU Workflow Family comprises two workflows that model the software update process for devices:
-The wfx.workflow.dau.direct workflow caters for the fully automated software update use case while the wfx.workflow.dau.phased workflow operates in distinct phases requiring external input to advance the workflow.</description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Workflows on</title><link>https://siemens.github.io/wfx/docs/workflows/</link><description>Recent content in Workflows on</description><generator>Hugo</generator><language>en</language><atom:link href="https://siemens.github.io/wfx/docs/workflows/index.xml" rel="self" type="application/rss+xml"/><item><title>Device Artifact Update (DAU)</title><link>https://siemens.github.io/wfx/docs/workflows/dau/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://siemens.github.io/wfx/docs/workflows/dau/</guid><description>&lt;p>The Device Artifact Update Workflow Family has been specifically designed for updating software on devices.&lt;/p>
+&lt;p>The following clients have support for the Device Artifact Update Workflow Family:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;a href="https://github.com/sbabic/swupdate/blob/master/doc/source/suricatta.rst#support-for-wfx" target="_blank">SWUpdate&lt;/a> - Software Update
+for Embedded Linux Devices.&lt;/li>
+&lt;/ul>
+&lt;h2 id="workflows">Workflows&lt;/h2>
+&lt;p>Currently, the DAU Workflow Family comprises two workflows that model the software update process for devices:&lt;/p>
+&lt;p>The 
+&lt;a href="https://siemens.github.io/wfx/wfx.workflow.dau.direct.yml">&lt;code>wfx.workflow.dau.direct&lt;/code>&lt;/a> workflow caters for the fully automated software update
+use case while the 
+&lt;a href="https://siemens.github.io/wfx/wfx.workflow.dau.phased.yml">&lt;code>wfx.workflow.dau.phased&lt;/code>&lt;/a> workflow operates in distinct phases
+requiring external input to advance the workflow.&lt;/p></description></item></channel></rss>

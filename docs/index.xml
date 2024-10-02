@@ -1,9 +1,67 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Documentation on</title><link>https://siemens.github.io/wfx/docs/</link><description>Recent content in Documentation on</description><generator>Hugo</generator><language>en</language><atom:link href="https://siemens.github.io/wfx/docs/index.xml" rel="self" type="application/rss+xml"/><item><title>Build and Installation</title><link>https://siemens.github.io/wfx/docs/installation/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://siemens.github.io/wfx/docs/installation/</guid><description>Pre-built binaries, as well as Debian and RPM packages, are available here for Linux, specifically x86_64 and arm64 architectures.
-To start a container hosting wfx, follow these commands:
-# create a named volume to persist data (only needed the first time) docker volume create wfx-db docker run --rm -v wfx-db:/home/nonroot \ -p 8080:8080 -p 8081:8081 \ ghcr.io/siemens/wfx:latest If pre-built binaries are not available (refer to go tool dist list for alternative platforms and architectures, such as Windows or macOS), or if specific features need to be disabled during compilation, building wfx from source is necessary.</description></item><item><title>Configuration</title><link>https://siemens.github.io/wfx/docs/configuration/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://siemens.github.io/wfx/docs/configuration/</guid><description>wfx is configured in the following order of precedence using
-command line parameters (e.g. --log-level), environment variables (prefixed with WFX_, e.g. WFX_LOG_LEVEL), configuration files in YAML format (either via the --config command line parameter or present in one of the default search locations, see wfx --help). Note that wfx supports configuration file live reloading so that a running wfx instance can be reconfigured without the need for restarting it.
-Without configuration,</description></item><item><title>Operations</title><link>https://siemens.github.io/wfx/docs/operations/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://siemens.github.io/wfx/docs/operations/</guid><description>API wfx provides two RESTful APIs to interact with it: the northbound operator/management interface and the southbound interface used by clients as illustrated in the following figure:
-Management │ │ ▼ Northbound API ┌──────────────────┐ │ wfx │ └──────────────────┘ ▲ Southbound API │ │ Device The northbound API is used to create jobs and execute server-side state transitions, whereas the southbound API is used for client-side transitions.
-The complete wfx API specification is accessible at runtime via the /swagger.</description></item><item><title>REST API</title><link>https://siemens.github.io/wfx/docs/api/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://siemens.github.io/wfx/docs/api/</guid><description/></item><item><title>Use Cases</title><link>https://siemens.github.io/wfx/docs/use-cases/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://siemens.github.io/wfx/docs/use-cases/</guid><description>This document presents a collection of use cases for employing wfx. Owing to wfx&amp;rsquo;s versatility, the list provided here is not exhaustive. Should you identify an important use case missing, please feel free to contribute.
-Note: Each use case requires an appropriate client implementation to execute the specific &amp;ldquo;business logic&amp;rdquo;. If no such client exists yet, this implies writing custom code.
-Software Update Perform over-the-air (OTA) firmware updates using SWUpdate and the Device Artifact Update (DAU) Workflow Family.</description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Documentation on</title><link>https://siemens.github.io/wfx/docs/</link><description>Recent content in Documentation on</description><generator>Hugo</generator><language>en</language><atom:link href="https://siemens.github.io/wfx/docs/index.xml" rel="self" type="application/rss+xml"/><item><title>Build and Installation</title><link>https://siemens.github.io/wfx/docs/installation/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://siemens.github.io/wfx/docs/installation/</guid><description>&lt;p>Pre-built binaries, as well as Debian and RPM packages, are available 
+&lt;a href="https://github.com/siemens/wfx/releases" target="_blank">here&lt;/a>
+for Linux, specifically 
+&lt;a href="https://github.com/golang/go/wiki/MinimumRequirements#amd64" target="_blank">x86_64&lt;/a> and
+
+&lt;a href="https://github.com/golang/go/wiki/MinimumRequirements#arm64" target="_blank">arm64&lt;/a> architectures.&lt;/p>
+&lt;p>To start a container hosting wfx, follow these commands:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#998;font-style:italic"># create a named volume to persist data (only needed the first time)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>docker volume create wfx-db
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>docker run --rm -v wfx-db:/home/nonroot &lt;span style="color:#d14">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#d14">&lt;/span> -p 8080:8080 -p 8081:8081 &lt;span style="color:#d14">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#d14">&lt;/span> ghcr.io/siemens/wfx:latest
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>If pre-built binaries are not available (refer to &lt;code>go tool dist list&lt;/code> for alternative platforms and architectures, such
+as Windows or macOS), or if specific features need to be disabled during compilation, building wfx from source is
+necessary.&lt;/p></description></item><item><title>Configuration</title><link>https://siemens.github.io/wfx/docs/configuration/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://siemens.github.io/wfx/docs/configuration/</guid><description>&lt;p>wfx is configured in the following order of precedence using&lt;/p>
+&lt;ol>
+&lt;li>command line parameters (e.g. &lt;code>--log-level&lt;/code>),&lt;/li>
+&lt;li>environment variables (prefixed with &lt;code>WFX_&lt;/code>, e.g. &lt;code>WFX_LOG_LEVEL&lt;/code>),&lt;/li>
+&lt;li>configuration files in 
+&lt;a href="https://github.com/go-yaml/yaml#compatibility" target="_blank">YAML&lt;/a> format (either via the &lt;code>--config&lt;/code>
+command line parameter or present in one of the default search locations, see &lt;code>wfx --help&lt;/code>).&lt;/li>
+&lt;/ol>
+&lt;p>Note that wfx supports configuration file live reloading so that a running wfx instance can be reconfigured without the
+need for restarting it.&lt;/p>
+&lt;p>Without configuration,&lt;/p></description></item><item><title>Operations</title><link>https://siemens.github.io/wfx/docs/operations/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://siemens.github.io/wfx/docs/operations/</guid><description>&lt;h2 id="api">API&lt;/h2>
+&lt;p>wfx provides two RESTful APIs to interact with it: the northbound operator/management interface and the southbound
+interface used by clients as illustrated in the following figure:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-txt" data-lang="txt">&lt;span style="display:flex;">&lt;span> Management
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ▼ Northbound API
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>┌──────────────────┐
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ wfx │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>└──────────────────┘
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ▲ Southbound API
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Device
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The northbound API is used to create jobs and execute server-side state transitions, whereas the southbound API is used
+for client-side transitions.&lt;/p></description></item><item><title>REST API</title><link>https://siemens.github.io/wfx/docs/api/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://siemens.github.io/wfx/docs/api/</guid><description>&lt;div id="docsy_swagger_ui">&lt;/div>
+&lt;script>
+ window.onload = function () {
+ const ui = SwaggerUIBundle({
+ url: "/wfx/wfx.swagger.yml",
+ dom_id: '#docsy_swagger_ui',
+ presets: [
+ SwaggerUIBundle.presets.apis,
+ SwaggerUIStandalonePreset
+ ]
+ });
+ window.ui = ui;
+ };
+&lt;/script></description></item><item><title>Use Cases</title><link>https://siemens.github.io/wfx/docs/use-cases/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://siemens.github.io/wfx/docs/use-cases/</guid><description>&lt;p>This document presents a collection of use cases for employing wfx. Owing to wfx&amp;rsquo;s versatility, the list provided here
+is not exhaustive. Should you identify an important use case missing, please feel free to
+
+&lt;a href="https://github.com/siemens/wfx/tree/main/CONTRIBUTING.md" target="_blank">contribute&lt;/a>.&lt;/p>
+&lt;p>&lt;strong>Note&lt;/strong>: Each use case requires an appropriate client implementation to execute the specific &amp;ldquo;business logic&amp;rdquo;. If no
+such client exists yet, this implies writing custom code.&lt;/p>
+&lt;h2 id="software-update">Software Update&lt;/h2>
+&lt;p>Perform over-the-air (OTA) firmware updates using 
+&lt;a href="https://swupdate.org/" target="_blank">SWUpdate&lt;/a> and the 
+&lt;a href="https://siemens.github.io/wfx/wfx/docs/workflows/dau/">Device Artifact Update
+(DAU) Workflow Family&lt;/a>. See also SWUpdate&amp;rsquo;s 
+&lt;a href="https://github.com/sbabic/swupdate/blob/master/doc/source/suricatta.rst#support-for-wfx" target="_blank">Suricatta
+documentation&lt;/a>.&lt;/p></description></item></channel></rss>
