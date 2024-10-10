@@ -123,15 +123,17 @@ DOWNLOADING ──────┤
 
 ## Job Definition
 
-As being general purpose, wfx doesn't impose a particular schema on the information conveyed to the device describing its action(s) to perform, except that it's in JSON format.
-Instead, the job definition is a contract between the operator creating jobs, each possibly following a different workflow, and the client(s) executing those jobs in lock-step with the wfx.
-The same is true for the type of update artifacts that are specified in the job definition and that can be of any form such as, e.g., firmware disk images, container images, or configurations:
-The operator has to has to take care to only assign jobs to devices that are known to be able to digest this type of update artifact.
-wfx doesn't exercise any checks on compatibility.
+The job definition serves as a contract between the operator creating jobs and the clients executing those jobs in
+lock-step with wfx. For the Device Artifact Update workflow family, it conveys crucial information, such as the firmware
+artifact's download URL, required for carrying out the device update. The operator has to has to take care to only
+assign jobs to devices that are known to be able to digest this type of update artifact.
 
-An exemplary job for a device called `example` (utilizing the [built-in simple file server](../../docs/configuration.md#file-server)) may be created as follows:
+**Note**: Being general purpose, wfx doesn't enforce any schema on the job definition (except that it's valid JSON) but some
+clients, such as [SWUpdate](https://github.com/sbabic/swupdate/blob/master/doc/source/suricatta.rst#support-for-wfx), do enforce one.
 
-```json
+An exemplary job for a device called `example` (using the [built-in simple file server](../../docs/configuration.md#file-server)) may be created as follows:
+
+```sh
 cat <<EOF | wfxctl job create --client-id example --workflow wfx.workflow.dau.direct -
 {
   "version": "1.0",
