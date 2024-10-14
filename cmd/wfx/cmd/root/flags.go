@@ -13,14 +13,11 @@ import (
 	"strings"
 	"time"
 
-	mcobra "github.com/muesli/mango-cobra"
-	"github.com/muesli/roff"
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	"github.com/siemens/wfx/cmd/wfx/metadata/config"
+	"github.com/siemens/wfx/internal/cmd/man"
 	"github.com/siemens/wfx/middleware/fileserver"
 	"github.com/siemens/wfx/persistence"
-	"github.com/spf13/cobra"
 
 	// import storages (must be here because we include them into the --help output
 	_ "github.com/siemens/wfx/internal/persistence/entgo"
@@ -63,19 +60,7 @@ const (
 )
 
 func init() {
-	Command.AddCommand(&cobra.Command{
-		Use:   "man",
-		Short: "Generate man page and exit",
-		Run: func(*cobra.Command, []string) {
-			manPage, err := mcobra.NewManPage(1, Command)
-			if err != nil {
-				log.Fatal().Err(err).Msg("Failed to generate man page")
-			}
-			manPage = manPage.WithSection("Copyright", "(C) 2023 Siemens AG.\n"+
-				"Licensed under the Apache License, Version 2.0")
-			fmt.Println(manPage.Build(roff.NewDocument()))
-		},
-	})
+	Command.AddCommand(man.Command)
 
 	f := Command.PersistentFlags()
 
