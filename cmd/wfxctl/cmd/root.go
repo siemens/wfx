@@ -18,8 +18,6 @@ import (
 	"github.com/knadh/koanf/providers/env"
 	"github.com/knadh/koanf/providers/file"
 	"github.com/knadh/koanf/providers/posflag"
-	mcobra "github.com/muesli/mango-cobra"
-	"github.com/muesli/roff"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/siemens/wfx/cmd/wfx/metadata/config"
@@ -29,6 +27,7 @@ import (
 	"github.com/siemens/wfx/cmd/wfxctl/cmd/workflow"
 	"github.com/siemens/wfx/cmd/wfxctl/flags"
 	"github.com/siemens/wfx/cmd/wfxctl/metadata"
+	"github.com/siemens/wfx/internal/cmd/man"
 	"github.com/spf13/cobra"
 )
 
@@ -82,7 +81,7 @@ Tip: Shell completion is available for Bash, Fish and Zsh. See wfxctl completion
 		}
 
 		log.Logger = zerolog.New(zerolog.ConsoleWriter{
-			Out:        os.Stderr,
+			Out:        cmd.OutOrStderr(),
 			TimeFormat: time.Stamp,
 		}).With().Timestamp().Logger()
 		if lvl, err := zerolog.ParseLevel(flags.Koanf.String(logLevelFlag)); err == nil {
@@ -100,24 +99,11 @@ Tip: Shell completion is available for Bash, Fish and Zsh. See wfxctl completion
 }
 
 func init() {
-	RootCmd.AddCommand(&cobra.Command{
-		Use:   "man",
-		Short: "Generate man page and exit",
-		Run: func(cmd *cobra.Command, _ []string) {
-			manPage, err := mcobra.NewManPage(1, RootCmd)
-			if err != nil {
-				log.Fatal().Err(err).Msg("Failed to generate man page")
-			}
-			manPage = manPage.WithSection("Copyright", "(C) 2023 Siemens AG.\n"+
-				"Licensed under the Apache License, Version 2.0")
-			fmt.Fprintln(cmd.OutOrStdout(), manPage.Build(roff.NewDocument()))
-		},
-	})
-
 	RootCmd.AddCommand(job.Command)
 	RootCmd.AddCommand(workflow.Command)
 	RootCmd.AddCommand(version.Command)
 	RootCmd.AddCommand(health.Command)
+	RootCmd.AddCommand(man.Command)
 
 	f := RootCmd.PersistentFlags()
 	f.StringSlice(flags.ConfigFlag, config.DefaultConfigFiles(), "path to one or more .yaml config files; if this option is not set, then the default paths are tried")
