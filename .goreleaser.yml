@@ -161,8 +161,8 @@ nfpms:
         dst: /usr/share/zsh/vendor-completions/_wfx
       - src: dist/wfx_linux_amd64_v1/wfx.fish
         dst: /usr/share/fish/completions/wfx.fish
-      - src: dist/wfx_linux_amd64_v1/wfx.1.gz
-        dst: /usr/share/man/man1/wfx.1.gz
+      - src: dist/wfx_linux_amd64_v1/*.1.gz
+        dst: /usr/share/man/man1/
       - src: share/systemd/wfx.service
         dst: /lib/systemd/system/wfx.service
       - src: share/systemd/wfx@.socket
@@ -195,8 +195,8 @@ nfpms:
         dst: /usr/share/zsh/vendor-completions/_wfxctl
       - src: dist/wfxctl_linux_amd64_v1/wfxctl.fish
         dst: /usr/share/fish/completions/wfxctl.fish
-      - src: dist/wfxctl_linux_amd64_v1/wfxctl.1.gz
-        dst: /usr/share/man/man1/wfxctl.1.gz
+      - src: dist/wfxctl_linux_amd64_v1/*.1.gz
+        dst: /usr/share/man/man1/
     recommends:
       - bash-completion
 
@@ -224,8 +224,8 @@ nfpms:
         dst: /usr/share/zsh/vendor-completions/_wfx-viewer
       - src: dist/wfx-viewer_linux_amd64_v1/wfx-viewer.fish
         dst: /usr/share/fish/completions/wfx-viewer.fish
-      - src: dist/wfx-viewer_linux_amd64_v1/wfx-viewer.1.gz
-        dst: /usr/share/man/man1/wfx-viewer.1.gz
+      - src: dist/wfx-viewer_linux_amd64_v1/*.1.gz
+        dst: /usr/share/man/man1/
 
 dockers:
   - id: wfx
