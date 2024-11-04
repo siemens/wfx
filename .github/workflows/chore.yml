@@ -15,9 +15,9 @@ on:
 jobs:
   go-mod-tidy:
     runs-on: ubuntu-latest
-    container: golang:1.23.1@sha256:4f063a24d429510e512cc730c3330292ff49f3ade3ae79bda8f84a24fa25ecb0
+    container: golang:1.23.2@sha256:ad5c126b5cf501a8caef751a243bb717ec204ab1aa56dc41dc11be089fafcb4f
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - run: |
           # find all go.mod files, except in the hugo directory, and run `go mod tidy` inside
           find . -path ./hugo -prune -o -type f -name go.mod -exec dirname {} \; | while read -r dir; do
