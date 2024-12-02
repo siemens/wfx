@@ -18,11 +18,10 @@ import (
 	"github.com/knadh/koanf/providers/env"
 	"github.com/knadh/koanf/providers/posflag"
 	"github.com/knadh/koanf/v2"
-	mcobra "github.com/muesli/mango-cobra"
-	"github.com/muesli/roff"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/siemens/wfx/cmd/wfx-loadtest/loadtest"
+	"github.com/siemens/wfx/internal/cmd/man"
 	"github.com/spf13/cobra"
 )
 
@@ -31,19 +30,7 @@ const (
 )
 
 func init() {
-	rootCmd.AddCommand(&cobra.Command{
-		Use:   "man",
-		Short: "Generate man page and exit",
-		Run: func(*cobra.Command, []string) {
-			manPage, err := mcobra.NewManPage(1, rootCmd)
-			if err != nil {
-				log.Fatal().Err(err).Msg("Failed to generate man page")
-			}
-			manPage = manPage.WithSection("Copyright", "(C) 2023 Siemens AG.\n"+
-				"Licensed under the Apache License, Version 2.0")
-			fmt.Println(manPage.Build(roff.NewDocument()))
-		},
-	})
+	rootCmd.AddCommand(man.Command)
 
 	f := rootCmd.PersistentFlags()
 

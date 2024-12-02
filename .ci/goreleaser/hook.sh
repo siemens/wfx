@@ -24,4 +24,5 @@ DNAME=$(dirname "$BINARY")
 "$BINARY" completion fish >"$DNAME/$FNAME".fish
 "$BINARY" completion zsh >"${DNAME}/_${FNAME}"
 
-"$BINARY" man | gzip -9 >"${DNAME}/${FNAME}.1.gz"
+"$BINARY" man --dir "${DNAME}"
+find "${DNAME}" -name "*.1" -exec gzip -9 {} \;
