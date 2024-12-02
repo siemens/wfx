@@ -9,13 +9,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `wfxctl workflow query` now accepts a `sort` param
+- Added (existing but undocumented) `/health` and `/version` endpoint to OpenAPI spec
+
 ### Fixed
 
 - `wfx` would not start if it was built without plugins support
+- `wfx`: implemented sort functionality for `/workflows` endpoint
 
 ### Changed
 
 - Use zstd instead of xz to compress release tarballs
+- Migrated from Swagger to OpenAPI v3
+- Spec endpoint is now `/openapi.json` instead of `/swagger.json`
+- `wfxctl job delete` command now accepts jobs as arguments instead of positional parameters
+- `wfxctl workflow get` uses southbound API by default
+- `wfxctl health` validates the certificate chain when using TLS
+- Forbbiden requests (e.g. job creation via southbound API) now return HTTP status code 403 instead of 405
+- System Certificates will be loaded automatically for TLS communication
 
 ## [0.3.1] - 2024-07-09
 

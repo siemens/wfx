@@ -11,7 +11,6 @@ package entgo
  */
 
 import (
-	"context"
 	"database/sql"
 	"embed"
 	"time"
@@ -45,7 +44,7 @@ func init() {
 
 // example dsn: "user=<username> password=<password> host=localhost port=5432 database=wfx sslmode=disable"
 // see https://github.com/jackc/pgx/blob/master/stdlib/sql.go
-func (wrapper *PostgreSQL) Initialize(ctx context.Context, options string) error {
+func (wrapper *PostgreSQL) Initialize(options string) error {
 	connConfig, err := pgx.ParseConfig(options)
 	if err != nil {
 		return fault.Wrap(err)
@@ -59,7 +58,7 @@ func (wrapper *PostgreSQL) Initialize(ctx context.Context, options string) error
 	if err != nil {
 		return fault.Wrap(err)
 	}
-	if err := db.PingContext(ctx); err != nil {
+	if err := db.Ping(); err != nil {
 		log.Error().Err(err).Msg("Failed to ping PostgreSQL database")
 		return fault.Wrap(err)
 	}

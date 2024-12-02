@@ -10,161 +10,133 @@ package health
 
 import (
 	"bufio"
-	"crypto/tls"
-	"encoding/json"
 	"fmt"
 	"io"
-	"net/http"
 	"os"
-	"time"
+	"sync"
 
-	"github.com/alexliesenfeld/health"
+	"github.com/Southclaws/fault"
 	"github.com/gookit/color"
 	"github.com/mattn/go-isatty"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 
+	"github.com/siemens/wfx/cmd/wfxctl/errutil"
 	"github.com/siemens/wfx/cmd/wfxctl/flags"
+	"github.com/siemens/wfx/generated/api"
 )
 
-type endpoint struct {
-	Name   string                    `json:"name"`
-	URL    string                    `json:"url"`
-	Status health.AvailabilityStatus `json:"status"`
+type Endpoint struct {
+	Name     string
+	Server   string
+	Response *api.GetHealthResponse
 }
 
 const (
 	colorNever  = "never"
 	colorAlways = "always"
 	colorAuto   = "auto"
-	colorFlag   = "color"
 )
 
-func init() {
-	f := Command.Flags()
-	f.String(colorFlag, colorAuto, fmt.Sprintf("possible values: %s, %s, %s", colorNever, colorAlways, colorAuto))
-}
+func NewCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:              "health",
+		Short:            "Check health of wfx",
+		Long:             "Check health wfx",
+		TraverseChildren: true,
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			b := flags.NewBaseCmd(cmd.Flags())
 
-var Command = &cobra.Command{
-	Use:              "health",
-	Short:            "Check health of wfx",
-	Long:             "Check health wfx",
-	TraverseChildren: true,
-	Run: func(cmd *cobra.Command, _ []string) {
-		tty := isatty.IsTerminal(os.Stdout.Fd())
+			var useColor bool
+			switch b.ColorMode {
+			case colorAlways:
+				useColor = true
+			case colorAuto:
+				useColor = isatty.IsTerminal(os.Stdout.Fd())
+			case colorNever:
+				useColor = false
+			default:
+				return fmt.Errorf("unsupported color mode: %s", b.ColorMode)
+			}
 
-		colorMode := flags.Koanf.String(colorFlag)
-		var useColor bool
-		switch colorMode {
-		case colorAlways:
-			useColor = true
-		case colorAuto:
-			useColor = tty
-		case colorNever:
-			useColor = false
-		default:
-			log.Warn().Str("color", colorMode).Msg("Unsupported color mode")
-		}
+			swagger := errutil.Must(api.GetSwagger())
+			basePath := errutil.Must(swagger.Servers.BasePath())
 
-		allEndpoints := []endpoint{
-			{
-				Name: "northbound",
-				URL: fmt.Sprintf("http://%s:%d/health", flags.Koanf.String(flags.MgmtHostFlag),
-					flags.Koanf.Int(flags.MgmtPortFlag)),
-				Status: health.StatusUnknown,
-			},
-			{
-				Name: "southbound",
-				URL: fmt.Sprintf("http://%s:%d/health", flags.Koanf.String(flags.ClientHostFlag),
-					flags.Koanf.Int(flags.ClientPortFlag)),
-				Status: health.StatusUnknown,
-			},
-			{
-				Name: "northbound_tls",
-				URL: fmt.Sprintf("https://%s:%d/health", flags.Koanf.String(flags.MgmtTLSHostFlag),
-					flags.Koanf.Int(flags.MgmtTLSPortFlag)),
-				Status: health.StatusUnknown,
-			},
-			{
-				Name: "southbound_tls",
-				URL: fmt.Sprintf("https://%s:%d/health", flags.Koanf.String(flags.ClientTLSHostFlag),
-					flags.Koanf.Int(flags.ClientTLSPortFlag)),
-				Status: health.StatusUnknown,
-			},
-		}
-
-		client := http.Client{
-			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{
-					InsecureSkipVerify: true,
+			allEndpoints := []Endpoint{
+				{
+					Name:     "northbound",
+					Server:   fmt.Sprintf("http://%s:%d%s", b.MgmtHost, b.MgmtPort, basePath),
+					Response: &api.GetHealthResponse{Body: []byte("{}")},
 				},
-				TLSHandshakeTimeout: time.Second * 10,
-			},
-			Timeout: time.Second * 10,
-		}
+				{
+					Name:     "southbound",
+					Server:   fmt.Sprintf("http://%s:%d%s", b.Host, b.Port, basePath),
+					Response: &api.GetHealthResponse{Body: []byte("{}")},
+				},
+				{
+					Name:     "northbound_tls",
+					Server:   fmt.Sprintf("https://%s:%d%s", b.MgmtTLSHost, b.MgmtTLSPort, basePath),
+					Response: &api.GetHealthResponse{Body: []byte("{}")},
+				},
+				{
+					Name:     "southbound_tls",
+					Server:   fmt.Sprintf("https://%s:%d%s", b.TLSHost, b.TLSPort, basePath),
+					Response: &api.GetHealthResponse{Body: []byte("{}")},
+				},
+			}
 
-		for i := range allEndpoints {
-			updateStatus(&allEndpoints[i], &client)
-		}
+			httpClient, err := b.CreateHTTPClient()
+			if err != nil {
+				return fault.Wrap(err)
+			}
 
-		filter, rawOutput := flags.Koanf.String(flags.FilterFlag),
-			flags.Koanf.Bool(flags.RawFlag)
-
-		if tty && filter == "" && !rawOutput {
-			prettyReport(cmd.OutOrStderr(), useColor, allEndpoints)
-		} else {
-			baseCmd := flags.NewBaseCmd()
-			_ = baseCmd.DumpResponse(cmd.OutOrStdout(), allEndpoints)
-		}
-	},
+			var g sync.WaitGroup
+			for i, endpoint := range allEndpoints {
+				g.Add(1)
+				go func() {
+					defer g.Done()
+					client := errutil.Must(api.NewClientWithResponses(endpoint.Server, api.WithHTTPClient(httpClient)))
+					resp, err := client.GetHealthWithResponse(cmd.Context())
+					if err != nil {
+						log.Warn().Err(err).Msg("Error while checking health")
+					} else {
+						allEndpoints[i].Response = resp
+					}
+				}()
+			}
+			g.Wait()
+			prettyReport(cmd.OutOrStdout(), useColor, allEndpoints)
+			return nil
+		},
+	}
+	f := cmd.Flags()
+	f.String(flags.ColorFlag, colorAuto, fmt.Sprintf("possible values: %s, %s, %s", colorNever, colorAlways, colorAuto))
+	return cmd
 }
 
-type simpleHTTPClient interface {
-	Get(url string) (resp *http.Response, err error)
-}
-
-func updateStatus(ep *endpoint, client simpleHTTPClient) {
-	resp, err := client.Get(ep.URL)
-	if err != nil {
-		ep.Status = health.StatusDown
-		return
-	}
-
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		ep.Status = health.StatusUnknown
-		return
-	}
-
-	var result health.CheckerResult
-	err = json.Unmarshal(body, &result)
-	if err != nil {
-		ep.Status = health.StatusDown
-		return
-	}
-	ep.Status = health.StatusUp
-}
-
-func prettyReport(w io.Writer, useColor bool, allEndpoints []endpoint) {
+func prettyReport(w io.Writer, useColor bool, allEndpoints []Endpoint) {
 	buf := bufio.NewWriter(w)
+	defer buf.Flush()
 	_, _ = buf.WriteString("Health report:\n\n")
 	for _, ep := range allEndpoints {
-		f := fmt.Sprint
+		status := api.Down
+		if ep.Response.JSON200 != nil {
+			status = ep.Response.JSON200.Status
+		} else if ep.Response.JSON503 != nil {
+			status = ep.Response.JSON503.Status
+		}
+
+		formatter := fmt.Sprint
 		if useColor {
-			switch ep.Status {
-			case health.StatusUp:
-				f = color.FgGreen.Render
-
-			case health.StatusDown:
-				f = color.FgRed.Render
-
+			switch status {
+			case api.Up:
+				formatter = color.FgGreen.Render
+			case api.Down:
+				formatter = color.FgRed.Render
 			default:
-				f = color.FgYellow.Render
+				formatter = color.FgYellow.Render
 			}
 		}
-		fmt.Fprintf(buf, "%s\t%s\t(%s)\n", ep.Name, f(ep.Status), ep.URL)
+		fmt.Fprintf(buf, "%s\t%s\t(%s)\n", ep.Name, formatter(status), ep.Server)
 	}
-	buf.Flush()
 }
