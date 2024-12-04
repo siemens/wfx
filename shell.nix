@@ -29,6 +29,7 @@ mkShell {
 
     gnumake
     goreleaser
+    syft
     zig_0_13
     just
     git
