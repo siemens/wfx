@@ -266,3 +266,17 @@ changelog:
     exclude:
       - "^docs:"
       - "^test:"
+
+sboms:
+  - id: spdx
+    artifacts: binary
+    cmd: syft
+    args: ["$artifact", "--output", "spdx-json=$document"]
+    documents:
+      - "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.spdx.sbom.json"
+  - id: cyclonedx
+    artifacts: binary
+    cmd: syft
+    args: ["$artifact", "--output", "cyclonedx-json=$document"]
+    documents:
+      - "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.cyclonedx.sbom.json"
