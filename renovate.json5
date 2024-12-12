@@ -35,8 +35,7 @@
       matchUpdateTypes: ["minor", "patch", "digest"],
     },
     {
-      // needed to maintain our hugo dependencies
-      matchManagers: ["gomod"],
+      matchFileNames: ["hugo/go.mod"],
       matchDepTypes: ["indirect"],
       enabled: true,
     },
