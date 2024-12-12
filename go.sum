@@ -26,6 +26,7 @@ github.com/alexliesenfeld/health v0.8.0 h1:lCV0i+ZJPTbqP7LfKG7p3qZBl5VhelwUFCIVW
 github.com/alexliesenfeld/health v0.8.0/go.mod h1:TfNP0f+9WQVWMQRzvMUjlws4ceXKEL3WR+6Hp95HUFc=
 github.com/apparentlymart/go-textseg/v15 v15.0.0 h1:uYvfpb3DyLSCGWnctWKGj857c6ew1u1fNQOlOtuGxQY=
 github.com/apparentlymart/go-textseg/v15 v15.0.0/go.mod h1:K8XmNZdhEBkdlyDdvbmmsvpAG721bKi0joRfFdHIWJ4=
+github.com/apparentlymart/go-textseg/v16 v16.0.0/go.mod h1:wCrfQB/AReGqD1ECqVHhhsq7BV2AxUhnirsBLInYHvE=
 github.com/approvals/go-approval-tests v0.0.0-20241211183344-15d1ffb738a9 h1:zfQwAI2fXGieaEZTtHdxha2Uq2MywDSUe8AXzdOKBtQ=
 github.com/approvals/go-approval-tests v0.0.0-20241211183344-15d1ffb738a9/go.mod h1:PJOqSY8IofNv3heAD6k8E7EfFS6okiSS9bSAasaAUME=
 github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 h1:DklsrG3dyBCFEj5IhUbnKptjxatkF07cF2ak3yi77so=
