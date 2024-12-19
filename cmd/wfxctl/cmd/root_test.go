@@ -11,20 +11,13 @@ package cmd
 import (
 	"testing"
 
-	"github.com/siemens/wfx/cmd/wfxctl/flags"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestRootCmd_ManPage(t *testing.T) {
-	cmd, _, err := RootCmd.Find([]string{"man"})
+	cmd := NewCommand()
+	cmd, _, err := cmd.Find([]string{"man"})
 	require.NoError(t, err)
 	assert.NotNil(t, cmd)
-}
-
-func TestPersistentPreRunE(t *testing.T) {
-	t.Setenv("WFX_LOG_LEVEL", "trace")
-	err := RootCmd.PersistentPreRunE(RootCmd, nil)
-	require.NoError(t, err)
-	assert.Equal(t, "trace", flags.Koanf.String(logLevelFlag))
 }

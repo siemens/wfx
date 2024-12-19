@@ -13,12 +13,12 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"strconv"
 	"testing"
 
 	"github.com/siemens/wfx/cmd/wfxctl/flags"
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetWorkflow(t *testing.T) {
@@ -27,25 +27,24 @@ func TestGetWorkflow(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		name := "test"
-		wf := model.Workflow{Name: name}
+		wf := api.Workflow{Name: name}
 		actualPath = r.URL.Path
 
 		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		model, _ := json.Marshal(wf)
-		_, _ = w.Write(model)
+		_ = json.NewEncoder(w).Encode(wf)
 	}))
 	defer ts.Close()
 
 	u, _ := url.Parse(ts.URL)
-	_ = flags.Koanf.Set(flags.MgmtHostFlag, u.Hostname())
-	port, _ := strconv.Atoi(u.Port())
+	t.Setenv("WFX_CLIENT_HOST", u.Hostname())
+	t.Setenv("WFX_CLIENT_PORT", u.Port())
 
-	_ = flags.Koanf.Set(flags.MgmtPortFlag, port)
-	_ = flags.Koanf.Set(nameFlag, "test")
+	cmd := NewCommand()
+	cmd.SetArgs([]string{"--" + flags.NameFlag, "test"})
 
-	err := Command.Execute()
-	assert.NoError(t, err)
+	err := cmd.Execute()
 
+	require.NoError(t, err)
 	assert.Equal(t, expectedPath, actualPath)
 }

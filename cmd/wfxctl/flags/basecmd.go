@@ -18,13 +18,57 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/Southclaws/fault"
-	"github.com/go-openapi/strfmt"
 	"github.com/itchyny/gojq"
+	"github.com/knadh/koanf/parsers/yaml"
+	"github.com/knadh/koanf/providers/env"
+	"github.com/knadh/koanf/providers/file"
+	"github.com/knadh/koanf/providers/posflag"
+	"github.com/knadh/koanf/v2"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/siemens/wfx/generated/client"
+	"github.com/siemens/wfx/cmd/wfxctl/errutil"
+	"github.com/siemens/wfx/generated/api"
+	"github.com/spf13/pflag"
+)
+
+const (
+	ActorFlag            = "actor"
+	ClientHostFlag       = "client-host"
+	ClientIDFlag         = "client-id"
+	ClientPortFlag       = "client-port"
+	ClientTLSHostFlag    = "client-tls-host"
+	ClientTLSPortFlag    = "client-tls-port"
+	ClientUnixSocketFlag = "client-unix-socket"
+	ColorFlag            = "color"
+	ConfigFlag           = "config"
+	EnableTLSFlag        = "enable-tls"
+	FilterFlag           = "filter"
+	GroupFlag            = "group"
+	HistoryFlag          = "history"
+	IDFlag               = "id"
+	JobIDFlag            = "job-id"
+	LimitFlag            = "limit"
+	LogLevelFlag         = "log-level"
+	MessageFlag          = "message"
+	MgmtHostFlag         = "mgmt-host"
+	MgmtPortFlag         = "mgmt-port"
+	MgmtTLSHostFlag      = "mgmt-tls-host"
+	MgmtTLSPortFlag      = "mgmt-tls-port"
+	MgmtUnixSocketFlag   = "mgmt-unix-socket"
+	OffsetFlag           = "offset"
+	ProgressFlag         = "progress"
+	RawFlag              = "raw"
+	SortFlag             = "sort"
+	StateFlag            = "state"
+	TLSCaFlag            = "tls-ca"
+	TagFlag              = "tag"
+	WorkflowFlag         = "workflow"
+	WorkflowNameFlag     = "workflow-name"
+	NameFlag             = "name"
 )
 
 type BaseCmd struct {
@@ -46,28 +90,120 @@ type BaseCmd struct {
 	Filter string
 	// Strip quotes to make output usable in shell scripts
 	RawOutput bool
+	ColorMode string
+
+	ID        string
+	ClientID  string
+	ClientIDs []string
+	Workflow  string
+	Workflows []string
+	Tags      []string
+	State     string
+	Sort      string
+	Groups    []string
+	Offset    int64
+	JobIDs    []string
+	History   bool
+	Progress  int
+	Message   string
+	Actor     string
+	Name      string
+	Limit     int32
 }
 
-func NewBaseCmd() BaseCmd {
-	return BaseCmd{
-		EnableTLS: Koanf.Bool(EnableTLSFlag),
-		TLSCa:     Koanf.String(TLSCaFlag),
+func NewBaseCmd(f *pflag.FlagSet) BaseCmd {
+	k := koanf.New(".")
 
-		Host:    Koanf.String(ClientHostFlag),
-		Port:    Koanf.Int(ClientPortFlag),
-		TLSHost: Koanf.String(ClientTLSHostFlag),
-		TLSPort: Koanf.Int(ClientTLSPortFlag),
-		Socket:  Koanf.String(ClientUnixSocketFlag),
-
-		MgmtHost:    Koanf.String(MgmtHostFlag),
-		MgmtPort:    Koanf.Int(MgmtPortFlag),
-		MgmtTLSHost: Koanf.String(MgmtTLSHostFlag),
-		MgmtTLSPort: Koanf.Int(MgmtTLSPortFlag),
-		MgmtSocket:  Koanf.String(MgmtUnixSocketFlag),
-
-		Filter:    Koanf.String(FilterFlag),
-		RawOutput: Koanf.Bool(RawFlag),
+	if level, err := f.GetString(LogLevelFlag); err == nil {
+		if lvl, err := zerolog.ParseLevel(level); err == nil {
+			zerolog.SetGlobalLevel(lvl)
+		}
 	}
+
+	// Load the config files provided in the commandline.
+	configFiles, _ := f.GetStringSlice(ConfigFlag)
+	log.Debug().Strs("configFiles", configFiles).Msg("Checking config files")
+	for _, fname := range configFiles {
+		if _, err := os.Stat(fname); err == nil {
+			log.Debug().Str("fname", fname).Msg("Loading config file")
+			prov := file.Provider(fname)
+			if err := k.Load(prov, yaml.Parser()); err != nil {
+				log.Fatal().Err(err).Msg("Failed to config file")
+			}
+		}
+	}
+
+	if err := k.Load(env.Provider("WFX_", ".", func(s string) string {
+		result := strings.ReplaceAll(
+			strings.ToLower(strings.TrimPrefix(s, "WFX_")), "_", "-")
+		return result
+	}), nil); err != nil {
+		log.Err(err).Msg("Failed to env variables")
+	}
+
+	// --log-level becomes log.level
+	if err := k.Load(posflag.Provider(f, ".", k), nil); err != nil {
+		log.Fatal().Err(err).Msg("Failed to load flags")
+	}
+
+	log.Logger = zerolog.New(zerolog.ConsoleWriter{
+		Out:        os.Stderr,
+		TimeFormat: time.Stamp,
+	}).With().Timestamp().Logger()
+	if lvl, err := zerolog.ParseLevel(k.String(LogLevelFlag)); err == nil {
+		zerolog.SetGlobalLevel(lvl)
+	}
+
+	return BaseCmd{
+		ClientID:    k.String(ClientIDFlag),
+		ClientIDs:   k.Strings(ClientIDFlag),
+		ColorMode:   k.String(ColorFlag),
+		EnableTLS:   k.Bool(EnableTLSFlag),
+		Filter:      k.String(FilterFlag),
+		Groups:      k.Strings(GroupFlag),
+		History:     k.Bool(HistoryFlag),
+		Host:        k.String(ClientHostFlag),
+		ID:          k.String(IDFlag),
+		JobIDs:      k.Strings(JobIDFlag),
+		MgmtHost:    k.String(MgmtHostFlag),
+		MgmtPort:    k.Int(MgmtPortFlag),
+		MgmtSocket:  k.String(MgmtUnixSocketFlag),
+		MgmtTLSHost: k.String(MgmtTLSHostFlag),
+		MgmtTLSPort: k.Int(MgmtTLSPortFlag),
+		Offset:      k.Int64(OffsetFlag),
+		Port:        k.Int(ClientPortFlag),
+		RawOutput:   k.Bool(RawFlag),
+		Socket:      k.String(ClientUnixSocketFlag),
+		Sort:        k.String(SortFlag),
+		TLSCa:       k.String(TLSCaFlag),
+		TLSHost:     k.String(ClientTLSHostFlag),
+		TLSPort:     k.Int(ClientTLSPortFlag),
+		Tags:        k.Strings(TagFlag),
+		Workflow:    k.String(WorkflowFlag),
+		Workflows:   k.Strings(WorkflowNameFlag),
+		Progress:    k.Int(ProgressFlag),
+		Message:     k.String(MessageFlag),
+		State:       k.String(StateFlag),
+		Actor:       k.String(ActorFlag),
+		Name:        k.String(NameFlag),
+		Limit:       int32(k.Int(LimitFlag)),
+	}
+}
+
+func (b *BaseCmd) SortParam() (*api.SortEnum, error) {
+	sortRaw := strings.ToLower(b.Sort)
+	asc := api.Asc
+	desc := api.Desc
+	if sortRaw == "" {
+		return &asc, nil
+	}
+	if sortRaw == "asc" {
+		return &asc, nil
+	}
+	if sortRaw == "desc" {
+		return &desc, nil
+	}
+	return nil, fmt.Errorf("invalid sort value: %s", sortRaw)
 }
 
 func (b *BaseCmd) CreateHTTPClient() (*http.Client, error) {
@@ -99,96 +235,118 @@ func (b *BaseCmd) CreateHTTPClient() (*http.Client, error) {
 		}, nil
 	}
 
-	if !b.EnableTLS {
-		return &http.Client{
-			Timeout: time.Second * 10,
-		}, nil
-	}
-	caCert, err := os.ReadFile(b.TLSCa)
-	if err != nil {
-		log.Error().Err(err).Str("tlsCA", b.TLSCa).Msg("Failed to read CA bundle")
-		return &http.Client{
-			Timeout: time.Second * 10,
-		}, nil
-	}
+	tlsConfig := new(tls.Config)
+	if b.TLSCa != "" {
+		caCertPool, err := x509.SystemCertPool()
+		if err != nil {
+			log.Warn().Err(err).Msg("Failed to load system cert pool, starting with empty pool")
+			caCertPool = x509.NewCertPool()
+		}
 
-	caCertPool := x509.NewCertPool()
-	caCertPool.AppendCertsFromPEM(caCert)
+		log.Debug().Str("tlsCA", b.TLSCa).Msg("Reading CA bundle")
+		caCert, err := os.ReadFile(b.TLSCa)
+		if err != nil {
+			return nil, fault.Wrap(err)
+		}
+		caCertPool.AppendCertsFromPEM(caCert)
+		tlsConfig.RootCAs = caCertPool
+	}
 
 	return &http.Client{
 		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				RootCAs: caCertPool,
-			},
+			TLSClientConfig:     tlsConfig,
+			TLSHandshakeTimeout: time.Second * 10,
 		},
 		Timeout: time.Second * 10,
 	}, nil
 }
 
-func (b *BaseCmd) CreateClient() *client.WorkflowExecutor {
-	return client.NewHTTPClientWithConfig(strfmt.Default, b.CreateTransportConfig())
-}
-
-func (b *BaseCmd) CreateTransportConfig() *client.TransportConfig {
-	var host string
-	var schemes []string
+func (b *BaseCmd) CreateClient() (*api.Client, error) {
+	var server string
+	swagger := errutil.Must(api.GetSwagger())
+	basePath := errutil.Must(swagger.Servers.BasePath())
 	if b.EnableTLS {
-		schemes = []string{"https"}
-		host = fmt.Sprintf("%s:%d", b.TLSHost, b.TLSPort)
+		server = fmt.Sprintf("https://%s:%d%s", b.TLSHost, b.TLSPort, basePath)
 	} else {
-		schemes = []string{"http"}
-		host = fmt.Sprintf("%s:%d", b.Host, b.Port)
+		server = fmt.Sprintf("http://%s:%d%s", b.Host, b.Port, basePath)
 	}
-	return client.DefaultTransportConfig().
-		WithHost(host).
-		WithSchemes(schemes)
+	log.Debug().Str("server", server).Msg("Creating client")
+	httpClient, err := b.CreateHTTPClient()
+	if err != nil {
+		return nil, fault.Wrap(err)
+	}
+	client, err := api.NewClient(server, api.WithHTTPClient(httpClient))
+	if err != nil {
+		return nil, fault.Wrap(err)
+	}
+	return client, nil
 }
 
-func (b *BaseCmd) CreateMgmtClient() *client.WorkflowExecutor {
-	var host string
-	var schemes []string
+func (b *BaseCmd) CreateMgmtClient() (*api.Client, error) {
+	var server string
+	swagger := errutil.Must(api.GetSwagger())
+	basePath := errutil.Must(swagger.Servers.BasePath())
 	if b.EnableTLS {
-		schemes = []string{"https"}
-		host = fmt.Sprintf("%s:%d", b.MgmtTLSHost, b.MgmtTLSPort)
+		server = fmt.Sprintf("https://%s:%d%s", b.MgmtTLSHost, b.MgmtTLSPort, basePath)
 	} else {
-		schemes = []string{"http"}
-		host = fmt.Sprintf("%s:%d", b.MgmtHost, b.MgmtPort)
+		server = fmt.Sprintf("http://%s:%d%s", b.MgmtHost, b.MgmtPort, basePath)
 	}
-
-	cfg := client.DefaultTransportConfig().
-		WithHost(host).
-		WithSchemes(schemes)
-	return client.NewHTTPClientWithConfig(strfmt.Default, cfg)
+	httpClient, err := b.CreateHTTPClient()
+	if err != nil {
+		return nil, fault.Wrap(err)
+	}
+	client, err := api.NewClient(server, api.WithHTTPClient(httpClient))
+	if err != nil {
+		return nil, fault.Wrap(err)
+	}
+	return client, nil
 }
 
-func (b *BaseCmd) DumpResponse(w io.Writer, payload any) error {
+func (b *BaseCmd) ProcessResponse(resp *http.Response, w io.Writer) error {
+	body, _ := io.ReadAll(resp.Body)
+	_ = resp.Body.Close()
+	statusCode := resp.StatusCode
+	switch statusCode {
+	case http.StatusOK, http.StatusCreated, http.StatusNoContent:
+		if err := b.dumpResponse(w, body); err != nil {
+			return fault.Wrap(err)
+		}
+	default:
+		var errorResponse api.ErrorResponse
+		if err := json.Unmarshal(body, &errorResponse); err == nil {
+			errutil.ProcessErrorResponse(w, errorResponse)
+		}
+		return fmt.Errorf("error: %s", string(body))
+	}
+	return nil
+}
+
+func (b *BaseCmd) dumpResponse(w io.Writer, payload []byte) error {
+	if len(payload) == 0 {
+		return nil
+	}
 	if b.Filter != "" {
 		return fault.Wrap(dumpFiltered(payload, b.Filter, b.RawOutput, w))
 	}
-	return fault.Wrap(dumpPlain(payload, w))
+	var body any
+	if err := json.Unmarshal(payload, &body); err != nil {
+		return fault.Wrap(err)
+	}
+	encoder := json.NewEncoder(w)
+	encoder.SetIndent("", "  ")
+	return fault.Wrap(encoder.Encode(body))
 }
 
-func dumpFiltered(payload any, filter string, rawOutput bool, w io.Writer) error {
+func dumpFiltered(payload []byte, filter string, rawOutput bool, w io.Writer) error {
 	query, err := gojq.Parse(filter)
 	if err != nil {
 		return fault.Wrap(err)
 	}
 
 	var input any
-	if payloadBytes, ok := payload.([]byte); ok {
-		if err := json.Unmarshal(payloadBytes, &input); err != nil {
-			return fault.Wrap(err)
-		}
-	} else {
-		data, err := json.Marshal(payload)
-		if err != nil {
-			return fault.Wrap(err)
-		}
-		if err := json.Unmarshal(data, &input); err != nil {
-			return fault.Wrap(err)
-		}
+	if err := json.Unmarshal(payload, &input); err != nil {
+		return fault.Wrap(err)
 	}
-
 	iter := query.Run(input)
 	for {
 		v, ok := iter.Next()
@@ -206,23 +364,13 @@ func dumpFiltered(payload any, filter string, rawOutput bool, w io.Writer) error
 				return errors.New("value is not a string. try disabling raw output mode")
 			}
 		} else {
-			b, err := json.MarshalIndent(v, "", "  ")
-			if err != nil {
+			encoder := json.NewEncoder(w)
+			encoder.SetIndent("", "  ")
+			if err := encoder.Encode(v); err != nil {
 				return fault.Wrap(err)
 			}
-			fmt.Fprintln(w, string(b))
 		}
 
 	}
 	return nil
-}
-
-func dumpPlain(payload any, w io.Writer) error {
-	if payloadBytes, ok := payload.([]byte); ok {
-		fmt.Println(string(payloadBytes))
-		return nil
-	}
-	enc := json.NewEncoder(w)
-	enc.SetIndent("", "  ")
-	return fault.Wrap(enc.Encode(payload))
 }

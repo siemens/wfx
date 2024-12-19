@@ -17,7 +17,7 @@ import (
 	"github.com/Southclaws/fault"
 	"github.com/cnf/structhash"
 	"github.com/go-openapi/strfmt"
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/internal/handler/job/events"
 	"github.com/siemens/wfx/middleware/logging"
 	"github.com/siemens/wfx/persistence"
@@ -45,12 +45,12 @@ func Update(ctx context.Context, storage persistence.Storage, jobID string, defi
 	_ = events.PublishEvent(ctx, &events.JobEvent{
 		Ctime:  strfmt.DateTime(time.Now()),
 		Action: events.ActionUpdateDefinition,
-		Job: &model.Job{
+		Job: &api.Job{
 			ID:         result.ID,
 			ClientID:   result.ClientID,
-			Workflow:   &model.Workflow{Name: job.Workflow.Name},
+			Workflow:   &api.Workflow{Name: job.Workflow.Name},
 			Definition: result.Definition,
-			Status: &model.JobStatus{
+			Status: &api.JobStatus{
 				DefinitionHash: result.Status.DefinitionHash,
 			},
 		},
@@ -60,7 +60,7 @@ func Update(ctx context.Context, storage persistence.Storage, jobID string, defi
 	return result.Definition, nil
 }
 
-func Hash(job *model.Job) string {
+func Hash(job *api.Job) string {
 	hasher := sha256.New()
 	hasher.Write(structhash.Dump(job.Definition, 1))
 	return fmt.Sprintf("%x", hasher.Sum(nil))

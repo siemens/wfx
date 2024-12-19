@@ -15,13 +15,13 @@ import (
 )
 
 func TestStorageAPI(t *testing.T) {
-	storage1 := NewMockStorage(t)
+	storage1 := NewHealthyMockStorage(t)
 
 	RegisterStorage("storage1", storage1)
 	actual := GetStorage("storage1")
 	assert.Same(t, storage1, actual)
 
-	storage2 := NewMockStorage(t)
+	storage2 := NewHealthyMockStorage(t)
 	RegisterStorage("storage2", storage2)
 	all := Storages()
 	assert.Len(t, all, 2)

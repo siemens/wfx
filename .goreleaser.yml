@@ -21,6 +21,7 @@ builds:
       - postgres
       - mysql
       - plugin
+      - swagger
     flags:
       - -trimpath
       - -mod=readonly
@@ -54,9 +55,9 @@ builds:
       - -mod=readonly
     ldflags:
       - -s -w -linkmode external -extldflags '-static'
-      - -X github.com/siemens/wfxctl/cmd/wfx/metadata.Version={{.Version}}
-      - -X github.com/siemens/wfxctl/cmd/wfx/metadata.Commit={{.Commit}}
-      - -X github.com/siemens/wfxctl/cmd/wfx/metadata.Date={{.CommitDate}}
+      - -X github.com/siemens/wfx/cmd/wfxctl/metadata.Version={{.Version}}
+      - -X github.com/siemens/wfx/cmd/wfxctl/metadata.Commit={{.Commit}}
+      - -X github.com/siemens/wfx/cmd/wfxctl/metadata.Date={{.CommitDate}}
     env:
       - CGO_ENABLED=1
     goos:

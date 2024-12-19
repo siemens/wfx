@@ -12,8 +12,8 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/generated/ent/workflow"
-	"github.com/siemens/wfx/generated/model"
 )
 
 // Workflow is the model entity for the Workflow schema.
@@ -26,11 +26,11 @@ type Workflow struct {
 	// Description holds the value of the "description" field.
 	Description string `json:"description,omitempty"`
 	// States holds the value of the "states" field.
-	States []*model.State `json:"states,omitempty"`
+	States []api.State `json:"states,omitempty"`
 	// Transitions holds the value of the "transitions" field.
-	Transitions []*model.Transition `json:"transitions,omitempty"`
+	Transitions []api.Transition `json:"transitions,omitempty"`
 	// Groups holds the value of the "groups" field.
-	Groups []*model.Group `json:"groups,omitempty"`
+	Groups []api.Group `json:"groups,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the WorkflowQuery when eager-loading is set.
 	Edges        WorkflowEdges `json:"edges"`

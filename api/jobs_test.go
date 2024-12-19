@@ -14,7 +14,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/internal/handler/workflow"
 	"github.com/siemens/wfx/persistence"
 	"github.com/siemens/wfx/workflow/dau"
@@ -30,14 +30,12 @@ func TestGetJobsHandler_Group(t *testing.T) {
 	workflow, err := db.CreateWorkflow(context.Background(), dau.DirectWorkflow())
 	require.NoError(t, err)
 
-	_, err = db.CreateJob(context.Background(), &model.Job{
+	_, err = db.CreateJob(context.Background(), &api.Job{
 		ClientID: "foo",
-		Status: &model.JobStatus{
-			State:    "INSTALL",
-			Progress: 0,
-			Message:  "",
+		Status: &api.JobStatus{
+			State: "INSTALL",
 		},
-		Workflow: &model.Workflow{Name: workflow.Name},
+		Workflow: &api.Workflow{Name: workflow.Name},
 	})
 	assert.NoError(t, err)
 
@@ -111,6 +109,6 @@ func TestCreateJob_SouthNotAllowed(t *testing.T) {
 		Body(`{"clientId":"gotest","workflow":"wfx.workflow.kanban","tags":[]}`).
 		ContentType("application/json").
 		Expect(t).
-		Status(http.StatusMethodNotAllowed).
+		Status(http.StatusForbidden).
 		End()
 }

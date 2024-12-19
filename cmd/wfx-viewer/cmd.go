@@ -22,7 +22,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/siemens/wfx/cmd/wfx-viewer/output"
 	"github.com/siemens/wfx/cmd/wfx/metadata"
-	"github.com/siemens/wfx/generated/model"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/internal/cmd/man"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
@@ -35,8 +35,7 @@ const (
 
 func init() {
 	rootCmd.Version = metadata.Version
-	rootCmd.AddCommand(man.Command)
-
+	rootCmd.AddCommand(man.NewCommand())
 	f := rootCmd.PersistentFlags()
 	f.String("log-level", "info", fmt.Sprintf("set log level. one of: %s,%s,%s,%s,%s,%s,%s",
 		zerolog.TraceLevel.String(),
@@ -116,7 +115,7 @@ Do not use this for confidential information.
 			cmd.SetOut(outFile)
 		}
 
-		var workflow model.Workflow
+		var workflow api.Workflow
 		{ // parse workflow
 			b, err := io.ReadAll(cmd.InOrStdin())
 			if err != nil {

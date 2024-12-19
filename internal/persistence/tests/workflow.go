@@ -70,15 +70,9 @@ func TestQueryWorkflows(t *testing.T, db persistence.Storage) {
 	require.NoError(t, err)
 
 	allCount := 1
-	result, err := db.QueryWorkflows(context.Background(), persistence.PaginationParams{Offset: 0, Limit: int32(allCount)})
+	result, err := db.QueryWorkflows(context.Background(), persistence.SortParams{}, persistence.PaginationParams{Offset: 0, Limit: int32(allCount)})
 	require.NoError(t, err)
 	assert.Len(t, result.Content, allCount)
-
-	keys := make([]string, 0, len(result.Content))
-	for _, workflow := range result.Content {
-		keys = append(keys, workflow.Name)
-	}
-	assert.IsIncreasing(t, keys)
 }
 
 func TestWorkflowsPagination(t *testing.T, db persistence.Storage) {
@@ -87,16 +81,46 @@ func TestWorkflowsPagination(t *testing.T, db persistence.Storage) {
 	_, err = db.CreateWorkflow(context.Background(), dau.PhasedWorkflow())
 	require.NoError(t, err)
 
-	result, err := db.QueryWorkflows(context.Background(), persistence.PaginationParams{Offset: 0, Limit: 1})
+	result, err := db.QueryWorkflows(context.Background(), persistence.SortParams{}, persistence.PaginationParams{Offset: 0, Limit: 1})
 	assert.NoError(t, err)
 	assert.Len(t, result.Content, 1)
 
-	result2, err := db.QueryWorkflows(context.Background(), persistence.PaginationParams{Offset: 1, Limit: 1})
+	result2, err := db.QueryWorkflows(context.Background(), persistence.SortParams{}, persistence.PaginationParams{Offset: 1, Limit: 1})
 	assert.NoError(t, err)
 	assert.Len(t, result2.Content, 1)
 	assert.NotEqual(t, result.Content[0].Name, result2.Content[0].Name)
 
-	result3, err := db.QueryWorkflows(context.Background(), persistence.PaginationParams{Offset: 2, Limit: 1})
+	result3, err := db.QueryWorkflows(context.Background(), persistence.SortParams{}, persistence.PaginationParams{Offset: 2, Limit: 1})
 	assert.NoError(t, err)
 	assert.Len(t, result3.Content, 0)
+}
+
+func TestQueryWorkflowsSort(t *testing.T, db persistence.Storage) {
+	_, _ = db.CreateWorkflow(context.Background(), dau.DirectWorkflow())
+	_, _ = db.CreateWorkflow(context.Background(), dau.PhasedWorkflow())
+
+	allCount := 2
+	t.Run("asc", func(t *testing.T) {
+		result, err := db.QueryWorkflows(context.Background(), persistence.SortParams{Desc: false}, persistence.PaginationParams{Offset: 0, Limit: int32(allCount)})
+		require.NoError(t, err)
+		assert.Len(t, result.Content, allCount)
+
+		keys := make([]string, 0, len(result.Content))
+		for _, workflow := range result.Content {
+			keys = append(keys, workflow.Name)
+		}
+		assert.IsIncreasing(t, keys)
+	})
+
+	t.Run("desc", func(t *testing.T) {
+		result, err := db.QueryWorkflows(context.Background(), persistence.SortParams{Desc: true}, persistence.PaginationParams{Offset: 0, Limit: int32(allCount)})
+		require.NoError(t, err)
+		assert.Len(t, result.Content, allCount)
+
+		keys := make([]string, 0, len(result.Content))
+		for _, workflow := range result.Content {
+			keys = append(keys, workflow.Name)
+		}
+		assert.IsDecreasing(t, keys)
+	})
 }

@@ -88,25 +88,13 @@ format:
     prettier -l -w .
     just --fmt --unstable
 
-_generate-swagger:
+_generate-openapi:
     #!/usr/bin/env bash
-    set -euxo pipefail
-    cd "{{ THISDIR }}/generated"
-
-    # remove existing code
-    for dir in client model northbound southbound; do
-        find $dir -not -name configure_workflow_executor.go -type f -delete
-    done
-
-    # generate spec (inline anchors)
-    just -d . --justfile ../spec/justfile generate wfx.swagger.yml
-    swagger generate model --copyright-file=../spec/spdx.txt --target=. --model-package=model --spec=wfx.swagger.yml
-
-    for target in northbound southbound; do
-        swagger generate server --copyright-file=../spec/spdx.txt --target=$target --spec=wfx.swagger.yml --exclude-main --skip-models --model-package=model --existing-models=github.com/siemens/wfx/generated/model --flag-strategy=pflag --tags=$target
-        rm -f $target/restapi/server.go
-    done
-    swagger generate client --copyright-file=../spec/spdx.txt --target=. --model-package=model --spec=wfx.swagger.yml --skip-models --existing-models=github.com/siemens/wfx/generated/model
+    set -euo pipefail
+    source "{{ THISDIR }}/.ci/packages/versions.env"
+    cd "{{ THISDIR }}/spec"
+    set -x
+    go run "github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v${OAPI_CODEGEN_VERSION}" -config cfg.yaml wfx.openapiv3.yml
 
 _generate-ent:
     #!/usr/bin/env bash
@@ -131,14 +119,15 @@ _generate-flatbuffers:
     gofumpt -l -w generated/plugin
 
 # Generate code
-generate: _generate-swagger _generate-ent _generate-mockery _generate-flatbuffers
+generate: _generate-openapi _generate-ent _generate-mockery _generate-flatbuffers
 
 # Start PostgreSQL container
-postgres-start VERSION="15":
+postgres-start:
     #!/usr/bin/env bash
     count=`{{ DOCKER }} container ls --quiet --noheading --filter name=wfx-postgres --filter "health=healthy" | wc -l`
+    image=`grep -m1 -o "image: postgres:.*" .github/workflows/ci.yml | sed -e 's/image:\s*//'`
     if [[ $count -eq 0 ]]; then
-        echo "Starting PostgreSQL {{ VERSION }}"
+        echo "Starting $image"
         {{ DOCKER }} run -d --rm \
             --name wfx-postgres \
             -e "POSTGRES_USER=$PGUSER" \
@@ -149,7 +138,7 @@ postgres-start VERSION="15":
             --health-interval 3s \
             --health-timeout 5s \
             --health-retries 20 \
-            docker.io/library/postgres:{{ VERSION }}-alpine
+            "docker.io/library/$image"
     else
         echo "PostgreSQL is already running"
     fi
@@ -203,8 +192,9 @@ _container-stop name:
 mysql-start:
     #!/usr/bin/env bash
     count=`{{ DOCKER }} container ls --quiet --noheading --filter name=wfx-mysql --filter "health=healthy" | wc -l`
+    image=`grep -m1 -o "image: mysql:.*" .github/workflows/ci.yml | sed -e 's/image:\s*//'`
     if [[ $count -eq 0 ]]; then
-        echo "Starting MySQL"
+        echo "Starting $image"
         {{ DOCKER }} run -d --rm \
             --name wfx-mysql \
             -e MYSQL_DATABASE \
@@ -214,7 +204,7 @@ mysql-start:
             --health-interval 3s \
             --health-timeout 5s \
             --health-retries 20 \
-            docker.io/library/mysql:8-debian
+            "docker.io/library/$image"
     else
         echo "MySQL is already running"
     fi

@@ -1,0 +1,105 @@
+.nh
+.TH "WFXCTL-JOB-UPDATE-DEFINITION" "1" "Dec 2024" "" ""
+
+.SH NAME
+.PP
+wfxctl-job-update-definition - Update job definition
+
+
+.SH SYNOPSIS
+.PP
+\fBwfxctl job update-definition [flags]\fP
+
+
+.SH DESCRIPTION
+.PP
+Update definition of an existing job using data provided via stdin
+
+
+.SH OPTIONS
+.PP
+\fB-h\fP, \fB--help\fP[=false]
+	help for update-definition
+
+.PP
+\fB--id\fP=""
+	job id
+
+
+.SH OPTIONS INHERITED FROM PARENT COMMANDS
+.PP
+\fB--client-host\fP="localhost"
+	host
+
+.PP
+\fB--client-port\fP=8080
+	port
+
+.PP
+\fB--client-tls-host\fP="localhost"
+	TLS host
+
+.PP
+\fB--client-tls-port\fP=8443
+	TLS port
+
+.PP
+\fB--client-unix-socket\fP=""
+	connect via the given unix-domain socket (if set, this overrides http/tls)
+
+.PP
+\fB--config\fP=[wfx.yml,/home/adlerm/.config/wfx/config.yml,/etc/wfx/wfx.yml]
+	path to one or more .yaml config files; if this option is not set, then the default paths are tried
+
+.PP
+\fB--enable-tls\fP[=false]
+	whether to enable TLS (https)
+
+.PP
+\fB--filter\fP=""
+	output filter (jq-expression). example: '.id'
+
+.PP
+\fB--log-level\fP="info"
+	set log level. one of: trace,debug,info,warn,error,fatal,panic
+
+.PP
+\fB--mgmt-host\fP="localhost"
+	management host
+
+.PP
+\fB--mgmt-port\fP=8081
+	management port
+
+.PP
+\fB--mgmt-tls-host\fP="localhost"
+	management TLS host
+
+.PP
+\fB--mgmt-tls-port\fP=8444
+	management TLS port
+
+.PP
+\fB--mgmt-unix-socket\fP=""
+	connect via the given unix-domain socket (if set, this overrides http/tls)
+
+.PP
+\fB--raw\fP[=false]
+	output raw strings, not JSON texts; use --filter to select a single entity
+
+.PP
+\fB--tls-ca\fP=""
+	ca bundle (PEM)
+
+
+.SH EXAMPLE
+.EX
+
+wfxctl job update-definition
+
+.EE
+
+
+.SH SEE ALSO
+.PP
+\fBwfxctl-job(1)\fP

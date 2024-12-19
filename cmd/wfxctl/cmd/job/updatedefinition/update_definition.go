@@ -10,62 +10,40 @@ package updatedefinition
 
 import (
 	"bufio"
-	"encoding/json"
-	"io"
+	"errors"
 
-	"github.com/rs/zerolog/log"
+	"github.com/Southclaws/fault"
 	"github.com/spf13/cobra"
 
 	"github.com/siemens/wfx/cmd/wfxctl/errutil"
 	"github.com/siemens/wfx/cmd/wfxctl/flags"
-	"github.com/siemens/wfx/generated/client/jobs"
 )
 
-const (
-	idFlag = "id"
-)
-
-func init() {
-	f := Command.Flags()
-	f.String(idFlag, "", "job id")
-}
-
-var Command = &cobra.Command{
-	Use:   "update-definition",
-	Short: "Update job definition",
-	Long:  `Update definition of an existing job using data provided via stdin`,
-	Example: `
+func NewCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "update-definition",
+		Short: "Update job definition",
+		Long:  `Update definition of an existing job using data provided via stdin`,
+		Example: `
 wfxctl job update-definition
 `,
-	TraverseChildren: true,
-	Run: func(cmd *cobra.Command, _ []string) {
-		baseCmd := flags.NewBaseCmd()
+		TraverseChildren: true,
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			baseCmd := flags.NewBaseCmd(cmd.Flags())
+			id := baseCmd.ID
+			if id == "" {
+				return errors.New("job id missing")
+			}
+			client := errutil.Must(baseCmd.CreateMgmtClient())
+			resp, err := client.PutJobsIdDefinitionWithBody(cmd.Context(), id, nil, "application/json", bufio.NewReader(cmd.InOrStdin()))
+			if err != nil {
+				return fault.Wrap(err)
+			}
+			return fault.Wrap(baseCmd.ProcessResponse(resp, cmd.OutOrStdout()))
+		},
+	}
 
-		b, err := io.ReadAll(bufio.NewReader(cmd.InOrStdin()))
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to read from stdin")
-		}
-
-		var definition map[string]any
-		err = json.Unmarshal(b, &definition)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to parse data from stdin")
-		}
-		client := errutil.Must(baseCmd.CreateHTTPClient())
-		params := jobs.NewPutJobsIDDefinitionParams().
-			WithHTTPClient(client).
-			WithID(flags.Koanf.String(idFlag)).
-			WithJobDefinition(definition)
-
-		resp, err := baseCmd.CreateMgmtClient().Jobs.PutJobsIDDefinition(params)
-		if err != nil {
-			errutil.ProcessErrorResponse(cmd.OutOrStderr(), err)
-			log.Fatal().Msg("Failed to update job definition")
-		}
-
-		log.Info().Str("id", params.ID).Msg("Updated job definition")
-		if err := baseCmd.DumpResponse(cmd.OutOrStdout(), resp.GetPayload()); err != nil {
-			log.Fatal().Err(err).Msg("Failed to print response")
-		}
-	},
+	f := cmd.Flags()
+	f.String(flags.IDFlag, "", "job id")
+	return cmd
 }

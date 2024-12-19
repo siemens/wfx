@@ -16,9 +16,10 @@ import (
 	"github.com/spf13/cobra/doc"
 )
 
-var (
-	manDir  string
-	Command = &cobra.Command{
+var manDir string
+
+func NewCommand() *cobra.Command {
+	cmd := &cobra.Command{
 		Use:   "man",
 		Short: "Generate man pages and exit",
 		RunE: func(cmd *cobra.Command, _ []string) error {
@@ -33,10 +34,8 @@ var (
 			return nil
 		},
 	}
-)
-
-func init() {
-	Command.Flags().StringVar(&manDir, "dir", "man", "directory to store the man page files")
+	cmd.Flags().StringVar(&manDir, "dir", "man", "directory to store the man page files")
+	return cmd
 }
 
 func disableAutoGenTag(cmd *cobra.Command) {

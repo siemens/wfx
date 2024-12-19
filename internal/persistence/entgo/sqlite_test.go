@@ -11,7 +11,6 @@ package entgo
  */
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"path"
@@ -21,20 +20,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/google/uuid"
-	"github.com/rs/zerolog/log"
 	"github.com/siemens/wfx/internal/persistence/tests"
-	"github.com/siemens/wfx/middleware/logging"
 	"github.com/siemens/wfx/persistence"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/goleak"
 )
-
-func TestSQLite_Initialize(t *testing.T) {
-	defer goleak.VerifyNone(t)
-	db := setupSQLite(t)
-	db.Shutdown()
-}
 
 func TestSQLite(t *testing.T) {
 	db := setupSQLite(t)
@@ -53,10 +42,6 @@ func TestSQLite(t *testing.T) {
 func setupSQLite(t *testing.T) SQLite {
 	var sqlite SQLite
 
-	reqID := uuid.New().String()
-	l := log.With().Str("reqID", reqID).Logger()
-	ctx := context.WithValue(context.Background(), logging.KeyRequestLogger, l)
-
 	dir, err := os.MkdirTemp("", "wfx.db.*")
 	require.NoError(t, err)
 	f, err := os.Create(path.Join(dir, "wfx.db"))
@@ -67,7 +52,7 @@ func setupSQLite(t *testing.T) SQLite {
 	})
 
 	opts := fmt.Sprintf("file:%s?_fk=1&_journal=WAL", f.Name())
-	err = sqlite.Initialize(ctx, opts)
+	err = sqlite.Initialize(opts)
 	require.NoError(t, err)
 	require.NotNil(t, sqlite.Database)
 	return sqlite
