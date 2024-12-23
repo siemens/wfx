@@ -27,6 +27,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Forbbiden requests (e.g. job creation via southbound API) now return HTTP status code 403 instead of 405
 - System certificates will be loaded automatically for TLS communication
 
+## [0.3.3] - 2024-12-23
+
+### Added
+
+- Generate SBOMs for release artifacts
+- Generate separate man pages for subcommands
+
 ## [0.3.2] - 2024-09-03
 
 ### Fixed
@@ -86,4 +93,5 @@ Initial release of wfx.
 [0.3.0]: https://github.com/siemens/wfx/releases/tag/v0.3.0
 [0.3.1]: https://github.com/siemens/wfx/releases/tag/v0.3.1
 [0.3.2]: https://github.com/siemens/wfx/releases/tag/v0.3.2
-[unreleased]: https://github.com/siemens/wfx/compare/v0.3.2...HEAD
+[0.3.3]: https://github.com/siemens/wfx/releases/tag/v0.3.3
+[unreleased]: https://github.com/siemens/wfx/compare/v0.3.3...HEAD
