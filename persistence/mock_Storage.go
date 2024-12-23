@@ -574,7 +574,7 @@ func (_c *MockStorage_QueryWorkflows_Call) RunAndReturn(run func(context.Context
 	return _c
 }
 
-// Shutdown provides a mock function with given fields:
+// Shutdown provides a mock function with no fields
 func (_m *MockStorage) Shutdown() {
 	_m.Called()
 }
@@ -602,7 +602,7 @@ func (_c *MockStorage_Shutdown_Call) Return() *MockStorage_Shutdown_Call {
 }
 
 func (_c *MockStorage_Shutdown_Call) RunAndReturn(run func()) *MockStorage_Shutdown_Call {
-	_c.Call.Return(run)
+	_c.Run(run)
 	return _c
 }
 
