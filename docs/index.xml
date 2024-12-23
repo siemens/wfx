@@ -43,7 +43,7 @@ for client-side transitions.&lt;/p></description></item><item><title>REST API</t
 &lt;script>
  window.onload = function () {
  const ui = SwaggerUIBundle({
- url: "/wfx/wfx.swagger.yml",
+ url: "/wfx/wfx.openapiv3.yml",
  dom_id: '#docsy_swagger_ui',
  presets: [
  SwaggerUIBundle.presets.apis,
