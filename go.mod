@@ -14,7 +14,7 @@ require (
 	github.com/go-openapi/strfmt v0.23.0
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/golang-migrate/migrate/v4 v4.18.1
-	github.com/google/flatbuffers v24.3.25+incompatible
+	github.com/google/flatbuffers v24.12.23+incompatible
 	github.com/gookit/color v1.5.4
 	github.com/itchyny/gojq v0.12.17
 	github.com/jackc/pgx/v5 v5.7.2
@@ -36,7 +36,7 @@ require (
 	github.com/steinfletcher/apitest v1.5.17
 	github.com/steinfletcher/apitest-jsonpath v1.7.2
 	github.com/stretchr/testify v1.10.0
-	github.com/tmaxmax/go-sse v0.8.0
+	github.com/tmaxmax/go-sse v0.10.0
 	github.com/tsenart/vegeta/v12 v12.12.0
 	github.com/yourbasic/graph v0.0.0-20210606180040-8ecfec1c2869
 	go.uber.org/automaxprocs v1.6.0
