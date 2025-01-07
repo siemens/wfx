@@ -15,10 +15,10 @@ mkShell {
     htmltest
 
     nodePackages.sql-formatter
-    nodePackages.markdown-link-check
     nodePackages.prettier
     nodePackages.markdownlint-cli
     shfmt
+    lychee
 
     go-swagger
     golangci-lint
