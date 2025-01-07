@@ -9,4 +9,4 @@ apt-get install -q -y --no-install-recommends npm imagemagick librsvg2-bin
 "$SCRIPT_DIR/packages/hugo.sh"
 "$SCRIPT_DIR/packages/just.sh"
 "$SCRIPT_DIR/packages/pandoc.sh"
-"$SCRIPT_DIR/packages/markdown-link-check.sh"
+"$SCRIPT_DIR/packages/lychee.sh"
