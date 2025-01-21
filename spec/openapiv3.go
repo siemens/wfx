@@ -41,8 +41,12 @@ func init() {
 		_, _ = w.Write(jsonData)
 	})
 
-	Handlers["GET /"] = http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusNotFound)
-		_, _ = w.Write([]byte(fmt.Sprintf("The requested resource could not be found.\n\nHint: Check %s to see available endpoints.\n", specEndpoint)))
+	Handlers["GET /"] = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		scheme := "http"
+		if r.TLS != nil {
+			scheme = "https"
+		}
+		w.Header().Set("Link", fmt.Sprintf(`<%s://%s%s>; rel="service-desc"`, scheme, r.Host, specEndpoint))
+		w.WriteHeader(http.StatusNoContent)
 	})
 }

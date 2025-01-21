@@ -15,6 +15,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path"
+	"strings"
 	"testing"
 
 	"github.com/siemens/wfx/cmd/wfx/cmd/config"
@@ -43,9 +44,8 @@ func TestTopLevelNotFound(t *testing.T) {
 	rec := httptest.NewRecorder()
 	mux.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/", nil))
 	result := rec.Result()
-	assert.Equal(t, http.StatusNotFound, result.StatusCode)
-	b, _ := io.ReadAll(result.Body)
-	assert.Equal(t, "The requested resource could not be found.\n\nHint: Check /api/wfx/v1/openapi.json to see available endpoints.\n", string(b))
+	assert.Equal(t, http.StatusNoContent, result.StatusCode)
+	assert.Equal(t, strings.HasSuffix(result.Header.Get("Link"), `/api/wfx/v1/openapi.json>; rel="service-desc"`), true)
 }
 
 func TestDownloadRedirect(t *testing.T) {
