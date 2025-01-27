@@ -13,6 +13,7 @@ package root
 import (
 	"os"
 	"path"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -46,7 +47,9 @@ func TestLoadPlugins(t *testing.T) {
 	plugins, err := loadPlugins(dir)
 	require.NoError(t, err)
 	assert.Len(t, plugins, 1)
-	assert.Equal(t, f.Name(), plugins[0].Name())
+	expected, _ := filepath.EvalSymlinks(f.Name())
+	is, _ := filepath.EvalSymlinks(plugins[0].Name())
+	assert.Equal(t, expected, is)
 }
 
 func TestLoadPluginsIgnoreNonExecutable(t *testing.T) {
@@ -87,7 +90,9 @@ func TestLoadPluginsSymlink(t *testing.T) {
 	plugins, err := loadPlugins(second)
 	require.NoError(t, err)
 	assert.Len(t, plugins, 1)
-	assert.Equal(t, f.Name(), plugins[0].Name())
+	expected, _ := filepath.EvalSymlinks(f.Name())
+	is, _ := filepath.EvalSymlinks(plugins[0].Name())
+	assert.Equal(t, expected, is)
 }
 
 func TestLoadPluginsSymlinkIgnoreNonExecutable(t *testing.T) {
