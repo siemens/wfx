@@ -27,8 +27,9 @@ paths:
       tags:
         - southbound
         - northbound
-      summary: Query health status
-      description: Query health status
+      summary: Query wfx's health status
+      description: Query wfx's health status
+      x-cli-name: health
       responses:
         default:
           description: Other error with any status code and response body format.
@@ -68,8 +69,9 @@ paths:
 
   /version:
     get:
-      summary: Get version information
-      description: Returns the version information of the application
+      summary: Query wfx's version information
+      description: Query wfx's version information
+      x-cli-name: version
       responses:
         default:
           description: Other error with any status code and response body format.
@@ -104,8 +106,9 @@ paths:
       tags:
         - southbound
         - northbound
-      summary: List of available workflows
-      description: List of available workflows
+      summary: List available workflows
+      description: Detailed list of available workflows
+      x-cli-name: list-workflows
       parameters:
         - $ref: "#/components/parameters/responseFilter"
         - $ref: "#/components/parameters/limit"
@@ -126,6 +129,7 @@ paths:
         - northbound
       summary: Add a new workflow
       description: Add a new workflow
+      x-cli-name: add-workflow
       parameters:
         - $ref: "#/components/parameters/responseFilter"
       requestBody:
@@ -163,8 +167,9 @@ paths:
       tags:
         - southbound
         - northbound
-      summary: Workflow description for a given name
-      description: Workflow description for a given name
+      summary: Get specific workflow's details
+      description: Get details of a specific workflow
+      x-cli-name: get-workflow
       parameters:
         - $ref: "#/components/parameters/responseFilter"
         - name: name
@@ -204,9 +209,9 @@ paths:
     delete:
       tags:
         - northbound
-      summary: Delete an existing workflow
-      description: |
-        Delete an existing workflow
+      summary: Delete a specific workflow
+      description: Delete a specific workflow
+      x-cli-name: delete-workflow
       parameters:
         - name: name
           in: path
@@ -238,13 +243,14 @@ paths:
       tags:
         - southbound
         - northbound
-      summary: List of job descriptions
+      summary: List available jobs
       description: |
-        List of job descriptions
+        Detailed list of jobs
         By default, this endpoint returns the list of jobs in a specific order and predetermined paging properties.
         These defaults are:
           - Ascending sort on stime
           - 10 entries per page
+      x-cli-name: list-jobs
       parameters:
         - $ref: "#/components/parameters/responseFilter"
         - $ref: "#/components/parameters/limit"
@@ -286,8 +292,8 @@ paths:
       tags:
         - northbound
       summary: Add a new job
-      description: |
-        Add a new job
+      description: Add a new job
+      x-cli-name: add-job
       parameters:
         - $ref: "#/components/parameters/responseFilter"
       requestBody:
@@ -328,6 +334,7 @@ paths:
       description: |
         Obtain instant notifications when there are job changes matching the criteria. This endpoint utilizes server-sent events (SSE), where responses are "chunked" with double newline breaks. For example, a single event might look like this:
           data: {"clientId":"example_client","state":"INSTALLING"}\n\n
+      x-cli-hidden: true
       parameters:
         - name: clientIds
           in: query
@@ -396,9 +403,9 @@ paths:
       tags:
         - southbound
         - northbound
-      summary: Job description for a given ID
-      description: |
-        Job description for a given ID
+      summary: Get specific job's details
+      description: Get details of a specific job
+      x-cli-name: get-job
       parameters:
         - $ref: "#/components/parameters/responseFilter"
         - name: id
@@ -439,9 +446,9 @@ paths:
     delete:
       tags:
         - northbound
-      summary: Delete an existing job
-      description: |
-        Delete an existing job
+      summary: Delete a specific job
+      description: Delete a specific job
+      x-cli-name: delete-job
       parameters:
         - name: id
           in: path
@@ -473,8 +480,9 @@ paths:
       tags:
         - southbound
         - northbound
-      summary: Get job status
-      description: Retrieve the job status
+      summary: Get specific job's status
+      description: Get status of a specific job
+      x-cli-name: get-job-status
       parameters:
         - $ref: "#/components/parameters/responseFilter"
         - name: id
@@ -506,9 +514,9 @@ paths:
       tags:
         - southbound
         - northbound
-      summary: Modify status of an existing job
-      description: |
-        Modify status of an existing job
+      summary: Modify specific job's status
+      description: Modify a specific job's status
+      x-cli-name: modify-job-status
       parameters:
         - $ref: "#/components/parameters/responseFilter"
         - name: id
@@ -559,8 +567,9 @@ paths:
       tags:
         - southbound
         - northbound
-      summary: Get job definition
-      description: Retrieve the job definition
+      summary: Get specific job's definition
+      description: Get definition of a specific job
+      x-cli-name: get-job-definition
       parameters:
         - $ref: "#/components/parameters/responseFilter"
         - name: id
@@ -594,9 +603,9 @@ paths:
       tags:
         - southbound
         - northbound
-      summary: Modify job definition
-      description: |
-        Modify the job definition of an existing job
+      summary: Modify specific job's definition
+      description: Modify specific job's definition
+      x-cli-name: modify-job-definition
       parameters:
         - $ref: "#/components/parameters/responseFilter"
         - name: id
@@ -651,8 +660,9 @@ paths:
       tags:
         - southbound
         - northbound
-      summary: Get tags
-      description: Get the tags of a job
+      summary: Get specific job's tags
+      description: Get tags of a specific job
+      x-cli-name: get-job-tags
       parameters:
         - $ref: "#/components/parameters/responseFilter"
         - name: id
@@ -683,9 +693,9 @@ paths:
     post:
       tags:
         - northbound
-      summary: Add a tag
-      description: |
-        Add a tag to an existing job
+      summary: Add a tag to a specific job
+      description: Add a tag to a specific job
+      x-cli-name: add-job-tag
       parameters:
         - $ref: "#/components/parameters/responseFilter"
         - name: id
@@ -739,9 +749,9 @@ paths:
     delete:
       tags:
         - northbound
-      summary: Delete a tag
-      description: |
-        Delete a tag from an existing job
+      summary: Delete a tag from a specific job
+      description: Delete a tag from a specific job
+      x-cli-name: delete-job-tag
       parameters:
         - $ref: "#/components/parameters/responseFilter"
         - name: id
@@ -1296,6 +1306,7 @@ components:
         default: 0
     responseFilter:
       name: X-Response-Filter
+      x-cli-name: filter
       in: header
       description: Apply a jq-like filter to the response
       required: false
