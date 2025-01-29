@@ -6,3 +6,4 @@
 no_progress = true
 exclude_loopback = true
 accept = ["200..=204", "429"]
+exclude = ['^https://www\.gnu\.org', '^https://www\.mysql\.com']
