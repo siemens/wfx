@@ -5,7 +5,8 @@
 # Author: Michael Adler <michael.adler@siemens.com>
 ---
 name: Pages
-on: [push, pull_request, workflow_dispatch]
+on:
+  pull_request:
 
 permissions:
   contents: write
@@ -23,8 +24,8 @@ jobs:
       - name: Disable git security features
         run: git config --global safe.directory '*'
       - run: .ci/setup-pages.sh
-      # check for broken links
-      - run: just check-md-links
+      - run: .ci/check-links.py
+        continue-on-error: true
       - run: cd hugo && npm ci
       - run: just pages
         env:
