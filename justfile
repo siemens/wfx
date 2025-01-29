@@ -248,6 +248,6 @@ sqlite-generate-schema name:
 
 # Check links used in Markdown files.
 check-md-links:
-    git ls-files -z "*.md" | xargs -0 lychee
+    .ci/check-links.py
 
 # vim: ts=4 sw=4 expandtab
