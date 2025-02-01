@@ -14,7 +14,7 @@ require (
 	github.com/go-openapi/strfmt v0.23.0
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/golang-migrate/migrate/v4 v4.18.2
-	github.com/google/flatbuffers v24.12.23+incompatible
+	github.com/google/flatbuffers v25.1.24+incompatible
 	github.com/gookit/color v1.5.4
 	github.com/itchyny/gojq v0.12.17
 	github.com/jackc/pgx/v5 v5.7.2
