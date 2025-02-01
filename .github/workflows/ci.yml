@@ -12,7 +12,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    container: golang:1.23.4@sha256:7ea4c9dcb2b97ff8ee80a67db3d44f98c8ffa0d191399197007d8459c1453041
+    container: golang:1.23.5@sha256:8c10f21bec412f08f73aa7b97ca5ac5f28a39d8a88030ad8a339fd0a781d72b4
     strategy:
       matrix:
         # even though Windows is not officially supported, we want it to at least compile successfully
@@ -39,7 +39,7 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
-    container: golang:1.23.4@sha256:7ea4c9dcb2b97ff8ee80a67db3d44f98c8ffa0d191399197007d8459c1453041
+    container: golang:1.23.5@sha256:8c10f21bec412f08f73aa7b97ca5ac5f28a39d8a88030ad8a339fd0a781d72b4
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Setup Golang caches
@@ -53,7 +53,7 @@ jobs:
             ${{ runner.os }}-golang-
       - run: make test
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@1e68e06f1dbfde0e4cefc87efeba9e4643565303 # v5
+        uses: codecov/codecov-action@13ce06bfc6bbe3ecf90edbbf1bc32fe5978ca1d3 # v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: coverage.out
@@ -61,10 +61,10 @@ jobs:
   test-postgres:
     runs-on: ubuntu-latest
     name: Test PostgreSQL
-    container: golang:1.23.4@sha256:7ea4c9dcb2b97ff8ee80a67db3d44f98c8ffa0d191399197007d8459c1453041
+    container: golang:1.23.5@sha256:8c10f21bec412f08f73aa7b97ca5ac5f28a39d8a88030ad8a339fd0a781d72b4
     services:
       postgres:
-        image: postgres:17@sha256:888402a8cd6075c5dc83a31f58287f13306c318eaad016661ed12e076f3e6341
+        image: postgres:17@sha256:87ec5e0a167dc7d4831729f9e1d2ee7b8597dcc49ccd9e43cc5f89e808d2adae
         env:
           # see https://hub.docker.com/_/postgres
           POSTGRES_HOST: postgres
@@ -101,7 +101,7 @@ jobs:
           PGSSLMODE: disable
       - name: Upload coverage to Codecov
         # note: v4 is buggy and fails to upload this report
-        uses: codecov/codecov-action@1e68e06f1dbfde0e4cefc87efeba9e4643565303 # v5
+        uses: codecov/codecov-action@13ce06bfc6bbe3ecf90edbbf1bc32fe5978ca1d3 # v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: coverage.out
@@ -109,7 +109,7 @@ jobs:
   test-mysql:
     runs-on: ubuntu-latest
     name: Test MySQL
-    container: golang:1.23.4@sha256:7ea4c9dcb2b97ff8ee80a67db3d44f98c8ffa0d191399197007d8459c1453041
+    container: golang:1.23.5@sha256:8c10f21bec412f08f73aa7b97ca5ac5f28a39d8a88030ad8a339fd0a781d72b4
     services:
       mysql:
         image: mysql:8-debian@sha256:49f4fcb0087318aa1c222c7e8ceacbb541cdc457c6307d45e6ee4313f4902e33
@@ -147,7 +147,7 @@ jobs:
           MYSQL_HOST: mysql
       - name: Upload coverage to Codecov
         # note: v4 is buggy and fails to upload this report
-        uses: codecov/codecov-action@1e68e06f1dbfde0e4cefc87efeba9e4643565303 # v5
+        uses: codecov/codecov-action@13ce06bfc6bbe3ecf90edbbf1bc32fe5978ca1d3 # v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: coverage.out
@@ -155,7 +155,7 @@ jobs:
   cli-tests:
     name: CLI Tests
     runs-on: ubuntu-latest
-    container: golang:1.23.4@sha256:7ea4c9dcb2b97ff8ee80a67db3d44f98c8ffa0d191399197007d8459c1453041
+    container: golang:1.23.5@sha256:8c10f21bec412f08f73aa7b97ca5ac5f28a39d8a88030ad8a339fd0a781d72b4
     services:
       mysql:
         image: mysql:8-debian@sha256:49f4fcb0087318aa1c222c7e8ceacbb541cdc457c6307d45e6ee4313f4902e33
@@ -173,7 +173,7 @@ jobs:
           --health-timeout 5s
           --health-retries 20
       postgres:
-        image: postgres:17@sha256:888402a8cd6075c5dc83a31f58287f13306c318eaad016661ed12e076f3e6341
+        image: postgres:17@sha256:87ec5e0a167dc7d4831729f9e1d2ee7b8597dcc49ccd9e43cc5f89e808d2adae
         env:
           # see https://hub.docker.com/_/postgres
           POSTGRES_HOST: postgres
@@ -226,7 +226,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     name: Lint
-    container: golang:1.23.4@sha256:7ea4c9dcb2b97ff8ee80a67db3d44f98c8ffa0d191399197007d8459c1453041
+    container: golang:1.23.5@sha256:8c10f21bec412f08f73aa7b97ca5ac5f28a39d8a88030ad8a339fd0a781d72b4
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Disable git security features
@@ -245,7 +245,7 @@ jobs:
   generate:
     name: Generate Code
     runs-on: ubuntu-latest
-    container: golang:1.23.4@sha256:7ea4c9dcb2b97ff8ee80a67db3d44f98c8ffa0d191399197007d8459c1453041
+    container: golang:1.23.5@sha256:8c10f21bec412f08f73aa7b97ca5ac5f28a39d8a88030ad8a339fd0a781d72b4
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Install packages
