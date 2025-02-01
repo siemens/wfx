@@ -5,11 +5,11 @@ for Linux, specifically
 
 &lt;a href="https://github.com/golang/go/wiki/MinimumRequirements#arm64" target="_blank">arm64&lt;/a> architectures.&lt;/p>
 &lt;p>To start a container hosting wfx, follow these commands:&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#998;font-style:italic"># create a named volume to persist data (only needed the first time)&lt;/span>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#57606a"># create a named volume to persist data (only needed the first time)&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>docker volume create wfx-db
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>docker run --rm -v wfx-db:/home/nonroot &lt;span style="color:#d14">\
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#d14">&lt;/span> -p 8080:8080 -p 8081:8081 &lt;span style="color:#d14">\
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#d14">&lt;/span> ghcr.io/siemens/wfx:latest
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>docker run --rm -v wfx-db:/home/nonroot &lt;span style="color:#0a3069">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#0a3069">&lt;/span> -p 8080:8080 -p 8081:8081 &lt;span style="color:#0a3069">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#0a3069">&lt;/span> ghcr.io/siemens/wfx:latest
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>If pre-built binaries are not available (refer to &lt;code>go tool dist list&lt;/code> for alternative platforms and architectures, such
 as Windows or macOS), or if specific features need to be disabled during compilation, building wfx from source is
 necessary.&lt;/p></description></item><item><title>Configuration</title><link>https://siemens.github.io/wfx/docs/configuration/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://siemens.github.io/wfx/docs/configuration/</guid><description>&lt;p>wfx is configured in the following order of precedence using&lt;/p>

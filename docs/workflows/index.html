@@ -46,102 +46,102 @@ also for bandwidth reasons. Clients requiring a job&rsquo;s historical data must
 include the <code>history=true</code> parameter in their request.</p><h3 id=deleting-jobs>Deleting Jobs</h3><p>Jobs can be deleted using the northbound REST API. For example, this can be used to perform maintenance on old jobs.
 Note that wfx does not perform any housekeeping on its own.</p><h2 id=kanban-example-workflow>Kanban Example Workflow</h2><p>An exemplary
 <a href=https://en.wikipedia.org/wiki/Kanban target=_blank>Kanban</a>-inspired workflow YAML specification may be defined as
-follows:</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:navy>name</span>:<span style=color:#bbb> </span>wfx.workflow.kanban<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb></span><span style=color:navy>groups</span>:<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>  </span>- <span style=color:navy>name</span>:<span style=color:#bbb> </span>OPEN<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>description</span>:<span style=color:#bbb> </span>The task is ready for the client(s).<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>states</span>:<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>      </span>- NEW<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>      </span>- PROGRESS<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>      </span>- VALIDATE<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>  </span>- <span style=color:navy>name</span>:<span style=color:#bbb> </span>CLOSED<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>description</span>:<span style=color:#bbb> </span>The task is in a final state, i.e. it cannot progress any further.<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>states</span>:<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>      </span>- DONE<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>      </span>- DISCARDED<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb></span><span style=color:navy>states</span>:<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>  </span>- <span style=color:navy>name</span>:<span style=color:#bbb> </span>BACKLOG<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>description</span>:<span style=color:#bbb> </span>Task is created<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>  </span>- <span style=color:navy>name</span>:<span style=color:#bbb> </span>NEW<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>description</span>:<span style=color:#bbb> </span>task is ready to be pulled<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>  </span>- <span style=color:navy>name</span>:<span style=color:#bbb> </span>PROGRESS<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>description</span>:<span style=color:#bbb> </span>task is being worked on<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>  </span>- <span style=color:navy>name</span>:<span style=color:#bbb> </span>VALIDATE<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>description</span>:<span style=color:#bbb> </span>task is validated<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>  </span>- <span style=color:navy>name</span>:<span style=color:#bbb> </span>DONE<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>description</span>:<span style=color:#bbb> </span>task is done according to the definition of done<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>  </span>- <span style=color:navy>name</span>:<span style=color:#bbb> </span>DISCARDED<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>description</span>:<span style=color:#bbb> </span>task is discarded<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb></span><span style=color:navy>transitions</span>:<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>  </span>- <span style=color:navy>from</span>:<span style=color:#bbb> </span>BACKLOG<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>to</span>:<span style=color:#bbb> </span>NEW<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>eligible</span>:<span style=color:#bbb> </span>WFX<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>action</span>:<span style=color:#bbb> </span>IMMEDIATE<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>description</span>:<span style=color:#bbb> </span>|<span style=color:#d14>
-</span></span></span><span style=display:flex><span><span style=color:#d14>      Immediately transition to &#34;NEW&#34; upon a task hitting the backlog,
-</span></span></span><span style=display:flex><span><span style=color:#d14>      conveniently done by wfx &#34;on behalf of&#34; the Product Owner.</span><span style=color:#bbb>      
-</span></span></span><span style=display:flex><span><span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>  </span>- <span style=color:navy>from</span>:<span style=color:#bbb> </span>NEW<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>to</span>:<span style=color:#bbb> </span>PROGRESS<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>eligible</span>:<span style=color:#bbb> </span>CLIENT<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>description</span>:<span style=color:#bbb> </span>|<span style=color:#d14>
-</span></span></span><span style=display:flex><span><span style=color:#d14>      A Developer pulls the task or
-</span></span></span><span style=display:flex><span><span style=color:#d14>      the Product Owner discards it (see below transition),
-</span></span></span><span style=display:flex><span><span style=color:#d14>      whoever comes first.</span><span style=color:#bbb>      
-</span></span></span><span style=display:flex><span><span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>  </span>- <span style=color:navy>from</span>:<span style=color:#bbb> </span>NEW<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>to</span>:<span style=color:#bbb> </span>DISCARDED<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>eligible</span>:<span style=color:#bbb> </span>WFX<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>description</span>:<span style=color:#bbb> </span>|<span style=color:#d14>
-</span></span></span><span style=display:flex><span><span style=color:#d14>      The Product Owner discards the task or
-</span></span></span><span style=display:flex><span><span style=color:#d14>      a Developer pulls it (see preceding transition),
-</span></span></span><span style=display:flex><span><span style=color:#d14>      whoever comes first.</span><span style=color:#bbb>      
-</span></span></span><span style=display:flex><span><span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>  </span>- <span style=color:navy>from</span>:<span style=color:#bbb> </span>PROGRESS<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>to</span>:<span style=color:#bbb> </span>VALIDATE<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>eligible</span>:<span style=color:#bbb> </span>CLIENT<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>description</span>:<span style=color:#bbb> </span>|<span style=color:#d14>
-</span></span></span><span style=display:flex><span><span style=color:#d14>      The Developer has completed the task, it&#39;s ready for validation.</span><span style=color:#bbb>      
-</span></span></span><span style=display:flex><span><span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>  </span>- <span style=color:navy>from</span>:<span style=color:#bbb> </span>PROGRESS<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>to</span>:<span style=color:#bbb> </span>PROGRESS<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>eligible</span>:<span style=color:#bbb> </span>CLIENT<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>description</span>:<span style=color:#bbb> </span>|<span style=color:#d14>
-</span></span></span><span style=display:flex><span><span style=color:#d14>      The Developer reports task completion progress percentage.</span><span style=color:#bbb>      
-</span></span></span><span style=display:flex><span><span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>  </span>- <span style=color:navy>from</span>:<span style=color:#bbb> </span>VALIDATE<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>to</span>:<span style=color:#bbb> </span>DISCARDED<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>eligible</span>:<span style=color:#bbb> </span>WFX<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>description</span>:<span style=color:#bbb> </span>|<span style=color:#d14>
-</span></span></span><span style=display:flex><span><span style=color:#d14>      The task result has no customer value.</span><span style=color:#bbb>      
-</span></span></span><span style=display:flex><span><span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>  </span>- <span style=color:navy>from</span>:<span style=color:#bbb> </span>VALIDATE<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>to</span>:<span style=color:#bbb> </span>DISCARDED<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>eligible</span>:<span style=color:#bbb> </span>CLIENT<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>description</span>:<span style=color:#bbb> </span>|<span style=color:#d14>
-</span></span></span><span style=display:flex><span><span style=color:#d14>      The task result cannot be integrated into Production software.</span><span style=color:#bbb>      
-</span></span></span><span style=display:flex><span><span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>  </span>- <span style=color:navy>from</span>:<span style=color:#bbb> </span>VALIDATE<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>to</span>:<span style=color:#bbb> </span>DONE<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>eligible</span>:<span style=color:#bbb> </span>CLIENT<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>description</span>:<span style=color:#bbb> </span>|<span style=color:#d14>
-</span></span></span><span style=display:flex><span><span style=color:#d14>      A Developer has validated the task result as useful.</span><span style=color:#bbb>      
-</span></span></span><span style=display:flex><span><span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>  </span>- <span style=color:navy>from</span>:<span style=color:#bbb> </span>VALIDATE<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>to</span>:<span style=color:#bbb> </span>DONE<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>eligible</span>:<span style=color:#bbb> </span>WFX<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>action</span>:<span style=color:#bbb> </span>WAIT<span style=color:#bbb>
-</span></span></span><span style=display:flex><span><span style=color:#bbb>    </span><span style=color:navy>description</span>:<span style=color:#bbb> </span>|<span style=color:#d14>
-</span></span></span><span style=display:flex><span><span style=color:#d14>      The Product Owner has validated the task result as useful</span><span style=color:#bbb>      
+follows:</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#0550ae>name</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>wfx.workflow.kanban<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff></span><span style=color:#0550ae>groups</span><span style=color:#1f2328>:</span><span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>  </span>- <span style=color:#0550ae>name</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>OPEN<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>description</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>The task is ready for the client(s).<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>states</span><span style=color:#1f2328>:</span><span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>      </span>- NEW<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>      </span>- PROGRESS<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>      </span>- VALIDATE<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>  </span>- <span style=color:#0550ae>name</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>CLOSED<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>description</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>The task is in a final state, i.e. it cannot progress any further.<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>states</span><span style=color:#1f2328>:</span><span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>      </span>- DONE<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>      </span>- DISCARDED<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff></span><span style=color:#0550ae>states</span><span style=color:#1f2328>:</span><span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>  </span>- <span style=color:#0550ae>name</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>BACKLOG<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>description</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>Task is created<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>  </span>- <span style=color:#0550ae>name</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>NEW<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>description</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>task is ready to be pulled<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>  </span>- <span style=color:#0550ae>name</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>PROGRESS<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>description</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>task is being worked on<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>  </span>- <span style=color:#0550ae>name</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>VALIDATE<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>description</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>task is validated<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>  </span>- <span style=color:#0550ae>name</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>DONE<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>description</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>task is done according to the definition of done<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>  </span>- <span style=color:#0550ae>name</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>DISCARDED<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>description</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>task is discarded<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff></span><span style=color:#0550ae>transitions</span><span style=color:#1f2328>:</span><span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>  </span>- <span style=color:#0550ae>from</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>BACKLOG<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>to</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>NEW<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>eligible</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>WFX<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>action</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>IMMEDIATE<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>description</span><span style=color:#1f2328>:</span><span style=color:#fff> </span><span style=color:#1f2328>|</span><span style=color:#0a3069>
+</span></span></span><span style=display:flex><span><span style=color:#0a3069>      Immediately transition to &#34;NEW&#34; upon a task hitting the backlog,
+</span></span></span><span style=display:flex><span><span style=color:#0a3069>      conveniently done by wfx &#34;on behalf of&#34; the Product Owner.</span><span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>  </span>- <span style=color:#0550ae>from</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>NEW<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>to</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>PROGRESS<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>eligible</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>CLIENT<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>description</span><span style=color:#1f2328>:</span><span style=color:#fff> </span><span style=color:#1f2328>|</span><span style=color:#0a3069>
+</span></span></span><span style=display:flex><span><span style=color:#0a3069>      A Developer pulls the task or
+</span></span></span><span style=display:flex><span><span style=color:#0a3069>      the Product Owner discards it (see below transition),
+</span></span></span><span style=display:flex><span><span style=color:#0a3069>      whoever comes first.</span><span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>  </span>- <span style=color:#0550ae>from</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>NEW<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>to</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>DISCARDED<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>eligible</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>WFX<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>description</span><span style=color:#1f2328>:</span><span style=color:#fff> </span><span style=color:#1f2328>|</span><span style=color:#0a3069>
+</span></span></span><span style=display:flex><span><span style=color:#0a3069>      The Product Owner discards the task or
+</span></span></span><span style=display:flex><span><span style=color:#0a3069>      a Developer pulls it (see preceding transition),
+</span></span></span><span style=display:flex><span><span style=color:#0a3069>      whoever comes first.</span><span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>  </span>- <span style=color:#0550ae>from</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>PROGRESS<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>to</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>VALIDATE<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>eligible</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>CLIENT<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>description</span><span style=color:#1f2328>:</span><span style=color:#fff> </span><span style=color:#1f2328>|</span><span style=color:#0a3069>
+</span></span></span><span style=display:flex><span><span style=color:#0a3069>      The Developer has completed the task, it&#39;s ready for validation.</span><span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>  </span>- <span style=color:#0550ae>from</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>PROGRESS<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>to</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>PROGRESS<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>eligible</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>CLIENT<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>description</span><span style=color:#1f2328>:</span><span style=color:#fff> </span><span style=color:#1f2328>|</span><span style=color:#0a3069>
+</span></span></span><span style=display:flex><span><span style=color:#0a3069>      The Developer reports task completion progress percentage.</span><span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>  </span>- <span style=color:#0550ae>from</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>VALIDATE<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>to</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>DISCARDED<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>eligible</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>WFX<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>description</span><span style=color:#1f2328>:</span><span style=color:#fff> </span><span style=color:#1f2328>|</span><span style=color:#0a3069>
+</span></span></span><span style=display:flex><span><span style=color:#0a3069>      The task result has no customer value.</span><span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>  </span>- <span style=color:#0550ae>from</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>VALIDATE<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>to</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>DISCARDED<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>eligible</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>CLIENT<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>description</span><span style=color:#1f2328>:</span><span style=color:#fff> </span><span style=color:#1f2328>|</span><span style=color:#0a3069>
+</span></span></span><span style=display:flex><span><span style=color:#0a3069>      The task result cannot be integrated into Production software.</span><span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>  </span>- <span style=color:#0550ae>from</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>VALIDATE<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>to</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>DONE<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>eligible</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>CLIENT<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>description</span><span style=color:#1f2328>:</span><span style=color:#fff> </span><span style=color:#1f2328>|</span><span style=color:#0a3069>
+</span></span></span><span style=display:flex><span><span style=color:#0a3069>      A Developer has validated the task result as useful.</span><span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>  </span>- <span style=color:#0550ae>from</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>VALIDATE<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>to</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>DONE<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>eligible</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>WFX<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>action</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>WAIT<span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>description</span><span style=color:#1f2328>:</span><span style=color:#fff> </span><span style=color:#1f2328>|</span><span style=color:#0a3069>
+</span></span></span><span style=display:flex><span><span style=color:#0a3069>      The Product Owner has validated the task result as useful</span><span style=color:#fff>
 </span></span></span></code></pre></div><p>resulting in the following graph representation:</p><pre><code> BACKLOG
     │
     ▼
@@ -156,37 +156,37 @@ VALIDATE ─────┤
     │         │
     ▼         ▼
   DONE    DISCARDED
-</code></pre><h3 id=hands-on-playing-kanban>Hands-on: Playing Kanban</h3><p>Assuming the preceding Kanban workflow is saved in the file <code>wfx.workflow.kanban.yml</code>,</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>wfxctl workflow create --filter<span style=color:#000;font-weight:700>=</span>.transitions wfx.workflow.kanban.yml
+</code></pre><h3 id=hands-on-playing-kanban>Hands-on: Playing Kanban</h3><p>Assuming the preceding Kanban workflow is saved in the file <code>wfx.workflow.kanban.yml</code>,</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>wfxctl workflow create --filter<span style=color:#0550ae>=</span>.transitions wfx.workflow.kanban.yml
 </span></span></code></pre></div><p>loads the Kanban workflow into wfx making it available to create jobs driven by it. Note that the the command&rsquo;s output
 was made less verbose by using a <code>--filter</code> to only show the transitions.</p><p>Henceforth, a job is identified with a &ldquo;Task&rdquo; and a state is identified with a &ldquo;Lane&rdquo; in Kanban board parlance. The
 Product Owner Parker as also owning and managing the Kanban &ldquo;Board&rdquo; instruments the northbound wfx management interface
 while Developers instrument the southbound client interface.</p><p>Now that the Kanban workflow is available, Product Owner Parker creates a new Backlog item ― overriding the Pull
-principle ― to be taken by the highly specialized Developer Dana:</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span><span style=color:#0086b3>echo</span> <span style=color:#d14>&#39;{ &#34;title&#34;: &#34;expose job api&#34; }&#39;</span> | <span style=color:#d14>\
-</span></span></span><span style=display:flex><span><span style=color:#d14></span>    wfxctl job create --workflow wfx.workflow.kanban <span style=color:#d14>\
-</span></span></span><span style=display:flex><span><span style=color:#d14></span>                      --client-id dana <span style=color:#d14>\
-</span></span></span><span style=display:flex><span><span style=color:#d14></span>                      --filter<span style=color:#000;font-weight:700>=</span><span style=color:#d14>&#39;del(.workflow)&#39;</span> -
+principle ― to be taken by the highly specialized Developer Dana:</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span><span style=color:#6639ba>echo</span> <span style=color:#0a3069>&#39;{ &#34;title&#34;: &#34;expose job api&#34; }&#39;</span> <span style=color:#1f2328>|</span> <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>    wfxctl job create --workflow wfx.workflow.kanban <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>                      --client-id dana <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>                      --filter<span style=color:#0550ae>=</span><span style=color:#0a3069>&#39;del(.workflow)&#39;</span> -
 </span></span></code></pre></div><p>The Task is immediately transitioned to the &ldquo;NEW&rdquo; state (Kanban Lane) by wfx on behalf of the Product Owner Parker as
 the transition&rsquo;s <code>action</code> is <code>IMMEDIATE</code>. Note that the piped-in JSON document is the <em>Job Definition</em> (see
 <a href=/wfx.openapiv3.yml>wfx OpenAPI
 Specification</a>) which is the contract between the operator (Product Owner) creating jobs (Tasks) and
-the clients (Developers) executing those jobs so that they&rsquo;re actually able to process the job.</p><p>Then, Developer Dana, knowing the job (Task) Identifier, pulls the task into &ldquo;PROGRESS&rdquo;</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>wfxctl job update-status <span style=color:#d14>\
-</span></span></span><span style=display:flex><span><span style=color:#d14></span>    --actor<span style=color:#000;font-weight:700>=</span>client <span style=color:#d14>\
-</span></span></span><span style=display:flex><span><span style=color:#d14></span>    --id<span style=color:#000;font-weight:700>=</span><span style=color:#099>1</span> <span style=color:#d14>\
-</span></span></span><span style=display:flex><span><span style=color:#d14></span>    --state<span style=color:#000;font-weight:700>=</span>PROGRESS
-</span></span></code></pre></div><p>and starts working on it.</p><p>Traditional tools like <code>curl</code> can also be used instead of <code>wfxctl</code> to achieve the same result:</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>curl -X PUT <span style=color:#d14>\
-</span></span></span><span style=display:flex><span><span style=color:#d14></span>  http://localhost:8080/api/wfx/v1/jobs/1/status <span style=color:#d14>\
-</span></span></span><span style=display:flex><span><span style=color:#d14></span>  -H <span style=color:#d14>&#39;Content-Type: application/json&#39;</span> <span style=color:#d14>\
-</span></span></span><span style=display:flex><span><span style=color:#d14></span>  -H <span style=color:#d14>&#39;Accept: application/json&#39;</span> <span style=color:#d14>\
-</span></span></span><span style=display:flex><span><span style=color:#d14></span>  -d <span style=color:#d14>&#39;{&#34;state&#34;:&#34;PROGRESS&#34;}&#39;</span>
-</span></span></code></pre></div><p>Meanwhile, Developer Dana sporadically reports progress</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>wfxctl job update-status <span style=color:#d14>\
-</span></span></span><span style=display:flex><span><span style=color:#d14></span>    --actor<span style=color:#000;font-weight:700>=</span>client <span style=color:#d14>\
-</span></span></span><span style=display:flex><span><span style=color:#d14></span>    --id<span style=color:#000;font-weight:700>=</span><span style=color:#099>1</span> <span style=color:#d14>\
-</span></span></span><span style=display:flex><span><span style=color:#d14></span>    --state<span style=color:#000;font-weight:700>=</span>PROGRESS <span style=color:#d14>\
-</span></span></span><span style=display:flex><span><span style=color:#d14></span>    --progress <span style=color:#000;font-weight:700>$((</span>RANDOM <span style=color:#000;font-weight:700>%</span> <span style=color:#099>100</span><span style=color:#000;font-weight:700>))</span>
-</span></span></code></pre></div><p>until having finished the task and progressing it into the &ldquo;VALIDATE&rdquo; state:</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>wfxctl job update-status <span style=color:#d14>\
-</span></span></span><span style=display:flex><span><span style=color:#d14></span>    --actor<span style=color:#000;font-weight:700>=</span>client <span style=color:#d14>\
-</span></span></span><span style=display:flex><span><span style=color:#d14></span>    --id<span style=color:#000;font-weight:700>=</span><span style=color:#099>1</span> <span style=color:#d14>\
-</span></span></span><span style=display:flex><span><span style=color:#d14></span>    --state<span style=color:#000;font-weight:700>=</span>VALIDATE
+the clients (Developers) executing those jobs so that they&rsquo;re actually able to process the job.</p><p>Then, Developer Dana, knowing the job (Task) Identifier, pulls the task into &ldquo;PROGRESS&rdquo;</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>wfxctl job update-status <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>    --actor<span style=color:#0550ae>=</span>client <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>    --id<span style=color:#0550ae>=</span><span style=color:#0550ae>1</span> <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>    --state<span style=color:#0550ae>=</span>PROGRESS
+</span></span></code></pre></div><p>and starts working on it.</p><p>Traditional tools like <code>curl</code> can also be used instead of <code>wfxctl</code> to achieve the same result:</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>curl -X PUT <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>  http://localhost:8080/api/wfx/v1/jobs/1/status <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>  -H <span style=color:#0a3069>&#39;Content-Type: application/json&#39;</span> <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>  -H <span style=color:#0a3069>&#39;Accept: application/json&#39;</span> <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>  -d <span style=color:#0a3069>&#39;{&#34;state&#34;:&#34;PROGRESS&#34;}&#39;</span>
+</span></span></code></pre></div><p>Meanwhile, Developer Dana sporadically reports progress</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>wfxctl job update-status <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>    --actor<span style=color:#0550ae>=</span>client <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>    --id<span style=color:#0550ae>=</span><span style=color:#0550ae>1</span> <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>    --state<span style=color:#0550ae>=</span>PROGRESS <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>    --progress <span style=color:#cf222e>$((</span>RANDOM <span style=color:#0550ae>%</span> <span style=color:#0550ae>100</span><span style=color:#cf222e>))</span>
+</span></span></code></pre></div><p>until having finished the task and progressing it into the &ldquo;VALIDATE&rdquo; state:</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>wfxctl job update-status <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>    --actor<span style=color:#0550ae>=</span>client <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>    --id<span style=color:#0550ae>=</span><span style=color:#0550ae>1</span> <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>    --state<span style=color:#0550ae>=</span>VALIDATE
 </span></span></code></pre></div><p>Then, Developer Dana may realize that the task result cannot be integrated into the Production software and may put it
 into &ldquo;DISCARDED&rdquo; or Product Owner Parker may come to the conclusion that no customer value is provided by the task
 result, also putting it into &ldquo;DISCARDED&rdquo; ― whoever realizes this first.</p><p>Or, if the task result greatly increases customer value, Developer Dana as being highly experienced may do the
