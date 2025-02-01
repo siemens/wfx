@@ -10,10 +10,10 @@ require (
 	github.com/approvals/go-approval-tests v1.1.0
 	github.com/cnf/structhash v0.0.0-20201127153200-e1b16c1ebc08
 	github.com/coreos/go-systemd/v22 v22.5.0
-	github.com/getkin/kin-openapi v0.128.0
+	github.com/getkin/kin-openapi v0.129.0
 	github.com/go-openapi/strfmt v0.23.0
 	github.com/go-sql-driver/mysql v1.8.1
-	github.com/golang-migrate/migrate/v4 v4.18.1
+	github.com/golang-migrate/migrate/v4 v4.18.2
 	github.com/google/flatbuffers v24.12.23+incompatible
 	github.com/gookit/color v1.5.4
 	github.com/itchyny/gojq v0.12.17
@@ -32,7 +32,7 @@ require (
 	github.com/rs/cors v1.11.1
 	github.com/rs/zerolog v1.33.0
 	github.com/spf13/cobra v1.8.1
-	github.com/spf13/pflag v1.0.5
+	github.com/spf13/pflag v1.0.6
 	github.com/steinfletcher/apitest v1.5.17
 	github.com/steinfletcher/apitest-jsonpath v1.7.2
 	github.com/stretchr/testify v1.10.0
@@ -99,6 +99,8 @@ require (
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
+	github.com/oasdiff/yaml v0.0.0-20241210131133-6b86fb107d80 // indirect
+	github.com/oasdiff/yaml3 v0.0.0-20241210130736-a94c01f36349 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
 	github.com/rs/dnscache v0.0.0-20230804202142-fc85eb664529 // indirect
@@ -109,7 +111,7 @@ require (
 	go.mongodb.org/mongo-driver v1.17.1 // indirect
 	go.opentelemetry.io/otel/metric v1.32.0 // indirect
 	golang.org/x/exp v0.0.0-20241210194714-1829a127f884 // indirect
-	golang.org/x/net v0.32.0 // indirect
+	golang.org/x/net v0.33.0 // indirect
 	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/tools v0.28.0 // indirect
 )
