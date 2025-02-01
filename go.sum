@@ -31,6 +31,8 @@ github.com/apparentlymart/go-textseg/v15 v15.0.0 h1:uYvfpb3DyLSCGWnctWKGj857c6ew
 github.com/apparentlymart/go-textseg/v15 v15.0.0/go.mod h1:K8XmNZdhEBkdlyDdvbmmsvpAG721bKi0joRfFdHIWJ4=
 github.com/approvals/go-approval-tests v0.0.0-20241211183344-15d1ffb738a9 h1:zfQwAI2fXGieaEZTtHdxha2Uq2MywDSUe8AXzdOKBtQ=
 github.com/approvals/go-approval-tests v0.0.0-20241211183344-15d1ffb738a9/go.mod h1:PJOqSY8IofNv3heAD6k8E7EfFS6okiSS9bSAasaAUME=
+github.com/approvals/go-approval-tests v1.1.0 h1:F8gaTl3QMSV6Jz3/fx3nsDQACckf6hdoOt4dPO5SbPI=
+github.com/approvals/go-approval-tests v1.1.0/go.mod h1:Jw45q7bEifPpUkRU2S5GCthnwDxMUWPHTGcNewVh6mw=
 github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 h1:DklsrG3dyBCFEj5IhUbnKptjxatkF07cF2ak3yi77so=
 github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2/go.mod h1:WaHUgvxTVq04UNunO+XhnAqY/wQc+bxr74GqbsZ/Jqw=
 github.com/bmatcuk/doublestar v1.1.1/go.mod h1:UD6OnuiIn0yFxxA2le/rnRU1G4RaI4UvFv1sNto9p6w=
