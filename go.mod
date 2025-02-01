@@ -7,7 +7,7 @@ require (
 	github.com/OpenPeeDeeP/xdg v1.0.0
 	github.com/Southclaws/fault v0.8.1
 	github.com/alexliesenfeld/health v0.8.0
-	github.com/approvals/go-approval-tests v0.0.0-20241211183344-15d1ffb738a9
+	github.com/approvals/go-approval-tests v1.1.0
 	github.com/cnf/structhash v0.0.0-20201127153200-e1b16c1ebc08
 	github.com/coreos/go-systemd/v22 v22.5.0
 	github.com/getkin/kin-openapi v0.128.0
