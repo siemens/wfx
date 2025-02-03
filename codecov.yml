@@ -17,6 +17,9 @@ ignore:
 
 coverage:
   status:
+    project:
+      default:
+        informational: true
     patch:
       default:
         target: auto
