@@ -246,7 +246,7 @@ func TestAPI(t *testing.T) {
 		httpClient := new(http.Client)
 		var spec openapi3.T
 		for i := 0; i < 100; i++ {
-			resp, err := httpClient.Get("http://localhost:8080/api/wfx/v1/openapiv3.json")
+			resp, err := httpClient.Get("http://localhost:8080/api/wfx/v1/openapi.json")
 			if err != nil {
 				time.Sleep(time.Millisecond * 10)
 				continue
