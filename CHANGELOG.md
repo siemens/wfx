@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `wfxctl workflow query` now accepts a `sort` param
 - Added (existing but undocumented) `/health` and `/version` endpoint to OpenAPI spec
-- OpenAPI v3 spec is served at `/api/wfx/v1/openapiv3.json`
+- OpenAPI v3 spec is served at `/api/wfx/v1/openapi.json`
 
 ### Fixed
 

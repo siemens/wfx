@@ -33,7 +33,7 @@ func TestNewServerCollection(t *testing.T) {
 func TestOpenAPIJSON(t *testing.T) {
 	mux := createMux(new(config.AppConfig), nil)
 	rec := httptest.NewRecorder()
-	mux.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/api/wfx/v1/openapiv3.json", nil))
+	mux.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/api/wfx/v1/openapi.json", nil))
 	result := rec.Result()
 	assert.Equal(t, http.StatusOK, result.StatusCode)
 }
@@ -45,7 +45,7 @@ func TestTopLevelNotFound(t *testing.T) {
 	result := rec.Result()
 	assert.Equal(t, http.StatusNotFound, result.StatusCode)
 	b, _ := io.ReadAll(result.Body)
-	assert.Equal(t, "The requested resource could not be found.\n\nHint: Check /api/wfx/v1/openapiv3.json to see available endpoints.\n", string(b))
+	assert.Equal(t, "The requested resource could not be found.\n\nHint: Check /api/wfx/v1/openapi.json to see available endpoints.\n", string(b))
 }
 
 func TestDownloadRedirect(t *testing.T) {

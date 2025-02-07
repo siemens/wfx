@@ -28,7 +28,7 @@ func init() {
 	servers := yamlObj["servers"].([]any)
 	servers2 := servers[0].(map[string]any)
 	basePath := servers2["url"]
-	specEndpoint := fmt.Sprintf("%s/openapiv3.json", basePath)
+	specEndpoint := fmt.Sprintf("%s/openapi.json", basePath)
 
 	jsonData, err := json.Marshal(yamlObj)
 	if err != nil {

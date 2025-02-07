@@ -23,7 +23,7 @@ wfx provides two RESTful APIs to interact with it: the northbound operator/manag
 The northbound API is used to create jobs and execute server-side state transitions, whereas the southbound
 API is used for client-side transitions.
 
-The complete [wfx API specification](../spec/wfx.openapiv3.yml) is accessible at runtime via the `/api/wfx/v1/openapiv3.json` endpoint.
+The complete [wfx API specification](../spec/wfx.openapiv3.yml) is accessible at runtime via the `/api/wfx/v1/openapi.json` endpoint.
 Clients may inspect this specification at run-time so to obey the various limits imposed, e.g, for parameter value ranges and array lengths.
 
 ### Job Events
