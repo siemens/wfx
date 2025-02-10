@@ -26,6 +26,7 @@ import (
 
 // CLI flags
 const (
+	VersionFlag          = "version"
 	ConfigFlag           = "config"
 	LogFormatFlag        = "log-format"
 	LogLevelFlag         = "log-level"
@@ -68,6 +69,7 @@ const (
 func NewFlagset() *pflag.FlagSet {
 	f := pflag.NewFlagSet("wfx", pflag.ExitOnError)
 
+	f.BoolP(VersionFlag, "v", false, "version for wfx")
 	f.StringSlice(ConfigFlag, DefaultConfigFiles(), "path to one or more .yaml config files")
 	f.StringSlice(SchemeFlag, []string{"http"}, "the listeners to enable, this can be repeated and defaults to the schemes in the swagger spec")
 	f.Duration(CleanupTimeoutFlag, 10*time.Second, "grace period for which to wait before killing idle connections")

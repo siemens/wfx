@@ -13,6 +13,8 @@ import (
 	"os"
 	"os/signal"
 	"os/user"
+	"slices"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -27,6 +29,8 @@ import (
 	"go.uber.org/automaxprocs/maxprocs"
 )
 
+var buildTags []string
+
 func NewCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "wfx",
@@ -35,10 +39,17 @@ func NewCommand() *cobra.Command {
 It drives tasks in coordination with clients through jobs, with each job instantiation including metadata to guide the client.
 
 Examples of tasks are installation of firmware or other types of commands issued to clients.`,
-		Version:      metadata.Version,
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			cfg, err := config.NewAppConfig(cmd.Flags())
+			flags := cmd.Flags()
+
+			if ok, _ := flags.GetBool(config.VersionFlag); ok {
+				slices.Sort(buildTags)
+				fmt.Printf("wfx version %s\n\nbuild tags: %s\n", metadata.Version, strings.Join(buildTags, ","))
+				return nil
+			}
+
+			cfg, err := config.NewAppConfig(flags)
 			if err != nil {
 				return fault.Wrap(err)
 			}
