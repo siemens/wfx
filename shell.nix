@@ -20,7 +20,6 @@ mkShell {
     shfmt
     lychee
 
-    go-swagger
     golangci-lint
     go-tools
     go-mockery

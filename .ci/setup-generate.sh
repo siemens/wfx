@@ -8,6 +8,5 @@ apt-get install -q -y --no-install-recommends python3-yaml git-lfs apt-transport
 
 "$SCRIPT_DIR/packages/just.sh"
 "$SCRIPT_DIR/packages/gofumpt.sh"
-"$SCRIPT_DIR/packages/go-swagger.sh"
 "$SCRIPT_DIR/packages/mockery.sh"
 "$SCRIPT_DIR/packages/flatbuffers.sh"
