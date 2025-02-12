@@ -6,7 +6,14 @@
 ---
 name: CI
 
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+  pull_request:
+  workflow_dispatch:
 
 jobs:
   build:
@@ -256,6 +263,7 @@ jobs:
       - run: git diff --exit-code
 
   release:
+    name: Release
     if: startsWith(github.event.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
