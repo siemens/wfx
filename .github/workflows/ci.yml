@@ -254,3 +254,50 @@ jobs:
         run: git config --global safe.directory '*'
       - run: just generate
       - run: git diff --exit-code
+
+  release:
+    if: startsWith(github.event.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      attestations: write
+      id-token: write
+    needs:
+      - build
+      - test
+      - test-postgres
+      - test-mysql
+      - cli-tests
+      - lint
+      - reuse
+      - generate
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          fetch-depth: 0
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Export Golang version as env variable
+        run: |
+          GO_VERSION=$(sed -n 's/.*container: golang:\([0-9]*\.[0-9]*\.[0-9]*\).*/\1/p' .github/workflows/ci.yml | head -n1)
+          # You can make an environment variable available to any subsequent
+          # steps in a workflow job by defining or updating the environment
+          # variable and writing this to the GITHUB_ENV environment file.
+          echo "GO_VERSION=$GO_VERSION" | tee -a "$GITHUB_ENV"
+      - uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # v5
+        with:
+          go-version: "${{ env.GO_VERSION }}"
+
+      - name: Setup build
+        run: sudo .ci/setup-build.sh
+      - name: Run GoReleaser
+        run: export CC="$(pwd)/.ci/zcc"; goreleaser release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
