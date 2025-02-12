@@ -57,7 +57,7 @@ linters:
     - errname
     - errorlint
     - exhaustive
-    - exportloopref
+    - copyloopvar
     - gocheckcompilerdirectives
     - goconst
     - gocritic
