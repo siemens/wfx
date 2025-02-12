@@ -25,6 +25,6 @@ require (
 	github.com/oasdiff/yaml3 v0.0.0-20241210130736-a94c01f36349 // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
 	github.com/rs/zerolog v1.33.0 // indirect
-	golang.org/x/sys v0.29.0 // indirect
+	golang.org/x/sys v0.30.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
