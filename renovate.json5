@@ -11,6 +11,7 @@
   ],
   assigneesFromCodeOwners: true,
   separateMajorMinor: true,
+  postUpdateOptions: ["gomodTidy"],
   customManagers: [
     {
       customType: "regex",
