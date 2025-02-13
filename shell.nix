@@ -22,9 +22,7 @@ mkShell {
 
     golangci-lint
     go-tools
-    go-mockery
     reuse
-    gofumpt
 
     gnumake
     goreleaser
