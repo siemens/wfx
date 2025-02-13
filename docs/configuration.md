@@ -15,8 +15,8 @@ Without configuration,
 ```
 
 starts wfx using the built-in SQLite-based persistent storage.
-The northbound (management) API is available at [http://127.0.0.1:8081/api/wfx/v1/](http://127.0.0.1:8081/api/wfx/v1/),
-whereas the southbound (client) API is available at a different port: [http://127.0.0.1:8080/api/wfx/v1](http://127.0.0.1:8080/api/wfx/v1).
+The northbound (management) API is available at `http://127.0.0.1:8081/api/wfx/v1/`,
+whereas the southbound (client) API is available at a different port: `http://127.0.0.1:8080/api/wfx/v1`.
 
 ## Systemd Integration
 

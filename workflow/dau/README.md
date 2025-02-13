@@ -131,7 +131,7 @@ wfx doesn't exercise any checks on compatibility.
 
 An exemplary job for a device called `example` (utilizing the [built-in simple file server](../../docs/configuration.md#file-server)) may be created as follows:
 
-```json
+```
 cat <<EOF | wfxctl job create --client-id example --workflow wfx.workflow.dau.direct -
 {
   "version": "1.0",

@@ -1,6 +1,6 @@
 # Build and Installation
 
-Pre-built binaries, as well as Debian and RPM packages, are available [here](https://github.com/siemens/wfx/releases) for Linux, specifically [x86_64](https://github.com/golang/go/wiki/MinimumRequirements#amd64) and [arm64](https://github.com/golang/go/wiki/MinimumRequirements#arm64) architectures.
+Pre-built binaries, as well as Debian and RPM packages, are available [here](https://github.com/siemens/wfx/releases) for Linux, specifically [x86_64](https://go.dev/wiki/MinimumRequirements#amd64) and [arm64](https://go.dev/wiki/MinimumRequirements#arm64) architectures.
 
 To start a container hosting wfx, follow these commands:
 
@@ -44,7 +44,7 @@ The following persistent storage selection build tags are available:
 | `libsqlite3` | Dynamically link against `libsqlite3`                            |
 | `postgres`   | Enable built-in [PostgreSQL](https://www.postgresql.org) support |
 | `mysql`      | Enable built-in [MySQL](https://www.mysql.com/) support          |
-| `plugin`     | Enable support for [external plugins](operations.md#Plugins)     |
+| `plugin`     | Enable support for [external plugins](operations.md#plugins)     |
 
 By default, all built-in persistent storage options are enabled (wfx requires at least one persistent storage to save workflows and jobs).
 
