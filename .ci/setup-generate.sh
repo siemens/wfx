@@ -7,6 +7,4 @@ apt-get update -q
 apt-get install -q -y --no-install-recommends python3-yaml git-lfs apt-transport-https unzip
 
 "$SCRIPT_DIR/packages/just.sh"
-"$SCRIPT_DIR/packages/gofumpt.sh"
-"$SCRIPT_DIR/packages/mockery.sh"
 "$SCRIPT_DIR/packages/flatbuffers.sh"

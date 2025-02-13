@@ -2,7 +2,7 @@ module github.com/siemens/wfx/example/plugin
 
 replace github.com/siemens/wfx => ../..
 
-go 1.23.0
+go 1.24
 
 require github.com/siemens/wfx v0.3.3
 
