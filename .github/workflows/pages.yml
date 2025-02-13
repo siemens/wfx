@@ -32,8 +32,6 @@ jobs:
         continue-on-error: true
       - run: cd hugo && npm ci
       - run: just pages
-        env:
-          HUGO_BASEURL: ${{ vars.HUGO_BASEURL }}
       - run: find public
       - name: Deploy
         uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e # v4
@@ -41,3 +39,10 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public
+      - name: Upload pages
+        uses: actions/upload-artifact@v4
+        if: ${{ github.ref != 'refs/heads/main' }}
+        with:
+          name: wfx-pages
+          path: public
+          retention-days: 5
