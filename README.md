@@ -6,7 +6,6 @@ A lightweight, general-purpose workflow executor.
 
 [![CI](https://github.com/siemens/wfx/actions/workflows/ci.yml/badge.svg)](https://github.com/siemens/wfx/actions/workflows/ci.yml)
 [![Pages](https://github.com/siemens/wfx/actions/workflows/pages.yml/badge.svg)](https://github.com/siemens/wfx/actions/workflows/pages.yml)
-[![Release](https://github.com/siemens/wfx/actions/workflows/release.yml/badge.svg)](https://github.com/siemens/wfx/actions/workflows/release.yml)
 [![Coverage](https://codecov.io/github/siemens/wfx/coverage.svg?branch=main)](https://codecov.io/github/siemens/wfx?branch=main)
 
 ## Overview
