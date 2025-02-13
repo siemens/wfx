@@ -32,6 +32,8 @@ local link_rewrites = {
 	["../contrib/config-deployment/wfx.workflow.config.deployment.yml"] = "https://github.com/siemens/wfx/tree/main/contrib/config-deployment/wfx.workflow.config.deployment.yml",
 	["../contrib/config-deployment/README.md"] = "https://github.com/siemens/wfx/tree/main/contrib/config-deployment",
 	["../contrib/config-deployment/client/worker.go"] = "https://github.com/siemens/wfx/tree/main/contrib/config-deployment/client/worker.go",
+	["../fbs"] = "https://github.com/siemens/wfx/tree/main/fbs",
+	["../example/plugin"] = "https://github.com/siemens/wfx/tree/main/example/plugin",
 }
 
 local function find_git_root()
@@ -50,18 +52,25 @@ local function copy_file(from, to)
 	if not f then
 		error(string.format("ERROR: source %s does not exist", from))
 	end
-	local t = io.open(to, "wb")
-	if not t then
-		error(string.format("ERROR: destination %s does not exist", to))
+
+	local block = f:read(4096)
+	if not block then
+		logging.info("Skipping ", from, " because it is not a readable file")
+		f:close()
+		return
 	end
 
-	while true do
-		local block = f:read(4096)
-		if not block then
-			break
-		end
-		t:write(block)
+
+	local t = io.open(to, "wb")
+	if not t then
+		error(string.format("ERROR: Cannot create destination %s", to))
 	end
+
+	repeat
+		t:write(block)
+		block = f:read(4096)
+	until block == nil
+
 	f:close()
 	t:close()
 end
