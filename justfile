@@ -45,11 +45,14 @@ pages:
     #!/usr/bin/env bash
     set -euo pipefail
     rm -rf public hugo/public
-    cd hugo
+    pushd hugo
     make clean && make -j`nproc`
     npm install postcss postcss-cli autoprefixer
     hugo --minify
-    mv public ../
+    popd
+    mv hugo/public .
+    go tool github.com/wjdp/htmltest
+    lychee public
 
 # Serve docs
 docs-serve:

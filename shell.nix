@@ -12,7 +12,6 @@ mkShell {
     (python3.withPackages (ps: with ps; [ pyyaml ]))
 
     hugo
-    htmltest
 
     nodePackages.sql-formatter
     nodePackages.prettier
