@@ -84,10 +84,13 @@ require (
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
+	github.com/badoux/checkmail v1.2.1 // indirect
 	github.com/bmatcuk/doublestar v1.3.4 // indirect
 	github.com/chigopher/pathlib v0.19.1 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.4 // indirect
+	github.com/docopt/docopt-go v0.0.0-20180111231733-ee0de3bc6815 // indirect
 	github.com/dprotaso/go-yit v0.0.0-20220510233725-9ba8df137936 // indirect
+	github.com/fatih/color v1.14.1 // indirect
 	github.com/fsnotify/fsnotify v1.8.0 // indirect
 	github.com/go-openapi/errors v0.22.0 // indirect
 	github.com/go-openapi/swag v0.23.0 // indirect
@@ -96,6 +99,7 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/huandu/xstrings v1.4.0 // indirect
 	github.com/iancoleman/strcase v0.3.0 // indirect
+	github.com/imdario/mergo v0.3.11 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/influxdata/tdigest v0.0.1 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
@@ -129,6 +133,7 @@ require (
 	github.com/tsenart/go-tsz v0.0.0-20180814235614-0bd30b3df1c3 // indirect
 	github.com/vektra/mockery/v2 v2.52.2 // indirect
 	github.com/vmware-labs/yaml-jsonpath v0.3.2 // indirect
+	github.com/wjdp/htmltest v0.17.0 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	go.mongodb.org/mongo-driver v1.17.1 // indirect
 	go.opentelemetry.io/otel/metric v1.32.0 // indirect
@@ -138,6 +143,7 @@ require (
 	golang.org/x/sys v0.30.0 // indirect
 	golang.org/x/tools v0.30.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
+	gopkg.in/seborama/govcr.v2 v2.4.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	mvdan.cc/gofumpt v0.7.0 // indirect
 )
@@ -146,5 +152,6 @@ tool (
 	entgo.io/ent/cmd/ent
 	github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen
 	github.com/vektra/mockery/v2
+	github.com/wjdp/htmltest
 	mvdan.cc/gofumpt
 )

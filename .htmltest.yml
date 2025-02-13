@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023 Siemens AG
+# SPDX-FileCopyrightText: 2025 Siemens AG
 #
 # SPDX-License-Identifier: Apache-2.0
 ---
@@ -9,3 +9,4 @@ IgnoreURLs:
   - "^http://localhost.*"
   - "^https://www.mysql.com"
   - "^https://microsoft.com"
+  - "^https://www.gnu.org/.*"
