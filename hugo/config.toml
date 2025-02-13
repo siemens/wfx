@@ -6,6 +6,8 @@ contentDir = "content"
 defaultContentLanguage = "en"
 defaultContentLanguageInSubdir = false
 
+relativeURLs = true
+
 [languages]
   [languages.en]
     languageName ="English"
