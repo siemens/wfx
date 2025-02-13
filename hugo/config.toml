@@ -49,11 +49,6 @@ version = "0.0"
 # point people to the main doc site.
 url_latest_version = "https://example.com"
 
-# Repository configuration (URLs for in-page links to opening issues and suggesting changes)
-github_repo = "https://github.com/siemens/wfx"
-github_branch= "main"
-github_subdir = "hugo"
-
 # Enable Lunr.js offline search
 offlineSearch = true
 
