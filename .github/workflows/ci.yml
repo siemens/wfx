@@ -262,6 +262,19 @@ jobs:
       - run: just generate
       - run: git diff --exit-code
 
+  openapi-check-breaking:
+    name: API check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - name: Check for breaking changes in API
+        id: breaking_changes
+        uses: oasdiff/oasdiff-action/breaking@v0.0.21
+        with:
+          base: https://raw.githubusercontent.com/siemens/wfx/refs/heads/main/spec/wfx.openapiv3.yml
+          revision: spec/wfx.openapiv3.yml
+          fail-on: ERR
+
   release:
     name: Release
     if: startsWith(github.event.ref, 'refs/tags/v')
@@ -280,6 +293,7 @@ jobs:
       - lint
       - reuse
       - generate
+      - openapi-check-breaking
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
