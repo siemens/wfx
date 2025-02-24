@@ -116,7 +116,7 @@ func NewFlagset() *pflag.FlagSet {
 
 	allLevels := []string{zerolog.TraceLevel.String(), zerolog.DebugLevel.String(), zerolog.InfoLevel.String(), zerolog.WarnLevel.String(), zerolog.ErrorLevel.String(), zerolog.FatalLevel.String(), zerolog.PanicLevel.String()}
 	f.String(LogLevelFlag, "info", fmt.Sprintf("set log level. one of: [%s]", strings.Join(allLevels, ", ")))
-	f.String(LogFormatFlag, "auto", "log format; possible values: json, pretty, auto")
+	f.String(LogFormatFlag, "auto", "log format; possible values: json, pretty, journald, auto")
 	return f
 }
 
