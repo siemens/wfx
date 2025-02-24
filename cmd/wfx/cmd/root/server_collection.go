@@ -287,7 +287,7 @@ func (sc *ServerCollection) Stop() {
 
 func createServer(cfg *config.AppConfig, ssi genApi.StrictServerInterface, baseMWs []genApi.MiddlewareFunc, pluginMWs []*plugin.Middleware) (*http.Server, error) {
 	combinedMWs := make([]genApi.MiddlewareFunc, 0, len(baseMWs)+len(pluginMWs))
-	_ = copy(combinedMWs, baseMWs)
+	combinedMWs = append(combinedMWs, baseMWs...)
 	for _, mw := range pluginMWs {
 		combinedMWs = append(combinedMWs, mw.Middleware())
 	}
