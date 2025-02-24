@@ -9,6 +9,7 @@ package root
  */
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -16,11 +17,15 @@ import (
 	"os"
 	"path"
 	"strings"
+	"sync/atomic"
 	"testing"
 
+	"github.com/siemens/wfx/api"
 	"github.com/siemens/wfx/cmd/wfx/cmd/config"
+	genAPI "github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/persistence"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
@@ -29,6 +34,31 @@ func TestNewServerCollection(t *testing.T) {
 	sc, err := NewServerCollection(new(config.AppConfig), dbMock)
 	assert.NotNil(t, sc)
 	assert.NoError(t, err)
+}
+
+func TestCreateServer_UseMiddlewares(t *testing.T) {
+	dbMock := persistence.NewHealthyMockStorage(t)
+	dbMock.EXPECT().QueryJobs(context.Background(), mock.Anything, mock.Anything, mock.Anything).Return(new(genAPI.PaginatedJobList), nil)
+	wfx := api.NewWfxServer(dbMock)
+
+	var myMWCalled atomic.Bool
+	myMW := func(next http.Handler) http.Handler {
+		myMWCalled.Store(true)
+		return next
+	}
+
+	middlewares := []genAPI.MiddlewareFunc{myMW}
+	server, err := createServer(new(config.AppConfig), api.NewNorthboundServer(wfx), middlewares, nil)
+	require.NoError(t, err)
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest("", "/api/wfx/v1/jobs", nil)
+
+	server.Handler.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
+
+	assert.True(t, myMWCalled.Load())
 }
 
 func TestOpenAPIJSON(t *testing.T) {
