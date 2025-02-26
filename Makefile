@@ -13,7 +13,7 @@ MAKEFLAGS += --jobs=$(shell nproc)
 DESTDIR ?=
 prefix ?= /usr/local
 
-GO_TAGS = sqlite,postgres,mysql,plugin,swagger
+GO_TAGS ?=
 
 export CGO_ENABLED=1
 
@@ -31,7 +31,7 @@ default:
 
 .PHONY: test
 test:
-	go test -race -coverprofile=coverage.out -covermode=atomic -timeout 30s ./... "--tags=sqlite,testing,plugin"
+	go test -race -coverprofile=coverage.out -covermode=atomic -timeout 30s ./... --tags=testing
 
 .PHONY: install
 install:

@@ -1,4 +1,4 @@
-//go:build !plugin
+//go:build no_plugin
 
 package root
 

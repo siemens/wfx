@@ -1,4 +1,4 @@
-//go:build postgres
+//go:build no_mysql
 
 /*
  * SPDX-FileCopyrightText: 2025 Siemens AG
@@ -11,5 +11,5 @@
 package root
 
 func init() {
-	buildTags = append(buildTags, "postgres")
+	buildTags = append(buildTags, "no_mysql")
 }
