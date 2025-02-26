@@ -1,4 +1,4 @@
-//go:build integration && mysql
+//go:build integration && !no_mysql
 
 package entgo
 

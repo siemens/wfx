@@ -1,4 +1,4 @@
-//go:build swagger
+//go:build no_plugin
 
 /*
  * SPDX-FileCopyrightText: 2025 Siemens AG
@@ -11,5 +11,5 @@
 package root
 
 func init() {
-	buildTags = append(buildTags, "swagger")
+	buildTags = append(buildTags, "no_plugin")
 }

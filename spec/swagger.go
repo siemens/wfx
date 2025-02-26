@@ -1,4 +1,4 @@
-//go:build swagger
+//go:build !no_swagger
 
 package spec
 
@@ -37,16 +37,4 @@ func init() {
 	Handlers[fmt.Sprintf("GET %s/swagger.json", basePath)] = http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = w.Write(jsonData)
 	})
-}
-
-func yamlToJSON(yamlData []byte) ([]byte, error) {
-	var yamlObj any
-	if err := yaml.Unmarshal(yamlData, &yamlObj); err != nil {
-		return nil, err
-	}
-	jsonData, err := json.Marshal(yamlObj)
-	if err != nil {
-		return nil, err
-	}
-	return jsonData, nil
 }

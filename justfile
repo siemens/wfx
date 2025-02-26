@@ -27,11 +27,12 @@ export MYSQL_HOST := env_var_or_default("MYSQL_HOST", "localhost")
 
 build:
     #!/usr/bin/env bash
-    set -euxo pipefail
+    set -euo pipefail
     # goreleaser requires an absolute path to the compiler
-    export CC=$(pwd)/.ci/zcc
-    goreleaser build --clean --single-target --snapshot
-    make -s plugins contrib
+    /usr/bin/env CC={{ THISDIR }}/.ci/zcc goreleaser build --clean --single-target --snapshot
+    go build -C example/plugin
+    go build -C contrib/remote-access/client
+    go build -C contrib/config-deployment/client
 
 # Update dependencies
 update-deps:
@@ -61,10 +62,10 @@ lint:
     #!/usr/bin/env bash
     set -euo pipefail
     export CGO_ENABLED=0
-    golangci-lint run -v --build-tags=sqlite,testing
-    staticcheck -tags=sqlite,testing ./...
+    golangci-lint run -v --build-tags=testing
+    staticcheck -tags=testing ./...
     go list ./... 2>/dev/null | sed -e 's,github.com/siemens/wfx/,,' | grep -v "^generated" | sort | uniq | while read -r pkg; do
-        if [[ "$pkg" == *tests* ]]; then
+        if [[ "$pkg" == *tests* ]] || [[ ! -d "$pkg" ]]; then
             continue
         fi
         file_count=$(find "$pkg" -maxdepth 1 -type f -name "*.go" | wc -l)
@@ -158,10 +159,7 @@ postgres-stop: (_container-stop "wfx-postgres")
 
 # Run PostgreSQL integration tests.
 postgres-integration-test:
-    #!/usr/bin/env bash
-    set -eux
-    # note: sqlite is needed for in-memory tests
-    go test -tags testing,integration,postgres,sqlite,plugin -count=1 ./...
+    go test -tags testing,integration,no_mysql -count=1 ./...
 
 # Start wfx and connect to Postgres database
 @postgres-wfx: postgres-start
@@ -228,10 +226,7 @@ mysql-generate-schema name:
 
 # Run MySQL integration tests.
 mysql-integration-test:
-    #!/usr/bin/env bash
-    set -eux
-    # note: sqlite is needed for in-memory tests
-    go test -tags testing,integration,mysql,sqlite,plugin -count=1 ./...
+    go test -tags testing,integration,no_postgres -count=1 ./...
 
 # Start wfx and connect to MySQL container.
 mysql-wfx: mysql-start

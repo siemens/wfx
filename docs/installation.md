@@ -18,13 +18,19 @@ necessary.
 
 ## Building wfx
 
-A recent [Go compiler](https://go.dev/) (see `go.mod`) as well as [GNU make](https://www.gnu.org/software/make/) wrapping the `go build` commands is required to build wfx and its associated tools:
+A recent [Go compiler](https://go.dev/) (see `go.mod`):
 
 ```bash
-make
+# build wfx
+go build
+
+# build the rest (optional)
+go build ./cmd/wfxctl
+go build ./cmd/wfx-loadtest
+go build ./cmd/wfx-viewer
 ```
 
-The above command produces the following binaries:
+The above commands produce the following binaries:
 
 - `wfx`: The server component providing the RESTful APIs for managing workflows and jobs.
 - `wfxctl`: Command line client for interacting with the wfx.
@@ -35,26 +41,21 @@ All binaries have extensive help texts when invoked with `--help`.
 
 ### Build Tags
 
-Go [build tags](https://pkg.go.dev/go/build) are used to select compiled-in support for various features.
-The following persistent storage selection build tags are available:
+Go [build tags](https://pkg.go.dev/go/build) can be used to opt-out from various features at compile-time.
+By default, all features are enabled. The following build tags are available:
 
 | Build Tag    | Description                                                      |
 | :----------- | :--------------------------------------------------------------- |
-| `sqlite`     | Enable built-in [SQLite](https://www.sqlite.org/) support        |
+| `no_sqlite`     | Disable built-in [SQLite](https://www.sqlite.org/) support    |
 | `libsqlite3` | Dynamically link against `libsqlite3`                            |
-| `postgres`   | Enable built-in [PostgreSQL](https://www.postgresql.org) support |
-| `mysql`      | Enable built-in [MySQL](https://www.mysql.com/) support          |
-| `plugin`     | Enable support for [external plugins](operations.md#Plugins)     |
+| `no_postgres`   | Disable built-in [PostgreSQL](https://www.postgresql.org) support |
+| `no_mysql`      | Disable built-in [MySQL](https://www.mysql.com/) support          |
+| `no_plugin`     | Disable support for [external plugins](operations.md#Plugins)     |
 
-By default, all built-in persistent storage options are enabled (wfx requires at least one persistent storage to save workflows and jobs).
+Note:
 
-Note that the selection of build tags can impact the size of the `wfx` binary file and may as well have implications for the software clearing process, including obligations that must be met.
-
-To build and compile-in, e.g., SQLite persistent storage support only, according `GO_TAGS` must be given:
-
-```bash
-make GO_TAGS=sqlite
-```
+- wfx requires at least one persistent storage to save workflows and jobs
+- build tags can impact the size of the `wfx` binary file and may as well have implications for the software clearing process, including obligations that must be met
 
 ### Debian
 
@@ -68,14 +69,9 @@ the Go toolchain.
 wfx's release binaries are statically linked and self-contained.
 Hence, an installation isn't strictly necessary, although if available, it's recommended to pick the distro packages (e.g. `*.deb` for Debian-based distros).
 
-Nevertheless, for convenience on UNIXy systems,
-
 ```bash
-make DESTDIR= prefix= install
+go install github.com/siemens/wfx@latest
 ```
-
-installs the binaries to `/bin`.
-Giving a different `DESTDIR` and/or `prefix` allows to adjust to other locations.
 
 Alternatively, a pre-built [Debian](https://www.debian.org) package is [provided](https://github.com/siemens/wfx/releases).
 

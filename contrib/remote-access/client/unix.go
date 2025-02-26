@@ -32,13 +32,13 @@ func terminate() {
 		if err := syscall.Kill(-pid, 0); err == nil {
 			// process still running
 			log.Println("Sending SIGTERM to", pid)
-			syscall.Kill(-pid, syscall.SIGTERM)
+			_ = syscall.Kill(-pid, syscall.SIGTERM)
 		}
 		time.Sleep(3 * time.Second)
 		if err := syscall.Kill(-pid, 0); err == nil {
 			// process still running
 			log.Println("Sending SIGKILL to", pid)
-			syscall.Kill(-pid, syscall.SIGKILL)
+			_ = syscall.Kill(-pid, syscall.SIGKILL)
 		}
 	}
 }

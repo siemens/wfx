@@ -1,4 +1,4 @@
-//go:build integration && postgres
+//go:build integration && !no_postgres
 
 package entgo
 
