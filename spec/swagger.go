@@ -38,15 +38,3 @@ func init() {
 		_, _ = w.Write(jsonData)
 	})
 }
-
-func yamlToJSON(yamlData []byte) ([]byte, error) {
-	var yamlObj any
-	if err := yaml.Unmarshal(yamlData, &yamlObj); err != nil {
-		return nil, err
-	}
-	jsonData, err := json.Marshal(yamlObj)
-	if err != nil {
-		return nil, err
-	}
-	return jsonData, nil
-}
