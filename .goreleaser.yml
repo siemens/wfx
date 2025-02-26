@@ -16,12 +16,6 @@ builds:
   - id: wfx
     binary: wfx
     main: ./cmd/wfx
-    tags:
-      - sqlite
-      - postgres
-      - mysql
-      - plugin
-      - swagger
     flags:
       - -trimpath
       - -mod=readonly

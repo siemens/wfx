@@ -10,7 +10,7 @@ To make tools like `gopls` (the Go language server) understand build tags,
 set the `GOFLAGS` environment variable accordingly, e.g.
 
 ```sh
-export GOFLAGS="-tags=integration,sqlite,mysql,postgres"
+export GOFLAGS="-tags=integration,testing"
 ```
 
 ## Persistence

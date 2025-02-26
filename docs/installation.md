@@ -35,26 +35,21 @@ All binaries have extensive help texts when invoked with `--help`.
 
 ### Build Tags
 
-Go [build tags](https://pkg.go.dev/go/build) are used to select compiled-in support for various features.
-The following persistent storage selection build tags are available:
+Go [build tags](https://pkg.go.dev/go/build) can be used to opt-out from various features at compile-time.
+By default, all features are enabled. The following build tags are available:
 
 | Build Tag    | Description                                                      |
 | :----------- | :--------------------------------------------------------------- |
-| `sqlite`     | Enable built-in [SQLite](https://www.sqlite.org/) support        |
+| `no_sqlite`     | Disable built-in [SQLite](https://www.sqlite.org/) support    |
 | `libsqlite3` | Dynamically link against `libsqlite3`                            |
-| `postgres`   | Enable built-in [PostgreSQL](https://www.postgresql.org) support |
-| `mysql`      | Enable built-in [MySQL](https://www.mysql.com/) support          |
-| `plugin`     | Enable support for [external plugins](operations.md#plugins)     |
+| `no_postgres`   | Disable built-in [PostgreSQL](https://www.postgresql.org) support |
+| `no_mysql`      | Disable built-in [MySQL](https://www.mysql.com/) support          |
+| `no_plugin`     | Disable support for [external plugins](operations.md#plugins)     |
 
-By default, all built-in persistent storage options are enabled (wfx requires at least one persistent storage to save workflows and jobs).
+Note:
 
-Note that the selection of build tags can impact the size of the `wfx` binary file and may as well have implications for the software clearing process, including obligations that must be met.
-
-To build and compile-in, e.g., SQLite persistent storage support only, according `GO_TAGS` must be given:
-
-```bash
-make GO_TAGS=sqlite
-```
+- wfx requires at least one persistent storage to save workflows and jobs
+- build tags can impact the size of the `wfx` binary file and may as well have implications for the software clearing process, including obligations that must be met
 
 ### Debian
 
