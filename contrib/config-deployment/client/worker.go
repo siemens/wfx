@@ -19,6 +19,7 @@ import (
 	"path"
 	"time"
 
+	"github.com/Southclaws/fault"
 	"github.com/siemens/wfx/cmd/wfxctl/errutil"
 	"github.com/siemens/wfx/generated/api"
 )
@@ -71,7 +72,7 @@ func worker() {
 func processJob(client *api.ClientWithResponses, job *api.Job) error {
 	tmpDir, err := os.MkdirTemp("", "config-deployer")
 	if err != nil {
-		return err
+		return fault.Wrap(err)
 	}
 	defer func() {
 		_ = os.RemoveAll(tmpDir)
@@ -83,7 +84,7 @@ func processJob(client *api.ClientWithResponses, job *api.Job) error {
 
 	tmpFile, err := download(url, tmpDir)
 	if err != nil {
-		return err
+		return fault.Wrap(err)
 	}
 
 	log.Println("Download successful, starting installation")
@@ -104,13 +105,13 @@ func processJob(client *api.ClientWithResponses, job *api.Job) error {
 		_ = os.MkdirAll(path.Dir(destination), 0o755)
 		src, err := os.Open(tmpFile)
 		if err != nil {
-			return err
+			return fault.Wrap(err)
 		}
 		defer src.Close()
 
 		dst, err := os.Create(destination)
 		if err != nil {
-			return err
+			return fault.Wrap(err)
 		}
 		defer dst.Close()
 
@@ -154,7 +155,7 @@ func runScript(script string) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
-		return err
+		return fault.Wrap(err)
 	}
 	return nil
 }
