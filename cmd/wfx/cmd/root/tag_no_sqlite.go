@@ -1,4 +1,4 @@
-//go:build sqlite
+//go:build no_sqlite
 
 /*
  * SPDX-FileCopyrightText: 2025 Siemens AG
@@ -11,5 +11,5 @@
 package root
 
 func init() {
-	buildTags = append(buildTags, "sqlite")
+	buildTags = append(buildTags, "no_sqlite")
 }
