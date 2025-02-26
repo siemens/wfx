@@ -35,7 +35,7 @@ test:
   stage: test
   needs: []
   script:
-    - make test
+    - go test -race -coverprofile=coverage.out -covermode=atomic -timeout 30s --tags=testing ./...
 
 test-postgres:
   stage: test
@@ -118,9 +118,11 @@ cli-tests:
     PGDATABASE: wfx
   before_script:
     - .ci/setup-cli-tests.sh
-    - make
-    - make install
+    - go install .
+    - go install ./cmd/wfxctl
+    - go build -C example/plugin
   script:
+    - export PATH=$(go env GOPATH)/bin:$PATH
     - cd test && bats .
 
 lint:

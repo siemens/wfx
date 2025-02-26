@@ -58,7 +58,7 @@ jobs:
           key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-golang-
-      - run: make test
+      - run: go test -race -coverprofile=coverage.out -covermode=atomic -timeout 30s --tags=testing ./...
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@13ce06bfc6bbe3ecf90edbbf1bc32fe5978ca1d3 # v5
         with:
@@ -211,10 +211,12 @@ jobs:
       - run: .ci/setup-cli-tests.sh
       - name: Disable git security features
         run: git config --global safe.directory '*'
-      - name: build wfx
-        run: make
       - name: install wfx
-        run: make install
+        run: go install .
+      - name: install wfxctl
+        run: go install ./cmd/wfxctl
+      - name: build plugins
+        run: go build -C example/plugin
       - name: run tests
         env:
           PGHOST: postgres
@@ -228,7 +230,7 @@ jobs:
           MYSQL_PASSWORD: secret
           MYSQL_HOST: mysql
         working-directory: test
-        run: bats .
+        run: export PATH=$(go env GOPATH)/bin:$PATH; bats .
 
   lint:
     runs-on: ubuntu-latest

@@ -12,13 +12,14 @@ import (
 	"log"
 	"time"
 
+	"github.com/Southclaws/fault"
 	"github.com/cavaliergopher/grab/v3"
 )
 
 func download(url string, dir string) (string, error) {
 	req, err := grab.NewRequest(dir, url)
 	if err != nil {
-		return "", err
+		return "", fault.Wrap(err)
 	}
 
 	// start download
@@ -46,7 +47,7 @@ Loop:
 	}
 
 	if err := resp.Err(); err != nil {
-		return "", err
+		return "", fault.Wrap(err)
 	}
 
 	log.Printf("Download saved to %s\n", resp.Filename)
