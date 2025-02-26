@@ -18,13 +18,19 @@ necessary.
 
 ## Building wfx
 
-A recent [Go compiler](https://go.dev/) (see `go.mod`) as well as [GNU make](https://www.gnu.org/software/make/) wrapping the `go build` commands is required to build wfx and its associated tools:
+A recent [Go compiler](https://go.dev/) (see `go.mod`):
 
 ```bash
-make
+# build wfx
+go build
+
+# build the rest (optional)
+go build ./cmd/wfxctl
+go build ./cmd/wfx-loadtest
+go build ./cmd/wfx-viewer
 ```
 
-The above command produces the following binaries:
+The above commands produce the following binaries:
 
 - `wfx`: The server component providing the RESTful APIs for managing workflows and jobs.
 - `wfxctl`: Command line client for interacting with the wfx.
@@ -63,14 +69,9 @@ the Go toolchain.
 wfx's release binaries are statically linked and self-contained.
 Hence, an installation isn't strictly necessary, although if available, it's recommended to pick the distro packages (e.g. `*.deb` for Debian-based distros).
 
-Nevertheless, for convenience on UNIXy systems,
-
 ```bash
-make DESTDIR= prefix= install
+go install github.com/siemens/wfx@latest
 ```
-
-installs the binaries to `/bin`.
-Giving a different `DESTDIR` and/or `prefix` allows to adjust to other locations.
 
 Alternatively, a pre-built [Debian](https://www.debian.org) package is [provided](https://github.com/siemens/wfx/releases).
 

@@ -27,11 +27,12 @@ export MYSQL_HOST := env_var_or_default("MYSQL_HOST", "localhost")
 
 build:
     #!/usr/bin/env bash
-    set -euxo pipefail
+    set -euo pipefail
     # goreleaser requires an absolute path to the compiler
-    export CC=$(pwd)/.ci/zcc
-    goreleaser build --clean --single-target --snapshot
-    make -s plugins contrib
+    /usr/bin/env CC={{ THISDIR }}/.ci/zcc goreleaser build --clean --single-target --snapshot
+    go build -C example/plugin
+    go build -C contrib/remote-access/client
+    go build -C contrib/config-deployment/client
 
 # Update dependencies
 update-deps:

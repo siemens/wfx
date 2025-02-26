@@ -25,7 +25,7 @@ just postgres-stop mysql-stop
 ## Running the tests locally
 
 ```bash
-make test
+go test ./...
 ```
 
 will execute all tests.

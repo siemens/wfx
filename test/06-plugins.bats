@@ -8,10 +8,6 @@
 
 . lib.sh
 
-setup_file() {
-    make -s -C.. plugins
-}
-
 teardown() {
     if pgrep -x wfx > /dev/null; then
         pkill -9 wfx
