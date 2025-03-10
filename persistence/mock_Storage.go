@@ -1,3 +1,5 @@
+//go:build testing
+
 /*
  * SPDX-FileCopyrightText: 2023 Siemens AG
  *
