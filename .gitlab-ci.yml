@@ -60,10 +60,8 @@ test-postgres:
     PGUSER: $POSTGRES_USER
     PGPASSWORD: $POSTGRES_PASSWORD
     PGSSLMODE: disable
-  before_script:
-    - .ci/setup-postgres.sh
   script:
-    - just postgres-integration-test
+    - go test -tags testing,integration,no_mysql ./...
 
 test-mysql:
   stage: test
@@ -80,10 +78,8 @@ test-mysql:
     MYSQL_USER: wfx
     MYSQL_PASSWORD: secret
     MYSQL_HOST: mysql
-  before_script:
-    - .ci/setup-mysql.sh
   script:
-    - just mysql-integration-test
+    - go test -tags testing,integration,no_postgres ./...
 
 cli-tests:
   stage: test

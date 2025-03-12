@@ -160,10 +160,6 @@ postgres-start:
 # Stop PostgreSQL container
 postgres-stop: (_container-stop "wfx-postgres")
 
-# Run PostgreSQL integration tests.
-postgres-integration-test:
-    go test -tags testing,integration,no_mysql -count=1 ./...
-
 # Start wfx and connect to Postgres database
 @postgres-wfx: postgres-start
     ./wfx --log-level debug \
@@ -226,10 +222,6 @@ mysql-shell:
 # Generate schema definitions for MySQL
 mysql-generate-schema name:
     go run -mod=mod generated/ent/migrate/main.go mysql "{{ name }}"
-
-# Run MySQL integration tests.
-mysql-integration-test:
-    go test -tags testing,integration,no_postgres -count=1 ./...
 
 # Start wfx and connect to MySQL container.
 mysql-wfx: mysql-start

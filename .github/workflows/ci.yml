@@ -97,8 +97,7 @@ jobs:
           key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-golang-
-      - run: .ci/setup-postgres.sh
-      - run: just postgres-integration-test
+      - run: go test -tags testing,integration,no_mysql -coverprofile=coverage.out -covermode=atomic ./...
         env:
           PGHOST: postgres
           PGPORT: 5432
@@ -144,8 +143,7 @@ jobs:
           key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-golang-
-      - run: .ci/setup-mysql.sh
-      - run: just mysql-integration-test
+      - run: go test -tags testing,integration,no_postgres -coverprofile=coverage.out -covermode=atomic ./...
         env:
           MYSQL_DATABASE: wfx
           MYSQL_ROOT_PASSWORD: root
