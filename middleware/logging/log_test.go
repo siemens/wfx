@@ -35,7 +35,7 @@ func TestLog(t *testing.T) {
 	assert.NoError(t, err)
 
 	greeting, err := io.ReadAll(res.Body)
-	defer res.Body.Close()
+	defer func() { _ = res.Body.Close() }()
 	assert.NoError(t, err)
 
 	assert.Equal(t, "Hello, client\n", string(greeting))
@@ -53,7 +53,7 @@ func TestLogDebug(t *testing.T) {
 	assert.NoError(t, err)
 
 	greeting, err := io.ReadAll(res.Body)
-	defer res.Body.Close()
+	defer func() { _ = res.Body.Close() }()
 	assert.NoError(t, err)
 
 	assert.Equal(t, "Hello, client\n", string(greeting))

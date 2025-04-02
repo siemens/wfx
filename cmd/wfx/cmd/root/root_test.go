@@ -59,13 +59,15 @@ func TestUDS(t *testing.T) {
 	var g errgroup.Group
 	g.Go(cmd.Execute)
 
-	for i := 0; i < 30; i++ {
+	for range 30 {
 		conn, err := net.Dial("unix", clientSocket)
 		if err != nil {
 			time.Sleep(time.Millisecond * 10)
 			continue
 		}
-		defer conn.Close()
+		defer func() {
+			_ = conn.Close()
+		}()
 
 		req, err := http.NewRequest(http.MethodGet, "/version", nil)
 		require.NoError(t, err)
@@ -245,13 +247,15 @@ func TestAPI(t *testing.T) {
 	t.Run("fetch openapiv3 spec", func(t *testing.T) {
 		httpClient := new(http.Client)
 		var spec openapi3.T
-		for i := 0; i < 100; i++ {
+		for range 100 {
 			resp, err := httpClient.Get("http://localhost:8080/api/wfx/v1/openapi.json")
 			if err != nil {
 				time.Sleep(time.Millisecond * 10)
 				continue
 			}
-			defer resp.Body.Close()
+			defer func() {
+				_ = resp.Body.Close()
+			}()
 			// check valid json
 			err = json.NewDecoder(resp.Body).Decode(&spec)
 			require.NoError(t, err)
@@ -263,13 +267,15 @@ func TestAPI(t *testing.T) {
 	t.Run("/health endpoint", func(t *testing.T) {
 		httpClient := new(http.Client)
 		var result api.CheckerResult
-		for i := 0; i < 100; i++ {
+		for range 100 {
 			resp, err := httpClient.Get("http://localhost:8080/health")
 			if err != nil {
 				time.Sleep(time.Millisecond * 10)
 				continue
 			}
-			defer resp.Body.Close()
+			defer func() {
+				_ = resp.Body.Close()
+			}()
 			// check valid json
 			err = json.NewDecoder(resp.Body).Decode(&result)
 			require.NoError(t, err)
@@ -281,13 +287,15 @@ func TestAPI(t *testing.T) {
 	t.Run("/version endpoint", func(t *testing.T) {
 		httpClient := new(http.Client)
 		var result api.GetVersion200JSONResponse
-		for i := 0; i < 100; i++ {
+		for range 100 {
 			resp, err := httpClient.Get("http://localhost:8080/version")
 			if err != nil {
 				time.Sleep(time.Millisecond * 10)
 				continue
 			}
-			defer resp.Body.Close()
+			defer func() {
+				_ = resp.Body.Close()
+			}()
 			// check valid json
 			err = json.NewDecoder(resp.Body).Decode(&result)
 			require.NoError(t, err)
@@ -328,7 +336,7 @@ func TestAPI(t *testing.T) {
 
 		httpClient := new(http.Client)
 		var state string
-		for i := 0; i < 100; i++ {
+		for range 100 {
 			url := fmt.Sprintf("http://localhost:8080/api/wfx/v1/jobs/%s/status", jobID)
 			req, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
@@ -338,7 +346,9 @@ func TestAPI(t *testing.T) {
 				time.Sleep(time.Millisecond * 10)
 				continue
 			}
-			defer resp.Body.Close()
+			defer func() {
+				_ = resp.Body.Close()
+			}()
 			b, _ := io.ReadAll(resp.Body)
 			state = strings.TrimSpace(string(b))
 			break
@@ -350,13 +360,15 @@ func TestAPI(t *testing.T) {
 		httpClient := new(http.Client)
 		var statusCode int
 		var body []byte
-		for i := 0; i < 100; i++ {
+		for range 100 {
 			resp, err := httpClient.Get("http://localhost:8080/download/")
 			if err != nil {
 				time.Sleep(time.Millisecond * 10)
 				continue
 			}
-			defer resp.Body.Close()
+			defer func() {
+				_ = resp.Body.Close()
+			}()
 			body, _ = io.ReadAll(resp.Body)
 			statusCode = resp.StatusCode
 
@@ -373,7 +385,7 @@ func TestAPI(t *testing.T) {
 func TestSimpleFileServer(t *testing.T) {
 	dir, err := os.MkdirTemp("", "wfx-fileserver*")
 	require.NoError(t, err)
-	t.Cleanup(func() { os.RemoveAll(dir) })
+	t.Cleanup(func() { _ = os.RemoveAll(dir) })
 
 	testFile := path.Join(dir, "hello.txt")
 	err = os.WriteFile(testFile, []byte("Hello World!"), 0o644)
@@ -397,13 +409,15 @@ func TestSimpleFileServer(t *testing.T) {
 	httpClient := new(http.Client)
 	var statusCode int
 	var body []byte
-	for i := 0; i < 100; i++ {
+	for range 100 {
 		resp, err := httpClient.Get("http://localhost:8080/download/hello.txt")
 		if err != nil {
 			time.Sleep(time.Millisecond * 10)
 			continue
 		}
-		defer resp.Body.Close()
+		defer func() {
+			_ = resp.Body.Close()
+		}()
 		body, _ = io.ReadAll(resp.Body)
 		statusCode = resp.StatusCode
 	}
@@ -419,7 +433,7 @@ func TestSimpleFileServer(t *testing.T) {
 
 func generateTempFilenames(t *testing.T) (string, string) {
 	fnames := make([]string, 0, 2)
-	for i := 0; i < 2; i++ {
+	for range 2 {
 		f, _ := os.CreateTemp(os.TempDir(), fmt.Sprintf("%s.*.sock", t.Name()))
 		f.Close()
 		fname := f.Name()
@@ -443,7 +457,7 @@ func createKeypair(t *testing.T) (string, string) {
 	derBytes, _ := x509.CreateCertificate(rand.Reader, &template, &template, &privateKey.PublicKey, privateKey)
 
 	dir, _ := os.MkdirTemp("", "wfx-testkeys.*")
-	t.Cleanup(func() { os.RemoveAll(dir) })
+	t.Cleanup(func() { _ = os.RemoveAll(dir) })
 
 	privkey, pubkey := path.Join(dir, "test.key"), path.Join(dir, "test.crt")
 	certOut, _ := os.Create(pubkey)

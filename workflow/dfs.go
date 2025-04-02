@@ -58,10 +58,11 @@ func (d *dfsData) dfsVisit(g graph.Iterator, v int) {
 	d.Time++
 	d.Discover[v] = d.Time
 	g.Visit(v, func(w int, _ int64) (skip bool) {
-		if d.Color[w] == white {
+		switch d.Color[w] {
+		case white:
 			d.Prev[w] = v
 			d.dfsVisit(g, w)
-		} else if d.Color[w] == gray {
+		case gray:
 			d.Cycles = append(d.Cycles, cycle{From: w, To: v})
 		}
 		return

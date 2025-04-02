@@ -31,7 +31,7 @@ func (g *Generator) Generate(out io.Writer, wf *api.Workflow) error {
 	_, _ = out.Write([]byte("stateDiagram-v2\n"))
 
 	initialState := *workflow.FindInitialState(wf)
-	_, _ = out.Write([]byte(fmt.Sprintf("    [*] --> %s\n", initialState)))
+	_, _ = fmt.Fprintf(out, "    [*] --> %s\n", initialState)
 	for _, transition := range wf.Transitions {
 		_, _ = out.Write([]byte("    "))
 		_, _ = out.Write([]byte(transition.From))
@@ -53,12 +53,12 @@ func (g *Generator) Generate(out io.Writer, wf *api.Workflow) error {
 	cp := colors.NewColorPalette(wf)
 	for _, state := range wf.States {
 		fgColor, bgColor := cp.StateColor(state.Name)
-		_, _ = out.Write([]byte(fmt.Sprintf("    classDef cl_%s color:%s,fill:%s\n", state.Name, fgColor, bgColor)))
-		_, _ = out.Write([]byte(fmt.Sprintf("    class %s cl_%s\n", state.Name, state.Name)))
+		_, _ = fmt.Fprintf(out, "    classDef cl_%s color:%s,fill:%s\n", state.Name, fgColor, bgColor)
+		_, _ = fmt.Fprintf(out, "    class %s cl_%s\n", state.Name, state.Name)
 	}
 
 	// add legend
-	_, _ = out.Write([]byte(fmt.Sprintf("    Note right of %s: <b>Group to Color Mapping</b><br/>", initialState)))
+	_, _ = fmt.Fprintf(out, "    Note right of %s: <b>Group to Color Mapping</b><br/>", initialState)
 	lines := make([]string, 0)
 	for _, group := range wf.Groups {
 		hex := cp.GroupColor(group.Name).ToHEX().String()

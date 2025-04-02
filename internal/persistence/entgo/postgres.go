@@ -42,8 +42,12 @@ func init() {
 	persistence.RegisterStorage("postgres", &PostgreSQL{})
 }
 
-// example dsn: "user=<username> password=<password> host=localhost port=5432 database=wfx sslmode=disable"
-// see https://github.com/jackc/pgx/blob/master/stdlib/sql.go
+// Initialize sets up the PostgreSQL database connection using the provided DSN (options), runs migrations, and initializes the ent client.
+//
+// Parameters:
+//   - options: PostgreSQL connection string (DSN) in the format:
+//     "user=<username> password=<password> host=localhost port=5432 database=wfx sslmode=disable"
+//     See https://github.com/jackc/pgx/blob/master/stdlib/sql.go for DSN syntax details.
 func (wrapper *PostgreSQL) Initialize(options string) error {
 	connConfig, err := pgx.ParseConfig(options)
 	if err != nil {

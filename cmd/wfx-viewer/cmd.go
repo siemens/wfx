@@ -95,10 +95,10 @@ Do not use this for confidential information.
 		var inFile, outFile *os.File
 		defer func() {
 			if inFile != nil {
-				inFile.Close()
+				_ = inFile.Close()
 			}
 			if outFile != nil {
-				outFile.Close()
+				_ = outFile.Close()
 			}
 		}()
 		inFile, err = os.OpenFile(src, os.O_RDONLY, 0o644)

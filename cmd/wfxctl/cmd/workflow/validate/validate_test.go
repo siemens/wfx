@@ -38,7 +38,7 @@ func TestCommand_Fname(t *testing.T) {
 	tmpFile, _ := os.CreateTemp(os.TempDir(), "workflow")
 	_, _ = tmpFile.Write([]byte(dau.PhasedYAML))
 	_ = tmpFile.Close()
-	defer os.Remove(tmpFile.Name())
+	t.Cleanup(func() { _ = os.Remove(tmpFile.Name()) })
 
 	cmd := NewCommand()
 	cmd.SetArgs([]string{tmpFile.Name()})

@@ -34,7 +34,7 @@ var validator = func(out io.Writer) sse.ResponseValidator {
 		}
 
 		if r.Body != nil {
-			defer r.Body.Close()
+			defer func() { _ = r.Body.Close() }()
 			b, err := io.ReadAll(r.Body)
 			if err != nil {
 				return fault.Wrap(err)
@@ -59,7 +59,7 @@ type SSETransport struct {
 	out       io.Writer
 }
 
-// Submit implements the runtime.ClientTransport interface.
+// Do implements the runtime.ClientTransport interface.
 func (t SSETransport) Do(req *http.Request) (*http.Response, error) {
 	conn := t.sseClient.NewConnection(req)
 	unsubscribe := conn.SubscribeMessages(func(event sse.Event) {

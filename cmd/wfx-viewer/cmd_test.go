@@ -22,8 +22,10 @@ func TestPlantUML_Stdout(t *testing.T) {
 	tmpFile, _ := os.CreateTemp(os.TempDir(), "TestPlantUML.*")
 	b, _ := yaml.Marshal(dau.DirectWorkflow())
 	_, _ = tmpFile.Write(b)
-	tmpFile.Close()
-	defer os.Remove(tmpFile.Name())
+	_ = tmpFile.Close()
+	defer func() {
+		_ = os.Remove(tmpFile.Name())
+	}()
 
 	rootCmd.SetArgs([]string{tmpFile.Name()})
 	err := rootCmd.Execute()
@@ -36,7 +38,9 @@ func TestPlantUML_File(t *testing.T) {
 	f := rootCmd.PersistentFlags()
 
 	outFile, _ := os.CreateTemp(os.TempDir(), "TestPlantUML.*")
-	defer os.Remove(outFile.Name())
+	defer func() {
+		_ = os.Remove(outFile.Name())
+	}()
 
 	_ = f.Set(outputFlag, outFile.Name())
 	_ = f.Set(outputFormatFlag, "plantuml")
@@ -44,8 +48,8 @@ func TestPlantUML_File(t *testing.T) {
 	tmpFile, _ := os.CreateTemp(os.TempDir(), "TestPlantUML.*")
 	b, _ := yaml.Marshal(dau.DirectWorkflow())
 	_, _ = tmpFile.Write(b)
-	tmpFile.Close()
-	defer os.Remove(tmpFile.Name())
+	_ = tmpFile.Close()
+	t.Cleanup(func() { _ = os.Remove(tmpFile.Name()) })
 
 	err := rootCmd.RunE(rootCmd, []string{tmpFile.Name()})
 	require.NoError(t, err)

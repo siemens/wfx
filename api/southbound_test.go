@@ -31,9 +31,10 @@ func createServerForTesting(t *testing.T, orientation string, db persistence.Sto
 	wfx := NewWfxServer(db)
 	wfx.Start()
 	t.Cleanup(func() { wfx.Stop() })
-	if orientation == "north" {
+	switch orientation {
+	case "north":
 		return NewNorthboundServer(wfx)
-	} else if orientation == "south" {
+	case "south":
 		return NewSouthboundServer(wfx)
 	}
 	panic("invalid orientation")

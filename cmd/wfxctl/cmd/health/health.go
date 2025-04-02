@@ -116,7 +116,7 @@ func NewCommand() *cobra.Command {
 
 func prettyReport(w io.Writer, useColor bool, allEndpoints []Endpoint) {
 	buf := bufio.NewWriter(w)
-	defer buf.Flush()
+	defer func() { _ = buf.Flush() }()
 	_, _ = buf.WriteString("Health report:\n\n")
 	for _, ep := range allEndpoints {
 		status := api.Down
