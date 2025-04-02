@@ -96,7 +96,7 @@ _generate-openapi:
     #!/bin/sh
     set -eu
     cd "{{ THISDIR }}/spec"
-    go tool github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen -config cfg.yaml wfx.openapiv3.yml
+    go tool github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen -config cfg.yaml wfx.openapi.yml
 
 _generate-ent:
     #!/usr/bin/env bash

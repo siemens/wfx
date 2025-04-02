@@ -244,7 +244,7 @@ func TestAPI(t *testing.T) {
 		return cmd.Execute()
 	})
 
-	t.Run("fetch openapiv3 spec", func(t *testing.T) {
+	t.Run("fetch openapi spec", func(t *testing.T) {
 		httpClient := new(http.Client)
 		var spec openapi3.T
 		for range 100 {

@@ -8,7 +8,7 @@ More precisely, a _workflow_ consists of
 - a non-empty finite set of `transitions` correlating states by their names, and
 - optionally, a set of `groups` collating states by their names,
 
-see the [wfx OpenAPI Specification](../spec/wfx.openapiv3.yml)'s `Workflow` object for reference.
+see the [wfx OpenAPI Specification](../spec/wfx.openapi.yml)'s `Workflow` object for reference.
 
 wfx supports dynamic loading and unloading of workflows at run-time; when a workflow is loaded into wfx, it is validated
 to ensure that it adheres to these rules and constraints.
@@ -81,7 +81,7 @@ workflows to address them.
 
 ### Creating Jobs
 
-A new job can be created by sending a `JobRequest` object (see [wfx OpenAPI Specification](../spec/wfx.openapiv3.yml)) to wfx's [northbound REST API](operations.md#API).
+A new job can be created by sending a `JobRequest` object (see [wfx OpenAPI Specification](../spec/wfx.openapi.yml)) to wfx's [northbound REST API](operations.md#API).
 A JobRequest consists of the following:
 
 - a non-empty `clientId` to assign the job to a specific client
@@ -269,7 +269,7 @@ echo '{ "title": "expose job api" }' | \
 
 The Task is immediately transitioned to the "NEW" state (Kanban Lane) by wfx on behalf of the Product Owner Parker as
 the transition's `action` is `IMMEDIATE`.
-Note that the piped-in JSON document is the _Job Definition_ (see [wfx OpenAPI Specification](../spec/wfx.openapiv3.yml)) which is the contract
+Note that the piped-in JSON document is the _Job Definition_ (see [wfx OpenAPI Specification](../spec/wfx.openapi.yml)) which is the contract
 between the operator (Product Owner) creating jobs (Tasks) and the clients (Developers) executing those jobs so that
 they're actually able to process the job.
 
