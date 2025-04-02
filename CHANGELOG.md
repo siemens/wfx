@@ -27,6 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `wfxctl health` validates the certificate chain when using TLS
 - Forbbiden requests (e.g. job creation via southbound API) now return HTTP status code 403 instead of 405
 - System certificates will be loaded automatically for TLS communication
+- Access log level was changed from `INFO` to `DEBUG` to avoid logging a message for every poll by each client.
+  To restore the old behavior, start wfx with `--log-level=DEBUG` (note that this will enable additional log messages
+  though).
 
 ## [0.3.3] - 2024-12-23
 
