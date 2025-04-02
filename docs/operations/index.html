@@ -18,7 +18,7 @@ interface used by clients as illustrated in the following figure:</p><div class=
 </span></span><span style=display:flex><span>      Device
 </span></span></code></pre></div><p>The northbound API is used to create jobs and execute server-side state transitions, whereas the southbound API is used
 for client-side transitions.</p><p>The complete
-<a href=../../wfx.openapiv3.yml>wfx API specification</a> is accessible at runtime via the <code>/api/wfx/v1/openapi.json</code>
+<a href=../../wfx.openapi.yml>wfx API specification</a> is accessible at runtime via the <code>/api/wfx/v1/openapi.json</code>
 endpoint. Clients may inspect this specification at run-time so to obey the various limits imposed, e.g, for parameter
 value ranges and array lengths.</p><h3 id=job-events>Job Events</h3><p>Job events provide a notification mechanism that informs clients about certain operations happening on jobs. This
 approach eliminates the need for clients to continuously poll wfx, thus optimizing network usage and client resources.
