@@ -17,7 +17,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-//go:embed wfx.openapiv3.yml
+//go:embed wfx.openapi.yml
 var openapiv3YAML string
 
 func init() {

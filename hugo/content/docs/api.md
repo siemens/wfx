@@ -3,4 +3,4 @@ title = "REST API"
 type = "swagger"
 +++
 
-{{< swaggerui src="/wfx/wfx.openapiv3.yml" >}}
+{{< swaggerui src="/wfx/wfx.openapi.yml" >}}
