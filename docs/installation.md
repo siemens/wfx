@@ -44,13 +44,14 @@ All binaries have extensive help texts when invoked with `--help`.
 Go [build tags](https://pkg.go.dev/go/build) can be used to opt-out from various features at compile-time.
 By default, all features are enabled. The following build tags are available:
 
-| Build Tag    | Description                                                      |
-| :----------- | :--------------------------------------------------------------- |
-| `no_sqlite`     | Disable built-in [SQLite](https://www.sqlite.org/) support    |
-| `libsqlite3` | Dynamically link against `libsqlite3`                            |
-| `no_postgres`   | Disable built-in [PostgreSQL](https://www.postgresql.org) support |
-| `no_mysql`      | Disable built-in [MySQL](https://www.mysql.com/) support          |
-| `no_plugin`     | Disable support for [external plugins](operations.md#plugins)     |
+| Build Tag     | Description                                                       |
+| :------------ | :---------------------------------------------------------------- |
+| `no_sqlite`   | Disable built-in [SQLite](https://www.sqlite.org/) support        |
+| `libsqlite3`  | Dynamically link against `libsqlite3`                             |
+| `no_postgres` | Disable built-in [PostgreSQL](https://www.postgresql.org) support |
+| `no_mysql`    | Disable built-in [MySQL](https://www.mysql.com/) support          |
+| `no_plugin`   | Disable support for [external plugins](operations.md#plugins)     |
+| `no_swagger`  | Disable legacy `swagger.json` endpoint                            |
 
 Note:
 
