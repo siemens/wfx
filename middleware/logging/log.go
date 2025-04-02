@@ -73,7 +73,7 @@ func NewLoggingMiddleware() func(http.Handler) http.Handler {
 				}
 			}
 
-			contextLogger.Info().
+			contextLogger.Debug().
 				TimeDiff("duration", time.Now(), start).
 				Int("code", writer.statusCode).
 				Msg("Finished request")
