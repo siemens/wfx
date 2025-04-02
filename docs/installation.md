@@ -53,6 +53,12 @@ By default, all features are enabled. The following build tags are available:
 | `no_plugin`   | Disable support for [external plugins](operations.md#plugins)     |
 | `no_swagger`  | Disable legacy `swagger.json` endpoint                            |
 
+Example:
+
+```bash
+go build -tags no_mysql,no_sqlite
+```
+
 Note:
 
 - wfx requires at least one persistent storage to save workflows and jobs

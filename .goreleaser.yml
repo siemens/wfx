@@ -103,7 +103,7 @@ archives:
       - wfx
     name_template: >-
       {{.Binary}}-{{.Version}}-{{.Os}}-{{- if eq .Arch "amd64" }}x86_64{{ else }}{{.Arch}}{{ end }}{{ if .Arm }}v{{.Arm }}{{ end }}
-    formats: [ "tar.zst" ]
+    formats: ["tar.zst"]
     files:
       - LICENSE
       - README.md
@@ -115,7 +115,7 @@ archives:
       - wfxctl
     name_template: >-
       {{.Binary}}-{{.Version}}-{{.Os}}-{{- if eq .Arch "amd64" }}x86_64{{ else }}{{.Arch}}{{ end }}{{ if .Arm }}v{{.Arm }}{{ end }}
-    formats: [ "tar.zst" ]
+    formats: ["tar.zst"]
     files:
       - LICENSE
 
@@ -124,7 +124,7 @@ archives:
       - wfx-viewer
     name_template: >-
       {{.Binary}}-{{.Version}}-{{.Os}}-{{- if eq .Arch "amd64" }}x86_64{{ else }}{{.Arch}}{{ end }}{{ if .Arm }}v{{.Arm }}{{ end }}
-    formats: [ "tar.zst" ]
+    formats: ["tar.zst"]
     files:
       - LICENSE
 
