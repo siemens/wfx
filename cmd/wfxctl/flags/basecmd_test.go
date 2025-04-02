@@ -50,7 +50,7 @@ CAUw7C29C79Fv1C5qfPrmAESrciIxpg0X40KPMbp1ZWVbd4=
 	`)
 	tmpFile, _ := os.CreateTemp("", "wfx-cert-")
 	_, _ = tmpFile.Write(cert)
-	defer os.Remove(tmpFile.Name())
+	t.Cleanup(func() { _ = os.Remove(tmpFile.Name()) })
 
 	b := NewBaseCmd(pflag.NewFlagSet("wfx", pflag.ExitOnError))
 	b.EnableTLS = true
@@ -231,7 +231,7 @@ func TestNewBaseCmd_ConfigFile(t *testing.T) {
 	tmpfile, err := os.CreateTemp("", "test-log-level-*.yaml")
 	require.NoError(t, err)
 	t.Log(tmpfile.Name())
-	defer os.Remove(tmpfile.Name())
+	t.Cleanup(func() { _ = os.Remove(tmpfile.Name()) })
 
 	content := []byte("log-level: trace\n")
 	_, err = tmpfile.Write(content)

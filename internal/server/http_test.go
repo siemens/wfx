@@ -74,7 +74,7 @@ func TestConfigureTLS(t *testing.T) {
 
 	dir, err := os.MkdirTemp(os.TempDir(), "wfx-tlsca")
 	require.NoError(t, err)
-	defer os.RemoveAll(dir)
+	t.Cleanup(func() { _ = os.RemoveAll(dir) })
 
 	caCrtFile := path.Join(dir, "ca.crt")
 	caKeyFile := path.Join(dir, "ca.key")

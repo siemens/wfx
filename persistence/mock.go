@@ -18,7 +18,7 @@ import (
 
 func NewHealthyMockStorage(t *testing.T) *MockStorage {
 	m := new(MockStorage)
-	m.Mock.Test(t)
+	m.Test(t)
 	m.On("CheckHealth", mock.Anything).Return(nil)
 	return m
 }

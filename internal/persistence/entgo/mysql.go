@@ -75,7 +75,9 @@ func (wrapper *MySQL) Initialize(options string) error {
 		if err != nil {
 			return fault.Wrap(err)
 		}
-		defer conn.Close()
+		defer func() {
+			_ = conn.Close()
+		}()
 
 		m, err := mysql.WithConnection(ctx, conn, &mysql.Config{})
 		if err != nil {

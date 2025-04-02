@@ -37,14 +37,14 @@ func (g *Generator) Generate(out io.Writer, workflow *api.Workflow) error {
 
 	for _, state := range workflow.States {
 		fgColor, bgColor := cp.StateColor(state.Name)
-		_, _ = out.Write([]byte((fmt.Sprintf("state %s as \"<color:%s>%s</color>\" %s: %s\n", state.Name, fgColor, state.Name, bgColor, state.Description))))
+		_, _ = fmt.Fprintf(out, "state %s as \"<color:%s>%s</color>\" %s: %s\n", state.Name, fgColor, state.Name, bgColor, state.Description)
 	}
 
 	// add transitions
 	for _, transition := range workflow.Transitions {
-		_, _ = out.Write([]byte((fmt.Sprintf("%s --> %s: %s", transition.From, transition.To, string(transition.Eligible)))))
+		_, _ = fmt.Fprintf(out, "%s --> %s: %s", transition.From, transition.To, string(transition.Eligible))
 		if transition.Action != nil {
-			_, _ = out.Write([]byte((fmt.Sprintf(" [%s]", string(*transition.Action)))))
+			_, _ = fmt.Fprintf(out, " [%s]", string(*transition.Action))
 		}
 		_, _ = out.Write([]byte("\n"))
 	}
@@ -55,9 +55,9 @@ func (g *Generator) Generate(out io.Writer, workflow *api.Workflow) error {
 	for _, group := range workflow.Groups {
 		color := cp.GroupColor(group.Name)
 		hex := color.ToHEX().String()
-		_, _ = out.Write([]byte((fmt.Sprintf("  | <%s> | %s | %s |\n", hex, group.Name, group.Description))))
+		_, _ = fmt.Fprintf(out, "  | <%s> | %s | %s |\n", hex, group.Name, group.Description)
 	}
-	_, _ = out.Write([]byte((fmt.Sprintf("  | <%s> | %s | %s |\n", colors.DefaultBgColor, "", "The state doesn't belong to any group."))))
+	_, _ = fmt.Fprintf(out, "  | <%s> | %s | %s |\n", colors.DefaultBgColor, "", "The state doesn't belong to any group.")
 	_, _ = out.Write([]byte(("endlegend\n")))
 
 	_, _ = out.Write([]byte(("@enduml\n")))

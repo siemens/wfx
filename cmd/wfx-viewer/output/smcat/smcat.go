@@ -43,7 +43,7 @@ func (g *Generator) Generate(out io.Writer, wf *api.Workflow) error {
 	_, _ = out.Write([]byte(";\n\n"))
 
 	initialState := *workflow.FindInitialState(wf)
-	_, _ = out.Write([]byte(fmt.Sprintf("initial => %s;\n", initialState)))
+	_, _ = fmt.Fprintf(out, "initial => %s;\n", initialState)
 	for _, transition := range wf.Transitions {
 		_, _ = out.Write([]byte(transition.From))
 		_, _ = out.Write([]byte(" => "))

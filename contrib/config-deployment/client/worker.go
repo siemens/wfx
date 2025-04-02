@@ -47,10 +47,8 @@ func worker() {
 	for !done.Load() {
 		log.Println("\n>> Waiting for new job")
 		var job *api.Job
-		for {
-			if done.Load() {
-				break
-			}
+		for !done.Load() {
+
 			resp, err := client.GetJobsWithResponse(context.Background(), params)
 			if err == nil && resp.JSON200 != nil && len(resp.JSON200.Content) > 0 {
 				job = &resp.JSON200.Content[0]

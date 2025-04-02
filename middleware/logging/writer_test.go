@@ -34,7 +34,7 @@ func TestWriter(t *testing.T) {
 
 	body, err := io.ReadAll(result.Body)
 	require.NoError(t, err)
-	defer result.Body.Close()
+	defer func() { _ = result.Body.Close() }()
 
 	assert.Equal(t, "hello world", string(body))
 	assert.Equal(t, "hello world", w.responseBody.String())

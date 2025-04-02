@@ -66,7 +66,7 @@ Loop:
 			_, _ = w.Write([]byte("data: "))
 			_, _ = w.Write(b)
 			// must end with two newlines as required by the SSE spec:
-			_, _ = w.Write([]byte(fmt.Sprintf("\nid: %d\n\n", id)))
+			_, _ = fmt.Fprintf(w, "\nid: %d\n\n", id)
 
 			flusher.Flush()
 
