@@ -18,11 +18,11 @@ import (
 )
 
 //go:embed wfx.openapi.yml
-var openapiv3YAML string
+var openapiYAML string
 
 func init() {
 	var yamlObj map[string]any
-	if err := yaml.Unmarshal([]byte(openapiv3YAML), &yamlObj); err != nil {
+	if err := yaml.Unmarshal([]byte(openapiYAML), &yamlObj); err != nil {
 		panic(err)
 	}
 	servers := yamlObj["servers"].([]any)
@@ -30,7 +30,7 @@ func init() {
 	basePath := servers2["url"]
 	specEndpoint := fmt.Sprintf("%s/openapi.json", basePath)
 
-	jsonData, err := json.Marshal(yamlObj)
+	jsonData, err := json.MarshalIndent(yamlObj, "", "  ")
 	if err != nil {
 		panic(err)
 	}
