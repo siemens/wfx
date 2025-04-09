@@ -9,8 +9,11 @@ package logging
  */
 
 import (
+	"bufio"
 	"bytes"
+	"errors"
 	"io"
+	"net"
 	"net/http"
 
 	"github.com/Southclaws/fault"
@@ -22,6 +25,12 @@ type responseWriter struct {
 	httpWriter   http.ResponseWriter
 	statusCode   int
 }
+
+// responseWriter implements the following interfaces (compile-time check):
+var (
+	_ http.Flusher  = (*responseWriter)(nil)
+	_ http.Hijacker = (*responseWriter)(nil)
+)
 
 func newMyResponseWriter(w http.ResponseWriter, interceptBody bool) *responseWriter {
 	var result responseWriter
@@ -48,9 +57,21 @@ func (w *responseWriter) Write(b []byte) (int, error) {
 	return n, fault.Wrap(err)
 }
 
-// Flush implements the http.Flusher interface.
-// This is used by the server-sent events implementation to flush a single event to the client.
+// Flush is used by the server-sent events implementation to flush a single event to the client.
+// This is part of the http.Flusher interface.
 func (w *responseWriter) Flush() {
 	flusher := w.httpWriter.(http.Flusher)
 	flusher.Flush()
+}
+
+// Hijack allows an HTTP handler to take over the underlying connection.
+// This is used by the server-sent events implementation to keep the long-running (idle) connection open.
+// NOTE: The "funny" name comes from Golang's http.Hijacker interface.
+func (w *responseWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	hj, ok := w.httpWriter.(http.Hijacker)
+	if !ok {
+		return nil, nil, errors.New("hijacker interface not supported")
+	}
+	conn, bw, err := hj.Hijack()
+	return conn, bw, fault.Wrap(err)
 }

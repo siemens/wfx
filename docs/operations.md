@@ -157,8 +157,8 @@ See `wfxctl job events --help` for other filter parameters, e.g. workflow names.
    there are multiple wfx instances, a consolidated "global" event stream can only be assembled by subscribing to all
    wfx instances (and aggregating the events).
 4. **Browser Connection Limits for SSE**: Web browsers typically restrict the number of SSE connections to six per
-   domain. To overcome this limitation, HTTP/2 can be used, allowing up to 100 connections by default, or [filter
-   parameters](#filter-parameters) can be utilized to efficiently manage the connections.
+   domain.
+5. **HTTP/2**: Not supported currently. The HTTP protocol is limited to HTTP/1.1.
 
 ### Response Filters
 

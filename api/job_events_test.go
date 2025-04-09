@@ -11,7 +11,7 @@ package api
 import (
 	"context"
 	"encoding/json"
-	"io"
+	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -28,8 +28,8 @@ import (
 	"github.com/siemens/wfx/internal/handler/job/events"
 	"github.com/siemens/wfx/internal/handler/job/status"
 	"github.com/siemens/wfx/internal/handler/workflow"
+	"github.com/siemens/wfx/middleware/sse"
 	"github.com/siemens/wfx/workflow/dau"
-	"github.com/steinfletcher/apitest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -94,26 +94,22 @@ func TestJobEventsSubscribe(t *testing.T) {
 				time.Sleep(20 * time.Millisecond)
 			}
 
-			result := apitest.New().
-				Handler(handler).
-				Get("/api/wfx/v1/jobs/events").Query("ids", *jobID.Load()).
-				Expect(t).
-				Status(http.StatusOK).
-				Header("Content-Type", "text/event-stream").
-				End()
+			req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/wfx/v1/jobs/events?ids=%s", *jobID.Load()), nil)
+			rec := sse.NewMockResponseRecorder()
+			handler.ServeHTTP(rec, req)
 
-			data, _ := io.ReadAll(result.Response.Body)
-			body := string(data)
-			require.NotEmpty(t, body)
+			response := <-rec.ChResponse
+			assert.Contains(t, response, "HTTP/1.1 200")
+			assert.Contains(t, response, "Content-Type: text/event-stream")
 
-			lines := strings.Split(body, "\n")
-
-			t.Log("HTTP resonse body:")
+			lines := strings.Split(response, "\r\n")
+			t.Log("HTTP response:")
 			for _, line := range lines {
 				t.Logf(">> %s", line)
 			}
+			assert.Len(t, lines, 7)
 
-			assert.Len(t, lines, 4)
+			lines = strings.Split(lines[len(lines)-1], "\n")
 
 			// check body starts with data:
 			assert.True(t, strings.HasPrefix(lines[0], "data: "))
