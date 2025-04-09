@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - `wfx`: implemented sort functionality for `/workflows` endpoint
+- `wfx`: fixed an issue where job event connections were prematurely closed due to inactivity
 
 ### Changed
 

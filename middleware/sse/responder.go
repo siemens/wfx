@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/Southclaws/fault"
 	"github.com/olebedev/emitter"
 	"github.com/siemens/wfx/middleware/logging"
 )
@@ -37,14 +38,33 @@ func NewResponder(ctx context.Context, eventChan <-chan emitter.Event) Responder
 func (responder Responder) VisitGetJobsEventsResponse(w http.ResponseWriter) error {
 	log := logging.LoggerFromCtx(responder.ctx)
 
-	flusher, _ := w.(http.Flusher)
+	// Check if the ResponseWriter supports hijacking
+	hj, ok := w.(http.Hijacker)
+	if !ok { // e.g. if HTTP/2 is being used
+		return fmt.Errorf("http.Hijacker interface not supported")
+	}
 
-	w.Header().Set("Content-Type", "text/event-stream")
-	w.Header().Set("Cache-Control", "no-cache")
-	w.Header().Set("Connection", "keep-alive")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	// use raw connection to prevent it being closed by http.Server's idle cleanup routines
+	conn, bufrw, err := hj.Hijack()
+	if err != nil {
+		return fmt.Errorf("failed to hijack connection: %w", err)
+	}
+	defer func() {
+		_ = conn.Close()
+	}()
 
-	flusher.Flush()
+	_, _ = fmt.Fprintf(bufrw, "HTTP/1.1 %d\r\n", http.StatusOK)
+	_, _ = bufrw.WriteString("Content-Type: text/event-stream\r\n")
+	_, _ = bufrw.WriteString("Cache-Control: no-cache\r\n")
+	_, _ = bufrw.WriteString("Connection: keep-alive\r\n")
+	_, _ = bufrw.WriteString("Access-Control-Allow-Origin: *\r\n")
+	// finish header section
+	_, _ = bufrw.WriteString("\r\n")
+
+	if err := bufrw.Flush(); err != nil {
+		log.Err(err).Msg("Failed to send event to client")
+		return fault.Wrap(err)
+	}
 
 	var id uint64 = 1
 Loop:
@@ -63,12 +83,17 @@ Loop:
 			}
 			log.Debug().RawJSON("event", b).Msg("Sending event to client")
 
-			_, _ = w.Write([]byte("data: "))
-			_, _ = w.Write(b)
 			// must end with two newlines as required by the SSE spec:
-			_, _ = fmt.Fprintf(w, "\nid: %d\n\n", id)
+			_, err = fmt.Fprintf(bufrw, "data: %s\nid: %d\n\n", b, id)
+			if err != nil {
+				log.Err(err).Msg("Cannot write to buffer")
+				return fault.Wrap(err)
+			}
 
-			flusher.Flush()
+			if err := bufrw.Flush(); err != nil {
+				log.Err(err).Msg("Failed to send event to client")
+				return fault.Wrap(err)
+			}
 
 			id++
 		case <-responder.ctx.Done():

@@ -10,7 +10,6 @@ package sse
 
 import (
 	"context"
-	"net/http/httptest"
 	"sync"
 	"testing"
 
@@ -22,14 +21,18 @@ import (
 func TestSSEResponder(t *testing.T) {
 	events := make(chan emitter.Event)
 
-	rw := httptest.NewRecorder()
+	rw := NewMockResponseRecorder()
 	var wg sync.WaitGroup
 
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
 		responder := NewResponder(context.Background(), events)
-		_ = responder.VisitGetJobsEventsResponse(rw)
+		if err := responder.VisitGetJobsEventsResponse(rw); err != nil {
+			close(events)
+			t.Log("Received error from VisitGetJobsEventsResponse:", err)
+			t.Fail()
+		}
 	}()
 
 	clientID := "foo"
@@ -49,8 +52,10 @@ func TestSSEResponder(t *testing.T) {
 
 	wg.Wait()
 
-	assert.Equal(t, `data: {"clientId":"foo","message":"hello world","state":"INSTALLING"}
+	response := <-rw.ChResponse
+
+	assert.Contains(t, response, `data: {"clientId":"foo","message":"hello world","state":"INSTALLING"}
 id: 1
 
-`, rw.Body.String())
+`)
 }
