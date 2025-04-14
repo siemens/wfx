@@ -99,7 +99,7 @@ builds:
 
 archives:
   - id: wfx
-    builds:
+    ids:
       - wfx
     name_template: >-
       {{.Binary}}-{{.Version}}-{{.Os}}-{{- if eq .Arch "amd64" }}x86_64{{ else }}{{.Arch}}{{ end }}{{ if .Arm }}v{{.Arm }}{{ end }}
@@ -111,7 +111,7 @@ archives:
       - docs/*.md
 
   - id: wfxctl
-    builds:
+    ids:
       - wfxctl
     name_template: >-
       {{.Binary}}-{{.Version}}-{{.Os}}-{{- if eq .Arch "amd64" }}x86_64{{ else }}{{.Arch}}{{ end }}{{ if .Arm }}v{{.Arm }}{{ end }}
@@ -120,7 +120,7 @@ archives:
       - LICENSE
 
   - id: wfx-viewer
-    builds:
+    ids:
       - wfx-viewer
     name_template: >-
       {{.Binary}}-{{.Version}}-{{.Os}}-{{- if eq .Arch "amd64" }}x86_64{{ else }}{{.Arch}}{{ end }}{{ if .Arm }}v{{.Arm }}{{ end }}
@@ -132,7 +132,7 @@ nfpms:
   - id: wfx
     package_name: wfx
     file_name_template: '{{ .PackageName }}_{{ .Version }}_{{ .Os }}_{{- if eq .Arch "amd64" }}x86_64{{ else }}{{.Arch}}{{ end }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}'
-    builds:
+    ids:
       - wfx
     vendor: Siemens AG
     homepage: https://github.com/siemens/wfx
@@ -170,7 +170,7 @@ nfpms:
   - id: wfxctl
     package_name: wfxctl
     file_name_template: '{{ .PackageName }}_{{ .Version }}_{{ .Os }}_{{- if eq .Arch "amd64" }}x86_64{{ else }}{{.Arch}}{{ end }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}'
-    builds:
+    ids:
       - wfxctl
     vendor: Siemens AG
     homepage: https://github.com/siemens/wfx
@@ -198,7 +198,7 @@ nfpms:
   - id: wfx-viewer
     package_name: wfx-viewer
     file_name_template: '{{ .PackageName }}_{{ .Version }}_{{ .Os }}_{{- if eq .Arch "amd64" }}x86_64{{ else }}{{.Arch}}{{ end }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}'
-    builds:
+    ids:
       - wfx-viewer
     vendor: Siemens AG
     homepage: https://github.com/siemens/wfx
