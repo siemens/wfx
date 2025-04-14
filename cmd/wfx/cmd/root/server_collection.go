@@ -48,7 +48,11 @@ type ServerCollection struct {
 }
 
 func NewServerCollection(cfg *config.AppConfig, storage persistence.Storage) (*ServerCollection, error) {
-	wfx := api.NewWfxServer(storage)
+	wfx := api.NewWfxServer(storage).
+		WithSSEOpts(api.SSEOpts{
+			PingInterval:  cfg.SSEPingInterval(),
+			GraceInterval: cfg.SSEGraceInterval(),
+		})
 
 	swag, _ := genApi.GetSwagger()
 	validator := nethttpmiddleware.OapiRequestValidatorWithOptions(swag,

@@ -11,6 +11,7 @@ package job
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/internal/handler/job/events"
@@ -39,8 +40,7 @@ func TestCreateJob_Notification(t *testing.T) {
 	db := newInMemoryDB(t)
 	wf := createDirectWorkflow(t, db)
 
-	ch, err := events.AddSubscriber(context.Background(), events.FilterParams{}, nil)
-	require.NoError(t, err)
+	subscriber := events.AddSubscriber(t.Context(), time.Minute, events.FilterParams{}, nil)
 
 	job, err := CreateJob(context.Background(), db, &api.JobRequest{
 		ClientID: "foo",
@@ -48,8 +48,7 @@ func TestCreateJob_Notification(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	ev := <-ch
-	jobEvent := ev.Args[0].(*events.JobEvent)
+	jobEvent := <-subscriber.Events
 	assert.Equal(t, events.ActionCreate, jobEvent.Action)
 	assert.Equal(t, job.ID, jobEvent.Job.ID)
 }

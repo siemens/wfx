@@ -12,6 +12,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/Southclaws/fault/ftag"
 	"github.com/siemens/wfx/generated/api"
@@ -29,14 +30,13 @@ func TestDeleteJob(t *testing.T) {
 	job, err := db.CreateJob(context.Background(), &tmpJob)
 	require.NoError(t, err)
 
-	ch, err := events.AddSubscriber(context.Background(), events.FilterParams{}, nil)
+	subscriber := events.AddSubscriber(t.Context(), time.Minute, events.FilterParams{}, nil)
 	require.NoError(t, err)
 
 	err = DeleteJob(context.Background(), db, job.ID)
 	require.NoError(t, err)
 
-	ev := <-ch
-	jobEvent := ev.Args[0].(*events.JobEvent)
+	jobEvent := <-subscriber.Events
 	assert.Equal(t, events.ActionDelete, jobEvent.Action)
 	assert.Equal(t, job.ID, jobEvent.Job.ID)
 }

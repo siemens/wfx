@@ -36,16 +36,18 @@ func Delete(ctx context.Context, storage persistence.Storage, jobID string, tags
 		return nil, fault.Wrap(err)
 	}
 
-	_ = events.PublishEvent(ctx, &events.JobEvent{
-		Ctime:  strfmt.DateTime(time.Now()),
-		Action: events.ActionDeleteTags,
-		Job: &api.Job{
-			ID:       updatedJob.ID,
-			ClientID: updatedJob.ClientID,
-			Workflow: updatedJob.Workflow,
-			Tags:     updatedJob.Tags,
-		},
-	})
+	go func() {
+		events.PublishEvent(ctx, events.JobEvent{
+			Ctime:  strfmt.DateTime(time.Now()),
+			Action: events.ActionDeleteTags,
+			Job: &api.Job{
+				ID:       updatedJob.ID,
+				ClientID: updatedJob.ClientID,
+				Workflow: updatedJob.Workflow,
+				Tags:     updatedJob.Tags,
+			},
+		})
+	}()
 
 	contextLogger.Info().Msg("Deleted job tags")
 	return updatedJob.Tags, nil

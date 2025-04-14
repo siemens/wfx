@@ -18,6 +18,7 @@ import (
 	"github.com/Southclaws/fault/ftag"
 	"github.com/alexliesenfeld/health"
 	"github.com/rs/zerolog/log"
+	"github.com/siemens/wfx/cmd/wfx/cmd/config"
 	"github.com/siemens/wfx/cmd/wfx/metadata"
 	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/internal/handler/job"
@@ -38,6 +39,12 @@ const (
 type WfxServer struct {
 	storage persistence.Storage
 	checker health.Checker
+	sseOpts SSEOpts
+}
+
+type SSEOpts struct {
+	PingInterval  time.Duration
+	GraceInterval time.Duration
 }
 
 func NewWfxServer(storage persistence.Storage) *WfxServer {
@@ -51,8 +58,20 @@ func NewWfxServer(storage persistence.Storage) *WfxServer {
 		}),
 		health.WithStatusListener(healthStatusListener),
 		health.WithDisabledAutostart())
-	wfx := &WfxServer{storage: storage, checker: checker}
+	wfx := &WfxServer{
+		storage: storage,
+		checker: checker,
+		sseOpts: SSEOpts{
+			PingInterval:  config.DefaultSSEPingInterval,
+			GraceInterval: config.DefaultSSEGraceInterval,
+		},
+	}
 	return wfx
+}
+
+func (server *WfxServer) WithSSEOpts(sseOpts SSEOpts) *WfxServer {
+	server.sseOpts = sseOpts
+	return server
 }
 
 func (server WfxServer) Start() {
@@ -152,11 +171,8 @@ func (server WfxServer) GetJobsEvents(ctx context.Context, request api.GetJobsEv
 	if s := request.Params.Tags; s != nil {
 		tags = strings.Split(*s, ",")
 	}
-	eventChan, err := events.AddSubscriber(ctx, filter, tags)
-	if err != nil {
-		return nil, fault.Wrap(err)
-	}
-	return sse.NewResponder(ctx, eventChan), nil
+	subscriber := events.AddSubscriber(ctx, server.sseOpts.GraceInterval, filter, tags)
+	return sse.NewResponder(ctx, server.sseOpts.PingInterval, subscriber), nil
 }
 
 func (server WfxServer) DeleteJobsId(ctx context.Context, request api.DeleteJobsIdRequestObject) (api.DeleteJobsIdResponseObject, error) {

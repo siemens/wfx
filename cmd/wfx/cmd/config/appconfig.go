@@ -42,6 +42,9 @@ type AppConfig struct {
 	schemes          []Scheme
 	simpleFileServer string
 
+	ssePingInterval  time.Duration
+	sseGraceInterval time.Duration
+
 	maxHeaderSize  int
 	readTimeout    time.Duration
 	writeTimeout   time.Duration
@@ -216,6 +219,9 @@ func (cfg *AppConfig) Reload() bool {
 	cfg.storage = cfg.k.String(StorageFlag)
 	cfg.storageOpts = cfg.k.String(StorageOptFlag)
 	cfg.gracefulTimeout = cfg.k.Duration(GracefulTimeoutFlag)
+	cfg.ssePingInterval = cfg.k.Duration(SSEPingIntervalFlag)
+	cfg.sseGraceInterval = cfg.k.Duration(SSEGraceIntervalFlag)
+
 	if schemes := cfg.k.Strings(SchemeFlag); len(schemes) > 0 {
 		cfg.schemes = make([]Scheme, 0, len(schemes))
 		for _, s := range schemes {
@@ -396,4 +402,16 @@ func (cfg *AppConfig) MgmtPluginsDir() string {
 	cfg.mutex.RLock()
 	defer cfg.mutex.RUnlock()
 	return cfg.mgmtPluginsDir
+}
+
+func (cfg *AppConfig) SSEPingInterval() time.Duration {
+	cfg.mutex.RLock()
+	defer cfg.mutex.RUnlock()
+	return cfg.ssePingInterval
+}
+
+func (cfg *AppConfig) SSEGraceInterval() time.Duration {
+	cfg.mutex.RLock()
+	defer cfg.mutex.RUnlock()
+	return cfg.sseGraceInterval
 }

@@ -47,7 +47,7 @@ func TestGetJobsEvents(t *testing.T) {
 	}
 
 	wfx := NewWfxServer(persistence.NewHealthyMockStorage(t))
-	ctx, cancel := context.WithCancel(context.TODO())
+	ctx, cancel := context.WithCancel(t.Context())
 	defer cancel()
 	response, err := wfx.GetJobsEvents(ctx, request)
 	require.NoError(t, err)
