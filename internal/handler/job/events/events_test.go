@@ -10,18 +10,17 @@ package events
 
 import (
 	"context"
+	"sync"
 	"testing"
+	"time"
 
-	"github.com/olebedev/emitter"
 	"github.com/siemens/wfx/generated/api"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestAddSubscriberAndShutdown(t *testing.T) {
 	for i := 1; i <= 2; i++ {
-		_, err := AddSubscriber(context.Background(), FilterParams{JobIDs: []string{"42"}}, nil)
-		require.NoError(t, err)
+		_ = AddSubscriber(t.Context(), time.Minute, FilterParams{JobIDs: []string{"42"}}, nil)
 		assert.Equal(t, i, SubscriberCount())
 	}
 	ShutdownSubscribers()
@@ -29,66 +28,141 @@ func TestAddSubscriberAndShutdown(t *testing.T) {
 }
 
 func TestFiltering(t *testing.T) {
-	job1 := api.Job{ID: "1", Workflow: &api.Workflow{Name: "workflow"}, Status: &api.JobStatus{State: "INITIAL"}}
-	job2 := api.Job{ID: "2", Workflow: &api.Workflow{Name: "workflow"}, Status: &api.JobStatus{State: "INITIAL"}}
+	ctx, cancel := context.WithCancel(t.Context())
+	t.Cleanup(cancel)
 
-	ctx := context.Background()
-	ch1, _ := AddSubscriber(ctx, FilterParams{JobIDs: []string{job1.ID}}, nil)
-	ch2, _ := AddSubscriber(ctx, FilterParams{JobIDs: []string{job2.ID}}, nil)
-	chCombined, _ := AddSubscriber(ctx, FilterParams{JobIDs: []string{job1.ID, job2.ID}}, nil)
-	chAll, _ := AddSubscriber(ctx, FilterParams{}, nil) // no filter should receive all events
+	job1 := api.Job{ID: "1", Workflow: &api.Workflow{Name: "workflow"}, Status: &api.JobStatus{State: "FOO"}}
+	job2 := api.Job{ID: "2", Workflow: &api.Workflow{Name: "workflow"}, Status: &api.JobStatus{State: "BAR"}}
 
-	job1.Status.State = "FOO"
-	<-PublishEvent(context.Background(), &JobEvent{Action: ActionUpdateStatus, Job: &job1})
+	sub1 := AddSubscriber(ctx, time.Minute, FilterParams{JobIDs: []string{job1.ID}}, nil)
+	sub2 := AddSubscriber(ctx, time.Minute, FilterParams{JobIDs: []string{job2.ID}}, nil)
+	sub1and2 := AddSubscriber(ctx, time.Minute, FilterParams{JobIDs: []string{job1.ID, job2.ID}}, nil)
+	subAll := AddSubscriber(ctx, time.Minute, FilterParams{}, nil) // no filter should receive all events
 
-	job2.Status.State = "BAR"
-	<-PublishEvent(context.Background(), &JobEvent{Action: ActionUpdateStatus, Job: &job2})
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
 
-	{
-		ev := <-ch1
-		actual := ev.Args[0].(*JobEvent)
+		actual := receiveEventBlocking(sub1)
+		assert.Equal(t, ActionUpdateStatus, actual.Action)
 		assert.Equal(t, "FOO", actual.Job.Status.State)
 
 		// check there is nothing else
 		select {
-		case <-ch1:
+		case <-sub1.Events:
 			assert.Fail(t, "Received unexpected event")
 		default:
 			// nothing there, good
 		}
-	}
-	{
-		ev := <-ch2
-		actual := ev.Args[0].(*JobEvent)
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		actual := receiveEventBlocking(sub2)
 		assert.Equal(t, "BAR", actual.Job.Status.State)
 
 		// check there is nothing else
 		select {
-		case <-ch2:
+		case <-sub2.Events:
 			assert.Fail(t, "Received unexpected event")
 		default:
 			// nothing there, good
 		}
-	}
-	{
-		for _, ch := range []<-chan emitter.Event{chCombined, chAll} {
-			ev := <-ch
-			actual := ev.Args[0].(*JobEvent)
+	}()
+
+	arr := []*Subscriber{sub1and2, subAll}
+	for i := range len(arr) {
+		sub := arr[i]
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+
+			actual := receiveEventBlocking(sub)
 			assert.Equal(t, "FOO", actual.Job.Status.State)
 
-			ev = <-ch
-			actual = ev.Args[0].(*JobEvent)
+			actual = receiveEventBlocking(sub)
 			assert.Equal(t, "BAR", actual.Job.Status.State)
 
 			// check there is nothing else
 			select {
-			case <-ch:
+			case <-sub.Events:
 				assert.Fail(t, "Received unexpected event")
 			default:
 				// nothing there, good
 			}
-		}
+			assert.Empty(t, sub.Backlog.data)
+		}()
+
 	}
 
+	PublishEvent(ctx, JobEvent{Action: ActionUpdateStatus, Job: &job1})
+	PublishEvent(ctx, JobEvent{Action: ActionUpdateStatus, Job: &job2})
+
+	wg.Wait()
+
+	cancel()
 	ShutdownSubscribers()
+}
+
+func TestBacklog(t *testing.T) {
+	ctx, cancel := context.WithCancel(t.Context())
+	t.Cleanup(cancel)
+	t.Cleanup(ShutdownSubscribers)
+
+	job1 := api.Job{ID: "1", Workflow: &api.Workflow{Name: "workflow"}, Status: &api.JobStatus{State: "ALPHA"}}
+	job2 := api.Job{ID: "2", Workflow: &api.Workflow{Name: "workflow"}, Status: &api.JobStatus{State: "BETA"}}
+	sub := AddSubscriber(ctx, time.Minute, FilterParams{}, nil)
+
+	PublishEvent(ctx, JobEvent{Action: ActionUpdateStatus, Job: &job1})
+	PublishEvent(ctx, JobEvent{Action: ActionUpdateStatus, Job: &job2})
+
+	ev := <-sub.Events
+	assert.Equal(t, "ALPHA", ev.Job.Status.State)
+
+	assert.Len(t, sub.Backlog.data, 1)
+	assert.Equal(t, "BETA", sub.Backlog.data[0].Job.Status.State)
+}
+
+func TestGracePeriod(t *testing.T) {
+	ctx, cancel := context.WithCancel(t.Context())
+	t.Cleanup(cancel)
+	t.Cleanup(ShutdownSubscribers)
+
+	job := api.Job{ID: "1", Workflow: &api.Workflow{Name: "workflow"}, Status: &api.JobStatus{State: "ALPHA"}}
+	sub := AddSubscriber(ctx, time.Microsecond, FilterParams{}, nil)
+
+	PublishEvent(ctx, JobEvent{Action: ActionUpdateStatus, Job: &job})
+	PublishEvent(ctx, JobEvent{Action: ActionUpdateStatus, Job: &job})
+	time.Sleep(time.Microsecond)
+	PublishEvent(ctx, JobEvent{Action: ActionUpdateStatus, Job: &job})
+
+	ev := <-sub.Events
+	assert.Equal(t, job.ID, ev.Job.ID)
+	assert.Len(t, sub.Backlog.data, 2)
+
+	_, ok := <-sub.Events
+	assert.False(t, ok, "channel should be closed")
+}
+
+func receiveEventBlocking(sub *Subscriber) *JobEvent {
+	for {
+		select {
+		case ev, ok := <-sub.Events:
+			if !ok {
+				return nil
+			}
+			return &ev
+		default:
+			// check backlog
+			ev, ok := sub.Backlog.Deq()
+			if ok {
+				return ev
+			}
+			time.Sleep(10 * time.Millisecond)
+		}
+	}
 }

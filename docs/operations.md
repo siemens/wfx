@@ -66,6 +66,10 @@ Below is a high-level overview of how the communication flow operates:
 2. Upon receipt of the request, `wfx` sets the `Content-Type` header to `text/event-stream`.
 3. The server then initiates a stream of job events in the response body, allowing clients to receive instant updates.
 
+**Note**: To prevent the connection from being closed due to inactivity (e.g., when no job events occur), periodic keep-alive events are sent during such idle periods.
+This ensures that the connection remains open, preventing closure by proxies, the kernel, or other entities since it may not be possible to control all involved parties.
+The keep-alive events are technically comments (as defined in the SSE specification) and must be ignored by clients.
+
 #### Event Format Specification
 
 The job events stream is composed of [server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events) (SSE).
@@ -79,6 +83,14 @@ data: [...]
 id: 2
 
 [...]
+
+: keepalive
+
+data: [...]
+id: 42
+
+[...]
+
 ```
 
 An individual event within the stream conforms to this format:

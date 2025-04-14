@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `wfx`: implemented sort functionality for `/workflows` endpoint
 - `wfx`: fixed an issue where job event connections were prematurely closed due to inactivity
+- `wfx`: wfx could end up being stuck publishing job events. impact: client doesn't receive any job events, wfx didn't shut down cleanly
 
 ### Changed
 
@@ -31,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Access log level was changed from `INFO` to `DEBUG` to avoid logging a message for every poll by each client.
   To restore the old behavior, start wfx with `--log-level=DEBUG` (note that this will enable additional log messages
   though).
+- Events: use timer-based approach for dropping non-responsive event subscribers
 
 ## [0.3.3] - 2024-12-23
 
