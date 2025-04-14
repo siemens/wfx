@@ -10,15 +10,24 @@ package events
 
 import (
 	"context"
+	"sync"
 
 	"github.com/go-openapi/strfmt"
 	"github.com/google/uuid"
-	"github.com/olebedev/emitter"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/middleware/logging"
 )
+
+type Subscriber struct {
+	subscriberID string
+	ch           chan JobEvent
+	jobIDSet     map[string]any
+	clientIDSet  map[string]any
+	workflowSet  map[string]any
+	tags         []string
+}
 
 type JobEvent struct {
 	// Ctime is the time when the event was created
@@ -45,16 +54,19 @@ const (
 	ActionUpdateDefinition Action = "UPDATE_DEFINITION"
 )
 
-// NOTE: The number 32 for capacity is arbitrary; suggestions for a different value are welcome, particularly if supported by evidence.
-var e *emitter.Emitter = emitter.New(32)
+var (
+	subscribers = make([]Subscriber, 0)
+	mu          sync.RWMutex
+)
+
+// how many messages are kept in the subscriber's backlog before the subscriber is removed due to being considered dead
+const backlogCapacity int = 32
 
 // AddSubscriber adds a new subscriber to receive job events filtered based on the provided filterParams.
-func AddSubscriber(ctx context.Context, filter FilterParams, tags []string) (<-chan emitter.Event, error) {
+func AddSubscriber(ctx context.Context, filter FilterParams, tags []string) <-chan JobEvent {
 	log := logging.LoggerFromCtx(ctx)
-
 	// for logging purposes
 	subscriberID := uuid.New().String()
-
 	log.Info().
 		Str("subscriberID", subscriberID).
 		Dict("filterParams", zerolog.Dict().
@@ -64,48 +76,9 @@ func AddSubscriber(ctx context.Context, filter FilterParams, tags []string) (<-c
 		Strs("tags", tags).
 		Msg("Adding new subscriber for job events")
 
-	if filter := filter.createEventFilter(subscriberID, tags); filter != nil {
-		return e.On("*", filter), nil
-	}
-	return e.On("*"), nil
-}
+	ch := make(chan JobEvent, backlogCapacity)
 
-// ShutdownSubscribers disconnects all subscribers.
-func ShutdownSubscribers() {
-	count := len(e.Topics())
-	for _, topic := range e.Topics() {
-		log.Debug().Str("topic", topic).Msg("Closing subscribers")
-		e.Off(topic)
-	}
-	log.Info().Int("count", count).Msg("Subscriber shutdown complete")
-}
-
-// SubscriberCount counts the total number of subscribers across all topics.
-func SubscriberCount() int {
-	count := 0
-	for _, topic := range e.Topics() {
-		count += len(e.Listeners(topic))
-	}
-	return count
-}
-
-// PublishEvent publishes a new event. It returns a channel which can be used
-// to wait for the delivery of the event to all listeners.
-func PublishEvent(ctx context.Context, event *JobEvent) chan struct{} {
-	log := logging.LoggerFromCtx(ctx)
-	log.Debug().
-		Str("jobID", event.Job.ID).
-		Str("action", string(event.Action)).Msg("Publishing event")
-	return e.Emit(event.Job.ID, event)
-}
-
-func (filter FilterParams) createEventFilter(subscriberID string, tags []string) func(*emitter.Event) {
-	// special case: no filters means "catch-all"
-	if len(filter.JobIDs) == 0 && len(filter.ClientIDs) == 0 && len(filter.Workflows) == 0 {
-		return nil
-	}
-
-	// build hash sets for faster lookup
+	// build hash maps for faster lookup
 	jobIDSet := make(map[string]any, len(filter.JobIDs))
 	for _, s := range filter.JobIDs {
 		jobIDSet[s] = nil
@@ -118,27 +91,92 @@ func (filter FilterParams) createEventFilter(subscriberID string, tags []string)
 	for _, s := range filter.Workflows {
 		workflowSet[s] = nil
 	}
-	return func(ev *emitter.Event) {
-		event := ev.Args[0].(*JobEvent)
-		job := event.Job
-		// check if we shall notify the client about the event
-		_, interested := jobIDSet[job.ID]
+
+	l := Subscriber{
+		subscriberID: subscriberID,
+		ch:           ch,
+		jobIDSet:     jobIDSet,
+		clientIDSet:  clientIDSet,
+		workflowSet:  workflowSet,
+		tags:         tags,
+	}
+
+	mu.Lock()
+	subscribers = append(subscribers, l)
+	mu.Unlock()
+
+	return ch
+}
+
+// ShutdownSubscribers disconnects all subscribers.
+func ShutdownSubscribers() {
+	mu.Lock()
+	newSubscribers := subscribers
+	subscribers = make([]Subscriber, 0)
+	mu.Unlock()
+
+	for _, l := range newSubscribers {
+		close(l.ch)
+	}
+	log.Info().Msg("Subscriber shutdown complete")
+}
+
+// SubscriberCount counts the total number of subscribers across all topics.
+func SubscriberCount() int {
+	mu.RLock()
+	count := len(subscribers)
+	mu.RUnlock()
+	return count
+}
+
+// PublishEvent publishes a new event. This is a synchronous operation.
+func PublishEvent(ctx context.Context, event JobEvent) {
+	log := logging.LoggerFromCtx(ctx).With().Str("jobID", event.Job.ID).Str("action", string(event.Action)).Logger()
+	log.Debug().Msg("Publishing event to subscribers")
+
+	mu.Lock()
+	defer mu.Unlock()
+
+	// the subscribers that are still active and we'll keep
+	newSubscribers := make([]Subscriber, 0, len(subscribers))
+
+	for _, l := range subscribers {
+		ctxLog := log.With().Str("subscriberID", l.subscriberID).Logger()
+
+		// check if we shall notify the subscriber about the event
+		// special case: no filters means "catch-all"
+		isCatchAll := len(l.jobIDSet) == 0 && len(l.clientIDSet) == 0 && len(l.workflowSet) == 0
+		interested := isCatchAll ||
+			mapContains(l.jobIDSet, event.Job.ID) ||
+			mapContains(l.clientIDSet, event.Job.ClientID) ||
+			(event.Job.Workflow != nil && mapContains(l.workflowSet, event.Job.Workflow.Name))
 		if !interested {
-			_, interested = clientIDSet[job.ClientID]
-		}
-		if !interested && job.Workflow != nil {
-			_, interested = workflowSet[job.Workflow.Name]
+			// keep subscriber, potentially still alive
+			newSubscribers = append(newSubscribers, l)
+			ctxLog.Debug().Msg("Subscriber not interested, skipping event notification")
+			continue
 		}
 
-		if interested {
-			// apply tags
-			log.Debug().Strs("tags", tags).Msg("Applying tags to event notification")
-			event.Tags = tags
-		} else {
-			log.Debug().
-				Str("subscriberID", subscriberID).
-				Str("jobID", job.ID).Msg("Skipping event notification")
-			emitter.Void(ev)
+		// apply tags
+		event.Tags = l.tags
+
+		// send event
+		ctxLog.Debug().Msg("Sending event to subscriber")
+		select {
+		case l.ch <- event:
+			ctxLog.Debug().Msg("Sent event to subscriber")
+			// keep subscriber since it's still alive
+			newSubscribers = append(newSubscribers, l)
+		default: // No subscriber
+			close(l.ch)
+			ctxLog.Info().Msg("Subscriber no longer alive, skipping send and dropping subscriber")
 		}
 	}
+
+	subscribers = newSubscribers
+}
+
+func mapContains(set map[string]any, key string) (found bool) {
+	_, found = set[key]
+	return
 }
