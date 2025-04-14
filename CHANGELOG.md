@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `wfx`: implemented sort functionality for `/workflows` endpoint
 - `wfx`: fixed an issue where job event connections were prematurely closed due to inactivity
+- `wfx`: wfx could end up being stuck publishing job events. impact: client doesn't receive any job events, wfx didn't shut down cleanly
 
 ### Changed
 

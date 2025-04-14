@@ -12,7 +12,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/olebedev/emitter"
 	"github.com/siemens/wfx/generated/api"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -20,8 +19,7 @@ import (
 
 func TestAddSubscriberAndShutdown(t *testing.T) {
 	for i := 1; i <= 2; i++ {
-		_, err := AddSubscriber(context.Background(), FilterParams{JobIDs: []string{"42"}}, nil)
-		require.NoError(t, err)
+		_ = AddSubscriber(context.Background(), FilterParams{JobIDs: []string{"42"}}, nil)
 		assert.Equal(t, i, SubscriberCount())
 	}
 	ShutdownSubscribers()
@@ -33,20 +31,21 @@ func TestFiltering(t *testing.T) {
 	job2 := api.Job{ID: "2", Workflow: &api.Workflow{Name: "workflow"}, Status: &api.JobStatus{State: "INITIAL"}}
 
 	ctx := context.Background()
-	ch1, _ := AddSubscriber(ctx, FilterParams{JobIDs: []string{job1.ID}}, nil)
-	ch2, _ := AddSubscriber(ctx, FilterParams{JobIDs: []string{job2.ID}}, nil)
-	chCombined, _ := AddSubscriber(ctx, FilterParams{JobIDs: []string{job1.ID, job2.ID}}, nil)
-	chAll, _ := AddSubscriber(ctx, FilterParams{}, nil) // no filter should receive all events
+	ch1 := AddSubscriber(ctx, FilterParams{JobIDs: []string{job1.ID}}, nil)
+	ch2 := AddSubscriber(ctx, FilterParams{JobIDs: []string{job2.ID}}, nil)
+	chCombined := AddSubscriber(ctx, FilterParams{JobIDs: []string{job1.ID, job2.ID}}, nil)
+	chAll := AddSubscriber(ctx, FilterParams{}, nil) // no filter should receive all events
 
 	job1.Status.State = "FOO"
-	<-PublishEvent(context.Background(), &JobEvent{Action: ActionUpdateStatus, Job: &job1})
+	PublishEvent(t.Context(), JobEvent{Action: ActionUpdateStatus, Job: &job1})
 
 	job2.Status.State = "BAR"
-	<-PublishEvent(context.Background(), &JobEvent{Action: ActionUpdateStatus, Job: &job2})
+	PublishEvent(t.Context(), JobEvent{Action: ActionUpdateStatus, Job: &job2})
 
 	{
-		ev := <-ch1
-		actual := ev.Args[0].(*JobEvent)
+		actual, ok := <-ch1
+		require.True(t, ok)
+		assert.Equal(t, ActionUpdateStatus, actual.Action)
 		assert.Equal(t, "FOO", actual.Job.Status.State)
 
 		// check there is nothing else
@@ -58,8 +57,8 @@ func TestFiltering(t *testing.T) {
 		}
 	}
 	{
-		ev := <-ch2
-		actual := ev.Args[0].(*JobEvent)
+		actual, ok := <-ch2
+		require.True(t, ok)
 		assert.Equal(t, "BAR", actual.Job.Status.State)
 
 		// check there is nothing else
@@ -71,13 +70,13 @@ func TestFiltering(t *testing.T) {
 		}
 	}
 	{
-		for _, ch := range []<-chan emitter.Event{chCombined, chAll} {
-			ev := <-ch
-			actual := ev.Args[0].(*JobEvent)
+		for _, ch := range []<-chan JobEvent{chCombined, chAll} {
+			actual, ok := <-ch
+			require.True(t, ok)
 			assert.Equal(t, "FOO", actual.Job.Status.State)
 
-			ev = <-ch
-			actual = ev.Args[0].(*JobEvent)
+			actual, ok = <-ch
+			require.True(t, ok)
 			assert.Equal(t, "BAR", actual.Job.Status.State)
 
 			// check there is nothing else

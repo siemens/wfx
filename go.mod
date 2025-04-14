@@ -28,7 +28,6 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.25
 	github.com/oapi-codegen/nethttp-middleware v1.0.2
 	github.com/oapi-codegen/runtime v1.1.1
-	github.com/olebedev/emitter v0.0.0-20230411050614-349169dec2ba
 	github.com/pkg/errors v0.9.1
 	github.com/rs/cors v1.11.1
 	github.com/rs/zerolog v1.34.0
