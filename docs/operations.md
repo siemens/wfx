@@ -140,9 +140,17 @@ times to job events using various filters in order to create a more advanced eve
 
 ```bash
 wfxctl job events
+
+# auto reconnect if connection is lost; also waits for wfx to be up and running.
+wfxctl job events --auto-reconnect
 ```
 
-This may result in a large number of events, though. For a more targeted approach, filter parameters may be used.
+**Note**: The `--auto-reconnect` flag should be used with caution, as it may result in missed events after a connection loss.
+When this flag is used, `wfxctl` does not terminate upon losing the connection, so its logs should be monitored to detect such occurrences.
+After a connection loss, fetching the job's current status and comparing it with the received events can help identify any missed events.
+
+The above commands monitor events for *all* jobs globally, which may result in a large number of events.
+For a more targeted approach, filter parameters may be used.
 Assuming the job IDs are known (either because the jobs have been created already or the IDs are received via another
 subscription channel), the following will subscribe to events matching either of the two specified job IDs:
 

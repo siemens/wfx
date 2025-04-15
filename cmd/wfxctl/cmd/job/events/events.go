@@ -10,7 +10,6 @@ package events
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -29,6 +28,7 @@ import (
 
 var validator = func(out io.Writer) sse.ResponseValidator {
 	return func(r *http.Response) error {
+		fmt.Fprintln(out, "SSE connection established")
 		if r.StatusCode == http.StatusOK {
 			return nil
 		}
@@ -69,8 +69,8 @@ func (t SSETransport) Do(req *http.Request) (*http.Response, error) {
 	defer unsubscribe()
 
 	err := conn.Connect()
-	if err != nil && !errors.Is(err, io.EOF) {
-		log.Error().Err(err).Msg("Failed to connect to remote server")
+	if err != nil {
+		log.Error().Msg(err.Error())
 		return nil, fault.Wrap(err)
 	}
 	return &http.Response{StatusCode: http.StatusOK}, nil
@@ -84,23 +84,27 @@ func NewCommand() *cobra.Command {
 wfxctl job events --job-id=1 --job-id=2 --client-id=foo
 `,
 		TraverseChildren: true,
+		SilenceUsage:     true,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			baseCmd := flags.NewBaseCmd(cmd.Flags())
+			f := cmd.Flags()
+			baseCmd := flags.NewBaseCmd(f)
 			httpClient := errutil.Must(baseCmd.CreateHTTPClient())
 			httpClient.Timeout = 0
-			sseClient := &sse.Client{
-				HTTPClient: httpClient,
-				Backoff: sse.Backoff{
-					InitialInterval: 5 * time.Second,
-					Multiplier:      1.5,
-					Jitter:          0.5,
-					MaxInterval:     60 * time.Second,
-					MaxElapsedTime:  15 * time.Minute,
-					MaxRetries:      -1,
-				},
-				ResponseValidator: validator(cmd.ErrOrStderr()),
+
+			// use sane defaults (e.g. auto reconnect) from the default client
+			sseClient := sse.DefaultClient
+			sseClient.HTTPClient = httpClient
+			sseClient.ResponseValidator = validator(cmd.ErrOrStderr())
+
+			autoReconnect, _ := f.GetBool(flags.AutoReconnectFlag)
+			if !autoReconnect {
+				sseClient.Backoff.MaxRetries = -1
 			}
-			transport := SSETransport{sseClient: sseClient, out: cmd.OutOrStdout()}
+
+			sseClient.OnRetry = func(_ error, sleep time.Duration) {
+				fmt.Fprintf(cmd.ErrOrStderr(), "SSE connection lost. Attempting to reconnect in %v...\n", sleep)
+			}
+			transport := SSETransport{sseClient: sse.DefaultClient, out: cmd.OutOrStdout()}
 
 			var server string
 			swagger := errutil.Must(api.GetSwagger())
@@ -142,5 +146,6 @@ wfxctl job events --job-id=1 --job-id=2 --client-id=foo
 	f.StringSlice(flags.ClientIDFlag, nil, "client id filter")
 	f.StringSlice(flags.WorkflowFlag, nil, "workflow name filter")
 	f.StringSlice(flags.TagFlag, nil, "tag filter")
+	f.Bool(flags.AutoReconnectFlag, false, "auto reconnect on connection loss")
 	return cmd
 }

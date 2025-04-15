@@ -17,7 +17,6 @@ import (
 
 	"github.com/siemens/wfx/cmd/wfxctl/flags"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestSubscribeJobStatus(t *testing.T) {
@@ -42,7 +41,7 @@ func TestSubscribeJobStatus(t *testing.T) {
 	cmd := NewCommand()
 	cmd.SetArgs([]string{"--" + flags.JobIDFlag, "1"})
 	err := cmd.Execute()
-	require.NoError(t, err)
+	assert.ErrorContains(t, err, "connection to server lost")
 	assert.Equal(t, expectedPath, actualPath)
 }
 
