@@ -128,6 +128,9 @@ times to job events using various filters in order to create a more advanced eve
 
 ```bash
 wfxctl job events
+
+# auto reconnect if connection is lost; also waits for wfx to be up and running
+wfxctl job events --auto-reconnect
 ```
 
 This may result in a large number of events, though. For a more targeted approach, filter parameters may be used.

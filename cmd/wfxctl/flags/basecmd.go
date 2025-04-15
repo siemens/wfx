@@ -69,6 +69,7 @@ const (
 	WorkflowFlag         = "workflow"
 	WorkflowNameFlag     = "workflow-name"
 	NameFlag             = "name"
+	AutoReconnectFlag    = "auto-reconnect"
 )
 
 type BaseCmd struct {
