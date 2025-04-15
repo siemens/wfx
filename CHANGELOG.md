@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added (existing but undocumented) `/health` and `/version` endpoint to OpenAPI spec
 - OpenAPI v3 spec is served at `/api/wfx/v1/openapi.json`
 - Add build tags to `--version` output
+- `wfxctl`: added `--auto-reconnect` flag to `job events` subcommand to automatically reconnect on connection loss
 
 ### Fixed
 
@@ -32,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Access log level was changed from `INFO` to `DEBUG` to avoid logging a message for every poll by each client.
   To restore the old behavior, start wfx with `--log-level=DEBUG` (note that this will enable additional log messages
   though).
+- `wfxctl`: return non-zero exit code if `job events` connection is lost
 
 ## [0.3.3] - 2024-12-23
 
