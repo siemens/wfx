@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added (existing but undocumented) `/health` and `/version` endpoint to OpenAPI spec
 - OpenAPI v3 spec is served at `/api/wfx/v1/openapi.json`
 - Add build tags to `--version` output
+- `wfxctl`: added `--auto-reconnect` flag to `job events` subcommand to automatically reconnect on connection loss.
+  **Note**: While reconnecting, events may be missed. Compare wfx's current job details with the last recorded event to detect (and recover from) this case.
 
 ### Fixed
 
