@@ -124,9 +124,8 @@ func ShutdownSubscribers() {
 // SubscriberCount counts the total number of subscribers across all topics.
 func SubscriberCount() int {
 	mu.RLock()
-	count := len(subscribers)
-	mu.RUnlock()
-	return count
+	defer mu.RUnlock()
+	return len(subscribers)
 }
 
 // PublishEvent publishes a new event. This is a synchronous operation.
