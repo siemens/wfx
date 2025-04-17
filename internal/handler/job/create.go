@@ -63,11 +63,13 @@ func CreateJob(ctx context.Context, storage persistence.Storage, request *api.Jo
 		return nil, fault.Wrap(err, ftag.With(ftag.Internal))
 	}
 
-	_ = events.PublishEvent(ctx, &events.JobEvent{
-		Ctime:  strfmt.DateTime(time.Now()),
-		Action: events.ActionCreate,
-		Job:    createdJob,
-	})
+	go func() {
+		events.PublishEvent(ctx, events.JobEvent{
+			Ctime:  strfmt.DateTime(time.Now()),
+			Action: events.ActionCreate,
+			Job:    createdJob,
+		})
+	}()
 
 	contextLogger.Info().Str("id", createdJob.ID).Msg("Created new job")
 	return createdJob, nil

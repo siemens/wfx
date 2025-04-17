@@ -34,15 +34,17 @@ func DeleteJob(ctx context.Context, storage persistence.Storage, jobID string) e
 		return fault.Wrap(err)
 	}
 
-	_ = events.PublishEvent(ctx, &events.JobEvent{
-		Ctime:  strfmt.DateTime(time.Now()),
-		Action: events.ActionDelete,
-		Job: &api.Job{
-			ID:       jobID,
-			ClientID: job.ClientID,
-			Workflow: &api.Workflow{Name: job.Workflow.Name},
-		},
-	})
+	go func() {
+		events.PublishEvent(ctx, events.JobEvent{
+			Ctime:  strfmt.DateTime(time.Now()),
+			Action: events.ActionDelete,
+			Job: &api.Job{
+				ID:       jobID,
+				ClientID: job.ClientID,
+				Workflow: &api.Workflow{Name: job.Workflow.Name},
+			},
+		})
+	}()
 
 	log.Info().Str("id", jobID).Msg("Deleted job")
 	return nil

@@ -54,14 +54,13 @@ func TestJobEventsSubscribe(t *testing.T) {
 
 			var wg sync.WaitGroup
 			expectedTags := []string{"tag1", "tag2"}
-			ch, _ := events.AddSubscriber(context.Background(), events.FilterParams{ClientIDs: []string{clientID}}, expectedTags)
+			ch := events.AddSubscriber(context.Background(), events.FilterParams{ClientIDs: []string{clientID}}, expectedTags)
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
 
 				// wait for job created event
-				ev := <-ch
-				payload := ev.Args[0].(*events.JobEvent)
+				payload := <-ch
 				assert.Equal(t, events.ActionCreate, payload.Action)
 				assert.Equal(t, expectedTags, payload.Tags)
 				jobID.Store(&payload.Job.ID)
@@ -107,7 +106,7 @@ func TestJobEventsSubscribe(t *testing.T) {
 			for _, line := range lines {
 				t.Logf(">> %s", line)
 			}
-			assert.Len(t, lines, 7)
+			assert.Len(t, lines, 8)
 
 			lines = strings.Split(lines[len(lines)-1], "\n")
 

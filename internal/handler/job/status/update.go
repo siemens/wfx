@@ -78,16 +78,18 @@ func Update(ctx context.Context, storage persistence.Storage, jobID string, newS
 		return nil, fault.Wrap(err)
 	}
 
-	_ = events.PublishEvent(ctx, &events.JobEvent{
-		Ctime:  strfmt.DateTime(time.Now()),
-		Action: events.ActionUpdateStatus,
-		Job: &api.Job{
-			ID:       result.ID,
-			ClientID: result.ClientID,
-			Workflow: &api.Workflow{Name: job.Workflow.Name},
-			Status:   result.Status,
-		},
-	})
+	go func() {
+		events.PublishEvent(ctx, events.JobEvent{
+			Ctime:  strfmt.DateTime(time.Now()),
+			Action: events.ActionUpdateStatus,
+			Job: &api.Job{
+				ID:       result.ID,
+				ClientID: result.ClientID,
+				Workflow: &api.Workflow{Name: job.Workflow.Name},
+				Status:   result.Status,
+			},
+		})
+	}()
 
 	contextLogger.Info().
 		Str("from", from).
