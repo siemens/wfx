@@ -22,14 +22,17 @@ import (
 // Responder streams server-sent events (SSE) to a client.
 // It listens for events from the provided channel and dispatches them
 // to the client as soon as they arrive.
-//
-// Parameters:
-// - ctx: The context for managing the lifecycle of the stream. If canceled, streaming stops.
-// - source: A read-only channel of events to be transmitted.
 type Responder[T any] struct {
-	ctx          context.Context
+	// ctx is the context used to manage the lifecycle of the SSE stream.
+	// When the context is canceled, the Responder stops streaming events.
+	ctx context.Context
+	// idleDuration specifies the duration of inactivity before a keep-alive
+	// event is sent to the client. This helps ensure the connection remains
+	// open even when no events occur.
 	idleDuration time.Duration
-	eventChan    <-chan T
+	// eventChan is a read-only channel from which the Responder receives events
+	// to be sent to the client. Each event is transmitted as soon as it is received.
+	eventChan <-chan T
 }
 
 func NewResponder[T any](ctx context.Context, idleDuration time.Duration, eventChan <-chan T) Responder[T] {

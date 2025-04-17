@@ -66,7 +66,7 @@ const (
 	preferedStorage   = "sqlite"
 	sqliteDefaultOpts = "file:wfx.db?_fk=1&_journal=WAL"
 
-	DefaultPingIntervalSSE = 15 * time.Second
+	DefaultPingIntervalSSE = 30 * time.Second // should be "short enough", i.e. shorter than the default read timeout of most reverse proxies
 )
 
 func NewFlagset() *pflag.FlagSet {
@@ -77,7 +77,7 @@ func NewFlagset() *pflag.FlagSet {
 	f.StringSlice(SchemeFlag, []string{"http"}, "the listeners to enable, this can be repeated and defaults to the schemes in the swagger spec")
 	f.Duration(CleanupTimeoutFlag, 10*time.Second, "grace period for which to wait before killing idle connections")
 	f.Duration(GracefulTimeoutFlag, 15*time.Second, "grace period for which to wait before shutting down the server")
-	f.Duration(PingIntervalSSEFlag, DefaultPingIntervalSSE, "interval to send periodic keep-alive messages to prevent the connection from being closed")
+	f.Duration(PingIntervalSSEFlag, DefaultPingIntervalSSE, "interval to send periodic keep-alive messages to prevent server-sent events connections from being closed")
 
 	f.Int(MaxHeaderSizeFlag, 1000000, "controls the maximum number of bytes the server will read parsing the request header's keys and values, including the request line. It does not limit the size of the request body")
 	f.Bool(KeepAliveFlag, true, "sets the TCP keep-alive timeouts on accepted connections. It prunes dead TCP connections ( e.g. closing laptop mid-download)")
