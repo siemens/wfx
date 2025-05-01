@@ -19,7 +19,7 @@ require (
 	github.com/gookit/color v1.5.4
 	github.com/itchyny/gojq v0.12.17
 	github.com/jackc/pgx/v5 v5.7.4
-	github.com/knadh/koanf/parsers/yaml v0.1.0
+	github.com/knadh/koanf/parsers/yaml v1.0.0
 	github.com/knadh/koanf/providers/env v1.1.0
 	github.com/knadh/koanf/providers/file v1.2.0
 	github.com/knadh/koanf/providers/posflag v0.1.0
