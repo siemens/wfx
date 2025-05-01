@@ -7,14 +7,14 @@ require (
 	github.com/OpenPeeDeeP/xdg v1.0.0
 	github.com/Southclaws/fault v0.8.1
 	github.com/alexliesenfeld/health v0.8.0
-	github.com/approvals/go-approval-tests v1.2.1
+	github.com/approvals/go-approval-tests v1.5.0
 	github.com/cavaliergopher/grab/v3 v3.0.1
 	github.com/cnf/structhash v0.0.0-20250313080605-df4c6cc74a9a
 	github.com/coreos/go-systemd/v22 v22.5.0
-	github.com/getkin/kin-openapi v0.131.0
+	github.com/getkin/kin-openapi v0.132.0
 	github.com/go-openapi/strfmt v0.23.0
 	github.com/go-sql-driver/mysql v1.9.2
-	github.com/golang-migrate/migrate/v4 v4.18.2
+	github.com/golang-migrate/migrate/v4 v4.18.3
 	github.com/google/flatbuffers v25.2.10+incompatible
 	github.com/gookit/color v1.5.4
 	github.com/itchyny/gojq v0.12.17
@@ -26,7 +26,7 @@ require (
 	github.com/knadh/koanf/v2 v2.2.0
 	github.com/mattn/go-isatty v0.0.20
 	github.com/mattn/go-sqlite3 v1.14.28
-	github.com/oapi-codegen/nethttp-middleware v1.0.2
+	github.com/oapi-codegen/nethttp-middleware v1.1.2
 	github.com/oapi-codegen/runtime v1.1.1
 	github.com/olebedev/emitter v0.0.0-20230411050614-349169dec2ba
 	github.com/pkg/errors v0.9.1
