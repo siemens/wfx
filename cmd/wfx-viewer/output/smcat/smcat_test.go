@@ -12,8 +12,8 @@ import (
 	"bytes"
 	"testing"
 
-	approvals "github.com/approvals/go-approval-tests"
 	"github.com/siemens/wfx/workflow/dau"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -22,5 +22,31 @@ func TestGenerate(t *testing.T) {
 	gen := NewGenerator()
 	err := gen.Generate(buf, dau.DirectWorkflow())
 	require.NoError(t, err)
-	approvals.VerifyString(t, buf.String())
+	actual := buf.String()
+	expected := `initial,
+INSTALL [color="#00cc00"],
+INSTALLING [color="#00cc00"],
+INSTALLED [color="#00cc00"],
+ACTIVATE [color="#00cc00"],
+ACTIVATING [color="#00cc00"],
+ACTIVATED [color="#4993dd"],
+TERMINATED [color="#9393dd"],
+final;
+
+initial => INSTALL;
+INSTALL => INSTALLING: CLIENT;
+INSTALL => TERMINATED: CLIENT;
+INSTALLING => INSTALLING: CLIENT;
+INSTALLING => TERMINATED: CLIENT;
+INSTALLING => INSTALLED: CLIENT;
+INSTALLED => ACTIVATE: WFX;
+ACTIVATE => ACTIVATING: CLIENT;
+ACTIVATE => TERMINATED: CLIENT;
+ACTIVATING => ACTIVATING: CLIENT;
+ACTIVATING => TERMINATED: CLIENT;
+ACTIVATING => ACTIVATED: CLIENT;
+ACTIVATED => final;
+TERMINATED => final;
+`
+	assert.Equal(t, expected, actual)
 }
