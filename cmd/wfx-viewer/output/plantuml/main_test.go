@@ -11,11 +11,9 @@ package plantuml
 import (
 	"testing"
 
-	approvals "github.com/approvals/go-approval-tests"
 	"go.uber.org/goleak"
 )
 
 func TestMain(m *testing.M) {
-	approvals.UseFolder("testdata")
 	goleak.VerifyTestMain(m)
 }
