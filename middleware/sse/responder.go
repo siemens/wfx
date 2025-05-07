@@ -13,29 +13,33 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/Southclaws/fault"
-	"github.com/olebedev/emitter"
 	"github.com/siemens/wfx/middleware/logging"
 )
 
 // Responder streams server-sent events (SSE) to a client.
 // It listens for events from the provided channel and dispatches them
 // to the client as soon as they arrive.
-//
-// Parameters:
-// - ctx: The context for managing the lifecycle of the stream. If canceled, streaming stops.
-// - source: A read-only channel of events to be transmitted.
-type Responder struct {
-	ctx       context.Context
-	eventChan <-chan emitter.Event
+type Responder[T any] struct {
+	// ctx is the context used to manage the lifecycle of the SSE stream.
+	// When the context is canceled, the Responder stops streaming events.
+	ctx context.Context
+	// idleDuration specifies the duration of inactivity before a keep-alive
+	// event is sent to the client. This helps ensure the connection remains
+	// open even when no events occur.
+	idleDuration time.Duration
+	// eventChan is a read-only channel from which the Responder receives events
+	// to be sent to the client. Each event is transmitted as soon as it is received.
+	eventChan <-chan T
 }
 
-func NewResponder(ctx context.Context, eventChan <-chan emitter.Event) Responder {
-	return Responder{ctx: ctx, eventChan: eventChan}
+func NewResponder[T any](ctx context.Context, idleDuration time.Duration, eventChan <-chan T) Responder[T] {
+	return Responder[T]{ctx: ctx, idleDuration: idleDuration, eventChan: eventChan}
 }
 
-func (responder Responder) VisitGetJobsEventsResponse(w http.ResponseWriter) error {
+func (responder Responder[T]) VisitGetJobsEventsResponse(w http.ResponseWriter) error {
 	log := logging.LoggerFromCtx(responder.ctx)
 
 	// Check if the ResponseWriter supports hijacking
@@ -58,6 +62,8 @@ func (responder Responder) VisitGetJobsEventsResponse(w http.ResponseWriter) err
 	_, _ = bufrw.WriteString("Cache-Control: no-cache\r\n")
 	_, _ = bufrw.WriteString("Connection: keep-alive\r\n")
 	_, _ = bufrw.WriteString("Access-Control-Allow-Origin: *\r\n")
+	_, _ = bufrw.WriteString("X-Accel-Buffering: no\r\n") // notify reverse proxy to disable buffering
+
 	// finish header section
 	_, _ = bufrw.WriteString("\r\n")
 
@@ -65,6 +71,9 @@ func (responder Responder) VisitGetJobsEventsResponse(w http.ResponseWriter) err
 		log.Err(err).Msg("Failed to send event to client")
 		return fault.Wrap(err)
 	}
+
+	idleTicker := time.NewTicker(responder.idleDuration)
+	defer idleTicker.Stop()
 
 	var id uint64 = 1
 Loop:
@@ -76,7 +85,7 @@ Loop:
 				log.Debug().Msg("SSE channel is closed")
 				break Loop
 			}
-			b, err := json.Marshal(ev.Args[0])
+			b, err := json.Marshal(ev)
 			if err != nil {
 				log.Error().Err(err).Msg("Failed to marshal status event")
 				continue Loop
@@ -96,9 +105,20 @@ Loop:
 			}
 
 			id++
+		case <-idleTicker.C:
+			log.Debug().Msg("Sending keep-alive message to client")
+			_, err = bufrw.WriteString(": keepalive\n\n")
+			if err != nil {
+				log.Err(err).Msg("Error writing keepalive")
+				return fault.Wrap(err)
+			}
+			if err := bufrw.Flush(); err != nil {
+				log.Err(err).Msg("Failed to send event to client")
+				return fault.Wrap(err)
+			}
 		case <-responder.ctx.Done():
 			// this typically happens when the client closes the connection
-			log.Debug().Msg("Context is done")
+			log.Debug().Msg("Client disconnected")
 			break Loop
 		}
 	}

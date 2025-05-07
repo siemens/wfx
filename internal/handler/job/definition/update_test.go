@@ -43,8 +43,7 @@ func TestUpdateJobDefinition(t *testing.T) {
 	oldDefinitionHash := job.Status.DefinitionHash
 	assert.NotEmpty(t, oldDefinitionHash)
 
-	ch, err := events.AddSubscriber(context.Background(), events.FilterParams{}, nil)
-	require.NoError(t, err)
+	ch := events.AddSubscriber(context.Background(), events.FilterParams{}, nil)
 
 	newDefinition := map[string]any{
 		"foo": "baz",
@@ -60,8 +59,7 @@ func TestUpdateJobDefinition(t *testing.T) {
 		assert.NotEqual(t, oldDefinitionHash, job.Status.DefinitionHash)
 	}
 
-	ev := <-ch
-	jobEvent := ev.Args[0].(*events.JobEvent)
+	jobEvent := <-ch
 	assert.Equal(t, events.ActionUpdateDefinition, jobEvent.Action)
 	assert.Equal(t, job.ID, jobEvent.Job.ID)
 }

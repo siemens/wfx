@@ -12,14 +12,14 @@ import (
 	"context"
 	"sync"
 	"testing"
+	"time"
 
-	"github.com/olebedev/emitter"
 	"github.com/siemens/wfx/generated/api"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSSEResponder(t *testing.T) {
-	events := make(chan emitter.Event)
+	chEvents := make(chan api.JobStatus)
 
 	rw := NewMockResponseRecorder()
 	var wg sync.WaitGroup
@@ -27,9 +27,9 @@ func TestSSEResponder(t *testing.T) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		responder := NewResponder(context.Background(), events)
+		responder := NewResponder(context.Background(), time.Minute, chEvents)
 		if err := responder.VisitGetJobsEventsResponse(rw); err != nil {
-			close(events)
+			close(chEvents)
 			t.Log("Received error from VisitGetJobsEventsResponse:", err)
 			t.Fail()
 		}
@@ -42,13 +42,8 @@ func TestSSEResponder(t *testing.T) {
 		Message:  message,
 		State:    "INSTALLING",
 	}
-	events <- emitter.Event{
-		Topic:         "",
-		OriginalTopic: "",
-		Flags:         0,
-		Args:          []any{jobStatus},
-	}
-	close(events)
+	chEvents <- jobStatus
+	close(chEvents)
 
 	wg.Wait()
 
@@ -58,4 +53,29 @@ func TestSSEResponder(t *testing.T) {
 id: 1
 
 `)
+}
+
+func TestSSEResponder_IdlePing(t *testing.T) {
+	chEvents := make(chan api.JobStatus)
+
+	rw := NewMockResponseRecorder()
+	var wg sync.WaitGroup
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		responder := NewResponder(context.Background(), time.Microsecond, chEvents)
+		if err := responder.VisitGetJobsEventsResponse(rw); err != nil {
+			close(chEvents)
+			t.Log("Received error from VisitGetJobsEventsResponse:", err)
+			t.Fail()
+		}
+	}()
+
+	time.Sleep(time.Millisecond)
+	close(chEvents)
+	wg.Wait()
+
+	response := <-rw.ChResponse
+	assert.Contains(t, response, ": keepalive\n\n")
 }

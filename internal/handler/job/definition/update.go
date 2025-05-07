@@ -42,19 +42,21 @@ func Update(ctx context.Context, storage persistence.Storage, jobID string, defi
 		return nil, fault.Wrap(err)
 	}
 
-	_ = events.PublishEvent(ctx, &events.JobEvent{
-		Ctime:  strfmt.DateTime(time.Now()),
-		Action: events.ActionUpdateDefinition,
-		Job: &api.Job{
-			ID:         result.ID,
-			ClientID:   result.ClientID,
-			Workflow:   &api.Workflow{Name: job.Workflow.Name},
-			Definition: result.Definition,
-			Status: &api.JobStatus{
-				DefinitionHash: result.Status.DefinitionHash,
+	go func() {
+		events.PublishEvent(ctx, events.JobEvent{
+			Ctime:  strfmt.DateTime(time.Now()),
+			Action: events.ActionUpdateDefinition,
+			Job: &api.Job{
+				ID:         result.ID,
+				ClientID:   result.ClientID,
+				Workflow:   &api.Workflow{Name: job.Workflow.Name},
+				Definition: result.Definition,
+				Status: &api.JobStatus{
+					DefinitionHash: result.Status.DefinitionHash,
+				},
 			},
-		},
-	})
+		})
+	}()
 
 	contextLogger.Info().Msg("Updated job definition")
 	return result.Definition, nil

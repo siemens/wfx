@@ -39,8 +39,7 @@ func TestCreateJob_Notification(t *testing.T) {
 	db := newInMemoryDB(t)
 	wf := createDirectWorkflow(t, db)
 
-	ch, err := events.AddSubscriber(context.Background(), events.FilterParams{}, nil)
-	require.NoError(t, err)
+	ch := events.AddSubscriber(context.Background(), events.FilterParams{}, nil)
 
 	job, err := CreateJob(context.Background(), db, &api.JobRequest{
 		ClientID: "foo",
@@ -48,8 +47,7 @@ func TestCreateJob_Notification(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	ev := <-ch
-	jobEvent := ev.Args[0].(*events.JobEvent)
+	jobEvent := <-ch
 	assert.Equal(t, events.ActionCreate, jobEvent.Action)
 	assert.Equal(t, job.ID, jobEvent.Job.ID)
 }
