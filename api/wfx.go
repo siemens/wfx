@@ -37,9 +37,10 @@ const (
 )
 
 type WfxServer struct {
-	storage         persistence.Storage
-	checker         health.Checker
-	pingIntervalSSE time.Duration
+	storage          persistence.Storage
+	checker          health.Checker
+	ssePingInterval  time.Duration
+	sseGraceDuration time.Duration
 }
 
 func NewWfxServer(storage persistence.Storage) *WfxServer {
@@ -53,12 +54,17 @@ func NewWfxServer(storage persistence.Storage) *WfxServer {
 		}),
 		health.WithStatusListener(healthStatusListener),
 		health.WithDisabledAutostart())
-	wfx := &WfxServer{storage: storage, checker: checker, pingIntervalSSE: config.DefaultPingIntervalSSE}
+	wfx := &WfxServer{
+		storage:          storage,
+		checker:          checker,
+		ssePingInterval:  config.DefaultSSEPingInterval,
+		sseGraceDuration: config.DefaultSSEGraceDuration,
+	}
 	return wfx
 }
 
 func (server *WfxServer) WithPingIntervalSSE(pingIntervalSSE time.Duration) *WfxServer {
-	server.pingIntervalSSE = pingIntervalSSE
+	server.ssePingInterval = pingIntervalSSE
 	return server
 }
 
@@ -159,8 +165,8 @@ func (server WfxServer) GetJobsEvents(ctx context.Context, request api.GetJobsEv
 	if s := request.Params.Tags; s != nil {
 		tags = strings.Split(*s, ",")
 	}
-	eventChan := events.AddSubscriber(ctx, filter, tags)
-	return sse.NewResponder(ctx, server.pingIntervalSSE, eventChan), nil
+	subscriber := events.AddSubscriber(ctx, server.sseGraceDuration, filter, tags)
+	return sse.NewResponder(ctx, server.ssePingInterval, subscriber), nil
 }
 
 func (server WfxServer) DeleteJobsId(ctx context.Context, request api.DeleteJobsIdRequestObject) (api.DeleteJobsIdResponseObject, error) {

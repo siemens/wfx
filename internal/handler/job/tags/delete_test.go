@@ -12,6 +12,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/internal/handler/job/events"
@@ -34,14 +35,14 @@ func TestDelete(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	ch := events.AddSubscriber(context.Background(), events.FilterParams{}, nil)
+	sub := events.AddSubscriber(t.Context(), time.Minute, events.FilterParams{}, nil)
 
 	tags, err := Delete(context.Background(), db, job.ID, []string{"foo"})
 	require.NoError(t, err)
 	expectedTags := []string{"bar"}
 	assert.Equal(t, expectedTags, tags)
 
-	jobEvent := <-ch
+	jobEvent := <-sub.Events
 	assert.Equal(t, events.ActionDeleteTags, jobEvent.Action)
 	assert.Equal(t, job.ID, jobEvent.Job.ID)
 	assert.Equal(t, expectedTags, jobEvent.Job.Tags)

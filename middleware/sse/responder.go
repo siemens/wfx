@@ -9,6 +9,7 @@ package sse
  */
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -16,13 +17,15 @@ import (
 	"time"
 
 	"github.com/Southclaws/fault"
+	"github.com/rs/zerolog/log"
+	"github.com/siemens/wfx/internal/handler/job/events"
 	"github.com/siemens/wfx/middleware/logging"
 )
 
 // Responder streams server-sent events (SSE) to a client.
 // It listens for events from the provided channel and dispatches them
 // to the client as soon as they arrive.
-type Responder[T any] struct {
+type Responder struct {
 	// ctx is the context used to manage the lifecycle of the SSE stream.
 	// When the context is canceled, the Responder stops streaming events.
 	ctx context.Context
@@ -30,16 +33,16 @@ type Responder[T any] struct {
 	// event is sent to the client. This helps ensure the connection remains
 	// open even when no events occur.
 	idleDuration time.Duration
-	// eventChan is a read-only channel from which the Responder receives events
+	// subscriber is a read-only channel from which the Responder receives events
 	// to be sent to the client. Each event is transmitted as soon as it is received.
-	eventChan <-chan T
+	subscriber *events.Subscriber
 }
 
-func NewResponder[T any](ctx context.Context, idleDuration time.Duration, eventChan <-chan T) Responder[T] {
-	return Responder[T]{ctx: ctx, idleDuration: idleDuration, eventChan: eventChan}
+func NewResponder(ctx context.Context, idleDuration time.Duration, subscriber *events.Subscriber) Responder {
+	return Responder{ctx: ctx, idleDuration: idleDuration, subscriber: subscriber}
 }
 
-func (responder Responder[T]) VisitGetJobsEventsResponse(w http.ResponseWriter) error {
+func (responder Responder) VisitGetJobsEventsResponse(w http.ResponseWriter) error {
 	log := logging.LoggerFromCtx(responder.ctx)
 
 	// Check if the ResponseWriter supports hijacking
@@ -80,32 +83,32 @@ Loop:
 	for {
 		log.Debug().Msg("Waiting for next event")
 		select {
-		case ev, ok := <-responder.eventChan:
+		case ev, ok := <-responder.subscriber.Events:
 			if !ok {
-				log.Debug().Msg("SSE channel is closed")
+				log.Debug().Msg("Channel was closed")
 				break Loop
 			}
-			b, err := json.Marshal(ev)
-			if err != nil {
-				log.Error().Err(err).Msg("Failed to marshal status event")
-				continue Loop
-			}
-			log.Debug().RawJSON("event", b).Msg("Sending event to client")
-
-			// must end with two newlines as required by the SSE spec:
-			_, err = fmt.Fprintf(bufrw, "data: %s\nid: %d\n\n", b, id)
-			if err != nil {
-				log.Err(err).Msg("Cannot write to buffer")
+			if err := sendEvent(id, &ev, bufrw); err != nil {
+				log.Err(err).Msg("Failed to send event")
 				return fault.Wrap(err)
 			}
-
-			if err := bufrw.Flush(); err != nil {
-				log.Err(err).Msg("Failed to send event to client")
-				return fault.Wrap(err)
-			}
-
 			id++
 		case <-idleTicker.C:
+			sent := false
+			for { // drain backlog
+				ev, ok := responder.subscriber.Backlog.Pop()
+				if !ok {
+					break
+				}
+				if err := sendEvent(id, ev, bufrw); err != nil {
+					log.Err(err).Msg("Failed to send event")
+					return fault.Wrap(err)
+				}
+				sent = true
+			}
+			if sent { // no need to send keep-alive
+				continue Loop
+			}
 			log.Debug().Msg("Sending keep-alive message to client")
 			_, err = bufrw.WriteString(": keepalive\n\n")
 			if err != nil {
@@ -123,5 +126,24 @@ Loop:
 		}
 	}
 	log.Info().Msg("Event Subscriber finished")
+	return nil
+}
+
+func sendEvent(id uint64, ev *events.JobEvent, bufrw *bufio.ReadWriter) error {
+	b, _ := json.Marshal(ev)
+	log.Debug().RawJSON("event", b).Msg("Sending event to client")
+
+	// must end with two newlines as required by the SSE spec:
+	_, err := fmt.Fprintf(bufrw, "data: %s\nid: %d\n\n", b, id)
+	if err != nil {
+		log.Err(err).Msg("Cannot write to buffer")
+		return fault.Wrap(err)
+	}
+
+	if err := bufrw.Flush(); err != nil {
+		log.Err(err).Msg("Failed to send event to client")
+		return fault.Wrap(err)
+	}
+
 	return nil
 }

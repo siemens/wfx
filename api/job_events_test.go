@@ -54,19 +54,19 @@ func TestJobEventsSubscribe(t *testing.T) {
 
 			var wg sync.WaitGroup
 			expectedTags := []string{"tag1", "tag2"}
-			ch := events.AddSubscriber(context.Background(), events.FilterParams{ClientIDs: []string{clientID}}, expectedTags)
+			subscriber := events.AddSubscriber(t.Context(), time.Minute, events.FilterParams{ClientIDs: []string{clientID}}, expectedTags)
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
 
 				// wait for job created event
-				payload := <-ch
+				payload := <-subscriber.Events
 				assert.Equal(t, events.ActionCreate, payload.Action)
 				assert.Equal(t, expectedTags, payload.Tags)
 				jobID.Store(&payload.Job.ID)
 
 				// wait for event created by our status.Update below
-				<-ch
+				<-subscriber.Events
 				// now our GET request should have received the response as well,
 				// add some extra time to be safe
 				time.Sleep(100 * time.Millisecond)
@@ -94,10 +94,17 @@ func TestJobEventsSubscribe(t *testing.T) {
 			}
 
 			req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/wfx/v1/jobs/events?ids=%s", *jobID.Load()), nil)
-			rec := sse.NewMockResponseRecorder()
+			rec := sse.NewMockResponseRecorder(t)
 			handler.ServeHTTP(rec, req)
 
-			response := <-rec.ChResponse
+			var response string
+			for {
+				response = rec.Response()
+				if strings.Contains(response, "id: 1") {
+					break
+				}
+			}
+
 			assert.Contains(t, response, "HTTP/1.1 200")
 			assert.Contains(t, response, "Content-Type: text/event-stream")
 

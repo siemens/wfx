@@ -11,6 +11,7 @@ package definition
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/Southclaws/fault/ftag"
 	"github.com/siemens/wfx/generated/api"
@@ -43,7 +44,7 @@ func TestUpdateJobDefinition(t *testing.T) {
 	oldDefinitionHash := job.Status.DefinitionHash
 	assert.NotEmpty(t, oldDefinitionHash)
 
-	ch := events.AddSubscriber(context.Background(), events.FilterParams{}, nil)
+	subscriber := events.AddSubscriber(t.Context(), time.Minute, events.FilterParams{}, nil)
 
 	newDefinition := map[string]any{
 		"foo": "baz",
@@ -59,7 +60,7 @@ func TestUpdateJobDefinition(t *testing.T) {
 		assert.NotEqual(t, oldDefinitionHash, job.Status.DefinitionHash)
 	}
 
-	jobEvent := <-ch
+	jobEvent := <-subscriber.Events
 	assert.Equal(t, events.ActionUpdateDefinition, jobEvent.Action)
 	assert.Equal(t, job.ID, jobEvent.Job.ID)
 }

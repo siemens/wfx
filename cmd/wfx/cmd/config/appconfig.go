@@ -217,7 +217,7 @@ func (cfg *AppConfig) Reload() bool {
 	cfg.storage = cfg.k.String(StorageFlag)
 	cfg.storageOpts = cfg.k.String(StorageOptFlag)
 	cfg.gracefulTimeout = cfg.k.Duration(GracefulTimeoutFlag)
-	cfg.pingIntervalSSE = cfg.k.Duration(PingIntervalSSEFlag)
+	cfg.pingIntervalSSE = cfg.k.Duration(SSEPingIntervalFlag)
 	if schemes := cfg.k.Strings(SchemeFlag); len(schemes) > 0 {
 		cfg.schemes = make([]Scheme, 0, len(schemes))
 		for _, s := range schemes {

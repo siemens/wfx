@@ -53,9 +53,11 @@ const (
 	MaxHeaderSizeFlag   = "max-header-size"
 	CleanupTimeoutFlag  = "cleanup-timeout"
 	GracefulTimeoutFlag = "graceful-timeout"
-	PingIntervalSSEFlag = "ping-interval-sse"
 	ReadTimeoutFlag     = "read-timeout"
 	WriteTimoutFlag     = "write-timeout"
+
+	SSEPingIntervalFlag  = "sse-ping-interval"
+	SSEGraceDurationFlag = "sse-grace-period"
 
 	TLSCaFlag          = "tls-ca"
 	TLSCertificateFlag = "tls-certificate"
@@ -66,7 +68,11 @@ const (
 	preferedStorage   = "sqlite"
 	sqliteDefaultOpts = "file:wfx.db?_fk=1&_journal=WAL"
 
-	DefaultPingIntervalSSE = 30 * time.Second // should be "short enough", i.e. shorter than the default read timeout of most reverse proxies
+	// should be "short enough", i.e. shorter than the timeout for closing
+	// connections due to inactivity (e.g. by the kernel in its default setting or
+	// some reverse proxy)
+	DefaultSSEPingInterval  = 30 * time.Second
+	DefaultSSEGraceDuration = time.Minute
 )
 
 func NewFlagset() *pflag.FlagSet {
@@ -77,7 +83,8 @@ func NewFlagset() *pflag.FlagSet {
 	f.StringSlice(SchemeFlag, []string{"http"}, "the listeners to enable, this can be repeated and defaults to the schemes in the swagger spec")
 	f.Duration(CleanupTimeoutFlag, 10*time.Second, "grace period for which to wait before killing idle connections")
 	f.Duration(GracefulTimeoutFlag, 15*time.Second, "grace period for which to wait before shutting down the server")
-	f.Duration(PingIntervalSSEFlag, DefaultPingIntervalSSE, "interval to send periodic keep-alive messages to prevent server-sent events connections from being closed")
+	f.Duration(SSEPingIntervalFlag, DefaultSSEPingInterval, "interval to send periodic keep-alive messages to prevent server-sent events connections from being closed due to inactivity")
+	f.Duration(SSEGraceDurationFlag, DefaultSSEGraceDuration, "duration after which non-responsive subscribers are dropped")
 
 	f.Int(MaxHeaderSizeFlag, 1000000, "controls the maximum number of bytes the server will read parsing the request header's keys and values, including the request line. It does not limit the size of the request body")
 	f.Bool(KeepAliveFlag, true, "sets the TCP keep-alive timeouts on accepted connections. It prunes dead TCP connections ( e.g. closing laptop mid-download)")

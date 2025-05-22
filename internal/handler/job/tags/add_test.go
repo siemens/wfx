@@ -13,6 +13,7 @@ import (
 	"errors"
 	"sort"
 	"testing"
+	"time"
 
 	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/internal/handler/job/events"
@@ -35,7 +36,7 @@ func TestAdd(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	ch := events.AddSubscriber(context.Background(), events.FilterParams{}, nil)
+	sub := events.AddSubscriber(t.Context(), time.Minute, events.FilterParams{}, nil)
 
 	tags := []string{"foo", "bar"}
 	actual, err := Add(context.Background(), db, job.ID, tags)
@@ -44,7 +45,7 @@ func TestAdd(t *testing.T) {
 
 	assert.Equal(t, tags, actual)
 
-	jobEvent := <-ch
+	jobEvent := <-sub.Events
 	assert.Equal(t, events.ActionAddTags, jobEvent.Action)
 	assert.Equal(t, job.ID, jobEvent.Job.ID)
 	assert.Equal(t, tags, jobEvent.Job.Tags)

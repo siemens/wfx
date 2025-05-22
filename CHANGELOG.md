@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   To restore the old behavior, start wfx with `--log-level=DEBUG` (note that this will enable additional log messages
   though).
 - `wfxctl`: return non-zero exit code if `job events` connection is lost
+- Events: use timer-based approach for dropping non-responsive event subscribers
 
 ## [0.3.3] - 2024-12-23
 
