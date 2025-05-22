@@ -39,6 +39,7 @@ type AppConfig struct {
 	storage          string
 	storageOpts      string
 	gracefulTimeout  time.Duration
+	pingIntervalSSE  time.Duration
 	schemes          []Scheme
 	simpleFileServer string
 
@@ -216,6 +217,7 @@ func (cfg *AppConfig) Reload() bool {
 	cfg.storage = cfg.k.String(StorageFlag)
 	cfg.storageOpts = cfg.k.String(StorageOptFlag)
 	cfg.gracefulTimeout = cfg.k.Duration(GracefulTimeoutFlag)
+	cfg.pingIntervalSSE = cfg.k.Duration(SSEPingIntervalFlag)
 	if schemes := cfg.k.Strings(SchemeFlag); len(schemes) > 0 {
 		cfg.schemes = make([]Scheme, 0, len(schemes))
 		for _, s := range schemes {
@@ -396,4 +398,10 @@ func (cfg *AppConfig) MgmtPluginsDir() string {
 	cfg.mutex.RLock()
 	defer cfg.mutex.RUnlock()
 	return cfg.mgmtPluginsDir
+}
+
+func (cfg *AppConfig) PingIntervalSSE() time.Duration {
+	cfg.mutex.RLock()
+	defer cfg.mutex.RUnlock()
+	return cfg.pingIntervalSSE
 }

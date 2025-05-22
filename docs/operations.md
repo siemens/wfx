@@ -66,6 +66,10 @@ Below is a high-level overview of how the communication flow operates:
 2. Upon receipt of the request, `wfx` sets the `Content-Type` header to `text/event-stream`.
 3. The server then initiates a stream of job events in the response body, allowing clients to receive instant updates.
 
+**Note**: To prevent the connection from being closed due to inactivity (e.g., when no job events occur), periodic keep-alive events are sent during such idle periods.
+This ensures that the connection remains open, preventing closure by proxies, the kernel, or other entities since it may not be possible to control all involved parties.
+The keep-alive events are technically comments (as defined in the SSE specification) and must be ignored by clients.
+
 #### Event Format Specification
 
 The job events stream is composed of [server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events) (SSE).
@@ -79,6 +83,14 @@ data: [...]
 id: 2
 
 [...]
+
+: keepalive
+
+data: [...]
+id: 42
+
+[...]
+
 ```
 
 An individual event within the stream conforms to this format:
@@ -128,9 +140,17 @@ times to job events using various filters in order to create a more advanced eve
 
 ```bash
 wfxctl job events
+
+# auto reconnect if connection is lost; also waits for wfx to be up and running.
+wfxctl job events --auto-reconnect
 ```
 
-This may result in a large number of events, though. For a more targeted approach, filter parameters may be used.
+**Note**: The `--auto-reconnect` flag should be used with caution, as it may result in missed events after a connection loss.
+When this flag is used, `wfxctl` does not terminate upon losing the connection, so its logs should be monitored to detect such occurrences.
+After a connection loss, fetching the job's current status and comparing it with the received events can help identify any missed events.
+
+The above commands monitor events for *all* jobs globally, which may result in a large number of events.
+For a more targeted approach, filter parameters may be used.
 Assuming the job IDs are known (either because the jobs have been created already or the IDs are received via another
 subscription channel), the following will subscribe to events matching either of the two specified job IDs:
 

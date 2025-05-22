@@ -12,6 +12,7 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -157,8 +158,7 @@ func TestUpdateJob_NotifySubscribers(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "ACTIVATING", job.Status.State)
 
-	ch, err := events.AddSubscriber(context.Background(), events.FilterParams{JobIDs: []string{job.ID}}, nil)
-	require.NoError(t, err)
+	sub := events.AddSubscriber(t.Context(), time.Minute, events.FilterParams{JobIDs: []string{job.ID}}, nil)
 
 	progress := int32(100)
 	_, err = Update(context.Background(), db, job.ID, &api.JobStatus{
@@ -168,8 +168,7 @@ func TestUpdateJob_NotifySubscribers(t *testing.T) {
 	}, api.CLIENT)
 	require.NoError(t, err)
 
-	event := <-ch
-	receivedEvent := event.Args[0].(*events.JobEvent)
+	receivedEvent := <-sub.Events
 	assert.Equal(t, events.ActionUpdateStatus, receivedEvent.Action)
 	assert.Equal(t, "ACTIVATED", receivedEvent.Job.Status.State)
 	assert.Equal(t, wf.Name, receivedEvent.Job.Workflow.Name)
