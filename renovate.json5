@@ -1,28 +1,23 @@
 {
-  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
   extends: [
-    'config:best-practices',
-    ':gitSignOff',
-    ':semanticCommits',
-    ':semanticCommitTypeAll(chore)',
-    ':prHourlyLimitNone',
-    ':prConcurrentLimitNone',
-    'schedule:monthly',
+    "config:best-practices",
+    ":gitSignOff",
+    ":semanticCommits",
+    ":semanticCommitTypeAll(chore)",
+    ":prHourlyLimitNone",
+    ":prConcurrentLimitNone",
+    "schedule:monthly",
   ],
   assigneesFromCodeOwners: true,
   separateMajorMinor: true,
-  postUpdateOptions: [
-    'gomodTidy',
-  ],
   customManagers: [
     {
-      customType: 'regex',
-      managerFilePatterns: [
-        '/.ci/packages/versions.env/',
-      ],
-      matchStringsStrategy: 'any',
+      customType: "regex",
+      managerFilePatterns: ["/.ci/packages/versions.env/"],
+      matchStringsStrategy: "any",
       matchStrings: [
-        'export .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s',
+        "export .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s",
       ],
     },
   ],
@@ -34,39 +29,28 @@
   // group-slug is used for the branch name
   packageRules: [
     {
-      groupName: 'all non-major dependencies',
-      groupSlug: 'all-minor-patch',
-      matchPackageNames: [
-        '*',
-      ],
-      matchUpdateTypes: [
-        'minor',
-        'patch',
-        'digest',
-      ],
+      groupName: "all non-major dependencies",
+      groupSlug: "all-minor-patch",
+      matchPackageNames: ["*"],
+      matchUpdateTypes: ["minor", "patch", "digest"],
+      postUpdateOptions: ["gomodTidy"],
     },
     {
-      matchFileNames: [
-        'hugo/go.mod',
-      ],
-      matchDepTypes: [
-        'indirect',
-      ],
+      matchFileNames: ["hugo/go.mod"],
+      matchDepTypes: ["indirect"],
       enabled: true,
     },
     {
-      groupName: 'all custom dependencies',
-      groupSlug: 'all-custom',
-      matchFileNames: [
-        '.ci/packages/versions.env',
-      ],
+      groupName: "all custom dependencies",
+      groupSlug: "all-custom",
+      matchFileNames: [".ci/packages/versions.env"],
     },
     {
-      groupName: 'all pages dependencies',
-      groupSlug: 'all-pages',
+      groupName: "all pages dependencies",
+      groupSlug: "all-pages",
       matchPackageNames: [
-        '/github.com/google/docsy/', // docsy and hugo must be compatible with each other
-        '/gohugoio/hugo/',
+        "/github.com/google/docsy/", // docsy and hugo must be compatible with each other
+        "/gohugoio/hugo/",
       ],
     },
   ],
