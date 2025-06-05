@@ -147,6 +147,7 @@ nfpms:
     priority: extra
     scripts:
       postinstall: .ci/goreleaser/postinstall.sh
+      preremove: .ci/goreleaser/preremove.sh
       postremove: .ci/goreleaser/postremove.sh
     contents:
       # it's the same content for all architectures
