@@ -15,7 +15,7 @@ import (
 	"time"
 
 	"github.com/Southclaws/fault"
-	"github.com/knadh/koanf/providers/env"
+	"github.com/knadh/koanf/providers/env/v2"
 	"github.com/knadh/koanf/providers/posflag"
 	"github.com/knadh/koanf/v2"
 	"github.com/rs/zerolog"
@@ -33,12 +33,15 @@ func NewCommand() *cobra.Command {
 		Short:   "Run a loadtest against wfx",
 		Example: "wfx-loadtest --duration 10s",
 		PreRun: func(cmd *cobra.Command, _ []string) {
-			if err := k.Load(env.Provider("WFX_", ".", func(s string) string {
-				result := strings.ReplaceAll(
-					strings.ToLower(strings.TrimPrefix(s, "WFX_")), "_", "-")
-				return result
-			}), nil); err != nil {
-				log.Err(err).Msg("Failed to env variables")
+			envProvider := env.Provider(".", env.Opt{
+				Prefix: "WFX_",
+				TransformFunc: func(k string, v string) (string, any) {
+					// WFX_LOG_LEVEL becomes log-level
+					return strings.ReplaceAll(strings.ToLower(strings.TrimPrefix(k, "WFX_")), "_", "-"), nil
+				},
+			})
+			if err := k.Load(envProvider, nil); err != nil {
+				fmt.Fprintln(os.Stderr, "ERROR: Could not load env variables")
 			}
 
 			// --log-level becomes log.level

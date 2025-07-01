@@ -34,6 +34,9 @@ build:
     go build -C contrib/remote-access/client
     go build -C contrib/config-deployment/client
 
+test:
+    go test -tags testing,no_mysql,no_postgres ./...
+
 # Update dependencies
 update-deps:
     #!/usr/bin/env bash
