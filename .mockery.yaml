@@ -1,18 +1,14 @@
-with-expecter: True
-inpackage: True
-dir: "{{.InterfaceDir}}"
-mockname: "Mock{{.InterfaceName}}"
-outpkg: "{{.PackageName}}"
+all: true
+dir: '{{.InterfaceDir}}'
+structname: Mock{{.InterfaceName}}
+pkgname: '{{ .SrcPackageName }}'
 filename: "mock_{{.InterfaceName}}.go"
-all: True
-
-boilerplate-file: .ci/mockery_header.txt
-mock-build-tags: testing
-
-resolve-type-alias: False
-disable-version-string: True
-
+template: testify
+template-data:
+  boilerplate-file: .ci/mockery_header.txt
+  mock-build-tags: testing
+  unroll-variadic: true
 packages:
   github.com/siemens/wfx/persistence:
     interfaces:
-      Storage:
+      Storage: {}
