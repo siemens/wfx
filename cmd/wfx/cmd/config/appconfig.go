@@ -118,7 +118,7 @@ func NewAppConfig(flags *pflag.FlagSet) (*AppConfig, error) {
 		Prefix: "WFX_",
 		TransformFunc: func(k string, v string) (string, any) {
 			// WFX_LOG_LEVEL becomes log-level
-			return strings.ReplaceAll(strings.ToLower(strings.TrimPrefix(k, "WFX_")), "_", "-"), nil
+			return strings.ReplaceAll(strings.ToLower(strings.TrimPrefix(k, "WFX_")), "_", "-"), v
 		},
 	})
 	if err := k.Load(envProvider, nil, mergeFn); err != nil {

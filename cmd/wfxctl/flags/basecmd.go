@@ -135,10 +135,10 @@ func NewBaseCmd(f *pflag.FlagSet) BaseCmd {
 	}
 
 	envProvider := env.Provider(".", env.Opt{
-		Prefix: "WFX_",
+		Prefix: "WFX",
 		TransformFunc: func(k string, v string) (string, any) {
 			// WFX_LOG_LEVEL becomes log-level
-			return strings.ReplaceAll(strings.ToLower(strings.TrimPrefix(k, "WFX_")), "_", "-"), nil
+			return strings.ReplaceAll(strings.ToLower(strings.TrimPrefix(k, "WFX_")), "_", "-"), v
 		},
 	})
 	if err := k.Load(envProvider, nil); err != nil {
