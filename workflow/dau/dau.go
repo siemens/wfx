@@ -11,8 +11,8 @@ package dau
 import (
 	_ "embed"
 
+	"github.com/goccy/go-yaml"
 	"github.com/siemens/wfx/generated/api"
-	"gopkg.in/yaml.v3"
 )
 
 //go:embed wfx.workflow.dau.direct.yml

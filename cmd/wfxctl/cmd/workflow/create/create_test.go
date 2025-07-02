@@ -18,11 +18,11 @@ import (
 	"os"
 	"testing"
 
+	"github.com/goccy/go-yaml"
 	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/workflow/dau"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gopkg.in/yaml.v3"
 )
 
 func TestCreateWorkflow_YAML(t *testing.T) {
