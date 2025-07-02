@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/Southclaws/fault"
+	"github.com/goccy/go-yaml"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/siemens/wfx/cmd/wfx-viewer/output"
@@ -25,7 +26,6 @@ import (
 	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/internal/cmd/man"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v3"
 )
 
 const (
