@@ -13,6 +13,7 @@ require (
 	github.com/getkin/kin-openapi v0.132.0
 	github.com/go-openapi/strfmt v0.23.0
 	github.com/go-sql-driver/mysql v1.9.3
+	github.com/goccy/go-yaml v1.18.0
 	github.com/golang-migrate/migrate/v4 v4.18.3
 	github.com/google/flatbuffers v25.2.10+incompatible
 	github.com/gookit/color v1.5.4
@@ -43,7 +44,6 @@ require (
 	golang.org/x/sync v0.16.0
 	golang.org/x/term v0.33.0
 	gopkg.in/go-playground/colors.v1 v1.2.0
-	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -138,6 +138,7 @@ require (
 	golang.org/x/tools v0.33.0 // indirect
 	gopkg.in/seborama/govcr.v2 v2.4.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 	mvdan.cc/gofumpt v0.8.0 // indirect
 )
 
