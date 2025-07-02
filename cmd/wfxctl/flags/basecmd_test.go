@@ -248,6 +248,7 @@ func TestNewBaseCmd_ConfigFile(t *testing.T) {
 func TestNewBaseCmd_EnvVariables(t *testing.T) {
 	t.Setenv("WFX_LOG_LEVEL", "trace")
 	f := pflag.NewFlagSet("test", pflag.ContinueOnError)
+	f.String(LogLevelFlag, "debug", "log level")
 	NewBaseCmd(f)
 	assert.Equal(t, zerolog.TraceLevel, zerolog.GlobalLevel())
 }
