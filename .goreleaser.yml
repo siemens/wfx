@@ -249,18 +249,23 @@ release:
 changelog:
   sort: asc
   groups:
-    - title: Features
-      regexp: "^.*feat[(\\w)]*:+.*$"
+    - title: Features (breaking)
+      regexp: '^feat(\([[:word:]]+\))?!:.*'
       order: 0
-    - title: "Bug fixes"
-      regexp: "^.*fix[(\\w)]*:+.*$"
+    - title: Features
+      regexp: '^feat(\([[:word:]]+\))?:.*'
       order: 1
+    - title: "Bug fixes"
+      regexp: '^.*?bug(\([[:word:]]+\))??!?:.+$'
+      order: 2
     - title: Others
       order: 999
   filters:
     exclude:
-      - "^docs:"
-      - "^test:"
+      - "^chore.*"
+      - "^ci.*"
+      - "^docs.*"
+      - "^test.*"
 
 sboms:
   - id: spdx
