@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Set `--mgmt-host` to `0.0.0.0` in the Docker image, allowing the management port (`--mgmt-port`) to be easily exposed and accessed from the host
+
 ## [0.4.1] - 2025-08-28
 
 This is a maintenance release.
