@@ -10,4 +10,4 @@ COPY wfx /usr/bin/wfx
 
 EXPOSE 8080 8081
 
-ENTRYPOINT ["wfx"]
+ENTRYPOINT ["wfx", "--mgmt-host=0.0.0.0"]
