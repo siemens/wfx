@@ -28,142 +28,142 @@ type JobCreate struct {
 }
 
 // SetStime sets the "stime" field.
-func (jc *JobCreate) SetStime(t time.Time) *JobCreate {
-	jc.mutation.SetStime(t)
-	return jc
+func (_c *JobCreate) SetStime(v time.Time) *JobCreate {
+	_c.mutation.SetStime(v)
+	return _c
 }
 
 // SetNillableStime sets the "stime" field if the given value is not nil.
-func (jc *JobCreate) SetNillableStime(t *time.Time) *JobCreate {
-	if t != nil {
-		jc.SetStime(*t)
+func (_c *JobCreate) SetNillableStime(v *time.Time) *JobCreate {
+	if v != nil {
+		_c.SetStime(*v)
 	}
-	return jc
+	return _c
 }
 
 // SetMtime sets the "mtime" field.
-func (jc *JobCreate) SetMtime(t time.Time) *JobCreate {
-	jc.mutation.SetMtime(t)
-	return jc
+func (_c *JobCreate) SetMtime(v time.Time) *JobCreate {
+	_c.mutation.SetMtime(v)
+	return _c
 }
 
 // SetNillableMtime sets the "mtime" field if the given value is not nil.
-func (jc *JobCreate) SetNillableMtime(t *time.Time) *JobCreate {
-	if t != nil {
-		jc.SetMtime(*t)
+func (_c *JobCreate) SetNillableMtime(v *time.Time) *JobCreate {
+	if v != nil {
+		_c.SetMtime(*v)
 	}
-	return jc
+	return _c
 }
 
 // SetClientID sets the "client_id" field.
-func (jc *JobCreate) SetClientID(s string) *JobCreate {
-	jc.mutation.SetClientID(s)
-	return jc
+func (_c *JobCreate) SetClientID(v string) *JobCreate {
+	_c.mutation.SetClientID(v)
+	return _c
 }
 
 // SetDefinition sets the "definition" field.
-func (jc *JobCreate) SetDefinition(m map[string]interface{}) *JobCreate {
-	jc.mutation.SetDefinition(m)
-	return jc
+func (_c *JobCreate) SetDefinition(v map[string]interface{}) *JobCreate {
+	_c.mutation.SetDefinition(v)
+	return _c
 }
 
 // SetStatus sets the "status" field.
-func (jc *JobCreate) SetStatus(as api.JobStatus) *JobCreate {
-	jc.mutation.SetStatus(as)
-	return jc
+func (_c *JobCreate) SetStatus(v api.JobStatus) *JobCreate {
+	_c.mutation.SetStatus(v)
+	return _c
 }
 
 // SetGroup sets the "group" field.
-func (jc *JobCreate) SetGroup(s string) *JobCreate {
-	jc.mutation.SetGroup(s)
-	return jc
+func (_c *JobCreate) SetGroup(v string) *JobCreate {
+	_c.mutation.SetGroup(v)
+	return _c
 }
 
 // SetNillableGroup sets the "group" field if the given value is not nil.
-func (jc *JobCreate) SetNillableGroup(s *string) *JobCreate {
-	if s != nil {
-		jc.SetGroup(*s)
+func (_c *JobCreate) SetNillableGroup(v *string) *JobCreate {
+	if v != nil {
+		_c.SetGroup(*v)
 	}
-	return jc
+	return _c
 }
 
 // SetID sets the "id" field.
-func (jc *JobCreate) SetID(s string) *JobCreate {
-	jc.mutation.SetID(s)
-	return jc
+func (_c *JobCreate) SetID(v string) *JobCreate {
+	_c.mutation.SetID(v)
+	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (jc *JobCreate) SetNillableID(s *string) *JobCreate {
-	if s != nil {
-		jc.SetID(*s)
+func (_c *JobCreate) SetNillableID(v *string) *JobCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
-	return jc
+	return _c
 }
 
 // SetWorkflowID sets the "workflow" edge to the Workflow entity by ID.
-func (jc *JobCreate) SetWorkflowID(id int) *JobCreate {
-	jc.mutation.SetWorkflowID(id)
-	return jc
+func (_c *JobCreate) SetWorkflowID(id int) *JobCreate {
+	_c.mutation.SetWorkflowID(id)
+	return _c
 }
 
 // SetNillableWorkflowID sets the "workflow" edge to the Workflow entity by ID if the given value is not nil.
-func (jc *JobCreate) SetNillableWorkflowID(id *int) *JobCreate {
+func (_c *JobCreate) SetNillableWorkflowID(id *int) *JobCreate {
 	if id != nil {
-		jc = jc.SetWorkflowID(*id)
+		_c = _c.SetWorkflowID(*id)
 	}
-	return jc
+	return _c
 }
 
 // SetWorkflow sets the "workflow" edge to the Workflow entity.
-func (jc *JobCreate) SetWorkflow(w *Workflow) *JobCreate {
-	return jc.SetWorkflowID(w.ID)
+func (_c *JobCreate) SetWorkflow(v *Workflow) *JobCreate {
+	return _c.SetWorkflowID(v.ID)
 }
 
 // AddHistoryIDs adds the "history" edge to the History entity by IDs.
-func (jc *JobCreate) AddHistoryIDs(ids ...int) *JobCreate {
-	jc.mutation.AddHistoryIDs(ids...)
-	return jc
+func (_c *JobCreate) AddHistoryIDs(ids ...int) *JobCreate {
+	_c.mutation.AddHistoryIDs(ids...)
+	return _c
 }
 
 // AddHistory adds the "history" edges to the History entity.
-func (jc *JobCreate) AddHistory(h ...*History) *JobCreate {
-	ids := make([]int, len(h))
-	for i := range h {
-		ids[i] = h[i].ID
+func (_c *JobCreate) AddHistory(v ...*History) *JobCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return jc.AddHistoryIDs(ids...)
+	return _c.AddHistoryIDs(ids...)
 }
 
 // AddTagIDs adds the "tags" edge to the Tag entity by IDs.
-func (jc *JobCreate) AddTagIDs(ids ...int) *JobCreate {
-	jc.mutation.AddTagIDs(ids...)
-	return jc
+func (_c *JobCreate) AddTagIDs(ids ...int) *JobCreate {
+	_c.mutation.AddTagIDs(ids...)
+	return _c
 }
 
 // AddTags adds the "tags" edges to the Tag entity.
-func (jc *JobCreate) AddTags(t ...*Tag) *JobCreate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_c *JobCreate) AddTags(v ...*Tag) *JobCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return jc.AddTagIDs(ids...)
+	return _c.AddTagIDs(ids...)
 }
 
 // Mutation returns the JobMutation object of the builder.
-func (jc *JobCreate) Mutation() *JobMutation {
-	return jc.mutation
+func (_c *JobCreate) Mutation() *JobMutation {
+	return _c.mutation
 }
 
 // Save creates the Job in the database.
-func (jc *JobCreate) Save(ctx context.Context) (*Job, error) {
-	jc.defaults()
-	return withHooks(ctx, jc.sqlSave, jc.mutation, jc.hooks)
+func (_c *JobCreate) Save(ctx context.Context) (*Job, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (jc *JobCreate) SaveX(ctx context.Context) *Job {
-	v, err := jc.Save(ctx)
+func (_c *JobCreate) SaveX(ctx context.Context) *Job {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -171,49 +171,49 @@ func (jc *JobCreate) SaveX(ctx context.Context) *Job {
 }
 
 // Exec executes the query.
-func (jc *JobCreate) Exec(ctx context.Context) error {
-	_, err := jc.Save(ctx)
+func (_c *JobCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (jc *JobCreate) ExecX(ctx context.Context) {
-	if err := jc.Exec(ctx); err != nil {
+func (_c *JobCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (jc *JobCreate) defaults() {
-	if _, ok := jc.mutation.Stime(); !ok {
+func (_c *JobCreate) defaults() {
+	if _, ok := _c.mutation.Stime(); !ok {
 		v := job.DefaultStime()
-		jc.mutation.SetStime(v)
+		_c.mutation.SetStime(v)
 	}
-	if _, ok := jc.mutation.Mtime(); !ok {
+	if _, ok := _c.mutation.Mtime(); !ok {
 		v := job.DefaultMtime()
-		jc.mutation.SetMtime(v)
+		_c.mutation.SetMtime(v)
 	}
-	if _, ok := jc.mutation.ID(); !ok {
+	if _, ok := _c.mutation.ID(); !ok {
 		v := job.DefaultID()
-		jc.mutation.SetID(v)
+		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (jc *JobCreate) check() error {
-	if _, ok := jc.mutation.Stime(); !ok {
+func (_c *JobCreate) check() error {
+	if _, ok := _c.mutation.Stime(); !ok {
 		return &ValidationError{Name: "stime", err: errors.New(`ent: missing required field "Job.stime"`)}
 	}
-	if _, ok := jc.mutation.Mtime(); !ok {
+	if _, ok := _c.mutation.Mtime(); !ok {
 		return &ValidationError{Name: "mtime", err: errors.New(`ent: missing required field "Job.mtime"`)}
 	}
-	if _, ok := jc.mutation.ClientID(); !ok {
+	if _, ok := _c.mutation.ClientID(); !ok {
 		return &ValidationError{Name: "client_id", err: errors.New(`ent: missing required field "Job.client_id"`)}
 	}
-	if _, ok := jc.mutation.Status(); !ok {
+	if _, ok := _c.mutation.Status(); !ok {
 		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "Job.status"`)}
 	}
-	if v, ok := jc.mutation.ID(); ok {
+	if v, ok := _c.mutation.ID(); ok {
 		if err := job.IDValidator(v); err != nil {
 			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Job.id": %w`, err)}
 		}
@@ -221,12 +221,12 @@ func (jc *JobCreate) check() error {
 	return nil
 }
 
-func (jc *JobCreate) sqlSave(ctx context.Context) (*Job, error) {
-	if err := jc.check(); err != nil {
+func (_c *JobCreate) sqlSave(ctx context.Context) (*Job, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := jc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, jc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -239,45 +239,45 @@ func (jc *JobCreate) sqlSave(ctx context.Context) (*Job, error) {
 			return nil, fmt.Errorf("unexpected Job.ID type: %T", _spec.ID.Value)
 		}
 	}
-	jc.mutation.id = &_node.ID
-	jc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (jc *JobCreate) createSpec() (*Job, *sqlgraph.CreateSpec) {
+func (_c *JobCreate) createSpec() (*Job, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Job{config: jc.config}
+		_node = &Job{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(job.Table, sqlgraph.NewFieldSpec(job.FieldID, field.TypeString))
 	)
-	if id, ok := jc.mutation.ID(); ok {
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := jc.mutation.Stime(); ok {
+	if value, ok := _c.mutation.Stime(); ok {
 		_spec.SetField(job.FieldStime, field.TypeTime, value)
 		_node.Stime = value
 	}
-	if value, ok := jc.mutation.Mtime(); ok {
+	if value, ok := _c.mutation.Mtime(); ok {
 		_spec.SetField(job.FieldMtime, field.TypeTime, value)
 		_node.Mtime = value
 	}
-	if value, ok := jc.mutation.ClientID(); ok {
+	if value, ok := _c.mutation.ClientID(); ok {
 		_spec.SetField(job.FieldClientID, field.TypeString, value)
 		_node.ClientID = value
 	}
-	if value, ok := jc.mutation.Definition(); ok {
+	if value, ok := _c.mutation.Definition(); ok {
 		_spec.SetField(job.FieldDefinition, field.TypeJSON, value)
 		_node.Definition = value
 	}
-	if value, ok := jc.mutation.Status(); ok {
+	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(job.FieldStatus, field.TypeJSON, value)
 		_node.Status = value
 	}
-	if value, ok := jc.mutation.Group(); ok {
+	if value, ok := _c.mutation.Group(); ok {
 		_spec.SetField(job.FieldGroup, field.TypeString, value)
 		_node.Group = value
 	}
-	if nodes := jc.mutation.WorkflowIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.WorkflowIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -294,7 +294,7 @@ func (jc *JobCreate) createSpec() (*Job, *sqlgraph.CreateSpec) {
 		_node.workflow_jobs = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := jc.mutation.HistoryIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.HistoryIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -310,7 +310,7 @@ func (jc *JobCreate) createSpec() (*Job, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := jc.mutation.TagsIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.TagsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -337,16 +337,16 @@ type JobCreateBulk struct {
 }
 
 // Save creates the Job entities in the database.
-func (jcb *JobCreateBulk) Save(ctx context.Context) ([]*Job, error) {
-	if jcb.err != nil {
-		return nil, jcb.err
+func (_c *JobCreateBulk) Save(ctx context.Context) ([]*Job, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(jcb.builders))
-	nodes := make([]*Job, len(jcb.builders))
-	mutators := make([]Mutator, len(jcb.builders))
-	for i := range jcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*Job, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := jcb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*JobMutation)
@@ -360,11 +360,11 @@ func (jcb *JobCreateBulk) Save(ctx context.Context) ([]*Job, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, jcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, jcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -384,7 +384,7 @@ func (jcb *JobCreateBulk) Save(ctx context.Context) ([]*Job, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, jcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -392,8 +392,8 @@ func (jcb *JobCreateBulk) Save(ctx context.Context) ([]*Job, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (jcb *JobCreateBulk) SaveX(ctx context.Context) []*Job {
-	v, err := jcb.Save(ctx)
+func (_c *JobCreateBulk) SaveX(ctx context.Context) []*Job {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -401,14 +401,14 @@ func (jcb *JobCreateBulk) SaveX(ctx context.Context) []*Job {
 }
 
 // Exec executes the query.
-func (jcb *JobCreateBulk) Exec(ctx context.Context) error {
-	_, err := jcb.Save(ctx)
+func (_c *JobCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (jcb *JobCreateBulk) ExecX(ctx context.Context) {
-	if err := jcb.Exec(ctx); err != nil {
+func (_c *JobCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

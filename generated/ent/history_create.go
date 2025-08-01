@@ -26,63 +26,63 @@ type HistoryCreate struct {
 }
 
 // SetMtime sets the "mtime" field.
-func (hc *HistoryCreate) SetMtime(t time.Time) *HistoryCreate {
-	hc.mutation.SetMtime(t)
-	return hc
+func (_c *HistoryCreate) SetMtime(v time.Time) *HistoryCreate {
+	_c.mutation.SetMtime(v)
+	return _c
 }
 
 // SetStatus sets the "status" field.
-func (hc *HistoryCreate) SetStatus(as api.JobStatus) *HistoryCreate {
-	hc.mutation.SetStatus(as)
-	return hc
+func (_c *HistoryCreate) SetStatus(v api.JobStatus) *HistoryCreate {
+	_c.mutation.SetStatus(v)
+	return _c
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (hc *HistoryCreate) SetNillableStatus(as *api.JobStatus) *HistoryCreate {
-	if as != nil {
-		hc.SetStatus(*as)
+func (_c *HistoryCreate) SetNillableStatus(v *api.JobStatus) *HistoryCreate {
+	if v != nil {
+		_c.SetStatus(*v)
 	}
-	return hc
+	return _c
 }
 
 // SetDefinition sets the "definition" field.
-func (hc *HistoryCreate) SetDefinition(m map[string]interface{}) *HistoryCreate {
-	hc.mutation.SetDefinition(m)
-	return hc
+func (_c *HistoryCreate) SetDefinition(v map[string]interface{}) *HistoryCreate {
+	_c.mutation.SetDefinition(v)
+	return _c
 }
 
 // SetJobID sets the "job" edge to the Job entity by ID.
-func (hc *HistoryCreate) SetJobID(id string) *HistoryCreate {
-	hc.mutation.SetJobID(id)
-	return hc
+func (_c *HistoryCreate) SetJobID(id string) *HistoryCreate {
+	_c.mutation.SetJobID(id)
+	return _c
 }
 
 // SetNillableJobID sets the "job" edge to the Job entity by ID if the given value is not nil.
-func (hc *HistoryCreate) SetNillableJobID(id *string) *HistoryCreate {
+func (_c *HistoryCreate) SetNillableJobID(id *string) *HistoryCreate {
 	if id != nil {
-		hc = hc.SetJobID(*id)
+		_c = _c.SetJobID(*id)
 	}
-	return hc
+	return _c
 }
 
 // SetJob sets the "job" edge to the Job entity.
-func (hc *HistoryCreate) SetJob(j *Job) *HistoryCreate {
-	return hc.SetJobID(j.ID)
+func (_c *HistoryCreate) SetJob(v *Job) *HistoryCreate {
+	return _c.SetJobID(v.ID)
 }
 
 // Mutation returns the HistoryMutation object of the builder.
-func (hc *HistoryCreate) Mutation() *HistoryMutation {
-	return hc.mutation
+func (_c *HistoryCreate) Mutation() *HistoryMutation {
+	return _c.mutation
 }
 
 // Save creates the History in the database.
-func (hc *HistoryCreate) Save(ctx context.Context) (*History, error) {
-	return withHooks(ctx, hc.sqlSave, hc.mutation, hc.hooks)
+func (_c *HistoryCreate) Save(ctx context.Context) (*History, error) {
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (hc *HistoryCreate) SaveX(ctx context.Context) *History {
-	v, err := hc.Save(ctx)
+func (_c *HistoryCreate) SaveX(ctx context.Context) *History {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -90,32 +90,32 @@ func (hc *HistoryCreate) SaveX(ctx context.Context) *History {
 }
 
 // Exec executes the query.
-func (hc *HistoryCreate) Exec(ctx context.Context) error {
-	_, err := hc.Save(ctx)
+func (_c *HistoryCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (hc *HistoryCreate) ExecX(ctx context.Context) {
-	if err := hc.Exec(ctx); err != nil {
+func (_c *HistoryCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (hc *HistoryCreate) check() error {
-	if _, ok := hc.mutation.Mtime(); !ok {
+func (_c *HistoryCreate) check() error {
+	if _, ok := _c.mutation.Mtime(); !ok {
 		return &ValidationError{Name: "mtime", err: errors.New(`ent: missing required field "History.mtime"`)}
 	}
 	return nil
 }
 
-func (hc *HistoryCreate) sqlSave(ctx context.Context) (*History, error) {
-	if err := hc.check(); err != nil {
+func (_c *HistoryCreate) sqlSave(ctx context.Context) (*History, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := hc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, hc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -123,29 +123,29 @@ func (hc *HistoryCreate) sqlSave(ctx context.Context) (*History, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	hc.mutation.id = &_node.ID
-	hc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (hc *HistoryCreate) createSpec() (*History, *sqlgraph.CreateSpec) {
+func (_c *HistoryCreate) createSpec() (*History, *sqlgraph.CreateSpec) {
 	var (
-		_node = &History{config: hc.config}
+		_node = &History{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(history.Table, sqlgraph.NewFieldSpec(history.FieldID, field.TypeInt))
 	)
-	if value, ok := hc.mutation.Mtime(); ok {
+	if value, ok := _c.mutation.Mtime(); ok {
 		_spec.SetField(history.FieldMtime, field.TypeTime, value)
 		_node.Mtime = value
 	}
-	if value, ok := hc.mutation.Status(); ok {
+	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(history.FieldStatus, field.TypeJSON, value)
 		_node.Status = value
 	}
-	if value, ok := hc.mutation.Definition(); ok {
+	if value, ok := _c.mutation.Definition(); ok {
 		_spec.SetField(history.FieldDefinition, field.TypeJSON, value)
 		_node.Definition = value
 	}
-	if nodes := hc.mutation.JobIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.JobIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -173,16 +173,16 @@ type HistoryCreateBulk struct {
 }
 
 // Save creates the History entities in the database.
-func (hcb *HistoryCreateBulk) Save(ctx context.Context) ([]*History, error) {
-	if hcb.err != nil {
-		return nil, hcb.err
+func (_c *HistoryCreateBulk) Save(ctx context.Context) ([]*History, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(hcb.builders))
-	nodes := make([]*History, len(hcb.builders))
-	mutators := make([]Mutator, len(hcb.builders))
-	for i := range hcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*History, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := hcb.builders[i]
+			builder := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*HistoryMutation)
 				if !ok {
@@ -195,11 +195,11 @@ func (hcb *HistoryCreateBulk) Save(ctx context.Context) ([]*History, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, hcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, hcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -223,7 +223,7 @@ func (hcb *HistoryCreateBulk) Save(ctx context.Context) ([]*History, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, hcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -231,8 +231,8 @@ func (hcb *HistoryCreateBulk) Save(ctx context.Context) ([]*History, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (hcb *HistoryCreateBulk) SaveX(ctx context.Context) []*History {
-	v, err := hcb.Save(ctx)
+func (_c *HistoryCreateBulk) SaveX(ctx context.Context) []*History {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -240,14 +240,14 @@ func (hcb *HistoryCreateBulk) SaveX(ctx context.Context) []*History {
 }
 
 // Exec executes the query.
-func (hcb *HistoryCreateBulk) Exec(ctx context.Context) error {
-	_, err := hcb.Save(ctx)
+func (_c *HistoryCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (hcb *HistoryCreateBulk) ExecX(ctx context.Context) {
-	if err := hcb.Exec(ctx); err != nil {
+func (_c *HistoryCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

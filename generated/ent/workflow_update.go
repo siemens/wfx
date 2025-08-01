@@ -28,130 +28,130 @@ type WorkflowUpdate struct {
 }
 
 // Where appends a list predicates to the WorkflowUpdate builder.
-func (wu *WorkflowUpdate) Where(ps ...predicate.Workflow) *WorkflowUpdate {
-	wu.mutation.Where(ps...)
-	return wu
+func (_u *WorkflowUpdate) Where(ps ...predicate.Workflow) *WorkflowUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetName sets the "name" field.
-func (wu *WorkflowUpdate) SetName(s string) *WorkflowUpdate {
-	wu.mutation.SetName(s)
-	return wu
+func (_u *WorkflowUpdate) SetName(v string) *WorkflowUpdate {
+	_u.mutation.SetName(v)
+	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (wu *WorkflowUpdate) SetNillableName(s *string) *WorkflowUpdate {
-	if s != nil {
-		wu.SetName(*s)
+func (_u *WorkflowUpdate) SetNillableName(v *string) *WorkflowUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
-	return wu
+	return _u
 }
 
 // SetDescription sets the "description" field.
-func (wu *WorkflowUpdate) SetDescription(s string) *WorkflowUpdate {
-	wu.mutation.SetDescription(s)
-	return wu
+func (_u *WorkflowUpdate) SetDescription(v string) *WorkflowUpdate {
+	_u.mutation.SetDescription(v)
+	return _u
 }
 
 // SetNillableDescription sets the "description" field if the given value is not nil.
-func (wu *WorkflowUpdate) SetNillableDescription(s *string) *WorkflowUpdate {
-	if s != nil {
-		wu.SetDescription(*s)
+func (_u *WorkflowUpdate) SetNillableDescription(v *string) *WorkflowUpdate {
+	if v != nil {
+		_u.SetDescription(*v)
 	}
-	return wu
+	return _u
 }
 
 // ClearDescription clears the value of the "description" field.
-func (wu *WorkflowUpdate) ClearDescription() *WorkflowUpdate {
-	wu.mutation.ClearDescription()
-	return wu
+func (_u *WorkflowUpdate) ClearDescription() *WorkflowUpdate {
+	_u.mutation.ClearDescription()
+	return _u
 }
 
 // SetStates sets the "states" field.
-func (wu *WorkflowUpdate) SetStates(a []api.State) *WorkflowUpdate {
-	wu.mutation.SetStates(a)
-	return wu
+func (_u *WorkflowUpdate) SetStates(v []api.State) *WorkflowUpdate {
+	_u.mutation.SetStates(v)
+	return _u
 }
 
-// AppendStates appends a to the "states" field.
-func (wu *WorkflowUpdate) AppendStates(a []api.State) *WorkflowUpdate {
-	wu.mutation.AppendStates(a)
-	return wu
+// AppendStates appends value to the "states" field.
+func (_u *WorkflowUpdate) AppendStates(v []api.State) *WorkflowUpdate {
+	_u.mutation.AppendStates(v)
+	return _u
 }
 
 // SetTransitions sets the "transitions" field.
-func (wu *WorkflowUpdate) SetTransitions(a []api.Transition) *WorkflowUpdate {
-	wu.mutation.SetTransitions(a)
-	return wu
+func (_u *WorkflowUpdate) SetTransitions(v []api.Transition) *WorkflowUpdate {
+	_u.mutation.SetTransitions(v)
+	return _u
 }
 
-// AppendTransitions appends a to the "transitions" field.
-func (wu *WorkflowUpdate) AppendTransitions(a []api.Transition) *WorkflowUpdate {
-	wu.mutation.AppendTransitions(a)
-	return wu
+// AppendTransitions appends value to the "transitions" field.
+func (_u *WorkflowUpdate) AppendTransitions(v []api.Transition) *WorkflowUpdate {
+	_u.mutation.AppendTransitions(v)
+	return _u
 }
 
 // SetGroups sets the "groups" field.
-func (wu *WorkflowUpdate) SetGroups(a []api.Group) *WorkflowUpdate {
-	wu.mutation.SetGroups(a)
-	return wu
+func (_u *WorkflowUpdate) SetGroups(v []api.Group) *WorkflowUpdate {
+	_u.mutation.SetGroups(v)
+	return _u
 }
 
-// AppendGroups appends a to the "groups" field.
-func (wu *WorkflowUpdate) AppendGroups(a []api.Group) *WorkflowUpdate {
-	wu.mutation.AppendGroups(a)
-	return wu
+// AppendGroups appends value to the "groups" field.
+func (_u *WorkflowUpdate) AppendGroups(v []api.Group) *WorkflowUpdate {
+	_u.mutation.AppendGroups(v)
+	return _u
 }
 
 // AddJobIDs adds the "jobs" edge to the Job entity by IDs.
-func (wu *WorkflowUpdate) AddJobIDs(ids ...string) *WorkflowUpdate {
-	wu.mutation.AddJobIDs(ids...)
-	return wu
+func (_u *WorkflowUpdate) AddJobIDs(ids ...string) *WorkflowUpdate {
+	_u.mutation.AddJobIDs(ids...)
+	return _u
 }
 
 // AddJobs adds the "jobs" edges to the Job entity.
-func (wu *WorkflowUpdate) AddJobs(j ...*Job) *WorkflowUpdate {
-	ids := make([]string, len(j))
-	for i := range j {
-		ids[i] = j[i].ID
+func (_u *WorkflowUpdate) AddJobs(v ...*Job) *WorkflowUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return wu.AddJobIDs(ids...)
+	return _u.AddJobIDs(ids...)
 }
 
 // Mutation returns the WorkflowMutation object of the builder.
-func (wu *WorkflowUpdate) Mutation() *WorkflowMutation {
-	return wu.mutation
+func (_u *WorkflowUpdate) Mutation() *WorkflowMutation {
+	return _u.mutation
 }
 
 // ClearJobs clears all "jobs" edges to the Job entity.
-func (wu *WorkflowUpdate) ClearJobs() *WorkflowUpdate {
-	wu.mutation.ClearJobs()
-	return wu
+func (_u *WorkflowUpdate) ClearJobs() *WorkflowUpdate {
+	_u.mutation.ClearJobs()
+	return _u
 }
 
 // RemoveJobIDs removes the "jobs" edge to Job entities by IDs.
-func (wu *WorkflowUpdate) RemoveJobIDs(ids ...string) *WorkflowUpdate {
-	wu.mutation.RemoveJobIDs(ids...)
-	return wu
+func (_u *WorkflowUpdate) RemoveJobIDs(ids ...string) *WorkflowUpdate {
+	_u.mutation.RemoveJobIDs(ids...)
+	return _u
 }
 
 // RemoveJobs removes "jobs" edges to Job entities.
-func (wu *WorkflowUpdate) RemoveJobs(j ...*Job) *WorkflowUpdate {
-	ids := make([]string, len(j))
-	for i := range j {
-		ids[i] = j[i].ID
+func (_u *WorkflowUpdate) RemoveJobs(v ...*Job) *WorkflowUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return wu.RemoveJobIDs(ids...)
+	return _u.RemoveJobIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (wu *WorkflowUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, wu.sqlSave, wu.mutation, wu.hooks)
+func (_u *WorkflowUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (wu *WorkflowUpdate) SaveX(ctx context.Context) int {
-	affected, err := wu.Save(ctx)
+func (_u *WorkflowUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -159,26 +159,26 @@ func (wu *WorkflowUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (wu *WorkflowUpdate) Exec(ctx context.Context) error {
-	_, err := wu.Save(ctx)
+func (_u *WorkflowUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (wu *WorkflowUpdate) ExecX(ctx context.Context) {
-	if err := wu.Exec(ctx); err != nil {
+func (_u *WorkflowUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (wu *WorkflowUpdate) check() error {
-	if v, ok := wu.mutation.Name(); ok {
+func (_u *WorkflowUpdate) check() error {
+	if v, ok := _u.mutation.Name(); ok {
 		if err := workflow.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Workflow.name": %w`, err)}
 		}
 	}
-	if v, ok := wu.mutation.Description(); ok {
+	if v, ok := _u.mutation.Description(); ok {
 		if err := workflow.DescriptionValidator(v); err != nil {
 			return &ValidationError{Name: "description", err: fmt.Errorf(`ent: validator failed for field "Workflow.description": %w`, err)}
 		}
@@ -186,52 +186,52 @@ func (wu *WorkflowUpdate) check() error {
 	return nil
 }
 
-func (wu *WorkflowUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := wu.check(); err != nil {
-		return n, err
+func (_u *WorkflowUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(workflow.Table, workflow.Columns, sqlgraph.NewFieldSpec(workflow.FieldID, field.TypeInt))
-	if ps := wu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := wu.mutation.Name(); ok {
+	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(workflow.FieldName, field.TypeString, value)
 	}
-	if value, ok := wu.mutation.Description(); ok {
+	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(workflow.FieldDescription, field.TypeString, value)
 	}
-	if wu.mutation.DescriptionCleared() {
+	if _u.mutation.DescriptionCleared() {
 		_spec.ClearField(workflow.FieldDescription, field.TypeString)
 	}
-	if value, ok := wu.mutation.States(); ok {
+	if value, ok := _u.mutation.States(); ok {
 		_spec.SetField(workflow.FieldStates, field.TypeJSON, value)
 	}
-	if value, ok := wu.mutation.AppendedStates(); ok {
+	if value, ok := _u.mutation.AppendedStates(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, workflow.FieldStates, value)
 		})
 	}
-	if value, ok := wu.mutation.Transitions(); ok {
+	if value, ok := _u.mutation.Transitions(); ok {
 		_spec.SetField(workflow.FieldTransitions, field.TypeJSON, value)
 	}
-	if value, ok := wu.mutation.AppendedTransitions(); ok {
+	if value, ok := _u.mutation.AppendedTransitions(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, workflow.FieldTransitions, value)
 		})
 	}
-	if value, ok := wu.mutation.Groups(); ok {
+	if value, ok := _u.mutation.Groups(); ok {
 		_spec.SetField(workflow.FieldGroups, field.TypeJSON, value)
 	}
-	if value, ok := wu.mutation.AppendedGroups(); ok {
+	if value, ok := _u.mutation.AppendedGroups(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, workflow.FieldGroups, value)
 		})
 	}
-	if wu.mutation.JobsCleared() {
+	if _u.mutation.JobsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -244,7 +244,7 @@ func (wu *WorkflowUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := wu.mutation.RemovedJobsIDs(); len(nodes) > 0 && !wu.mutation.JobsCleared() {
+	if nodes := _u.mutation.RemovedJobsIDs(); len(nodes) > 0 && !_u.mutation.JobsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -260,7 +260,7 @@ func (wu *WorkflowUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := wu.mutation.JobsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.JobsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -276,7 +276,7 @@ func (wu *WorkflowUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, wu.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{workflow.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -284,8 +284,8 @@ func (wu *WorkflowUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	wu.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // WorkflowUpdateOne is the builder for updating a single Workflow entity.
@@ -297,137 +297,137 @@ type WorkflowUpdateOne struct {
 }
 
 // SetName sets the "name" field.
-func (wuo *WorkflowUpdateOne) SetName(s string) *WorkflowUpdateOne {
-	wuo.mutation.SetName(s)
-	return wuo
+func (_u *WorkflowUpdateOne) SetName(v string) *WorkflowUpdateOne {
+	_u.mutation.SetName(v)
+	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (wuo *WorkflowUpdateOne) SetNillableName(s *string) *WorkflowUpdateOne {
-	if s != nil {
-		wuo.SetName(*s)
+func (_u *WorkflowUpdateOne) SetNillableName(v *string) *WorkflowUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
-	return wuo
+	return _u
 }
 
 // SetDescription sets the "description" field.
-func (wuo *WorkflowUpdateOne) SetDescription(s string) *WorkflowUpdateOne {
-	wuo.mutation.SetDescription(s)
-	return wuo
+func (_u *WorkflowUpdateOne) SetDescription(v string) *WorkflowUpdateOne {
+	_u.mutation.SetDescription(v)
+	return _u
 }
 
 // SetNillableDescription sets the "description" field if the given value is not nil.
-func (wuo *WorkflowUpdateOne) SetNillableDescription(s *string) *WorkflowUpdateOne {
-	if s != nil {
-		wuo.SetDescription(*s)
+func (_u *WorkflowUpdateOne) SetNillableDescription(v *string) *WorkflowUpdateOne {
+	if v != nil {
+		_u.SetDescription(*v)
 	}
-	return wuo
+	return _u
 }
 
 // ClearDescription clears the value of the "description" field.
-func (wuo *WorkflowUpdateOne) ClearDescription() *WorkflowUpdateOne {
-	wuo.mutation.ClearDescription()
-	return wuo
+func (_u *WorkflowUpdateOne) ClearDescription() *WorkflowUpdateOne {
+	_u.mutation.ClearDescription()
+	return _u
 }
 
 // SetStates sets the "states" field.
-func (wuo *WorkflowUpdateOne) SetStates(a []api.State) *WorkflowUpdateOne {
-	wuo.mutation.SetStates(a)
-	return wuo
+func (_u *WorkflowUpdateOne) SetStates(v []api.State) *WorkflowUpdateOne {
+	_u.mutation.SetStates(v)
+	return _u
 }
 
-// AppendStates appends a to the "states" field.
-func (wuo *WorkflowUpdateOne) AppendStates(a []api.State) *WorkflowUpdateOne {
-	wuo.mutation.AppendStates(a)
-	return wuo
+// AppendStates appends value to the "states" field.
+func (_u *WorkflowUpdateOne) AppendStates(v []api.State) *WorkflowUpdateOne {
+	_u.mutation.AppendStates(v)
+	return _u
 }
 
 // SetTransitions sets the "transitions" field.
-func (wuo *WorkflowUpdateOne) SetTransitions(a []api.Transition) *WorkflowUpdateOne {
-	wuo.mutation.SetTransitions(a)
-	return wuo
+func (_u *WorkflowUpdateOne) SetTransitions(v []api.Transition) *WorkflowUpdateOne {
+	_u.mutation.SetTransitions(v)
+	return _u
 }
 
-// AppendTransitions appends a to the "transitions" field.
-func (wuo *WorkflowUpdateOne) AppendTransitions(a []api.Transition) *WorkflowUpdateOne {
-	wuo.mutation.AppendTransitions(a)
-	return wuo
+// AppendTransitions appends value to the "transitions" field.
+func (_u *WorkflowUpdateOne) AppendTransitions(v []api.Transition) *WorkflowUpdateOne {
+	_u.mutation.AppendTransitions(v)
+	return _u
 }
 
 // SetGroups sets the "groups" field.
-func (wuo *WorkflowUpdateOne) SetGroups(a []api.Group) *WorkflowUpdateOne {
-	wuo.mutation.SetGroups(a)
-	return wuo
+func (_u *WorkflowUpdateOne) SetGroups(v []api.Group) *WorkflowUpdateOne {
+	_u.mutation.SetGroups(v)
+	return _u
 }
 
-// AppendGroups appends a to the "groups" field.
-func (wuo *WorkflowUpdateOne) AppendGroups(a []api.Group) *WorkflowUpdateOne {
-	wuo.mutation.AppendGroups(a)
-	return wuo
+// AppendGroups appends value to the "groups" field.
+func (_u *WorkflowUpdateOne) AppendGroups(v []api.Group) *WorkflowUpdateOne {
+	_u.mutation.AppendGroups(v)
+	return _u
 }
 
 // AddJobIDs adds the "jobs" edge to the Job entity by IDs.
-func (wuo *WorkflowUpdateOne) AddJobIDs(ids ...string) *WorkflowUpdateOne {
-	wuo.mutation.AddJobIDs(ids...)
-	return wuo
+func (_u *WorkflowUpdateOne) AddJobIDs(ids ...string) *WorkflowUpdateOne {
+	_u.mutation.AddJobIDs(ids...)
+	return _u
 }
 
 // AddJobs adds the "jobs" edges to the Job entity.
-func (wuo *WorkflowUpdateOne) AddJobs(j ...*Job) *WorkflowUpdateOne {
-	ids := make([]string, len(j))
-	for i := range j {
-		ids[i] = j[i].ID
+func (_u *WorkflowUpdateOne) AddJobs(v ...*Job) *WorkflowUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return wuo.AddJobIDs(ids...)
+	return _u.AddJobIDs(ids...)
 }
 
 // Mutation returns the WorkflowMutation object of the builder.
-func (wuo *WorkflowUpdateOne) Mutation() *WorkflowMutation {
-	return wuo.mutation
+func (_u *WorkflowUpdateOne) Mutation() *WorkflowMutation {
+	return _u.mutation
 }
 
 // ClearJobs clears all "jobs" edges to the Job entity.
-func (wuo *WorkflowUpdateOne) ClearJobs() *WorkflowUpdateOne {
-	wuo.mutation.ClearJobs()
-	return wuo
+func (_u *WorkflowUpdateOne) ClearJobs() *WorkflowUpdateOne {
+	_u.mutation.ClearJobs()
+	return _u
 }
 
 // RemoveJobIDs removes the "jobs" edge to Job entities by IDs.
-func (wuo *WorkflowUpdateOne) RemoveJobIDs(ids ...string) *WorkflowUpdateOne {
-	wuo.mutation.RemoveJobIDs(ids...)
-	return wuo
+func (_u *WorkflowUpdateOne) RemoveJobIDs(ids ...string) *WorkflowUpdateOne {
+	_u.mutation.RemoveJobIDs(ids...)
+	return _u
 }
 
 // RemoveJobs removes "jobs" edges to Job entities.
-func (wuo *WorkflowUpdateOne) RemoveJobs(j ...*Job) *WorkflowUpdateOne {
-	ids := make([]string, len(j))
-	for i := range j {
-		ids[i] = j[i].ID
+func (_u *WorkflowUpdateOne) RemoveJobs(v ...*Job) *WorkflowUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return wuo.RemoveJobIDs(ids...)
+	return _u.RemoveJobIDs(ids...)
 }
 
 // Where appends a list predicates to the WorkflowUpdate builder.
-func (wuo *WorkflowUpdateOne) Where(ps ...predicate.Workflow) *WorkflowUpdateOne {
-	wuo.mutation.Where(ps...)
-	return wuo
+func (_u *WorkflowUpdateOne) Where(ps ...predicate.Workflow) *WorkflowUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (wuo *WorkflowUpdateOne) Select(field string, fields ...string) *WorkflowUpdateOne {
-	wuo.fields = append([]string{field}, fields...)
-	return wuo
+func (_u *WorkflowUpdateOne) Select(field string, fields ...string) *WorkflowUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated Workflow entity.
-func (wuo *WorkflowUpdateOne) Save(ctx context.Context) (*Workflow, error) {
-	return withHooks(ctx, wuo.sqlSave, wuo.mutation, wuo.hooks)
+func (_u *WorkflowUpdateOne) Save(ctx context.Context) (*Workflow, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (wuo *WorkflowUpdateOne) SaveX(ctx context.Context) *Workflow {
-	node, err := wuo.Save(ctx)
+func (_u *WorkflowUpdateOne) SaveX(ctx context.Context) *Workflow {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -435,26 +435,26 @@ func (wuo *WorkflowUpdateOne) SaveX(ctx context.Context) *Workflow {
 }
 
 // Exec executes the query on the entity.
-func (wuo *WorkflowUpdateOne) Exec(ctx context.Context) error {
-	_, err := wuo.Save(ctx)
+func (_u *WorkflowUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (wuo *WorkflowUpdateOne) ExecX(ctx context.Context) {
-	if err := wuo.Exec(ctx); err != nil {
+func (_u *WorkflowUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (wuo *WorkflowUpdateOne) check() error {
-	if v, ok := wuo.mutation.Name(); ok {
+func (_u *WorkflowUpdateOne) check() error {
+	if v, ok := _u.mutation.Name(); ok {
 		if err := workflow.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Workflow.name": %w`, err)}
 		}
 	}
-	if v, ok := wuo.mutation.Description(); ok {
+	if v, ok := _u.mutation.Description(); ok {
 		if err := workflow.DescriptionValidator(v); err != nil {
 			return &ValidationError{Name: "description", err: fmt.Errorf(`ent: validator failed for field "Workflow.description": %w`, err)}
 		}
@@ -462,17 +462,17 @@ func (wuo *WorkflowUpdateOne) check() error {
 	return nil
 }
 
-func (wuo *WorkflowUpdateOne) sqlSave(ctx context.Context) (_node *Workflow, err error) {
-	if err := wuo.check(); err != nil {
+func (_u *WorkflowUpdateOne) sqlSave(ctx context.Context) (_node *Workflow, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(workflow.Table, workflow.Columns, sqlgraph.NewFieldSpec(workflow.FieldID, field.TypeInt))
-	id, ok := wuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Workflow.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := wuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, workflow.FieldID)
 		for _, f := range fields {
@@ -484,47 +484,47 @@ func (wuo *WorkflowUpdateOne) sqlSave(ctx context.Context) (_node *Workflow, err
 			}
 		}
 	}
-	if ps := wuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := wuo.mutation.Name(); ok {
+	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(workflow.FieldName, field.TypeString, value)
 	}
-	if value, ok := wuo.mutation.Description(); ok {
+	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(workflow.FieldDescription, field.TypeString, value)
 	}
-	if wuo.mutation.DescriptionCleared() {
+	if _u.mutation.DescriptionCleared() {
 		_spec.ClearField(workflow.FieldDescription, field.TypeString)
 	}
-	if value, ok := wuo.mutation.States(); ok {
+	if value, ok := _u.mutation.States(); ok {
 		_spec.SetField(workflow.FieldStates, field.TypeJSON, value)
 	}
-	if value, ok := wuo.mutation.AppendedStates(); ok {
+	if value, ok := _u.mutation.AppendedStates(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, workflow.FieldStates, value)
 		})
 	}
-	if value, ok := wuo.mutation.Transitions(); ok {
+	if value, ok := _u.mutation.Transitions(); ok {
 		_spec.SetField(workflow.FieldTransitions, field.TypeJSON, value)
 	}
-	if value, ok := wuo.mutation.AppendedTransitions(); ok {
+	if value, ok := _u.mutation.AppendedTransitions(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, workflow.FieldTransitions, value)
 		})
 	}
-	if value, ok := wuo.mutation.Groups(); ok {
+	if value, ok := _u.mutation.Groups(); ok {
 		_spec.SetField(workflow.FieldGroups, field.TypeJSON, value)
 	}
-	if value, ok := wuo.mutation.AppendedGroups(); ok {
+	if value, ok := _u.mutation.AppendedGroups(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, workflow.FieldGroups, value)
 		})
 	}
-	if wuo.mutation.JobsCleared() {
+	if _u.mutation.JobsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -537,7 +537,7 @@ func (wuo *WorkflowUpdateOne) sqlSave(ctx context.Context) (_node *Workflow, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := wuo.mutation.RemovedJobsIDs(); len(nodes) > 0 && !wuo.mutation.JobsCleared() {
+	if nodes := _u.mutation.RemovedJobsIDs(); len(nodes) > 0 && !_u.mutation.JobsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -553,7 +553,7 @@ func (wuo *WorkflowUpdateOne) sqlSave(ctx context.Context) (_node *Workflow, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := wuo.mutation.JobsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.JobsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -569,10 +569,10 @@ func (wuo *WorkflowUpdateOne) sqlSave(ctx context.Context) (_node *Workflow, err
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &Workflow{config: wuo.config}
+	_node = &Workflow{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, wuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{workflow.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -580,6 +580,6 @@ func (wuo *WorkflowUpdateOne) sqlSave(ctx context.Context) (_node *Workflow, err
 		}
 		return nil, err
 	}
-	wuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }
