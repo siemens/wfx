@@ -75,7 +75,7 @@ func (*Workflow) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Workflow fields.
-func (w *Workflow) assignValues(columns []string, values []any) error {
+func (_m *Workflow) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -86,24 +86,24 @@ func (w *Workflow) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			w.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case workflow.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
-				w.Name = value.String
+				_m.Name = value.String
 			}
 		case workflow.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field description", values[i])
 			} else if value.Valid {
-				w.Description = value.String
+				_m.Description = value.String
 			}
 		case workflow.FieldStates:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field states", values[i])
 			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &w.States); err != nil {
+				if err := json.Unmarshal(*value, &_m.States); err != nil {
 					return fmt.Errorf("unmarshal field states: %w", err)
 				}
 			}
@@ -111,7 +111,7 @@ func (w *Workflow) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field transitions", values[i])
 			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &w.Transitions); err != nil {
+				if err := json.Unmarshal(*value, &_m.Transitions); err != nil {
 					return fmt.Errorf("unmarshal field transitions: %w", err)
 				}
 			}
@@ -119,12 +119,12 @@ func (w *Workflow) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field groups", values[i])
 			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &w.Groups); err != nil {
+				if err := json.Unmarshal(*value, &_m.Groups); err != nil {
 					return fmt.Errorf("unmarshal field groups: %w", err)
 				}
 			}
 		default:
-			w.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -132,52 +132,52 @@ func (w *Workflow) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Workflow.
 // This includes values selected through modifiers, order, etc.
-func (w *Workflow) Value(name string) (ent.Value, error) {
-	return w.selectValues.Get(name)
+func (_m *Workflow) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryJobs queries the "jobs" edge of the Workflow entity.
-func (w *Workflow) QueryJobs() *JobQuery {
-	return NewWorkflowClient(w.config).QueryJobs(w)
+func (_m *Workflow) QueryJobs() *JobQuery {
+	return NewWorkflowClient(_m.config).QueryJobs(_m)
 }
 
 // Update returns a builder for updating this Workflow.
 // Note that you need to call Workflow.Unwrap() before calling this method if this Workflow
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (w *Workflow) Update() *WorkflowUpdateOne {
-	return NewWorkflowClient(w.config).UpdateOne(w)
+func (_m *Workflow) Update() *WorkflowUpdateOne {
+	return NewWorkflowClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Workflow entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (w *Workflow) Unwrap() *Workflow {
-	_tx, ok := w.config.driver.(*txDriver)
+func (_m *Workflow) Unwrap() *Workflow {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Workflow is not a transactional entity")
 	}
-	w.config.driver = _tx.drv
-	return w
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (w *Workflow) String() string {
+func (_m *Workflow) String() string {
 	var builder strings.Builder
 	builder.WriteString("Workflow(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", w.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("name=")
-	builder.WriteString(w.Name)
+	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
 	builder.WriteString("description=")
-	builder.WriteString(w.Description)
+	builder.WriteString(_m.Description)
 	builder.WriteString(", ")
 	builder.WriteString("states=")
-	builder.WriteString(fmt.Sprintf("%v", w.States))
+	builder.WriteString(fmt.Sprintf("%v", _m.States))
 	builder.WriteString(", ")
 	builder.WriteString("transitions=")
-	builder.WriteString(fmt.Sprintf("%v", w.Transitions))
+	builder.WriteString(fmt.Sprintf("%v", _m.Transitions))
 	builder.WriteString(", ")
 	builder.WriteString("groups=")
-	builder.WriteString(fmt.Sprintf("%v", w.Groups))
+	builder.WriteString(fmt.Sprintf("%v", _m.Groups))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -78,7 +78,7 @@ func (*History) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the History fields.
-func (h *History) assignValues(columns []string, values []any) error {
+func (_m *History) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -89,18 +89,18 @@ func (h *History) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			h.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case history.FieldMtime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field mtime", values[i])
 			} else if value.Valid {
-				h.Mtime = value.Time
+				_m.Mtime = value.Time
 			}
 		case history.FieldStatus:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &h.Status); err != nil {
+				if err := json.Unmarshal(*value, &_m.Status); err != nil {
 					return fmt.Errorf("unmarshal field status: %w", err)
 				}
 			}
@@ -108,7 +108,7 @@ func (h *History) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field definition", values[i])
 			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &h.Definition); err != nil {
+				if err := json.Unmarshal(*value, &_m.Definition); err != nil {
 					return fmt.Errorf("unmarshal field definition: %w", err)
 				}
 			}
@@ -116,11 +116,11 @@ func (h *History) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field job_history", values[i])
 			} else if value.Valid {
-				h.job_history = new(string)
-				*h.job_history = value.String
+				_m.job_history = new(string)
+				*_m.job_history = value.String
 			}
 		default:
-			h.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -128,46 +128,46 @@ func (h *History) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the History.
 // This includes values selected through modifiers, order, etc.
-func (h *History) Value(name string) (ent.Value, error) {
-	return h.selectValues.Get(name)
+func (_m *History) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryJob queries the "job" edge of the History entity.
-func (h *History) QueryJob() *JobQuery {
-	return NewHistoryClient(h.config).QueryJob(h)
+func (_m *History) QueryJob() *JobQuery {
+	return NewHistoryClient(_m.config).QueryJob(_m)
 }
 
 // Update returns a builder for updating this History.
 // Note that you need to call History.Unwrap() before calling this method if this History
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (h *History) Update() *HistoryUpdateOne {
-	return NewHistoryClient(h.config).UpdateOne(h)
+func (_m *History) Update() *HistoryUpdateOne {
+	return NewHistoryClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the History entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (h *History) Unwrap() *History {
-	_tx, ok := h.config.driver.(*txDriver)
+func (_m *History) Unwrap() *History {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: History is not a transactional entity")
 	}
-	h.config.driver = _tx.drv
-	return h
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (h *History) String() string {
+func (_m *History) String() string {
 	var builder strings.Builder
 	builder.WriteString("History(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", h.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("mtime=")
-	builder.WriteString(h.Mtime.Format(time.ANSIC))
+	builder.WriteString(_m.Mtime.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("status=")
-	builder.WriteString(fmt.Sprintf("%v", h.Status))
+	builder.WriteString(fmt.Sprintf("%v", _m.Status))
 	builder.WriteString(", ")
 	builder.WriteString("definition=")
-	builder.WriteString(fmt.Sprintf("%v", h.Definition))
+	builder.WriteString(fmt.Sprintf("%v", _m.Definition))
 	builder.WriteByte(')')
 	return builder.String()
 }

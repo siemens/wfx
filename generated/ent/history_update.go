@@ -28,95 +28,95 @@ type HistoryUpdate struct {
 }
 
 // Where appends a list predicates to the HistoryUpdate builder.
-func (hu *HistoryUpdate) Where(ps ...predicate.History) *HistoryUpdate {
-	hu.mutation.Where(ps...)
-	return hu
+func (_u *HistoryUpdate) Where(ps ...predicate.History) *HistoryUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetMtime sets the "mtime" field.
-func (hu *HistoryUpdate) SetMtime(t time.Time) *HistoryUpdate {
-	hu.mutation.SetMtime(t)
-	return hu
+func (_u *HistoryUpdate) SetMtime(v time.Time) *HistoryUpdate {
+	_u.mutation.SetMtime(v)
+	return _u
 }
 
 // SetNillableMtime sets the "mtime" field if the given value is not nil.
-func (hu *HistoryUpdate) SetNillableMtime(t *time.Time) *HistoryUpdate {
-	if t != nil {
-		hu.SetMtime(*t)
+func (_u *HistoryUpdate) SetNillableMtime(v *time.Time) *HistoryUpdate {
+	if v != nil {
+		_u.SetMtime(*v)
 	}
-	return hu
+	return _u
 }
 
 // SetStatus sets the "status" field.
-func (hu *HistoryUpdate) SetStatus(as api.JobStatus) *HistoryUpdate {
-	hu.mutation.SetStatus(as)
-	return hu
+func (_u *HistoryUpdate) SetStatus(v api.JobStatus) *HistoryUpdate {
+	_u.mutation.SetStatus(v)
+	return _u
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (hu *HistoryUpdate) SetNillableStatus(as *api.JobStatus) *HistoryUpdate {
-	if as != nil {
-		hu.SetStatus(*as)
+func (_u *HistoryUpdate) SetNillableStatus(v *api.JobStatus) *HistoryUpdate {
+	if v != nil {
+		_u.SetStatus(*v)
 	}
-	return hu
+	return _u
 }
 
 // ClearStatus clears the value of the "status" field.
-func (hu *HistoryUpdate) ClearStatus() *HistoryUpdate {
-	hu.mutation.ClearStatus()
-	return hu
+func (_u *HistoryUpdate) ClearStatus() *HistoryUpdate {
+	_u.mutation.ClearStatus()
+	return _u
 }
 
 // SetDefinition sets the "definition" field.
-func (hu *HistoryUpdate) SetDefinition(m map[string]interface{}) *HistoryUpdate {
-	hu.mutation.SetDefinition(m)
-	return hu
+func (_u *HistoryUpdate) SetDefinition(v map[string]interface{}) *HistoryUpdate {
+	_u.mutation.SetDefinition(v)
+	return _u
 }
 
 // ClearDefinition clears the value of the "definition" field.
-func (hu *HistoryUpdate) ClearDefinition() *HistoryUpdate {
-	hu.mutation.ClearDefinition()
-	return hu
+func (_u *HistoryUpdate) ClearDefinition() *HistoryUpdate {
+	_u.mutation.ClearDefinition()
+	return _u
 }
 
 // SetJobID sets the "job" edge to the Job entity by ID.
-func (hu *HistoryUpdate) SetJobID(id string) *HistoryUpdate {
-	hu.mutation.SetJobID(id)
-	return hu
+func (_u *HistoryUpdate) SetJobID(id string) *HistoryUpdate {
+	_u.mutation.SetJobID(id)
+	return _u
 }
 
 // SetNillableJobID sets the "job" edge to the Job entity by ID if the given value is not nil.
-func (hu *HistoryUpdate) SetNillableJobID(id *string) *HistoryUpdate {
+func (_u *HistoryUpdate) SetNillableJobID(id *string) *HistoryUpdate {
 	if id != nil {
-		hu = hu.SetJobID(*id)
+		_u = _u.SetJobID(*id)
 	}
-	return hu
+	return _u
 }
 
 // SetJob sets the "job" edge to the Job entity.
-func (hu *HistoryUpdate) SetJob(j *Job) *HistoryUpdate {
-	return hu.SetJobID(j.ID)
+func (_u *HistoryUpdate) SetJob(v *Job) *HistoryUpdate {
+	return _u.SetJobID(v.ID)
 }
 
 // Mutation returns the HistoryMutation object of the builder.
-func (hu *HistoryUpdate) Mutation() *HistoryMutation {
-	return hu.mutation
+func (_u *HistoryUpdate) Mutation() *HistoryMutation {
+	return _u.mutation
 }
 
 // ClearJob clears the "job" edge to the Job entity.
-func (hu *HistoryUpdate) ClearJob() *HistoryUpdate {
-	hu.mutation.ClearJob()
-	return hu
+func (_u *HistoryUpdate) ClearJob() *HistoryUpdate {
+	_u.mutation.ClearJob()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (hu *HistoryUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, hu.sqlSave, hu.mutation, hu.hooks)
+func (_u *HistoryUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (hu *HistoryUpdate) SaveX(ctx context.Context) int {
-	affected, err := hu.Save(ctx)
+func (_u *HistoryUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -124,43 +124,43 @@ func (hu *HistoryUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (hu *HistoryUpdate) Exec(ctx context.Context) error {
-	_, err := hu.Save(ctx)
+func (_u *HistoryUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (hu *HistoryUpdate) ExecX(ctx context.Context) {
-	if err := hu.Exec(ctx); err != nil {
+func (_u *HistoryUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (hu *HistoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *HistoryUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(history.Table, history.Columns, sqlgraph.NewFieldSpec(history.FieldID, field.TypeInt))
-	if ps := hu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := hu.mutation.Mtime(); ok {
+	if value, ok := _u.mutation.Mtime(); ok {
 		_spec.SetField(history.FieldMtime, field.TypeTime, value)
 	}
-	if value, ok := hu.mutation.Status(); ok {
+	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(history.FieldStatus, field.TypeJSON, value)
 	}
-	if hu.mutation.StatusCleared() {
+	if _u.mutation.StatusCleared() {
 		_spec.ClearField(history.FieldStatus, field.TypeJSON)
 	}
-	if value, ok := hu.mutation.Definition(); ok {
+	if value, ok := _u.mutation.Definition(); ok {
 		_spec.SetField(history.FieldDefinition, field.TypeJSON, value)
 	}
-	if hu.mutation.DefinitionCleared() {
+	if _u.mutation.DefinitionCleared() {
 		_spec.ClearField(history.FieldDefinition, field.TypeJSON)
 	}
-	if hu.mutation.JobCleared() {
+	if _u.mutation.JobCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -173,7 +173,7 @@ func (hu *HistoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := hu.mutation.JobIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.JobIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -189,7 +189,7 @@ func (hu *HistoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, hu.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{history.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -197,8 +197,8 @@ func (hu *HistoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	hu.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // HistoryUpdateOne is the builder for updating a single History entity.
@@ -210,102 +210,102 @@ type HistoryUpdateOne struct {
 }
 
 // SetMtime sets the "mtime" field.
-func (huo *HistoryUpdateOne) SetMtime(t time.Time) *HistoryUpdateOne {
-	huo.mutation.SetMtime(t)
-	return huo
+func (_u *HistoryUpdateOne) SetMtime(v time.Time) *HistoryUpdateOne {
+	_u.mutation.SetMtime(v)
+	return _u
 }
 
 // SetNillableMtime sets the "mtime" field if the given value is not nil.
-func (huo *HistoryUpdateOne) SetNillableMtime(t *time.Time) *HistoryUpdateOne {
-	if t != nil {
-		huo.SetMtime(*t)
+func (_u *HistoryUpdateOne) SetNillableMtime(v *time.Time) *HistoryUpdateOne {
+	if v != nil {
+		_u.SetMtime(*v)
 	}
-	return huo
+	return _u
 }
 
 // SetStatus sets the "status" field.
-func (huo *HistoryUpdateOne) SetStatus(as api.JobStatus) *HistoryUpdateOne {
-	huo.mutation.SetStatus(as)
-	return huo
+func (_u *HistoryUpdateOne) SetStatus(v api.JobStatus) *HistoryUpdateOne {
+	_u.mutation.SetStatus(v)
+	return _u
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (huo *HistoryUpdateOne) SetNillableStatus(as *api.JobStatus) *HistoryUpdateOne {
-	if as != nil {
-		huo.SetStatus(*as)
+func (_u *HistoryUpdateOne) SetNillableStatus(v *api.JobStatus) *HistoryUpdateOne {
+	if v != nil {
+		_u.SetStatus(*v)
 	}
-	return huo
+	return _u
 }
 
 // ClearStatus clears the value of the "status" field.
-func (huo *HistoryUpdateOne) ClearStatus() *HistoryUpdateOne {
-	huo.mutation.ClearStatus()
-	return huo
+func (_u *HistoryUpdateOne) ClearStatus() *HistoryUpdateOne {
+	_u.mutation.ClearStatus()
+	return _u
 }
 
 // SetDefinition sets the "definition" field.
-func (huo *HistoryUpdateOne) SetDefinition(m map[string]interface{}) *HistoryUpdateOne {
-	huo.mutation.SetDefinition(m)
-	return huo
+func (_u *HistoryUpdateOne) SetDefinition(v map[string]interface{}) *HistoryUpdateOne {
+	_u.mutation.SetDefinition(v)
+	return _u
 }
 
 // ClearDefinition clears the value of the "definition" field.
-func (huo *HistoryUpdateOne) ClearDefinition() *HistoryUpdateOne {
-	huo.mutation.ClearDefinition()
-	return huo
+func (_u *HistoryUpdateOne) ClearDefinition() *HistoryUpdateOne {
+	_u.mutation.ClearDefinition()
+	return _u
 }
 
 // SetJobID sets the "job" edge to the Job entity by ID.
-func (huo *HistoryUpdateOne) SetJobID(id string) *HistoryUpdateOne {
-	huo.mutation.SetJobID(id)
-	return huo
+func (_u *HistoryUpdateOne) SetJobID(id string) *HistoryUpdateOne {
+	_u.mutation.SetJobID(id)
+	return _u
 }
 
 // SetNillableJobID sets the "job" edge to the Job entity by ID if the given value is not nil.
-func (huo *HistoryUpdateOne) SetNillableJobID(id *string) *HistoryUpdateOne {
+func (_u *HistoryUpdateOne) SetNillableJobID(id *string) *HistoryUpdateOne {
 	if id != nil {
-		huo = huo.SetJobID(*id)
+		_u = _u.SetJobID(*id)
 	}
-	return huo
+	return _u
 }
 
 // SetJob sets the "job" edge to the Job entity.
-func (huo *HistoryUpdateOne) SetJob(j *Job) *HistoryUpdateOne {
-	return huo.SetJobID(j.ID)
+func (_u *HistoryUpdateOne) SetJob(v *Job) *HistoryUpdateOne {
+	return _u.SetJobID(v.ID)
 }
 
 // Mutation returns the HistoryMutation object of the builder.
-func (huo *HistoryUpdateOne) Mutation() *HistoryMutation {
-	return huo.mutation
+func (_u *HistoryUpdateOne) Mutation() *HistoryMutation {
+	return _u.mutation
 }
 
 // ClearJob clears the "job" edge to the Job entity.
-func (huo *HistoryUpdateOne) ClearJob() *HistoryUpdateOne {
-	huo.mutation.ClearJob()
-	return huo
+func (_u *HistoryUpdateOne) ClearJob() *HistoryUpdateOne {
+	_u.mutation.ClearJob()
+	return _u
 }
 
 // Where appends a list predicates to the HistoryUpdate builder.
-func (huo *HistoryUpdateOne) Where(ps ...predicate.History) *HistoryUpdateOne {
-	huo.mutation.Where(ps...)
-	return huo
+func (_u *HistoryUpdateOne) Where(ps ...predicate.History) *HistoryUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (huo *HistoryUpdateOne) Select(field string, fields ...string) *HistoryUpdateOne {
-	huo.fields = append([]string{field}, fields...)
-	return huo
+func (_u *HistoryUpdateOne) Select(field string, fields ...string) *HistoryUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated History entity.
-func (huo *HistoryUpdateOne) Save(ctx context.Context) (*History, error) {
-	return withHooks(ctx, huo.sqlSave, huo.mutation, huo.hooks)
+func (_u *HistoryUpdateOne) Save(ctx context.Context) (*History, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (huo *HistoryUpdateOne) SaveX(ctx context.Context) *History {
-	node, err := huo.Save(ctx)
+func (_u *HistoryUpdateOne) SaveX(ctx context.Context) *History {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -313,26 +313,26 @@ func (huo *HistoryUpdateOne) SaveX(ctx context.Context) *History {
 }
 
 // Exec executes the query on the entity.
-func (huo *HistoryUpdateOne) Exec(ctx context.Context) error {
-	_, err := huo.Save(ctx)
+func (_u *HistoryUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (huo *HistoryUpdateOne) ExecX(ctx context.Context) {
-	if err := huo.Exec(ctx); err != nil {
+func (_u *HistoryUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (huo *HistoryUpdateOne) sqlSave(ctx context.Context) (_node *History, err error) {
+func (_u *HistoryUpdateOne) sqlSave(ctx context.Context) (_node *History, err error) {
 	_spec := sqlgraph.NewUpdateSpec(history.Table, history.Columns, sqlgraph.NewFieldSpec(history.FieldID, field.TypeInt))
-	id, ok := huo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "History.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := huo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, history.FieldID)
 		for _, f := range fields {
@@ -344,29 +344,29 @@ func (huo *HistoryUpdateOne) sqlSave(ctx context.Context) (_node *History, err e
 			}
 		}
 	}
-	if ps := huo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := huo.mutation.Mtime(); ok {
+	if value, ok := _u.mutation.Mtime(); ok {
 		_spec.SetField(history.FieldMtime, field.TypeTime, value)
 	}
-	if value, ok := huo.mutation.Status(); ok {
+	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(history.FieldStatus, field.TypeJSON, value)
 	}
-	if huo.mutation.StatusCleared() {
+	if _u.mutation.StatusCleared() {
 		_spec.ClearField(history.FieldStatus, field.TypeJSON)
 	}
-	if value, ok := huo.mutation.Definition(); ok {
+	if value, ok := _u.mutation.Definition(); ok {
 		_spec.SetField(history.FieldDefinition, field.TypeJSON, value)
 	}
-	if huo.mutation.DefinitionCleared() {
+	if _u.mutation.DefinitionCleared() {
 		_spec.ClearField(history.FieldDefinition, field.TypeJSON)
 	}
-	if huo.mutation.JobCleared() {
+	if _u.mutation.JobCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -379,7 +379,7 @@ func (huo *HistoryUpdateOne) sqlSave(ctx context.Context) (_node *History, err e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := huo.mutation.JobIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.JobIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -395,10 +395,10 @@ func (huo *HistoryUpdateOne) sqlSave(ctx context.Context) (_node *History, err e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &History{config: huo.config}
+	_node = &History{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, huo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{history.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -406,6 +406,6 @@ func (huo *HistoryUpdateOne) sqlSave(ctx context.Context) (_node *History, err e
 		}
 		return nil, err
 	}
-	huo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

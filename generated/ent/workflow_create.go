@@ -25,71 +25,71 @@ type WorkflowCreate struct {
 }
 
 // SetName sets the "name" field.
-func (wc *WorkflowCreate) SetName(s string) *WorkflowCreate {
-	wc.mutation.SetName(s)
-	return wc
+func (_c *WorkflowCreate) SetName(v string) *WorkflowCreate {
+	_c.mutation.SetName(v)
+	return _c
 }
 
 // SetDescription sets the "description" field.
-func (wc *WorkflowCreate) SetDescription(s string) *WorkflowCreate {
-	wc.mutation.SetDescription(s)
-	return wc
+func (_c *WorkflowCreate) SetDescription(v string) *WorkflowCreate {
+	_c.mutation.SetDescription(v)
+	return _c
 }
 
 // SetNillableDescription sets the "description" field if the given value is not nil.
-func (wc *WorkflowCreate) SetNillableDescription(s *string) *WorkflowCreate {
-	if s != nil {
-		wc.SetDescription(*s)
+func (_c *WorkflowCreate) SetNillableDescription(v *string) *WorkflowCreate {
+	if v != nil {
+		_c.SetDescription(*v)
 	}
-	return wc
+	return _c
 }
 
 // SetStates sets the "states" field.
-func (wc *WorkflowCreate) SetStates(a []api.State) *WorkflowCreate {
-	wc.mutation.SetStates(a)
-	return wc
+func (_c *WorkflowCreate) SetStates(v []api.State) *WorkflowCreate {
+	_c.mutation.SetStates(v)
+	return _c
 }
 
 // SetTransitions sets the "transitions" field.
-func (wc *WorkflowCreate) SetTransitions(a []api.Transition) *WorkflowCreate {
-	wc.mutation.SetTransitions(a)
-	return wc
+func (_c *WorkflowCreate) SetTransitions(v []api.Transition) *WorkflowCreate {
+	_c.mutation.SetTransitions(v)
+	return _c
 }
 
 // SetGroups sets the "groups" field.
-func (wc *WorkflowCreate) SetGroups(a []api.Group) *WorkflowCreate {
-	wc.mutation.SetGroups(a)
-	return wc
+func (_c *WorkflowCreate) SetGroups(v []api.Group) *WorkflowCreate {
+	_c.mutation.SetGroups(v)
+	return _c
 }
 
 // AddJobIDs adds the "jobs" edge to the Job entity by IDs.
-func (wc *WorkflowCreate) AddJobIDs(ids ...string) *WorkflowCreate {
-	wc.mutation.AddJobIDs(ids...)
-	return wc
+func (_c *WorkflowCreate) AddJobIDs(ids ...string) *WorkflowCreate {
+	_c.mutation.AddJobIDs(ids...)
+	return _c
 }
 
 // AddJobs adds the "jobs" edges to the Job entity.
-func (wc *WorkflowCreate) AddJobs(j ...*Job) *WorkflowCreate {
-	ids := make([]string, len(j))
-	for i := range j {
-		ids[i] = j[i].ID
+func (_c *WorkflowCreate) AddJobs(v ...*Job) *WorkflowCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return wc.AddJobIDs(ids...)
+	return _c.AddJobIDs(ids...)
 }
 
 // Mutation returns the WorkflowMutation object of the builder.
-func (wc *WorkflowCreate) Mutation() *WorkflowMutation {
-	return wc.mutation
+func (_c *WorkflowCreate) Mutation() *WorkflowMutation {
+	return _c.mutation
 }
 
 // Save creates the Workflow in the database.
-func (wc *WorkflowCreate) Save(ctx context.Context) (*Workflow, error) {
-	return withHooks(ctx, wc.sqlSave, wc.mutation, wc.hooks)
+func (_c *WorkflowCreate) Save(ctx context.Context) (*Workflow, error) {
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (wc *WorkflowCreate) SaveX(ctx context.Context) *Workflow {
-	v, err := wc.Save(ctx)
+func (_c *WorkflowCreate) SaveX(ctx context.Context) *Workflow {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -97,51 +97,51 @@ func (wc *WorkflowCreate) SaveX(ctx context.Context) *Workflow {
 }
 
 // Exec executes the query.
-func (wc *WorkflowCreate) Exec(ctx context.Context) error {
-	_, err := wc.Save(ctx)
+func (_c *WorkflowCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (wc *WorkflowCreate) ExecX(ctx context.Context) {
-	if err := wc.Exec(ctx); err != nil {
+func (_c *WorkflowCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (wc *WorkflowCreate) check() error {
-	if _, ok := wc.mutation.Name(); !ok {
+func (_c *WorkflowCreate) check() error {
+	if _, ok := _c.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Workflow.name"`)}
 	}
-	if v, ok := wc.mutation.Name(); ok {
+	if v, ok := _c.mutation.Name(); ok {
 		if err := workflow.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Workflow.name": %w`, err)}
 		}
 	}
-	if v, ok := wc.mutation.Description(); ok {
+	if v, ok := _c.mutation.Description(); ok {
 		if err := workflow.DescriptionValidator(v); err != nil {
 			return &ValidationError{Name: "description", err: fmt.Errorf(`ent: validator failed for field "Workflow.description": %w`, err)}
 		}
 	}
-	if _, ok := wc.mutation.States(); !ok {
+	if _, ok := _c.mutation.States(); !ok {
 		return &ValidationError{Name: "states", err: errors.New(`ent: missing required field "Workflow.states"`)}
 	}
-	if _, ok := wc.mutation.Transitions(); !ok {
+	if _, ok := _c.mutation.Transitions(); !ok {
 		return &ValidationError{Name: "transitions", err: errors.New(`ent: missing required field "Workflow.transitions"`)}
 	}
-	if _, ok := wc.mutation.Groups(); !ok {
+	if _, ok := _c.mutation.Groups(); !ok {
 		return &ValidationError{Name: "groups", err: errors.New(`ent: missing required field "Workflow.groups"`)}
 	}
 	return nil
 }
 
-func (wc *WorkflowCreate) sqlSave(ctx context.Context) (*Workflow, error) {
-	if err := wc.check(); err != nil {
+func (_c *WorkflowCreate) sqlSave(ctx context.Context) (*Workflow, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := wc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, wc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -149,37 +149,37 @@ func (wc *WorkflowCreate) sqlSave(ctx context.Context) (*Workflow, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	wc.mutation.id = &_node.ID
-	wc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (wc *WorkflowCreate) createSpec() (*Workflow, *sqlgraph.CreateSpec) {
+func (_c *WorkflowCreate) createSpec() (*Workflow, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Workflow{config: wc.config}
+		_node = &Workflow{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(workflow.Table, sqlgraph.NewFieldSpec(workflow.FieldID, field.TypeInt))
 	)
-	if value, ok := wc.mutation.Name(); ok {
+	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(workflow.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if value, ok := wc.mutation.Description(); ok {
+	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(workflow.FieldDescription, field.TypeString, value)
 		_node.Description = value
 	}
-	if value, ok := wc.mutation.States(); ok {
+	if value, ok := _c.mutation.States(); ok {
 		_spec.SetField(workflow.FieldStates, field.TypeJSON, value)
 		_node.States = value
 	}
-	if value, ok := wc.mutation.Transitions(); ok {
+	if value, ok := _c.mutation.Transitions(); ok {
 		_spec.SetField(workflow.FieldTransitions, field.TypeJSON, value)
 		_node.Transitions = value
 	}
-	if value, ok := wc.mutation.Groups(); ok {
+	if value, ok := _c.mutation.Groups(); ok {
 		_spec.SetField(workflow.FieldGroups, field.TypeJSON, value)
 		_node.Groups = value
 	}
-	if nodes := wc.mutation.JobsIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.JobsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -206,16 +206,16 @@ type WorkflowCreateBulk struct {
 }
 
 // Save creates the Workflow entities in the database.
-func (wcb *WorkflowCreateBulk) Save(ctx context.Context) ([]*Workflow, error) {
-	if wcb.err != nil {
-		return nil, wcb.err
+func (_c *WorkflowCreateBulk) Save(ctx context.Context) ([]*Workflow, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(wcb.builders))
-	nodes := make([]*Workflow, len(wcb.builders))
-	mutators := make([]Mutator, len(wcb.builders))
-	for i := range wcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*Workflow, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := wcb.builders[i]
+			builder := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*WorkflowMutation)
 				if !ok {
@@ -228,11 +228,11 @@ func (wcb *WorkflowCreateBulk) Save(ctx context.Context) ([]*Workflow, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, wcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, wcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -256,7 +256,7 @@ func (wcb *WorkflowCreateBulk) Save(ctx context.Context) ([]*Workflow, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, wcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -264,8 +264,8 @@ func (wcb *WorkflowCreateBulk) Save(ctx context.Context) ([]*Workflow, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (wcb *WorkflowCreateBulk) SaveX(ctx context.Context) []*Workflow {
-	v, err := wcb.Save(ctx)
+func (_c *WorkflowCreateBulk) SaveX(ctx context.Context) []*Workflow {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -273,14 +273,14 @@ func (wcb *WorkflowCreateBulk) SaveX(ctx context.Context) []*Workflow {
 }
 
 // Exec executes the query.
-func (wcb *WorkflowCreateBulk) Exec(ctx context.Context) error {
-	_, err := wcb.Save(ctx)
+func (_c *WorkflowCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (wcb *WorkflowCreateBulk) ExecX(ctx context.Context) {
-	if err := wcb.Exec(ctx); err != nil {
+func (_c *WorkflowCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

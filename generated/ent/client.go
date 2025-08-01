@@ -287,8 +287,8 @@ func (c *HistoryClient) Update() *HistoryUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *HistoryClient) UpdateOne(h *History) *HistoryUpdateOne {
-	mutation := newHistoryMutation(c.config, OpUpdateOne, withHistory(h))
+func (c *HistoryClient) UpdateOne(_m *History) *HistoryUpdateOne {
+	mutation := newHistoryMutation(c.config, OpUpdateOne, withHistory(_m))
 	return &HistoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -305,8 +305,8 @@ func (c *HistoryClient) Delete() *HistoryDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *HistoryClient) DeleteOne(h *History) *HistoryDeleteOne {
-	return c.DeleteOneID(h.ID)
+func (c *HistoryClient) DeleteOne(_m *History) *HistoryDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -341,16 +341,16 @@ func (c *HistoryClient) GetX(ctx context.Context, id int) *History {
 }
 
 // QueryJob queries the job edge of a History.
-func (c *HistoryClient) QueryJob(h *History) *JobQuery {
+func (c *HistoryClient) QueryJob(_m *History) *JobQuery {
 	query := (&JobClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := h.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(history.Table, history.FieldID, id),
 			sqlgraph.To(job.Table, job.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, history.JobTable, history.JobColumn),
 		)
-		fromV = sqlgraph.Neighbors(h.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -436,8 +436,8 @@ func (c *JobClient) Update() *JobUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *JobClient) UpdateOne(j *Job) *JobUpdateOne {
-	mutation := newJobMutation(c.config, OpUpdateOne, withJob(j))
+func (c *JobClient) UpdateOne(_m *Job) *JobUpdateOne {
+	mutation := newJobMutation(c.config, OpUpdateOne, withJob(_m))
 	return &JobUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -454,8 +454,8 @@ func (c *JobClient) Delete() *JobDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *JobClient) DeleteOne(j *Job) *JobDeleteOne {
-	return c.DeleteOneID(j.ID)
+func (c *JobClient) DeleteOne(_m *Job) *JobDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -490,48 +490,48 @@ func (c *JobClient) GetX(ctx context.Context, id string) *Job {
 }
 
 // QueryWorkflow queries the workflow edge of a Job.
-func (c *JobClient) QueryWorkflow(j *Job) *WorkflowQuery {
+func (c *JobClient) QueryWorkflow(_m *Job) *WorkflowQuery {
 	query := (&WorkflowClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := j.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(job.Table, job.FieldID, id),
 			sqlgraph.To(workflow.Table, workflow.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, job.WorkflowTable, job.WorkflowColumn),
 		)
-		fromV = sqlgraph.Neighbors(j.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryHistory queries the history edge of a Job.
-func (c *JobClient) QueryHistory(j *Job) *HistoryQuery {
+func (c *JobClient) QueryHistory(_m *Job) *HistoryQuery {
 	query := (&HistoryClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := j.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(job.Table, job.FieldID, id),
 			sqlgraph.To(history.Table, history.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, job.HistoryTable, job.HistoryColumn),
 		)
-		fromV = sqlgraph.Neighbors(j.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryTags queries the tags edge of a Job.
-func (c *JobClient) QueryTags(j *Job) *TagQuery {
+func (c *JobClient) QueryTags(_m *Job) *TagQuery {
 	query := (&TagClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := j.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(job.Table, job.FieldID, id),
 			sqlgraph.To(tag.Table, tag.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, job.TagsTable, job.TagsPrimaryKey...),
 		)
-		fromV = sqlgraph.Neighbors(j.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -617,8 +617,8 @@ func (c *TagClient) Update() *TagUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *TagClient) UpdateOne(t *Tag) *TagUpdateOne {
-	mutation := newTagMutation(c.config, OpUpdateOne, withTag(t))
+func (c *TagClient) UpdateOne(_m *Tag) *TagUpdateOne {
+	mutation := newTagMutation(c.config, OpUpdateOne, withTag(_m))
 	return &TagUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -635,8 +635,8 @@ func (c *TagClient) Delete() *TagDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *TagClient) DeleteOne(t *Tag) *TagDeleteOne {
-	return c.DeleteOneID(t.ID)
+func (c *TagClient) DeleteOne(_m *Tag) *TagDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -671,16 +671,16 @@ func (c *TagClient) GetX(ctx context.Context, id int) *Tag {
 }
 
 // QueryJobs queries the jobs edge of a Tag.
-func (c *TagClient) QueryJobs(t *Tag) *JobQuery {
+func (c *TagClient) QueryJobs(_m *Tag) *JobQuery {
 	query := (&JobClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := t.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tag.Table, tag.FieldID, id),
 			sqlgraph.To(job.Table, job.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, tag.JobsTable, tag.JobsPrimaryKey...),
 		)
-		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -766,8 +766,8 @@ func (c *WorkflowClient) Update() *WorkflowUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *WorkflowClient) UpdateOne(w *Workflow) *WorkflowUpdateOne {
-	mutation := newWorkflowMutation(c.config, OpUpdateOne, withWorkflow(w))
+func (c *WorkflowClient) UpdateOne(_m *Workflow) *WorkflowUpdateOne {
+	mutation := newWorkflowMutation(c.config, OpUpdateOne, withWorkflow(_m))
 	return &WorkflowUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -784,8 +784,8 @@ func (c *WorkflowClient) Delete() *WorkflowDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *WorkflowClient) DeleteOne(w *Workflow) *WorkflowDeleteOne {
-	return c.DeleteOneID(w.ID)
+func (c *WorkflowClient) DeleteOne(_m *Workflow) *WorkflowDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -820,16 +820,16 @@ func (c *WorkflowClient) GetX(ctx context.Context, id int) *Workflow {
 }
 
 // QueryJobs queries the jobs edge of a Workflow.
-func (c *WorkflowClient) QueryJobs(w *Workflow) *JobQuery {
+func (c *WorkflowClient) QueryJobs(_m *Workflow) *JobQuery {
 	query := (&JobClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := w.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(workflow.Table, workflow.FieldID, id),
 			sqlgraph.To(job.Table, job.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, workflow.JobsTable, workflow.JobsColumn),
 		)
-		fromV = sqlgraph.Neighbors(w.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
