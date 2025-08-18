@@ -12,7 +12,6 @@ import (
 	"fmt"
 
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	"github.com/siemens/wfx/cmd/wfx/cmd/config"
 	"github.com/siemens/wfx/cmd/wfxctl/cmd/health"
 	"github.com/siemens/wfx/cmd/wfxctl/cmd/job"
@@ -32,16 +31,9 @@ func NewCommand() *cobra.Command {
 
 Tip: Shell completion is available for Bash, Fish and Zsh. See wfxctl completion --help for more information.
 `,
-		Version:          metadata.Version,
+		Version:          fmt.Sprintf("%s (commit %s)", metadata.Version, metadata.Commit),
 		SilenceUsage:     true,
 		TraverseChildren: true,
-		PersistentPreRun: func(*cobra.Command, []string) {
-			log.Debug().
-				Str("version", metadata.Version).
-				Str("date", metadata.Date).
-				Str("commit", metadata.Commit).
-				Msg("wfxctl")
-		},
 	}
 	cmd.AddCommand(man.NewCommand())
 	cmd.AddCommand(job.NewCommand())
