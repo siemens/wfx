@@ -14,7 +14,6 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"testing"
-	"time"
 
 	"github.com/siemens/wfx/generated/api"
 	"github.com/stretchr/testify/assert"
@@ -32,7 +31,6 @@ func TestVersion(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 		version := api.GetVersion200JSONResponse{
 			ApiVersion: "1.0",
-			BuildDate:  time.Now(),
 			Commit:     "036d0ad9eae6e3d6e4cead4558c630a49a116219",
 			Version:    "0.0.0",
 		}

@@ -39,9 +39,8 @@ func NewCommand() *cobra.Command {
 			fmt.Fprintf(cmd.OutOrStdout(), `
    version: %s
     commit: %s
- buildDate: %s
 apiVersion: %s
-`, versionResp.Version, versionResp.Commit, versionResp.BuildDate, versionResp.ApiVersion)
+`, versionResp.Version, versionResp.Commit, versionResp.ApiVersion)
 			return nil
 		},
 	}
