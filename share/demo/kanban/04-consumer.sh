@@ -10,6 +10,7 @@
 }
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+source "$SCRIPT_DIR/../demo.sh"
 
 echo "# waiting for wfx..."
 while true; do
@@ -23,7 +24,6 @@ done
 ########################
 # include the magic
 ########################
-source "$SCRIPT_DIR/../demo.sh"
 . "$DM" -n
 DEMO_COMMENT_COLOR=$WHITE
 TYPE_SPEED=20

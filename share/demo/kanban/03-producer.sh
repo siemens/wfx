@@ -6,6 +6,7 @@
 # Author: Michael Adler <michael.adler@siemens.com>
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+source "$SCRIPT_DIR/../demo.sh"
 
 CLIENTS=("$@")
 if [[ $# -lt 1 ]]; then
@@ -30,7 +31,6 @@ echo "# found kanban workflow"
 ########################
 # include the magic
 ########################
-source "$SCRIPT_DIR/../demo.sh"
 . "$DM" -n
 DEMO_COMMENT_COLOR=$WHITE
 TYPE_SPEED=15
