@@ -91,11 +91,6 @@ paths:
                     type: string
                     example: 25f4dd3f9828553c9e437a24f7fa451ae60916f2
                     x-go-type-skip-optional-pointer: true
-                  buildDate:
-                    type: string
-                    format: date-time
-                    example: "2024-07-23T15:28:54+02:00"
-                    x-go-type-skip-optional-pointer: true
                   apiVersion:
                     type: string
                     example: "v1"

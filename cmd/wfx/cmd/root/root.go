@@ -68,7 +68,6 @@ Examples of tasks are installation of firmware or other types of commands issued
 
 			log.Info().
 				Str("version", metadata.Version).
-				Str("date", metadata.Date).
 				Str("commit", metadata.Commit).
 				Str("user", username).
 				Msg("Starting wfx")
