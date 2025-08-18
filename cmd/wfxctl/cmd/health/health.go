@@ -18,7 +18,6 @@ import (
 	"github.com/Southclaws/fault"
 	"github.com/gookit/color"
 	"github.com/mattn/go-isatty"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 
 	"github.com/siemens/wfx/cmd/wfxctl/errutil"
@@ -96,12 +95,8 @@ func NewCommand() *cobra.Command {
 				go func() {
 					defer g.Done()
 					client := errutil.Must(api.NewClientWithResponses(endpoint.Server, api.WithHTTPClient(httpClient)))
-					resp, err := client.GetHealthWithResponse(cmd.Context())
-					if err != nil {
-						log.Warn().Err(err).Msg("Error while checking health")
-					} else {
-						allEndpoints[i].Response = resp
-					}
+					resp, _ := client.GetHealthWithResponse(cmd.Context())
+					allEndpoints[i].Response = resp
 				}()
 			}
 			g.Wait()
@@ -120,10 +115,12 @@ func prettyReport(w io.Writer, useColor bool, allEndpoints []Endpoint) {
 	_, _ = buf.WriteString("Health report:\n\n")
 	for _, ep := range allEndpoints {
 		status := api.Down
-		if ep.Response.JSON200 != nil {
-			status = ep.Response.JSON200.Status
-		} else if ep.Response.JSON503 != nil {
-			status = ep.Response.JSON503.Status
+		if resp := ep.Response; resp != nil {
+			if resp.JSON200 != nil {
+				status = resp.JSON200.Status
+			} else if resp.JSON503 != nil {
+				status = resp.JSON503.Status
+			}
 		}
 
 		formatter := fmt.Sprint
