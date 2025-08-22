@@ -463,11 +463,9 @@ func (server WfxServer) GetHealth(ctx context.Context, _ api.GetHealthRequestObj
 }
 
 func (server WfxServer) GetVersion(context.Context, api.GetVersionRequestObject) (api.GetVersionResponseObject, error) {
-	buildDate, _ := time.Parse("2006-01-02T15:04:05-07:00", metadata.Date)
 	return api.GetVersion200JSONResponse{
 		Version:    metadata.Version,
 		Commit:     metadata.Commit,
-		BuildDate:  buildDate,
 		ApiVersion: metadata.APIVersion,
 	}, nil
 }
