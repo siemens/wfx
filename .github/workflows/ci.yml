@@ -25,7 +25,7 @@ jobs:
         # even though Windows is not officially supported, we want it to at least compile successfully
         goos: [linux, windows]
     steps:
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
       - name: Setup Golang caches
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
         with:
@@ -48,7 +48,7 @@ jobs:
     runs-on: ubuntu-latest
     container: golang:1.25.0@sha256:5502b0e56fca23feba76dbc5387ba59c593c02ccc2f0f7355871ea9a0852cebe
     steps:
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
       - name: Setup Golang caches
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
         with:
@@ -87,7 +87,7 @@ jobs:
           --health-timeout 5s
           --health-retries 20
     steps:
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
       - name: Setup Golang caches
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
         with:
@@ -133,7 +133,7 @@ jobs:
           --health-timeout 5s
           --health-retries 20
     steps:
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
       - name: Setup Golang caches
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
         with:
@@ -194,7 +194,7 @@ jobs:
           --health-timeout 5s
           --health-retries 20
     steps:
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           submodules: "true"
       - name: Setup Golang caches
@@ -235,7 +235,7 @@ jobs:
     name: Lint
     container: golang:1.25.0@sha256:5502b0e56fca23feba76dbc5387ba59c593c02ccc2f0f7355871ea9a0852cebe
     steps:
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
       - name: Disable git security features
         run: git config --global safe.directory '*'
       - run: .ci/setup-lint.sh
@@ -246,7 +246,7 @@ jobs:
     name: Reuse
     container: fsfe/reuse:5.0.2@sha256:000c3fc0c3e39e95b36fa9966d0104ae0496571b7de7b9f0c889a66438581bda
     steps:
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
       - run: reuse lint || true # just a warning
 
   generate:
@@ -254,7 +254,7 @@ jobs:
     runs-on: ubuntu-latest
     container: golang:1.25.0@sha256:5502b0e56fca23feba76dbc5387ba59c593c02ccc2f0f7355871ea9a0852cebe
     steps:
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
       - name: Install packages
         run: .ci/setup-generate.sh
       - name: Disable git security features
@@ -266,7 +266,7 @@ jobs:
     name: API check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
       - name: Check for breaking changes in API
         id: breaking_changes
         uses: oasdiff/oasdiff-action/breaking@1c611ffb1253a72924624aa4fb662e302b3565d3 # v0.0.21
@@ -296,7 +296,7 @@ jobs:
       - openapi-check-breaking
     steps:
       - name: Checkout
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           fetch-depth: 0
       - name: Login to GitHub Container Registry
