@@ -149,7 +149,7 @@ wfxctl job events --auto-reconnect
 When this flag is used, `wfxctl` does not terminate upon losing the connection, so its logs should be monitored to detect such occurrences.
 After a connection loss, fetching the job's current status and comparing it with the received events can help identify any missed events.
 
-The above commands monitor events for *all* jobs globally, which may result in a large number of events.
+The above commands monitor events for _all_ jobs globally, which may result in a large number of events.
 For a more targeted approach, filter parameters may be used.
 Assuming the job IDs are known (either because the jobs have been created already or the IDs are received via another
 subscription channel), the following will subscribe to events matching either of the two specified job IDs:
