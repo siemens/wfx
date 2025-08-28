@@ -1,59 +1,59 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>wfx on</title><link>/</link><description>Recent content in wfx on</description><generator>Hugo</generator><language>en</language><atom:link href="/index.xml" rel="self" type="application/rss+xml"/><item><title>Build and Installation</title><link>/docs/installation/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/docs/installation/</guid><description>&lt;p>Pre-built binaries, as well as Debian and RPM packages, are available 
-&lt;a href="https://github.com/siemens/wfx/releases" target="_blank">here&lt;/a>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>wfx on</title><link>/</link><description>Recent content in wfx on</description><generator>Hugo</generator><language>en</language><atom:link href="/index.xml" rel="self" type="application/rss+xml"/><item><title>Build and Installation</title><link>/docs/installation/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/docs/installation/</guid><description>&lt;p&gt;Pre-built binaries, as well as Debian and RPM packages, are available 
+&lt;a href="https://github.com/siemens/wfx/releases" target="_blank"&gt;here&lt;/a&gt;
 for Linux, specifically 
-&lt;a href="https://go.dev/wiki/MinimumRequirements#amd64" target="_blank">x86_64&lt;/a> and
+&lt;a href="https://go.dev/wiki/MinimumRequirements#amd64" target="_blank"&gt;x86_64&lt;/a&gt; and
 
-&lt;a href="https://go.dev/wiki/MinimumRequirements#arm64" target="_blank">arm64&lt;/a> architectures.&lt;/p>
-&lt;p>To start a container hosting wfx, follow these commands:&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#57606a"># create a named volume to persist data (only needed the first time)&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>docker volume create wfx-db
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>docker run --rm -v wfx-db:/home/nonroot &lt;span style="color:#0a3069">\
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#0a3069">&lt;/span> -p 8080:8080 -p 8081:8081 &lt;span style="color:#0a3069">\
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#0a3069">&lt;/span> ghcr.io/siemens/wfx:latest
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>If pre-built binaries are not available (refer to &lt;code>go tool dist list&lt;/code> for alternative platforms and architectures, such
+&lt;a href="https://go.dev/wiki/MinimumRequirements#arm64" target="_blank"&gt;arm64&lt;/a&gt; architectures.&lt;/p&gt;
+&lt;p&gt;To start a container hosting wfx, follow these commands:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#57606a"&gt;# create a named volume to persist data (only needed the first time)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;docker volume create wfx-db
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;docker run --rm -v wfx-db:/home/nonroot &lt;span style="color:#0a3069"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#0a3069"&gt;&lt;/span&gt; -p 8080:8080 -p 8081:8081 &lt;span style="color:#0a3069"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#0a3069"&gt;&lt;/span&gt; ghcr.io/siemens/wfx:latest
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;If pre-built binaries are not available (refer to &lt;code&gt;go tool dist list&lt;/code&gt; for alternative platforms and architectures, such
 as Windows or macOS), or if specific features need to be disabled during compilation, building wfx from source is
-necessary.&lt;/p></description></item><item><title>Configuration</title><link>/docs/configuration/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/docs/configuration/</guid><description>&lt;p>wfx is configured in the following order of precedence using&lt;/p>
-&lt;ol>
-&lt;li>command line parameters (e.g. &lt;code>--log-level&lt;/code>),&lt;/li>
-&lt;li>environment variables (prefixed with &lt;code>WFX_&lt;/code>, e.g. &lt;code>WFX_LOG_LEVEL&lt;/code>),&lt;/li>
-&lt;li>configuration files in 
-&lt;a href="https://github.com/go-yaml/yaml#compatibility" target="_blank">YAML&lt;/a> format (either via the &lt;code>--config&lt;/code>
-command line parameter or present in one of the default search locations, see &lt;code>wfx --help&lt;/code>).&lt;/li>
-&lt;/ol>
-&lt;p>Note that wfx supports configuration file live reloading so that a running wfx instance can be reconfigured without the
-need for restarting it.&lt;/p>
-&lt;p>Without configuration,&lt;/p></description></item><item><title>Device Artifact Update (DAU)</title><link>/docs/workflows/dau/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/docs/workflows/dau/</guid><description>&lt;p>The Device Artifact Update Workflow Family has been specifically designed for updating software on devices.&lt;/p>
-&lt;p>The following clients have support for the Device Artifact Update Workflow Family:&lt;/p>
-&lt;ul>
-&lt;li>
-&lt;a href="https://github.com/sbabic/swupdate/blob/master/doc/source/suricatta.rst#support-for-wfx" target="_blank">SWUpdate&lt;/a> - Software Update
-for Embedded Linux Devices.&lt;/li>
-&lt;/ul>
-&lt;h2 id="workflows">Workflows&lt;/h2>
-&lt;p>Currently, the DAU Workflow Family comprises two workflows that model the software update process for devices:&lt;/p>
-&lt;p>The 
-&lt;a href="./wfx.workflow.dau.direct.yml">&lt;code>wfx.workflow.dau.direct&lt;/code>&lt;/a> workflow caters for the fully automated software update
+necessary.&lt;/p&gt;</description></item><item><title>Configuration</title><link>/docs/configuration/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/docs/configuration/</guid><description>&lt;p&gt;wfx is configured in the following order of precedence using&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;command line parameters (e.g. &lt;code&gt;--log-level&lt;/code&gt;),&lt;/li&gt;
+&lt;li&gt;environment variables (prefixed with &lt;code&gt;WFX_&lt;/code&gt;, e.g. &lt;code&gt;WFX_LOG_LEVEL&lt;/code&gt;),&lt;/li&gt;
+&lt;li&gt;configuration files in 
+&lt;a href="https://github.com/go-yaml/yaml#compatibility" target="_blank"&gt;YAML&lt;/a&gt; format (either via the &lt;code&gt;--config&lt;/code&gt;
+command line parameter or present in one of the default search locations, see &lt;code&gt;wfx --help&lt;/code&gt;).&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Note that wfx supports configuration file live reloading so that a running wfx instance can be reconfigured without the
+need for restarting it.&lt;/p&gt;
+&lt;p&gt;Without configuration,&lt;/p&gt;</description></item><item><title>Device Artifact Update (DAU)</title><link>/docs/workflows/dau/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/docs/workflows/dau/</guid><description>&lt;p&gt;The Device Artifact Update Workflow Family has been specifically designed for updating software on devices.&lt;/p&gt;
+&lt;p&gt;The following clients have support for the Device Artifact Update Workflow Family:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;a href="https://github.com/sbabic/swupdate/blob/master/doc/source/suricatta.rst#support-for-wfx" target="_blank"&gt;SWUpdate&lt;/a&gt; - Software Update
+for Embedded Linux Devices.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="workflows"&gt;Workflows&lt;/h2&gt;
+&lt;p&gt;Currently, the DAU Workflow Family comprises two workflows that model the software update process for devices:&lt;/p&gt;
+&lt;p&gt;The 
+&lt;a href="./wfx.workflow.dau.direct.yml"&gt;&lt;code&gt;wfx.workflow.dau.direct&lt;/code&gt;&lt;/a&gt; workflow caters for the fully automated software update
 use case while the 
-&lt;a href="./wfx.workflow.dau.phased.yml">&lt;code>wfx.workflow.dau.phased&lt;/code>&lt;/a> workflow operates in distinct phases
-requiring external input to advance the workflow.&lt;/p></description></item><item><title>Operations</title><link>/docs/operations/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/docs/operations/</guid><description>&lt;h2 id="api">API&lt;/h2>
-&lt;p>wfx provides two RESTful APIs to interact with it: the northbound operator/management interface and the southbound
-interface used by clients as illustrated in the following figure:&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-txt" data-lang="txt">&lt;span style="display:flex;">&lt;span> Management
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ▼ Northbound API
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>┌──────────────────┐
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ wfx │
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>└──────────────────┘
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ▲ Southbound API
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> │
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Device
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The northbound API is used to create jobs and execute server-side state transitions, whereas the southbound API is used
-for client-side transitions.&lt;/p></description></item><item><title>REST API</title><link>/docs/api/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/docs/api/</guid><description>&lt;div id="docsy_swagger_ui">&lt;/div>
-&lt;script>
+&lt;a href="./wfx.workflow.dau.phased.yml"&gt;&lt;code&gt;wfx.workflow.dau.phased&lt;/code&gt;&lt;/a&gt; workflow operates in distinct phases
+requiring external input to advance the workflow.&lt;/p&gt;</description></item><item><title>Operations</title><link>/docs/operations/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/docs/operations/</guid><description>&lt;h2 id="api"&gt;API&lt;/h2&gt;
+&lt;p&gt;wfx provides two RESTful APIs to interact with it: the northbound operator/management interface and the southbound
+interface used by clients as illustrated in the following figure:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-txt" data-lang="txt"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Management
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; │
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; │
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ▼ Northbound API
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;┌──────────────────┐
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;│ wfx │
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;└──────────────────┘
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ▲ Southbound API
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; │
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; │
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Device
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The northbound API is used to create jobs and execute server-side state transitions, whereas the southbound API is used
+for client-side transitions.&lt;/p&gt;</description></item><item><title>REST API</title><link>/docs/api/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/docs/api/</guid><description>&lt;div id="docsy_swagger_ui"&gt;&lt;/div&gt;
+&lt;script&gt;
  window.onload = function () {
  const ui = SwaggerUIBundle({
  url: "/wfx/wfx.openapi.yml",
@@ -65,16 +65,16 @@ for client-side transitions.&lt;/p></description></item><item><title>REST API</t
  });
  window.ui = ui;
  };
-&lt;/script></description></item><item><title>Use Cases</title><link>/docs/use-cases/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/docs/use-cases/</guid><description>&lt;p>This document presents a collection of use cases for employing wfx. Owing to wfx&amp;rsquo;s versatility, the list provided here
+&lt;/script&gt;</description></item><item><title>Use Cases</title><link>/docs/use-cases/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/docs/use-cases/</guid><description>&lt;p&gt;This document presents a collection of use cases for employing wfx. Owing to wfx&amp;rsquo;s versatility, the list provided here
 is not exhaustive. Should you identify an important use case missing, please feel free to
 
-&lt;a href="https://github.com/siemens/wfx/tree/main/CONTRIBUTING.md" target="_blank">contribute&lt;/a>.&lt;/p>
-&lt;p>&lt;strong>Note&lt;/strong>: Each use case requires an appropriate client implementation to execute the specific &amp;ldquo;business logic&amp;rdquo;. If no
-such client exists yet, this implies writing custom code.&lt;/p>
-&lt;h2 id="software-update">Software Update&lt;/h2>
-&lt;p>Perform over-the-air (OTA) firmware updates using 
-&lt;a href="https://swupdate.org/" target="_blank">SWUpdate&lt;/a> and the 
-&lt;a href="./docs/workflows/dau/">Device Artifact Update
-(DAU) Workflow Family&lt;/a>. See also SWUpdate&amp;rsquo;s 
-&lt;a href="https://github.com/sbabic/swupdate/blob/master/doc/source/suricatta.rst#support-for-wfx" target="_blank">Suricatta
-documentation&lt;/a>.&lt;/p></description></item></channel></rss>
+&lt;a href="https://github.com/siemens/wfx/tree/main/CONTRIBUTING.md" target="_blank"&gt;contribute&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Note&lt;/strong&gt;: Each use case requires an appropriate client implementation to execute the specific &amp;ldquo;business logic&amp;rdquo;. If no
+such client exists yet, this implies writing custom code.&lt;/p&gt;
+&lt;h2 id="software-update"&gt;Software Update&lt;/h2&gt;
+&lt;p&gt;Perform over-the-air (OTA) firmware updates using 
+&lt;a href="https://swupdate.org/" target="_blank"&gt;SWUpdate&lt;/a&gt; and the 
+&lt;a href="./docs/workflows/dau/"&gt;Device Artifact Update
+(DAU) Workflow Family&lt;/a&gt;. See also SWUpdate&amp;rsquo;s 
+&lt;a href="https://github.com/sbabic/swupdate/blob/master/doc/source/suricatta.rst#support-for-wfx" target="_blank"&gt;Suricatta
+documentation&lt;/a&gt;.&lt;/p&gt;</description></item></channel></rss>
