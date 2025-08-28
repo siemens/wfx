@@ -17,7 +17,7 @@
       managerFilePatterns: ["/.ci/packages/versions.env/"],
       matchStringsStrategy: "any",
       matchStrings: [
-        "export .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s",
+        "export .*?_VERSION=(?<currentValue>.*)\\s*# (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s",
       ],
     },
   ],
