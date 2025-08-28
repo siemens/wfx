@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2025-08-28
+
+This is a maintenance release.
+
 ## [0.4.0] - 2025-07-15
 
 ### Added
@@ -106,4 +110,5 @@ Initial release of wfx.
 [0.3.2]: https://github.com/siemens/wfx/releases/tag/v0.3.2
 [0.3.3]: https://github.com/siemens/wfx/releases/tag/v0.3.3
 [0.4.0]: https://github.com/siemens/wfx/releases/tag/v0.4.0
-[unreleased]: https://github.com/siemens/wfx/compare/v0.4.0...HEAD
+[0.4.1]: https://github.com/siemens/wfx/releases/tag/v0.4.1
+[unreleased]: https://github.com/siemens/wfx/compare/v0.4.1...HEAD
