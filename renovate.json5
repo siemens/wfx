@@ -13,11 +13,11 @@
   separateMajorMinor: true,
   customManagers: [
     {
-      customType: "regex",
+      customType: "regex", // Renovate supports the ECMAScript (JavaScript) flavor of regex
       managerFilePatterns: ["/.ci/packages/versions.env/"],
       matchStringsStrategy: "any",
       matchStrings: [
-        "export .*?_VERSION=(?<currentValue>.*)\\s*# (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s",
+        "export .*?_VERSION=(?<currentValue>\\S+)\\s+# (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s",
       ],
     },
   ],
