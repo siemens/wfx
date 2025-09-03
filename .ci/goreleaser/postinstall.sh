@@ -11,3 +11,12 @@ fi
 
 mkdir -p /var/lib/wfx
 chown -R wfx:wfx /var/lib/wfx
+
+if command -v systemctl &> /dev/null; then
+    systemctl enable wfx.service
+fi
+
+if [ -d /run/systemd/system ]; then
+    systemctl --system daemon-reload
+    systemctl start wfx.service
+fi
