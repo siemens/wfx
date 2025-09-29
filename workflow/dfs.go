@@ -41,11 +41,11 @@ func dfs(g graph.Iterator) dfsData {
 		Discover: make([]int, n),
 		Finish:   make([]int, n),
 	}
-	for v := 0; v < n; v++ {
+	for v := range n {
 		d.Color[v] = white
 		d.Prev[v] = noParent
 	}
-	for v := 0; v < n; v++ {
+	for v := range n {
 		if d.Color[v] == white {
 			d.dfsVisit(g, v)
 		}
