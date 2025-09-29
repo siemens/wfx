@@ -139,7 +139,7 @@ func ValidateWorkflow(workflow *api.Workflow) error {
 func findDuplicate[T comparable](values []T) *T {
 	n := len(values)
 	seen := make(map[T]bool, len(values))
-	for i := 0; i < n; i++ {
+	for i := range n {
 		if seen[values[i]] {
 			return &values[i]
 		}

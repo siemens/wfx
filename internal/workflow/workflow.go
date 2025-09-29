@@ -9,6 +9,7 @@ package workflow
  */
 
 import (
+	"slices"
 	"sort"
 
 	"github.com/siemens/wfx/generated/api"
@@ -17,10 +18,8 @@ import (
 // FindStateGroup tries to find the group of a state. If not found, it returns the empty string.
 func FindStateGroup(workflow *api.Workflow, state string) string {
 	for _, group := range workflow.Groups {
-		for _, s := range group.States {
-			if s == state {
-				return group.Name
-			}
+		if slices.Contains(group.States, state) {
+			return group.Name
 		}
 	}
 	return ""
