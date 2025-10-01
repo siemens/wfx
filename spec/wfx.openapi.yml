@@ -327,32 +327,32 @@ paths:
         - northbound
       summary: Subscribe to job-related events such as status updates
       description: |
-        Obtain instant notifications when there are job changes matching the criteria. This endpoint utilizes server-sent events (SSE), where responses are "chunked" with double newline breaks. For example, a single event might look like this:
+        Obtain instant notifications when there are job changes matching the criteria. This endpoint utilizes server-sent events (SSE), where responses are "chunked" with double newline breaks.
+        Note: The filter parameters are independent of each other; an event matches if it satisfies any of the specified filter parameters.
+        For example, a single event might look like this:
           data: {"clientId":"example_client","state":"INSTALLING"}\n\n
       x-cli-hidden: true
       parameters:
         - name: clientIds
           in: query
-          description: The job's clientId must be one of these clientIds (comma-separated).
+          description: Subscribe to events whose clientID matches one of the given clientIds (comma-separated). This is a filter.
           schema:
             type: string
           x-go-name: ClientIDs
         - name: jobIds
           in: query
-          description: The job's id must be one of these ids (comma-separated).
+          description: Subscribe to events whose job ID is one of the given jobIds (comma-separated). This is a filter.
           schema:
             type: string
         - name: workflows
           in: query
-          description:
-            The job's workflow must be equal to one of the provided workflow
-            names (comma-separated).
+          description: Subscribe to events whose workflow name is one of the given workflow names (comma-separated). This is a filter.
           schema:
             type: string
         - name: tags
           in: query
           description: |
-            A (comma-separated) list of tags to include into each job event. This can be used to aggregrate events from multiple wfx instances.
+            A (comma-separated) list of tags to apply to each job event. This can be used to aggregrate events from multiple wfx instances.
           schema:
             type: string
       responses:
