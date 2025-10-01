@@ -36,6 +36,10 @@ type Subscriber struct {
 	tags        []string       // tags to apply
 }
 
+func (s *Subscriber) ID() string {
+	return s.id
+}
+
 type Backlog struct {
 	data []JobEvent
 	mu   sync.Mutex
@@ -154,7 +158,7 @@ func ShutdownSubscribers() {
 }
 
 func RemoveSubscriber(subscriber *Subscriber) {
-	log.Debug().Str("id", subscriber.id).Msg("Removing subscriber")
+	log.Info().Str("id", subscriber.id).Msg("Removing subscriber")
 
 	muSubscribers.Lock()
 	defer muSubscribers.Unlock()
@@ -180,14 +184,15 @@ func SubscriberCount() int {
 // PublishEvent publishes a new event. This is a synchronous operation.
 func PublishEvent(ctx context.Context, event JobEvent) {
 	log := logging.LoggerFromCtx(ctx).With().Str("jobID", event.Job.ID).Str("action", string(event.Action)).Logger()
-	log.Debug().Msg("Publishing event to subscribers")
 
 	muSubscribers.Lock()
 	defer muSubscribers.Unlock()
 
 	// the subscribers that are still active and we'll keep
-	newSubscribers := make([]*Subscriber, 0, len(subscribers))
+	count := len(subscribers)
+	newSubscribers := make([]*Subscriber, 0, count)
 
+	log.Debug().Int("count", count).Msg("Publishing event to subscribers")
 	for _, sub := range subscribers {
 		ctxLog := log.With().Str("id", sub.id).Logger()
 
@@ -237,7 +242,7 @@ func PublishEvent(ctx context.Context, event JobEvent) {
 	subscribers = newSubscribers
 }
 
-func mapContains(set map[string]any, key string) (found bool) {
-	_, found = set[key]
+func mapContains(set map[string]any, key string) bool {
+	_, found := set[key]
 	return found
 }
