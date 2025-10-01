@@ -131,8 +131,8 @@ Job events can be filtered using any combination of the following parameters:
 - Client IDs
 - Workflow Names
 
-This enables more precise control over the dispatched events. Note that it is entirely possible to subscribe multiple
-times to job events using various filters in order to create a more advanced event recognition model.
+This enables more precise control over the dispatched events.
+Note: The filter parameters are independent of each other; an event matches if it satisfies any of the specified filter parameters.
 
 #### Examples
 
@@ -177,7 +177,8 @@ See `wfxctl job events --help` for other filter parameters, e.g. workflow names.
    there are multiple wfx instances, a consolidated "global" event stream can only be assembled by subscribing to all
    wfx instances (and aggregating the events).
 4. **Browser Connection Limits for SSE**: Web browsers typically restrict the number of SSE connections to six per
-   domain.
+   domain. This limitation can be addressed by subscribing to all job events through a single SSE connection, or by
+   supplying appropriate filter parameters.
 5. **HTTP/2**: Not supported currently. The HTTP protocol is limited to HTTP/1.1.
 
 ### Response Filters
