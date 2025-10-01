@@ -45,6 +45,7 @@ func Delete(ctx context.Context, storage persistence.Storage, jobID string, tags
 				ClientID: updatedJob.ClientID,
 				Workflow: updatedJob.Workflow,
 				Tags:     updatedJob.Tags,
+				Mtime:    updatedJob.Mtime,
 			},
 		})
 	}()

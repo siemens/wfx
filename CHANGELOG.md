@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Include mtime in job events
+
 ### Changed
 
 - **Breaking (Partial):** Removed the `buildDate` field from the `/version` endpoint response. This field was intended for informational use only and should not have been used for functional logic.
