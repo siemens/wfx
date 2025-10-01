@@ -239,5 +239,5 @@ func PublishEvent(ctx context.Context, event JobEvent) {
 
 func mapContains(set map[string]any, key string) (found bool) {
 	_, found = set[key]
-	return
+	return found
 }
