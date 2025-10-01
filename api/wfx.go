@@ -166,6 +166,28 @@ func (server WfxServer) GetJobsEvents(ctx context.Context, request api.GetJobsEv
 	if wfs := request.Params.Workflows; wfs != nil {
 		filter.Workflows = strings.Split(*wfs, ",")
 	}
+	if s := request.Params.Actions; s != nil {
+		filter.Actions = make([]events.Action, 0)
+		for action := range strings.SplitSeq(*s, ",") {
+			action = strings.ToUpper(action)
+			switch action {
+			case string(events.ActionCreate):
+				filter.Actions = append(filter.Actions, events.ActionCreate)
+			case string(events.ActionDelete):
+				filter.Actions = append(filter.Actions, events.ActionDelete)
+			case string(events.ActionAddTags):
+				filter.Actions = append(filter.Actions, events.ActionAddTags)
+			case string(events.ActionDeleteTags):
+				filter.Actions = append(filter.Actions, events.ActionDeleteTags)
+			case string(events.ActionUpdateStatus):
+				filter.Actions = append(filter.Actions, events.ActionUpdateStatus)
+			case string(events.ActionUpdateDefinition):
+				filter.Actions = append(filter.Actions, events.ActionUpdateDefinition)
+			default:
+				return api.GetJobsEvents400JSONResponse{Errors: &[]api.Error{InvalidRequest}}, nil
+			}
+		}
+	}
 
 	var tags []string
 	if s := request.Params.Tags; s != nil {

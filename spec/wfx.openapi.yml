@@ -349,6 +349,11 @@ paths:
           description: Subscribe to events whose workflow name is one of the given workflow names (comma-separated). This is a filter.
           schema:
             type: string
+        - name: actions
+          in: query
+          description: Subscribe to events whose job event action is one of the given actions (comma-separated, case-insenstive). This is a filter.
+          schema:
+            type: string
         - name: tags
           in: query
           description: |
@@ -1079,20 +1084,23 @@ components:
           description: Date and time (ISO8601) when the event was created
           format: date-time
         action:
-          type: string
-          enum:
-            - CREATE
-            - DELETE
-            - ADD_TAGS
-            - DELETE_TAGS
-            - UPDATE_STATUS
-            - UPDATE_DEFINITION
+          $ref: "#/components/schemas/JobEventAction"
         job:
           $ref: "#/components/schemas/Job"
         tags:
           type: array
           items:
             type: string
+
+    JobEventAction:
+      type: string
+      enum:
+        - CREATE
+        - DELETE
+        - ADD_TAGS
+        - DELETE_TAGS
+        - UPDATE_STATUS
+        - UPDATE_DEFINITION
 
     History:
       type: object
