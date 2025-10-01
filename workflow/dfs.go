@@ -65,7 +65,7 @@ func (d *dfsData) dfsVisit(g graph.Iterator, v int) {
 		case gray:
 			d.Cycles = append(d.Cycles, cycle{From: w, To: v})
 		}
-		return
+		return skip
 	})
 	d.Color[v] = black
 	d.Time++
