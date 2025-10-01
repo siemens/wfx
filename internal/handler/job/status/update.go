@@ -87,6 +87,7 @@ func Update(ctx context.Context, storage persistence.Storage, jobID string, newS
 				ClientID: result.ClientID,
 				Workflow: &api.Workflow{Name: job.Workflow.Name},
 				Status:   result.Status,
+				Mtime:    result.Mtime,
 			},
 		})
 	}()
