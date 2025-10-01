@@ -36,6 +36,7 @@ func TestFiltering(t *testing.T) {
 
 	sub1 := AddSubscriber(ctx, time.Minute, FilterParams{JobIDs: []string{job1.ID}}, nil)
 	sub2 := AddSubscriber(ctx, time.Minute, FilterParams{JobIDs: []string{job2.ID}}, nil)
+	sub3 := AddSubscriber(ctx, time.Minute, FilterParams{JobIDs: []string{job1.ID}, Actions: []Action{ActionUpdateStatus}}, nil)
 	sub1and2 := AddSubscriber(ctx, time.Minute, FilterParams{JobIDs: []string{job1.ID, job2.ID}}, nil)
 	subAll := AddSubscriber(ctx, time.Minute, FilterParams{}, nil) // no filter should receive all events
 
@@ -98,6 +99,23 @@ func TestFiltering(t *testing.T) {
 		}()
 
 	}
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		actual := receiveEventBlocking(sub3)
+		assert.Equal(t, ActionUpdateStatus, actual.Action)
+		assert.Equal(t, "FOO", actual.Job.Status.State)
+
+		// check there is nothing else
+		select {
+		case <-sub3.Events:
+			assert.Fail(t, "Received unexpected event")
+		default:
+			// nothing there, good
+		}
+	}()
 
 	PublishEvent(ctx, JobEvent{Action: ActionUpdateStatus, Job: &job1})
 	PublishEvent(ctx, JobEvent{Action: ActionUpdateStatus, Job: &job2})

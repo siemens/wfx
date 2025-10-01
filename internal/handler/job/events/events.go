@@ -33,6 +33,7 @@ type Subscriber struct {
 	jobIDSet    map[string]any // job filter
 	clientIDSet map[string]any // clientID filter
 	workflowSet map[string]any // workflow filter
+	actionSet   map[Action]any // actions filter
 	tags        []string       // tags to apply
 }
 
@@ -76,6 +77,7 @@ type FilterParams struct {
 	JobIDs    []string
 	ClientIDs []string
 	Workflows []string
+	Actions   []Action
 }
 
 type Action string
@@ -203,6 +205,7 @@ func PublishEvent(ctx context.Context, event JobEvent) {
 		isCatchAll := len(sub.jobIDSet) == 0 && len(sub.clientIDSet) == 0 && len(sub.workflowSet) == 0
 		interested := isCatchAll ||
 			mapContains(sub.jobIDSet, event.Job.ID) ||
+			mapContains(sub.actionSet, event.Action) ||
 			mapContains(sub.clientIDSet, event.Job.ClientID) ||
 			(event.Job.Workflow != nil && mapContains(sub.workflowSet, event.Job.Workflow.Name))
 		if !interested {
@@ -244,7 +247,7 @@ func PublishEvent(ctx context.Context, event JobEvent) {
 	subscribers = newSubscribers
 }
 
-func mapContains(set map[string]any, key string) bool {
+func mapContains[T comparable](set map[T]any, key T) bool {
 	_, found := set[key]
 	return found
 }

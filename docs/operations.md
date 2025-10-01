@@ -130,6 +130,7 @@ Job events can be filtered using any combination of the following parameters:
 - Job IDs
 - Client IDs
 - Workflow Names
+- Action type of the event
 
 This enables more precise control over the dispatched events.
 Note: The filter parameters are independent of each other; an event matches if it satisfies any of the specified filter parameters.
