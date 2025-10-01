@@ -70,10 +70,10 @@ func TestJobEventsSubscribe(t *testing.T) {
 				// now our GET request should have received the response as well,
 				// add some extra time to be safe
 				time.Sleep(100 * time.Millisecond)
-				events.ShutdownSubscribers()
+				events.RemoveSubscriber(subscriber)
 			}()
 
-			_, err := job.CreateJob(context.Background(), db, &api.JobRequest{ClientID: clientID, Workflow: wf.Name})
+			_, err := job.CreateJob(t.Context(), db, &api.JobRequest{ClientID: clientID, Workflow: wf.Name})
 			require.NoError(t, err)
 
 			wg.Add(1)
@@ -84,7 +84,7 @@ func TestJobEventsSubscribe(t *testing.T) {
 					time.Sleep(20 * time.Millisecond)
 				}
 				// update job
-				_, err = status.Update(context.Background(), db, *jobID.Load(), &api.JobStatus{State: "INSTALLING"}, api.CLIENT)
+				_, err = status.Update(t.Context(), db, *jobID.Load(), &api.JobStatus{State: "INSTALLING"}, api.CLIENT)
 				require.NoError(t, err)
 			}()
 
@@ -93,9 +93,15 @@ func TestJobEventsSubscribe(t *testing.T) {
 				time.Sleep(20 * time.Millisecond)
 			}
 
-			req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/wfx/v1/jobs/events?ids=%s", *jobID.Load()), nil)
+			ctx, cancel := context.WithCancel(t.Context())
 			rec := sse.NewMockResponseRecorder(t)
-			handler.ServeHTTP(rec, req)
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/wfx/v1/jobs/events?ids=%s", *jobID.Load()), nil)
+				req = req.WithContext(ctx)
+				handler.ServeHTTP(rec, req)
+			}()
 
 			var response string
 			for {
@@ -130,8 +136,8 @@ func TestJobEventsSubscribe(t *testing.T) {
 			assert.Equal(t, clientID, ev.Job.ClientID)
 			assert.Equal(t, "id: 1", lines[1])
 
+			cancel()
 			wg.Wait()
-			events.ShutdownSubscribers()
 		})
 	}
 }

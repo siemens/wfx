@@ -57,6 +57,7 @@ func (responder Responder) VisitGetJobsEventsResponse(w http.ResponseWriter) err
 		return fmt.Errorf("failed to hijack connection: %w", err)
 	}
 	defer func() {
+		events.RemoveSubscriber(responder.subscriber)
 		log.Info().Msg("Closing connection to event subscriber")
 		_ = conn.Close()
 	}()

@@ -64,7 +64,6 @@ id: 1
 	}
 	assert.Contains(t, resp, expected)
 
-	events.RemoveSubscriber(sub)
 	cancel()
 	wg.Wait()
 }
@@ -94,7 +93,6 @@ func TestResponder_IdlePing(t *testing.T) {
 	}
 	assert.Contains(t, resp, expected)
 
-	events.RemoveSubscriber(sub)
 	cancel()
 	wg.Wait()
 }
