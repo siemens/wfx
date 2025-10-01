@@ -146,6 +146,7 @@ func AddSubscriber(ctx context.Context, graceInterval time.Duration, filter Filt
 
 // ShutdownSubscribers disconnects all subscribers.
 func ShutdownSubscribers() {
+	log.Info().Msg("Shutting down subscribers")
 	muSubscribers.Lock()
 	oldSubscribers := subscribers
 	subscribers = make([]*Subscriber, 0)
@@ -172,6 +173,7 @@ func RemoveSubscriber(subscriber *Subscriber) {
 		subscribers = append(subscribers, sub)
 	}
 	close(subscriber.ch)
+	log.Info().Str("id", subscriber.id).Msg("Removed subscriber")
 }
 
 // SubscriberCount counts the total number of subscribers across all topics.
