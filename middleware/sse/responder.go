@@ -43,7 +43,7 @@ func NewResponder(ctx context.Context, idleDuration time.Duration, subscriber *e
 }
 
 func (responder Responder) VisitGetJobsEventsResponse(w http.ResponseWriter) error {
-	log := logging.LoggerFromCtx(responder.ctx)
+	log := logging.LoggerFromCtx(responder.ctx).With().Str("subscriberID", responder.subscriber.ID()).Logger()
 
 	// Check if the ResponseWriter supports hijacking
 	hj, ok := w.(http.Hijacker)
@@ -57,6 +57,7 @@ func (responder Responder) VisitGetJobsEventsResponse(w http.ResponseWriter) err
 		return fmt.Errorf("failed to hijack connection: %w", err)
 	}
 	defer func() {
+		log.Info().Msg("Closing connection to event subscriber")
 		_ = conn.Close()
 	}()
 
@@ -85,7 +86,7 @@ Loop:
 		select {
 		case ev, ok := <-responder.subscriber.Events:
 			if !ok {
-				log.Debug().Msg("Channel was closed")
+				log.Debug().Msg("Channel closed")
 				break Loop
 			}
 			if err := sendEvent(id, &ev, bufrw); err != nil {
@@ -109,14 +110,14 @@ Loop:
 			if sent { // no need to send keep-alive
 				continue Loop
 			}
-			log.Debug().Msg("Sending keep-alive message to client")
+			log.Debug().Msg("Sending keep-alive to client")
 			_, err = bufrw.WriteString(": keepalive\n\n")
 			if err != nil {
 				log.Err(err).Msg("Error writing keep-alive")
 				return fault.Wrap(err)
 			}
 			if err := bufrw.Flush(); err != nil {
-				log.Err(err).Msg("Failed to send event to client")
+				log.Err(err).Msg("Failed to send keep-alive to client")
 				return fault.Wrap(err)
 			}
 		case <-responder.ctx.Done():
@@ -125,7 +126,6 @@ Loop:
 			break Loop
 		}
 	}
-	log.Info().Msg("Event Subscriber finished")
 	return nil
 }
 
