@@ -1069,13 +1069,24 @@ components:
 
     JobEvent:
       type: object
+      required:
+        - ctime
+        - action
+        - job
       properties:
         ctime:
           type: string
+          description: Date and time (ISO8601) when the event was created
           format: date-time
-          nullable: true
         action:
           type: string
+          enum:
+            - CREATE
+            - DELETE
+            - ADD_TAGS
+            - DELETE_TAGS
+            - UPDATE_STATUS
+            - UPDATE_DEFINITION
         job:
           $ref: "#/components/schemas/Job"
         tags:
