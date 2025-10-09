@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: 2025 Siemens AG
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Author: Michael Adler <michael.adler@siemens.com>
+
+run:
+    gleam run -m lustre/dev start
+
+build:
+    gleam run -m lustre/dev build --minify app
+
+test:
+    #!/usr/bin/env sh
+    set -eu
+    export LC_TIME=C
+    export TZ=UTC
+    gleam test
+
+integration-test:
+    # By using Google Chrome, Playwright does not attempt to install the browser itself, allowing it to work on non-Ubuntu systems as well.
+    cd integration && npx playwright test --project 'Google Chrome'

@@ -1,0 +1,163 @@
+---
+version: 1.4.1
+title: Job Details
+file: ./test/app_test.gleam
+test_name: given_app_when_view_job_then_job_is_shown_test
+---
+<div class="flex flex-col min-h-screen">
+  <nav class="bg-gray-800 text-white px-4 py-2 flex justify-between items-center">
+    <div></div>
+    <div class="space-x-4">
+      <a href="https://github.com/siemens/wfx">
+        <img class="w-12 h-12" src="/ui/logo.svg">
+      </a>
+    </div>
+    <div></div>
+  </nav>
+  <div class="flex justify-center">
+    <div class="px-4 py-2 cursor-pointer text-gray-600 hover:text-blue-600">
+      <a href="/ui/jobs">
+        Jobs
+      </a>
+    </div>
+    <div class="px-4 py-2 cursor-pointer text-gray-600 hover:text-blue-600">
+      <a href="/ui/workflows">
+        Workflows
+      </a>
+    </div>
+  </div>
+  <div class="flex-1 flex flex-col items-center justify-start mt-6 text-center">
+    <div class="flex flex-col justify-center items-center">
+      <h1 class="text-xl font-bold mb-4">
+        Job Details
+      </h1>
+      <div class="overflow-x-auto">
+        <table class="table-fixed mb-4" id="job-details">
+          <thead>
+            <tr class="border-b">
+              <th class="px-4 py-2 text-left bg-gray-100 w-32">
+                Attribute
+              </th>
+              <th class="px-4 py-2 text-left bg-gray-100 w-100">
+                Value
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="text-left odd:bg-white even:bg-gray-100">
+              <td class="px-4 py-2 text-left text-left">
+                Job ID
+              </td>
+              <td class="px-4 py-2 text-left text-center font-mono">
+                1
+              </td>
+            </tr>
+            <tr class="text-left odd:bg-white even:bg-gray-100">
+              <td class="px-4 py-2 text-left text-left">
+                Client ID
+              </td>
+              <td class="px-4 py-2 text-left text-center font-mono">
+                john_doe
+              </td>
+            </tr>
+            <tr class="text-left odd:bg-white even:bg-gray-100">
+              <td class="px-4 py-2 text-left text-left">
+                State
+              </td>
+              <td class="px-4 py-2 text-left text-center font-mono">
+                NEW
+              </td>
+            </tr>
+            <tr class="text-left odd:bg-white even:bg-gray-100">
+              <td class="px-4 py-2 text-left text-left">
+                Group
+              </td>
+              <td class="px-4 py-2 text-left text-center font-mono">
+                OPEN
+              </td>
+            </tr>
+            <tr class="text-left odd:bg-white even:bg-gray-100">
+              <td class="px-4 py-2 text-left text-left">
+                Tags
+              </td>
+              <td class="px-4 py-2 text-left text-center font-mono">
+
+              </td>
+            </tr>
+            <tr class="text-left odd:bg-white even:bg-gray-100">
+              <td class="px-4 py-2 text-left text-left">
+                Created
+              </td>
+              <td class="px-4 py-2 text-left text-center font-mono">
+                01/01/1970 00:00:00
+              </td>
+            </tr>
+            <tr class="text-left odd:bg-white even:bg-gray-100">
+              <td class="px-4 py-2 text-left text-left">
+                Modified
+              </td>
+              <td class="px-4 py-2 text-left text-center font-mono">
+                01/01/1970 00:00:00
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mb-4">
+        <h2 class="text-xl font-bold">
+          workflow.test
+        </h2>
+        <p>
+          Rendering...
+        </p>
+      </div>
+      <h2 class="text-xl font-bold">
+        JSON
+      </h2>
+      <div class="relative w-full mx-auto my-8">
+        <button class="absolute bottom-3 right-2 bg-transparent text-gray-800 px-3 py-1 rounded text-xl transition cursor-pointer" title="Copy to clipboard">
+          📋
+        </button>
+        <pre class="text-left bg-gray-100 text-gray-800 rounded p-4 overflow-x-auto font-mono text-sm border border-gray-200">
+<code class="block max-w-4xl max-h-[40rem] w-full p-2 bg-white border rounded font-mono text-sm overflow-auto" id="job-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;1&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;client_id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;john_doe&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;status&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;state&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;NEW&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;client_id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">null</span></span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;progress&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">null</span></span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">null</span></span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;definition_hash&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">null</span></span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;context&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">null</span></span>
+  <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;definition&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span><span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;workflow&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;workflow.test&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;description&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">null</span></span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;states&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+      <span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;NEW&quot;</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;description&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">null</span></span>
+      <span class="hljs-punctuation">}</span>
+    <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;groups&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+      <span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;OPEN&quot;</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;description&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">null</span></span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;states&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+          <span class="hljs-string">&quot;NEW&quot;</span>
+        <span class="hljs-punctuation">]</span>
+      <span class="hljs-punctuation">}</span>
+    <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;transitions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span>
+  <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;tags&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;stime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;1970-01-01T00:00:00Z&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;mtime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;1970-01-01T00:00:00Z&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;history&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">null</span></span>
+<span class="hljs-punctuation">}</span></code>
+        </pre>
+      </div>
+    </div>
+  </div>
+</div>
