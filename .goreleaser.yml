@@ -11,11 +11,41 @@ version: 2
 before:
   hooks:
     - go mod download
+    - go generate -tags ui ./ui
 
 builds:
   - id: wfx
     binary: wfx
     main: ./cmd/wfx
+    flags:
+      - -trimpath
+      - -mod=readonly
+    ldflags:
+      - -s -w -linkmode external -extldflags '-static'
+      - -X github.com/siemens/wfx/cmd/wfx/metadata.Version={{.Version}}
+      - -X github.com/siemens/wfx/cmd/wfx/metadata.Commit={{.Commit}}
+    env:
+      - CGO_ENABLED=1
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    mod_timestamp: "{{ .CommitTimestamp }}"
+    hooks:
+      post:
+        - |
+          {{ if and (eq .Os "linux") (eq .Arch "amd64") -}}
+          .ci/goreleaser/hook.sh '{{ .Path }}'
+          {{ else -}}
+          true
+          {{ end }}
+
+  - id: wfx-with-ui
+    binary: wfx
+    main: ./cmd/wfx
+    tags:
+      - ui
     flags:
       - -trimpath
       - -mod=readonly
@@ -107,6 +137,18 @@ archives:
       - CHANGELOG.md
       - docs/*.md
 
+  - id: wfx-with-ui
+    ids:
+      - wfx-with-ui
+    name_template: >-
+      wfx-with-ui-{{.Version}}-{{.Os}}-{{- if eq .Arch "amd64" }}x86_64{{ else }}{{.Arch}}{{ end }}{{ if .Arm }}v{{.Arm }}{{ end }}
+    formats: ["tar.zst"]
+    files:
+      - LICENSE
+      - README.md
+      - CHANGELOG.md
+      - docs/*.md
+
   - id: wfxctl
     ids:
       - wfxctl
@@ -125,12 +167,63 @@ archives:
     files:
       - LICENSE
 
+  - id: wfxui
+    meta: true
+    name_template: wfxui-{{.Version}}
+    formats: ["tar.zst"]
+    files:
+      - LICENSE
+      - src: ui/priv/static/app.min.mjs
+        dst: app.min.mjs
+      - src: ui/priv/static/app.min.css
+        dst: app.min.css
+      - src: ui/index.html.tmpl
+        dst: index.html.tmpl
+
 nfpms:
   - id: wfx
     package_name: wfx
     file_name_template: '{{ .PackageName }}_{{ .Version }}_{{ .Os }}_{{- if eq .Arch "amd64" }}x86_64{{ else }}{{.Arch}}{{ end }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}'
     ids:
       - wfx
+    vendor: Siemens AG
+    homepage: https://github.com/siemens/wfx
+    maintainer: Michael Adler <michael.adler@siemens.com>
+    description: a lightweight, general-purpose workflow executor
+    license: Apache-2.0
+    formats:
+      - deb
+      - rpm
+    bindir: /usr/bin
+    section: net
+    priority: extra
+    scripts:
+      postinstall: .ci/goreleaser/postinstall.sh
+      postremove: .ci/goreleaser/postremove.sh
+    contents:
+      # it's the same content for all architectures
+      - src: dist/wfx_linux_amd64_v1/wfx.bash
+        dst: /usr/share/bash-completion/completions/wfx
+      - src: dist/wfx_linux_amd64_v1/_wfx
+        dst: /usr/share/zsh/vendor-completions/_wfx
+      - src: dist/wfx_linux_amd64_v1/wfx.fish
+        dst: /usr/share/fish/completions/wfx.fish
+      - src: dist/wfx_linux_amd64_v1/*.1.gz
+        dst: /usr/share/man/man1/
+      - src: share/systemd/wfx.service
+        dst: /lib/systemd/system/wfx.service
+      - src: share/systemd/wfx@.socket
+        dst: /lib/systemd/system/wfx@.socket
+      - src: share/systemd/wfx@.service
+        dst: /lib/systemd/system/wfx@.service
+    recommends:
+      - bash-completion
+
+  - id: wfx-with-ui
+    package_name: wfx
+    file_name_template: 'wfx-with-ui_{{ .Version }}_{{ .Os }}_{{- if eq .Arch "amd64" }}x86_64{{ else }}{{.Arch}}{{ end }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}'
+    ids:
+      - wfx-with-ui
     vendor: Siemens AG
     homepage: https://github.com/siemens/wfx
     maintainer: Michael Adler <michael.adler@siemens.com>
@@ -221,14 +314,11 @@ nfpms:
 
 dockers:
   - id: wfx
-
     ids:
       - wfx
-
     image_templates:
       - 'ghcr.io/{{ envOrDefault "GITHUB_REPOSITORY" "siemens/wfx" }}:latest'
       - 'ghcr.io/{{ envOrDefault "GITHUB_REPOSITORY" "siemens/wfx" }}:{{ .Tag }}'
-
     build_flag_templates:
       - "--pull"
 
@@ -266,12 +356,20 @@ changelog:
 
 sboms:
   - id: spdx
+    ids:
+      - wfx
+      - wfxctl
+      - wfx-viewer
     artifacts: binary
     cmd: syft
     args: ["$artifact", "--output", "spdx-json=$document"]
     documents:
       - "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.spdx.sbom.json"
   - id: cyclonedx
+    ids:
+      - wfx
+      - wfxctl
+      - wfx-viewer
     artifacts: binary
     cmd: syft
     args: ["$artifact", "--output", "cyclonedx-json=$document"]
