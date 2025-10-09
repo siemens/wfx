@@ -1,0 +1,7 @@
+node_modules
+*.beam
+*.ez
+*.dump
+build
+priv/static
+/index.html

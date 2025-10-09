@@ -1,5 +1,17 @@
 # Operations
 
+## UI
+
+A Web UI is available, currently in an experimental state, allowing you to explore wfx's state within a Web browser.
+This UI must be built separately and can optionally be embedded into the wfx binary by using a build tag (see [Installation](installation.md#build-tags)).
+When enabled, the UI is accessible through the northbound interface at the `/ui` path, defaulting to [http://localhost:8081/ui/](http://localhost:8081/ui/):
+
+[![wfxui](images/ui-jobs-table.png)](images/ui-jobs-table.png)
+
+**Note**: The UI is intentionally read-only; it is not possible to perform any write operations within wfx.
+
+For releases, wfx is published in two "flavors": one without the UI and one with the UI included.
+
 ## API
 
 wfx provides two RESTful APIs to interact with it: the northbound operator/management interface and the southbound interface used by clients as illustrated in the following figure:

@@ -27,10 +27,14 @@ jobs:
           fetch-depth: 0 # Fetch all history for .GitInfo and .Lastmod
       - name: Disable git security features
         run: git config --global safe.directory '*'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
       - run: .ci/setup-pages.sh
       - run: .ci/check-links.py
         continue-on-error: true
-      - run: cd hugo && npm ci
+      - run: npm ci
+        working-directory: hugo
       - run: just pages
       - name: Deploy
         uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e # v4

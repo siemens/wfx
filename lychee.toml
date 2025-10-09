@@ -6,5 +6,5 @@
 no_progress = true
 exclude_loopback = true
 accept = ["200..=204", "429"]
-exclude = ['^https://www\.gnu\.org', '^https://www\.mysql\.com']
+exclude = ['^https://www\.gnu\.org', '^https://www\.mysql\.com', '^https://www\.npmjs\.com']
 exclude_path = ["hugo/layouts/_default/_markup", "hugo/content/_index.html"]

@@ -10,3 +10,4 @@ IgnoreURLs:
   - "^https://www.mysql.com"
   - "^https://microsoft.com"
   - "^https://www.gnu.org/.*"
+  - "^https://www.npmjs.com/"

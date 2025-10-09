@@ -48,7 +48,9 @@ func TestCreateServer_UseMiddlewares(t *testing.T) {
 	}
 
 	middlewares := []genAPI.MiddlewareFunc{myMW}
-	server, err := createServer(new(config.AppConfig), api.NewNorthboundServer(wfx), middlewares, nil)
+	cfg := new(config.AppConfig)
+	mux := createMux(cfg, "/api/wfx/v1", false)
+	server, err := createServer(cfg, api.NewNorthboundServer(wfx), mux, middlewares, nil)
 	require.NoError(t, err)
 
 	rec := httptest.NewRecorder()
@@ -62,7 +64,7 @@ func TestCreateServer_UseMiddlewares(t *testing.T) {
 }
 
 func TestOpenAPIJSON(t *testing.T) {
-	mux := createMux(new(config.AppConfig), nil)
+	mux := createMux(new(config.AppConfig), "/api/wfx/v1", false)
 	rec := httptest.NewRecorder()
 	mux.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/api/wfx/v1/openapi.json", nil))
 	result := rec.Result()
@@ -70,7 +72,7 @@ func TestOpenAPIJSON(t *testing.T) {
 }
 
 func TestTopLevelNotFound(t *testing.T) {
-	mux := createMux(new(config.AppConfig), nil)
+	mux := createMux(new(config.AppConfig), "/api/wfx/v1", false)
 	rec := httptest.NewRecorder()
 	mux.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/", nil))
 	result := rec.Result()
@@ -79,7 +81,7 @@ func TestTopLevelNotFound(t *testing.T) {
 }
 
 func TestDownloadRedirect(t *testing.T) {
-	mux := createMux(new(config.AppConfig), nil)
+	mux := createMux(new(config.AppConfig), "/api/wfx/v1", false)
 	rec := httptest.NewRecorder()
 	mux.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/download", nil))
 	result := rec.Result()
@@ -102,7 +104,7 @@ func TestDownload(t *testing.T) {
 	require.NoError(t, err)
 	t.Cleanup(cfg.Stop)
 
-	mux := createMux(cfg, nil)
+	mux := createMux(cfg, "/api/wfx/v1", false)
 	rec := httptest.NewRecorder()
 	mux.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, fmt.Sprintf("/download/%s", path.Base(tmpFile.Name())), nil))
 	result := rec.Result()
@@ -116,7 +118,7 @@ func TestDownload_NotFound(t *testing.T) {
 	cfg, err := config.NewAppConfig(f)
 	t.Cleanup(cfg.Stop)
 	require.NoError(t, err)
-	mux := createMux(cfg, nil)
+	mux := createMux(cfg, "/api/wfx/v1", false)
 
 	rec := httptest.NewRecorder()
 	mux.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/download/", nil))

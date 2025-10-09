@@ -10,9 +10,4 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 . "$SCRIPT_DIR/versions.env"
 
-command -v npm >/dev/null || {
-    apt-get update -q
-    apt-get install -q -y --no-install-recommends npm
-}
-
 npm install -g -q "prettier@$PRETTIER_VERSION"

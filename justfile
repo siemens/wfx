@@ -47,7 +47,7 @@ update-deps:
 # Build the documentation
 pages:
     #!/usr/bin/env bash
-    set -euo pipefail
+    set -euxo pipefail
     rm -rf public hugo/public
     pushd hugo
     make clean && make -j`nproc`
@@ -68,7 +68,7 @@ lint:
     #!/usr/bin/env bash
     set -euo pipefail
     export CGO_ENABLED=0
-    golangci-lint run -v --build-tags=testing
+    golangci-lint run -v
     staticcheck -tags=testing ./...
     go list ./... 2>/dev/null | sed -e 's,github.com/siemens/wfx/,,' | grep -v "^generated" | sort | uniq | while read -r pkg; do
         if [[ "$pkg" == *tests* ]] || [[ ! -d "$pkg" ]]; then

@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>wfx UI</title>
+    <link rel="stylesheet" href="{{ .AppCSS }}">
+    <script type="module" src="{{ .AppMJS }}"></script>
+    <script>
+      function loadConfig() {
+        return {
+          "wfx_url": "{{ .WfxURL }}",
+          "base_path": "{{ .BasePath }}"
+        }
+      }
+    </script>
+  </head>
+
+  <body>
+    <div id="app"></div>
+  </body>
+</html>
