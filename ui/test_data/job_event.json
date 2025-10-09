@@ -1,0 +1,19 @@
+{
+  "ctime": "2025-10-01T14:39:05.155+02:00",
+  "action": "UPDATE_STATUS",
+  "job": {
+    "clientId": "Dana",
+    "id": "cc5922c6-6d3e-4ce6-a770-e04bbf3950bd",
+    "mtime": "2025-10-01T14:39:05.155297541+02:00",
+    "status": {
+      "definitionHash": "f8b3d6ea0150a98ec5f8dc224659211a37cb4737777388f77a3e323a865e7674",
+      "progress": 0,
+      "state": "PROGRESS"
+    },
+    "stime": null,
+    "workflow": {
+      "name": "wfx.workflow.kanban"
+    }
+  },
+  "tags": null
+}
