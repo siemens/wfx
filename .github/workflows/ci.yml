@@ -301,6 +301,7 @@ jobs:
       - test
       - test-postgres
       - test-mysql
+      - format
       - cli-tests
       - lint
       - reuse
