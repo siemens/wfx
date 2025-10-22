@@ -101,14 +101,21 @@ func AddSubscriber(ctx context.Context, graceInterval time.Duration, filter Filt
 	log := logging.LoggerFromCtx(ctx)
 	// for logging purposes
 	subscriberID := uuid.New().String()
-	log.Info().
-		Str("subscriberID", subscriberID).
-		Dict("filterParams", zerolog.Dict().
-			Strs("clientIDs", filter.ClientIDs).
-			Strs("jobIDs", filter.JobIDs).
-			Strs("workflows", filter.Workflows)).
-		Strs("tags", tags).
-		Msg("Adding new subscriber for job events")
+	if log.GetLevel() <= zerolog.InfoLevel {
+		actions := make([]string, len(filter.Actions))
+		for i, act := range filter.Actions {
+			actions[i] = string(act)
+		}
+		log.Info().
+			Str("subscriberID", subscriberID).
+			Dict("filterParams", zerolog.Dict().
+				Strs("clientIDs", filter.ClientIDs).
+				Strs("jobIDs", filter.JobIDs).
+				Strs("workflows", filter.Workflows).
+				Strs("actions", actions)).
+			Strs("tags", tags).
+			Msg("Adding new subscriber for job events")
+	}
 
 	ch := make(chan JobEvent, 1)
 
