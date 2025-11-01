@@ -133,7 +133,7 @@ reuse:
   stage: lint
   needs: []
   image:
-    name: fsfe/reuse:5.1.1@sha256:11eb8a423ea82776bc2890bb255b61736bec277ef6e2141f8c91d6d88864f9da
+    name: fsfe/reuse:6.2.0@sha256:85462a75c0f8efda09ddd190b92816b70e7662577c8427429e11e1b9f25a992e
     entrypoint: [""] # default entrypoint is "reuse" which doesn't work for CI
   script:
     - reuse lint || true # just a warning
