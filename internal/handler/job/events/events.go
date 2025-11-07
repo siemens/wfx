@@ -106,7 +106,8 @@ func AddSubscriber(ctx context.Context, graceInterval time.Duration, filter Filt
 		Dict("filterParams", zerolog.Dict().
 			Strs("clientIDs", filter.ClientIDs).
 			Strs("jobIDs", filter.JobIDs).
-			Strs("workflows", filter.Workflows)).
+			Strs("workflows", filter.Workflows).
+			Interface("actions", filter.Actions)).
 		Strs("tags", tags).
 		Msg("Adding new subscriber for job events")
 
