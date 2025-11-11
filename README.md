@@ -1,102 +1,93 @@
-<p align="center" width="100%"><img src="hugo/static/images/logo.svg" width="400"/></p>
+# wfx-rds-test
 
-# wfx
 
-A lightweight, general-purpose workflow executor.
 
-[![CI](https://github.com/siemens/wfx/actions/workflows/ci.yml/badge.svg)](https://github.com/siemens/wfx/actions/workflows/ci.yml)
-[![Pages](https://github.com/siemens/wfx/actions/workflows/pages.yml/badge.svg)](https://github.com/siemens/wfx/actions/workflows/pages.yml)
-[![Coverage](https://codecov.io/github/siemens/wfx/coverage.svg?branch=main)](https://codecov.io/github/siemens/wfx?branch=main)
+## Getting started
 
-## Overview
+To make it easy for you to get started with GitLab, here's a list of recommended next steps.
 
-[_Workflows_](docs/workflows.md) are modeled as finite-state machines and are instantiated as [_Jobs_](docs/workflows.md#jobs) through which the wfx and a client progress in lock-step to perform a task.
-Such a task could be [software updating](workflow/dau/README.md) the client, progressing a work item through [Kanban](docs/workflows.md#hands-on-playing-kanban), … in essence anything requiring cooperation and coordination.
+Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
 
-As being general purpose, wfx is only concerned with driving the (state) machinery, the specific actions a client should perform are encoded in the client implementation(s).
-Hence, one wfx instance can drive a multitude of wholly different workflows.
-Instantiating a workflow as a job augments it with additional metadata, the [_Job Definition_](docs/workflows.md#jobs), which contains job-specific information such as, e.g., URLs or other data the client (implementation) can make use of for this particular job.
+## Add your files
 
-To illustrate the concepts as well as the wfx / client interaction, consider the following figure
+- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
+- [ ] [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
 
-```txt
-┌──────────────────────────────────────┐                       ┌──────────────┐
-│                 wfx                  │                     ┌─┴────────────┐ │
-│                                      │                     │   Client Y   │ │
-│                                      │     poll for jobs   │              │ │
-│                instantiate ┌───────┐ │◀────────────────────│              │ │
-│  ┌────────────┐        ┌──▶│ Job 1 │ │────────────────────▶│──────┐       │ │
-│  │ Workflow A ├────────┤   └───────┘ │◀─┐  job information │      ▼       │ │
-│  └────────────┘        │   ┌───────┐ │  │                  │     act      │ │
-│                   ┌────┼──▶│ Job 2 │ │  └──────────────────│◀─────┘       │ │
-│  ┌────────────┐   │    │   └───────┘ │     update state    │              │ │
-│  │ Workflow B ├───┘    │   ┌───────┐ │                     │              │ │
-│  └────────────┘        └──▶│ Job 3 │ │           .         │              │ │
-│                            └───────┘ │           .         │              │ │
-│       ...                     ...    │           .         │              │ │
-│                                      │                     │              ├─┘
-└──────────────────────────────────────┘                     └──────────────┘
+```
+cd existing_repo
+git remote add origin https://code.siemens.com/sinec_ams/playground/ashoka/wfx-rds-test.git
+git branch -M main
+git push -uf origin main
 ```
 
-with the wfx having loaded a number of workflows `Workflow A`, `Workflow B`, … that got instantiated as `Job 1`, `Job 2`, `Job 3`, … with a `Client Y` working on `Job 1`: It polls the wfx for a new job or the current job's status, in return receives the job information, performs actions if applicable, and finally reports the new job status back to the wfx. This lock-step procedure is repeated until the workflow reaches a terminal state which could be identified with, e.g., success or failure.
+## Integrate with your tools
 
-**wfx in (Example) Action**
+- [ ] [Set up project integrations](https://code.siemens.com/sinec_ams/playground/ashoka/wfx-rds-test/-/settings/integrations)
 
-An exemplary [Kanban](https://en.wikipedia.org/wiki/Kanban)-inspired [workflow](docs/workflows.md#kanban-example-workflow) illustrating the interplay between the wfx as Kanban "Board", a Product Owner creating jobs, and a Developer executing them:
+## Collaborate with your team
 
-![Konsole Demo](share/demo/kanban/demo.gif)
+- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
+- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
+- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
+- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
+- [ ] [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
 
-**wfx Features & Non-Features**
+## Test and Deploy
 
-- Design Guidelines
-  - Compact, scalable core focusing on the essentials
-  - Proper interfaces to external systems for modularity and integrability:
-    Accompanying and necessary services like artifact storage and device registry
-    are likely already available or are better provided by specialized solutions
-- Implementation
-  - Extendable modularized source code architecture
-  - Lightweight, no dependencies (statically linked binaries)
-  - Efficient, native code for a wide variety of platforms and operating systems (as supported by the [Go](https://golang.org/) Language)
-  - Fully documented REST API, see [wfx OpenAPI Specification](spec/wfx.openapi.yml)
-  - Extensive test suite including load tests
-- Deployment / Usability
-  - Load / Unload workflows at run-time
-  - Hot / Live reload of configuration file
-  - Persistent Storage: built-in support for [SQLite](https://www.sqlite.org/), [PostgreSQL](https://www.postgresql.org) and [MySQL](https://www.mysql.com)
-  - A complimentary built-in file server serving as artifact storage for dynamic deployments and integration without external file storage
-  - Transport Layer Security (HTTPS) with support for custom certificates
+Use the built-in continuous integration in GitLab.
 
-**wfx Clients**
+- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
+- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
+- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
+- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
+- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
 
-Currently, the following clients have support for wfx:
+***
 
-- [SWUpdate](https://github.com/sbabic/swupdate) - Software Update for Embedded Linux Devices implementing support for the [Device Artifact Update Workflow Family](workflow/dau/README.md)
+# Editing this README
 
-## Documentation
+When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
 
-Grouped by topic, the following documentation is available in [docs/](docs/):
+## Suggestions for a good README
 
-- [Workflows](docs/workflows.md): Core concepts of Workflows and Jobs
-- [Installation](docs/installation.md): How to install and deploy wfx.
-- [Configuration](docs/configuration.md): How to configure wfx.
-- [Operation](docs/operations.md): How to operate wfx.
-- [Use-Cases](docs/use-cases.md): A collection of use-cases for wfx.
-- [API](docs/operations.md#api): wfx's north- and southbound APIs.
+Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
 
-You can also browse the rendered documentation at <https://siemens.github.io/wfx/>.
+## Name
+Choose a self-explaining name for your project.
+
+## Description
+Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+
+## Badges
+On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+
+## Visuals
+Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+
+## Installation
+Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+
+## Usage
+Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+
+## Support
+Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
 
 ## Roadmap
-
-The roadmap is tracked via [Github issues](https://github.com/siemens/wfx/issues).
+If you have ideas for releases in the future, it is a good idea to list them in the README.
 
 ## Contributing
+State if you are open to contributions and what your requirements are for accepting them.
 
-Contributions are encouraged and welcome!
+For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+
+## Authors and acknowledgment
+Show your appreciation to those who have contributed to the project.
 
 ## License
+For open source projects, say how it is licensed.
 
-Copyright ©️ 2023 Siemens AG.
-
-Released under the [Apache-2.0](LICENSE) license.
+## Project status
+If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
