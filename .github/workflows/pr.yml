@@ -18,14 +18,6 @@ permissions:
   pull-requests: write
 
 jobs:
-  check-sign-off:
-    name: Write comment if commits are not signed-off
-    env:
-      FORCE_COLOR: 1
-    runs-on: ubuntu-latest
-    steps:
-      - uses: live627/check-pr-signoff-action@990e5cc2aa4058b4012f989c9c9e689734e52c54 # v1
-
   check-conventional-commit:
     name: Check commit messages
     runs-on: ubuntu-latest
