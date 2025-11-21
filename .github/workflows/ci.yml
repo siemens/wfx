@@ -18,6 +18,8 @@ on:
 jobs:
   build:
     name: Build
+    needs:
+      - ui
     runs-on: ubuntu-latest
     container: golang:1.25.3@sha256:6bac879c5b77e0fc9c556a5ed8920e89dab1709bd510a854903509c828f67f96
     strategy:
@@ -26,6 +28,11 @@ jobs:
         goos: [linux, windows]
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - name: Download UI artifact
+        uses: actions/download-artifact@v5
+        with:
+          name: ui
+          path: ui/priv/static
       - name: Setup Golang caches
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
@@ -42,9 +49,16 @@ jobs:
         run: just build
         env:
           GOOS: ${{ matrix.goos }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.goos }}
+          path: dist/**/*
+          retention-days: 1
 
   test:
     name: Test
+    needs:
+      - ui
     runs-on: ubuntu-latest
     container: golang:1.25.3@sha256:6bac879c5b77e0fc9c556a5ed8920e89dab1709bd510a854903509c828f67f96
     steps:
@@ -58,12 +72,20 @@ jobs:
           key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-golang-
-      - run: go test -race -coverprofile=coverage.out -covermode=atomic -timeout 30s --tags=testing ./...
+      - name: Download UI artifact
+        uses: actions/download-artifact@v5
+        with:
+          name: ui
+          path: ui/priv/static
+      - run: apt-get update -q && apt-get install -q -y --no-install-recommends zstd
+      - run: go generate -tags ui ./ui
+      - run: go test -race -coverprofile=coverage1.out -covermode=atomic -timeout 30s --tags=testing,ui ./...
+      - run: go test -race -coverprofile=coverage2.out -covermode=atomic -timeout 30s --tags=testing ./...
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: coverage.out
+          files: coverage*.out
 
   test-postgres:
     runs-on: ubuntu-latest
@@ -233,12 +255,20 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     name: Lint
+    needs:
+      - ui
     container: golang:1.25.3@sha256:6bac879c5b77e0fc9c556a5ed8920e89dab1709bd510a854903509c828f67f96
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - name: Download UI artifact
+        uses: actions/download-artifact@v5
+        with:
+          name: ui
+          path: ui/priv/static
+      - run: .ci/setup-lint.sh
+      - run: go generate -tags ui ./ui
       - name: Disable git security features
         run: git config --global safe.directory '*'
-      - run: .ci/setup-lint.sh
       - run: just lint
 
   format:
@@ -247,6 +277,9 @@ jobs:
     container: golang:1.25.3@sha256:6bac879c5b77e0fc9c556a5ed8920e89dab1709bd510a854903509c828f67f96
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
       - run: .ci/setup-format.sh
       - run: just format
       - name: Disable git security features
@@ -287,6 +320,90 @@ jobs:
           revision: spec/wfx.openapi.yml
           fail-on: ERR
 
+  ui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - run: |
+          GLEAM_VERSION=$(grep -oP 'GLEAM_VERSION=\K[0-9.]+' .ci/packages/versions.env)
+          REBAR3_VERSION=$(grep -oP 'REBAR3_VERSION=\K[0-9.]+' .ci/packages/versions.env)
+          OTP_VERSION=$(grep -oP 'OTP_VERSION=\K[0-9.]+' .ci/packages/versions.env)
+          echo "GLEAM_VERSION=$GLEAM_VERSION" | tee -a "$GITHUB_ENV"
+          echo "REBAR3_VERSION=$REBAR3_VERSION" | tee -a "$GITHUB_ENV"
+          echo "OTP_VERSION=$OTP_VERSION" | tee -a "$GITHUB_ENV"
+      - uses: erlef/setup-beam@v1
+        with:
+          gleam-version: "${{ env.GLEAM_VERSION }}"
+          rebar3-version: "${{ env.REBAR3_VERSION }}"
+          otp-version: "${{ env.OTP_VERSION }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+      - run: sudo .ci/setup-ui.sh
+      - name: Install deps
+        run: |
+          npm ci
+          gleam deps download
+        working-directory: ui
+      - name: Test
+        run: gleam test
+        working-directory: ui
+      - name: Format
+        run: gleam format --check src test
+        working-directory: ui
+      - name: Build
+        run: just build
+        working-directory: ui
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ui
+          path: |
+            ui/priv/static/*
+          retention-days: 1
+
+  test-ui:
+    name: Playwright Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    needs:
+      - build
+      - ui
+    steps:
+      - uses: actions/checkout@v5
+      - name: Download UI artifact
+        uses: actions/download-artifact@v5
+        with:
+          name: ui
+          path: ui/priv/static
+      - name: Download wfx
+        uses: actions/download-artifact@v5
+        with:
+          name: dist-linux
+          path: dist
+      # upload-artifact does not retain permissions, see https://github.com/actions/upload-artifact/issues/38
+      - name: Make 'wfx' binary executable
+        run: chmod 0755 dist/wfx-with-ui_linux_amd64_v1/wfx
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ui/integration
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+        working-directory: ui/integration
+      - name: Run Playwright tests
+        run: npx playwright test --project chromium --project firefox --project webkit
+        working-directory: ui/integration
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 1
+
   release:
     name: Release
     if: startsWith(github.event.ref, 'refs/tags/v')
@@ -307,6 +424,8 @@ jobs:
       - reuse
       - generate
       - openapi-check-breaking
+      - ui
+      - test-ui
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
@@ -318,7 +437,11 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
+      - name: Download UI artifact
+        uses: actions/download-artifact@v5
+        with:
+          name: ui
+          path: ui/priv/static/
       - name: Export Golang version as env variable
         run: |
           GO_VERSION=$(sed -n 's/.*container: golang:\([0-9]*\.[0-9]*\.[0-9]*\).*/\1/p' .github/workflows/ci.yml | head -n1)

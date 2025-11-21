@@ -1,12 +1,18 @@
-<p align="center" width="100%"><img src="hugo/static/images/logo.svg" width="400"/></p>
+<p align="center" width="100%"><img src="hugo/static/images/logo.svg" width="100"/></p>
+
+<div align="center">
+
+[![CI](https://github.com/siemens/wfx/actions/workflows/ci.yml/badge.svg)](https://github.com/siemens/wfx/actions/workflows/ci.yml)
+[![Pages](https://github.com/siemens/wfx/actions/workflows/pages.yml/badge.svg)](https://github.com/siemens/wfx/actions/workflows/pages.yml)
+[![Coverage](https://codecov.io/github/siemens/wfx/coverage.svg?branch=main)](https://codecov.io/github/siemens/wfx?branch=main)
+
+</div>
 
 # wfx
 
 A lightweight, general-purpose workflow executor.
 
-[![CI](https://github.com/siemens/wfx/actions/workflows/ci.yml/badge.svg)](https://github.com/siemens/wfx/actions/workflows/ci.yml)
-[![Pages](https://github.com/siemens/wfx/actions/workflows/pages.yml/badge.svg)](https://github.com/siemens/wfx/actions/workflows/pages.yml)
-[![Coverage](https://codecov.io/github/siemens/wfx/coverage.svg?branch=main)](https://codecov.io/github/siemens/wfx?branch=main)
+[![wfxui](./docs/images/wfxui.gif)](./docs/images/wfxui.gif)
 
 ## Overview
 
@@ -97,6 +103,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 ## License
 
-Copyright ©️ 2023 Siemens AG.
+Copyright ©️ 2025 Siemens AG.
 
 Released under the [Apache-2.0](LICENSE) license.
