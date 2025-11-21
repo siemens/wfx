@@ -150,7 +150,10 @@ EOF
 The `type` list field allows to label update jobs. Labels may be used by wfx's on-device counterpart to determine the activation action(s) to execute since,
 e.g., container images need a different activation action than firmware disk images or a configuration change.
 
-In the preceding example, the presence of the `firmware` label may be used to instruct the on-device client to test-reboot into the new firmware.
+The following `type` labels are supported by SWUpdate as of 2025-11-20:
+
+- `firmware` instructs the on-device client to test-reboot into the new firmware.
+- `dry-run` causes the on-device client to simulate an installation without actual execution (since SWUpdate commit [3a52c07](https://github.com/sbabic/swupdate/commit/3a52c07893a490e93cb41e8e239d3d6788b81f60)).
 
 Since wfx isn't concerned with the job definition except for conveying it to the device, it can be adapted to specific
 needs by feeding in a different job definition into the wfx on job creation and having a client on the device that can
