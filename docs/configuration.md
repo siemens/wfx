@@ -81,6 +81,21 @@ env PGHOST=localhost \
     wfx --storage postgres
 ```
 
+#### AWS RDS IAM Authentication
+
+wfx supports AWS RDS IAM authentication for PostgreSQL, enabling passwordless authentication using IAM roles (IRSA in Kubernetes, EC2 instance profiles, etc.):
+
+```bash
+# Enable IAM authentication
+export WFX_POSTGRES_IAM_AUTH=true
+
+# Connect to RDS with IAM auth (password is ignored)
+wfx --storage postgres \
+    --storage-opt "host=mydb.us-east-1.rds.amazonaws.com port=5432 user=myuser database=wfx sslmode=require"
+```
+
+For detailed setup instructions, see [PostgreSQL IAM Authentication Guide](postgres-iam-auth.md).
+
 ### MySQL
 
 [MySQL](https://www.mysql.com/) is another well-known open source relational database.
