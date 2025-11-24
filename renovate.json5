@@ -11,6 +11,9 @@
   ],
   assigneesFromCodeOwners: true,
   separateMajorMinor: true,
+  "pre-commit": {
+    enabled: true,
+  },
   customManagers: [
     {
       customType: "regex", // Renovate supports the ECMAScript (JavaScript) flavor of regex
