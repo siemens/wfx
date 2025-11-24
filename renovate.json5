@@ -44,9 +44,9 @@
       enabled: true,
     },
     {
-      groupName: "all custom dependencies",
-      groupSlug: "all-custom",
-      matchFileNames: [".ci/packages/versions.env"],
+      groupName: "tools dependencies",
+      groupSlug: "all-tools",
+      matchFileNames: [".ci/packages/versions.env", ".pre-commit-config.yaml"],
     },
     {
       groupName: "all pages dependencies",
