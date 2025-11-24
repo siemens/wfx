@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023 Siemens AG
+# SPDX-FileCopyrightText: 2025 Siemens AG
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -32,4 +32,26 @@ jobs:
           cache: "pip" # caching pip dependencies
       - run: pip install commitizen
       - name: Check commit messages
-        run: cz check --rev-range origin/${GITHUB_BASE_REF}..
+        run: |
+          # NOTE: if the repo was forked, then 'origin' is the forked repo
+          SRC_REV=origin/${GITHUB_BASE_REF}
+          count=$(git rev-list --count $SRC_REV..)
+          if [[ "$count" -eq 0 ]]; then
+            # count is zero if user forked the repo and pushed their changes onto main branch
+            echo "Comparing against upstream repo instead"
+            git remote add upstream https://github.com/siemens/wfx.git
+            git fetch upstream ${GITHUB_BASE_REF}
+            # give user some slack by going back a few commits
+            SRC_REV=upstream/${GITHUB_BASE_REF}~14
+          fi
+          echo "Using SRC_REV=$SRC_REV"
+          # sanity check
+          count=$(git rev-list --count $SRC_REV..)
+          if [[ "$count" -eq 0 ]]; then
+            echo "No commits found. Please rebase your branch on top of ${GITHUB_BASE_REF}."
+            exit 1
+          fi
+          echo "The following commit messages will be checked:"
+          git log --oneline $SRC_REV..
+          echo "Performing check"
+          cz check --rev-range $SRC_REV..
