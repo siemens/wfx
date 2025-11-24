@@ -14,8 +14,7 @@ repos:
     rev: v8.24.2
     hooks:
       - id: gitleaks
-  - repo: https://github.com/compilerla/conventional-pre-commit
-    rev: v4.2.0
+  - repo: https://github.com/opensource-nepal/commitlint
+    rev: v1.3.1
     hooks:
-      - id: conventional-pre-commit
-        stages: [commit-msg]
+      - id: commitlint
