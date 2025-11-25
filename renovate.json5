@@ -10,7 +10,7 @@
     "schedule:monthly",
   ],
   assigneesFromCodeOwners: true,
-  separateMajorMinor: true,
+  separateMajorMinor: false,
   "pre-commit": {
     enabled: true,
   },
@@ -30,23 +30,39 @@
   // rules overwrite the result from the earlier ones.
   //
   // group-slug is used for the branch name
+  //
+  // see https://docs.renovatebot.com/configuration-options/
   packageRules: [
+    // catch-all
     {
-      groupName: "all non-major dependencies",
-      groupSlug: "all-minor-patch",
-      matchPackageNames: ["*"],
-      matchUpdateTypes: ["minor", "patch", "digest"],
+      groupName: "Other dependencies",
+      groupSlug: "all-other",
+      matchUpdateTypes: [
+        "major",
+        "minor",
+        "patch",
+        "pin",
+        "pinDigest",
+        "digest",
+        "lockFileMaintenance",
+        "rollback",
+        "bump",
+        "replacement",
+      ],
+    },
+    // override previous catch-all
+    {
+      groupName: "Golang dependencies",
+      groupSlug: "all-golang",
+      matchCategories: ["golang"],
       postUpdateOptions: ["gomodTidy"],
     },
+
+    // separate PR for pages as hugo often has breaking changes
     {
       matchFileNames: ["hugo/go.mod"],
       matchDepTypes: ["indirect"],
       enabled: true,
-    },
-    {
-      groupName: "tools dependencies",
-      groupSlug: "all-tools",
-      matchFileNames: [".ci/packages/versions.env", ".pre-commit-config.yaml"],
     },
     {
       groupName: "all pages dependencies",
