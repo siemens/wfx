@@ -14,6 +14,9 @@
   "pre-commit": {
     enabled: true,
   },
+  gomod: {
+    managerFilePatterns: ["/(^|/)go\\.mod$/", "/(^|/)go\\.tool\\.mod$/"],
+  },
   customManagers: [
     {
       customType: "regex", // Renovate supports the ECMAScript (JavaScript) flavor of regex
@@ -52,9 +55,15 @@
     },
     // override previous catch-all
     {
-      groupName: "Golang dependencies",
-      groupSlug: "all-golang",
-      matchCategories: ["golang"],
+      groupName: "Golang app dependencies",
+      groupSlug: "all-golang-app",
+      matchFileNames: ["go.mod"],
+      postUpdateOptions: ["gomodTidy"],
+    },
+    {
+      groupName: "Golang tool dependencies",
+      groupSlug: "all-golang-tools",
+      matchFileNames: ["go.tool.mod"],
       postUpdateOptions: ["gomodTidy"],
     },
 

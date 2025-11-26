@@ -1,0 +1,16 @@
+title = "Custom Gitleaks configuration"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "generic-api-key"
+
+[allowlist]
+description = "global allow lists"
+paths = [
+	'''gitleaks.toml''',
+	'''(.*?)(jpg|gif|doc|pdf|bin|svg|socket)$''',
+	'''(go.mod|go.sum)$''',
+	'''(go.tool.mod|go.tool.sum)$''',
+]
