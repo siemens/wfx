@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Set `--mgmt-host` to `0.0.0.0` in the Docker image, allowing the management port (`--mgmt-port`) to be easily exposed and accessed from the host
 - `wfxctl`: removed debug log showing wfxctl version at startup (use `--version` if needed)
 - `wfxctl health`: suppress warning when endpoint is down, as health checks may run during expected failures (e.g., waiting for wfx to start)
+- `wfxctl job events`: fixed usage of the `--workflow` flag to filter job events by workflow name. This flag was previously not considered.
 
 ## [0.4.1] - 2025-08-28
 
