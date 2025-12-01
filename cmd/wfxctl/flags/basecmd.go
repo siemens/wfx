@@ -67,7 +67,6 @@ const (
 	TLSCaFlag            = "tls-ca"
 	TagFlag              = "tag"
 	WorkflowFlag         = "workflow"
-	WorkflowNameFlag     = "workflow-name"
 	NameFlag             = "name"
 	AutoReconnectFlag    = "auto-reconnect"
 )
@@ -184,7 +183,7 @@ func NewBaseCmd(f *pflag.FlagSet) BaseCmd {
 		TLSPort:     k.Int(ClientTLSPortFlag),
 		Tags:        k.Strings(TagFlag),
 		Workflow:    k.String(WorkflowFlag),
-		Workflows:   k.Strings(WorkflowNameFlag),
+		Workflows:   k.Strings(WorkflowFlag),
 		Progress:    k.Int(ProgressFlag),
 		Message:     k.String(MessageFlag),
 		State:       k.String(StateFlag),
