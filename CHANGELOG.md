@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Include mtime in job events
 - Job Events: Allow clients to filter events based on their action type.
+- AWS RDS IAM authentication support for PostgreSQL: Enable passwordless authentication using IAM roles (IRSA in Kubernetes, EC2 instance profiles, etc.)
+  - Set `WFX_POSTGRES_IAM_AUTH=true` to enable
+  - Region must be configured via `WFX_POSTGRES_REGION` or `AWS_REGION` environment variables
+  - Tokens are automatically generated and refreshed on each connection
 
 ### Changed
 
