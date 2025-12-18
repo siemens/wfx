@@ -17,8 +17,8 @@ Please select the relevant options:
 
 #### Checklist
 
-- [ ] I have read the [CONTRIBUTING](../CONTRIBUTING.md) document.
+- [ ] I have read the [CONTRIBUTING](https://github.com/siemens/wfx/blob/main/CONTRIBUTING.md) document.
 - [ ] My changes adhere to the established code style, patterns, and best practices.
 - [ ] I have added tests that demonstrate the effectiveness of my changes.
 - [ ] I have updated the documentation accordingly (if applicable).
-- [ ] I have added an entry in the [CHANGELOG](../CHANGELOG.md) to document my changes (if applicable).
+- [ ] I have added an entry in the [CHANGELOG](https://github.com/siemens/wfx/blob/main/CHANGELOG.md) to document my changes (if applicable).
