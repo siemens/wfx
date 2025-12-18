@@ -392,7 +392,7 @@ and is to be interpreted as follows:
 There were 6,000 total requests at a rate of 100.02 requests per second.
 In terms of latency, the minimum response time was 187.363 microseconds, the mean was 612.69 microseconds, and the 99th percentile was 1.062 milliseconds.
 All requests were successful with a success ratio of 100%.
-The status codes indicate that a total of 5,625 status updates were sent with HTTP error code 200 and 375 jobs were created with HTTP error code 201.
+The status codes indicate that a total of 5,625 status updates were sent with HTTP status code 200 and 375 jobs were created with HTTP status code 201.
 No errors were reported.
 
 The latency over time distribution is illustrated in the following figure:
