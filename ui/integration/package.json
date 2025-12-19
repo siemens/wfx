@@ -1,0 +1,18 @@
+{
+  "name": "wfx-ui-integration",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "../../dist/wfx-with-ui_linux_amd64_v1/wfx --log-level debug --storage-opt=file:wfx?mode=memory&cache=shared&_fk=1"
+  },
+  "keywords": [],
+  "author": "Michael Adler <michael.adler@siemens.com>",
+  "license": "Apache-2.0",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "@types/node": "^24.8.1",
+    "yaml": "^2.8.1"
+  }
+}
