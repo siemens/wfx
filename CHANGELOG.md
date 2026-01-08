@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Include mtime in job events
 - Job Events: Allow clients to filter events based on their action type.
+- IRSA (IAM Roles for Service Accounts) enhancement for improved AWS authentication.
 
 ### Changed
 
