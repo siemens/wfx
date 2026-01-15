@@ -44,6 +44,7 @@ This is a maintenance release.
 
 ### Changed
 
+- Start and enable wfx service on installation and stop and disable it on removal
 - Migrated from Swagger to OpenAPI v3
 - The previous Swagger (OpenAPI v2) specification is still available at `/api/wfx/v1/swagger.json` to _ensure compatibility_ with older clients (e.g., SWUpdate <= 2024.12). This endpoint will be removed in a future release.
 - The top-level `/swagger.json` is no longer served, as no known clients make use of it.
