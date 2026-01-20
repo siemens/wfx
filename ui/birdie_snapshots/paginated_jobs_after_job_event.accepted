@@ -1,0 +1,100 @@
+---
+version: 1.4.1
+title: Paginated Jobs After Job Event
+file: ./test/app_test.gleam
+test_name: given_jobs_when_wfx_sends_job_event_then_jobs_are_updated_test
+---
+<div class="flex flex-col min-h-screen">
+  <nav class="bg-gray-800 text-white px-4 py-2 flex justify-between items-center">
+    <div></div>
+    <div class="space-x-4">
+      <a href="https://github.com/siemens/wfx">
+        <img class="w-12 h-12" src="/ui/logo.svg">
+      </a>
+    </div>
+    <div></div>
+  </nav>
+  <div class="flex justify-center">
+    <div class="px-4 py-2 cursor-pointer text-blue-600 border-b-2 border-blue-600 font-semibold">
+      <a href="/ui/jobs">
+        Jobs
+      </a>
+    </div>
+    <div class="px-4 py-2 cursor-pointer text-gray-600 hover:text-blue-600">
+      <a href="/ui/workflows">
+        Workflows
+      </a>
+    </div>
+  </div>
+  <div class="flex-1 flex flex-col items-center justify-start mt-6 text-center">
+    <div class="overflow-x-auto">
+      <table class="table-fixed" id="jobs-table">
+        <thead>
+          <tr class="border-b">
+            <th class="px-4 py-2 text-left bg-gray-100 w-100">
+              ID
+            </th>
+            <th class="px-4 py-2 text-left bg-gray-100 w-32">
+              Client
+            </th>
+            <th class="px-4 py-2 text-left bg-gray-100 w-64">
+              Workflow
+            </th>
+            <th class="px-4 py-2 text-left bg-gray-100 w-32">
+              Status
+            </th>
+            <th class="px-4 py-2 text-left bg-gray-100 w-32">
+              Group
+            </th>
+            <th class="px-4 py-2 text-left bg-gray-100 w-64">
+              Created
+            </th>
+            <th class="px-4 py-2 text-left bg-gray-100 w-64">
+              Last Modified
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-lustre-key="1" class="text-left odd:bg-white even:bg-gray-100">
+            <td class="px-4 py-2 text-left font-mono">
+              <a class="text-blue-500 hover:text-blue-700 underline" href="/ui/jobs/1">
+                1
+              </a>
+            </td>
+            <td class="px-4 py-2 text-left">
+              john_doe
+            </td>
+            <td class="px-4 py-2 text-left">
+              <a class="text-blue-500 hover:text-blue-700 underline" href="/ui/workflows/workflow.test">
+                workflow.test
+              </a>
+            </td>
+            <td class="px-4 py-2 text-left">
+              PROGRESS
+            </td>
+            <td class="px-4 py-2 text-left">
+
+            </td>
+            <td class="px-4 py-2 text-left font-mono">
+              01/01/1970 00:00:00
+            </td>
+            <td class="px-4 py-2 text-left font-mono">
+              n/a
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td class="px-6 py-4 text-center" colspan="7">
+              <div class="inline-flex justify-center items-center space-x-2">
+                <button class="rounded cursor-pointer" title="Refresh">
+                  ↻
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+</div>

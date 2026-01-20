@@ -1,0 +1,108 @@
+{
+  "content": [
+    {
+      "groups": [
+        {
+          "description": "The task is ready for the client(s).",
+          "name": "OPEN",
+          "states": ["NEW", "PROGRESS", "VALIDATE"]
+        },
+        {
+          "description": "The task is in a final state, i.e. it cannot progress any further.",
+          "name": "CLOSED",
+          "states": ["DONE", "DISCARDED"]
+        }
+      ],
+      "name": "wfx.workflow.kanban",
+      "states": [
+        {
+          "description": "Task is created",
+          "name": "BACKLOG"
+        },
+        {
+          "description": "task is ready to be pulled",
+          "name": "NEW"
+        },
+        {
+          "description": "task is being worked on",
+          "name": "PROGRESS"
+        },
+        {
+          "description": "task is validated",
+          "name": "VALIDATE"
+        },
+        {
+          "description": "task is done according to the definition of done",
+          "name": "DONE"
+        },
+        {
+          "description": "task is discarded",
+          "name": "DISCARDED"
+        }
+      ],
+      "transitions": [
+        {
+          "action": "IMMEDIATE",
+          "description": "Immediately transition to \"NEW\" upon a task hitting the backlog,\nconveniently done by wfx \"on behalf of\" the Product Owner.\n",
+          "eligible": "WFX",
+          "from": "BACKLOG",
+          "to": "NEW"
+        },
+        {
+          "description": "A Developer pulls the task or\nthe Product Owner discards it (see below transition),\nwhoever comes first.\n",
+          "eligible": "CLIENT",
+          "from": "NEW",
+          "to": "PROGRESS"
+        },
+        {
+          "description": "The Product Owner discards the task or\na Developer pulls it (see preceding transition),\nwhoever comes first.\n",
+          "eligible": "WFX",
+          "from": "NEW",
+          "to": "DISCARDED"
+        },
+        {
+          "description": "The Developer has completed the task, it's ready for validation.\n",
+          "eligible": "CLIENT",
+          "from": "PROGRESS",
+          "to": "VALIDATE"
+        },
+        {
+          "description": "The Developer reports task completion progress percentage.\n",
+          "eligible": "CLIENT",
+          "from": "PROGRESS",
+          "to": "PROGRESS"
+        },
+        {
+          "description": "The task result has no customer value.\n",
+          "eligible": "WFX",
+          "from": "VALIDATE",
+          "to": "DISCARDED"
+        },
+        {
+          "description": "The task result cannot be integrated into Production software.\n",
+          "eligible": "CLIENT",
+          "from": "VALIDATE",
+          "to": "DISCARDED"
+        },
+        {
+          "description": "A Developer has validated the task result as useful.\n",
+          "eligible": "CLIENT",
+          "from": "VALIDATE",
+          "to": "DONE"
+        },
+        {
+          "action": "WAIT",
+          "description": "The Product Owner has validated the task result as useful\n",
+          "eligible": "WFX",
+          "from": "VALIDATE",
+          "to": "DONE"
+        }
+      ]
+    }
+  ],
+  "pagination": {
+    "limit": 10,
+    "offset": 0,
+    "total": 1
+  }
+}

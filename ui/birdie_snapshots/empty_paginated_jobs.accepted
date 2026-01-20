@@ -1,0 +1,34 @@
+---
+version: 1.4.1
+title: Empty Paginated Jobs
+file: ./test/app_test.gleam
+test_name: start_empty_test
+---
+<div class="flex flex-col min-h-screen">
+  <nav class="bg-gray-800 text-white px-4 py-2 flex justify-between items-center">
+    <div></div>
+    <div class="space-x-4">
+      <a href="https://github.com/siemens/wfx">
+        <img class="w-12 h-12" src="/ui/logo.svg">
+      </a>
+    </div>
+    <div></div>
+  </nav>
+  <div class="flex justify-center">
+    <div class="px-4 py-2 cursor-pointer text-blue-600 border-b-2 border-blue-600 font-semibold">
+      <a href="/ui/jobs">
+        Jobs
+      </a>
+    </div>
+    <div class="px-4 py-2 cursor-pointer text-gray-600 hover:text-blue-600">
+      <a href="/ui/workflows">
+        Workflows
+      </a>
+    </div>
+  </div>
+  <div class="flex-1 flex flex-col items-center justify-start mt-6 text-center">
+    <p>
+      Waiting for response from wfx...
+    </p>
+  </div>
+</div>
