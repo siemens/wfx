@@ -15,6 +15,6 @@ repos:
     hooks:
       - id: gitleaks
   - repo: https://github.com/opensource-nepal/commitlint
-    rev: v1.3.1
+    rev: v1.13.3
     hooks:
       - id: commitlint
