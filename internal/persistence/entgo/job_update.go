@@ -73,8 +73,10 @@ func doUpdateJob(ctx context.Context, tx *ent.Tx, job *api.Job, request persiste
 	}
 
 	allTags := make(map[string]any)
-	for _, t := range job.Tags {
-		allTags[t] = nil
+	if job.Tags != nil {
+		for _, t := range *job.Tags {
+			allTags[t] = nil
+		}
 	}
 	{ // deal with tags
 		if request.AddTags != nil && len(*request.AddTags) > 0 {
@@ -170,7 +172,7 @@ func doUpdateJob(ctx context.Context, tx *ent.Tx, job *api.Job, request persiste
 	}
 	sort.Strings(tags)
 
-	updatedJob.Tags = tags
+	updatedJob.Tags = &tags
 
 	return &updatedJob, nil
 }

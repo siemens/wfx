@@ -218,7 +218,7 @@ func TestNorthboundPostJobsIDTags_InternalError(t *testing.T) {
 	assert.Nil(t, resp)
 }
 
-func TestNorthboundDeleteJobsIDTags_NotFound(t *testing.T) {
+func TestNorthboundDeleteJobsIDTags_NoBody(t *testing.T) {
 	jobID := "42"
 
 	dbMock := persistence.NewHealthyMockStorage(t)
@@ -229,6 +229,26 @@ func TestNorthboundDeleteJobsIDTags_NotFound(t *testing.T) {
 	server := NewNorthboundServer(wfx)
 
 	resp, err := server.DeleteJobsIdTags(context.Background(), api.DeleteJobsIdTagsRequestObject{Id: jobID})
+	assert.NoError(t, err)
+
+	recorder := httptest.NewRecorder()
+	_ = resp.VisitDeleteJobsIdTagsResponse(recorder)
+	response := recorder.Result()
+
+	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+}
+
+func TestNorthboundDeleteJobsIDTags_NotFound(t *testing.T) {
+	jobID := "42"
+
+	dbMock := persistence.NewHealthyMockStorage(t)
+	dbMock.EXPECT().GetJob(context.Background(), jobID, persistence.FetchParams{}).Return(nil, fault.Wrap(errors.New("not found"), ftag.With(ftag.NotFound)))
+
+	wfx := NewWfxServer(dbMock)
+	t.Cleanup(func() { wfx.Stop() })
+	server := NewNorthboundServer(wfx)
+
+	resp, err := server.DeleteJobsIdTags(context.Background(), api.DeleteJobsIdTagsRequestObject{Id: jobID, Body: &api.DeleteJobsIdTagsJSONRequestBody{}})
 	assert.NoError(t, err)
 
 	recorder := httptest.NewRecorder()
@@ -248,7 +268,7 @@ func TestNorthboundDeleteJobsIDTags_InternalError(t *testing.T) {
 	t.Cleanup(func() { wfx.Stop() })
 	server := NewNorthboundServer(wfx)
 
-	resp, err := server.DeleteJobsIdTags(context.Background(), api.DeleteJobsIdTagsRequestObject{Id: jobID})
+	resp, err := server.DeleteJobsIdTags(context.Background(), api.DeleteJobsIdTagsRequestObject{Id: jobID, Body: &api.DeleteJobsIdTagsJSONRequestBody{}})
 	assert.Error(t, err)
 	assert.Nil(t, resp)
 }

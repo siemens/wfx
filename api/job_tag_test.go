@@ -29,10 +29,11 @@ func TestJobTagGet(t *testing.T) {
 	wf, err := workflow.CreateWorkflow(context.Background(), db, dau.DirectWorkflow())
 	require.NoError(t, err)
 
+	tags := []string{"foo", "bar"}
 	jobReq := api.JobRequest{
 		ClientID: "foo",
 		Workflow: wf.Name,
-		Tags:     []string{"foo", "bar"},
+		Tags:     &tags,
 	}
 	job, err := job.CreateJob(context.Background(), db, &jobReq)
 	require.NoError(t, err)
@@ -59,10 +60,11 @@ func TestJobTagPost(t *testing.T) {
 	wf, err := workflow.CreateWorkflow(context.Background(), db, dau.DirectWorkflow())
 	require.NoError(t, err)
 
+	tags := []string{"tag1"}
 	jobReq := api.JobRequest{
 		ClientID: "foo",
 		Workflow: wf.Name,
-		Tags:     []string{"tag1"},
+		Tags:     &tags,
 	}
 	job, err := job.CreateJob(context.Background(), db, &jobReq)
 	require.NoError(t, err)
@@ -100,10 +102,11 @@ func TestJobTagDelete(t *testing.T) {
 	wf, err := workflow.CreateWorkflow(context.Background(), db, dau.DirectWorkflow())
 	require.NoError(t, err)
 
+	tags := []string{"foo", "bar"}
 	jobReq := api.JobRequest{
 		ClientID: "foo",
 		Workflow: wf.Name,
-		Tags:     []string{"foo", "bar"},
+		Tags:     &tags,
 	}
 	job, err := job.CreateJob(context.Background(), db, &jobReq)
 	require.NoError(t, err)

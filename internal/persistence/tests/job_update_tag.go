@@ -29,11 +29,13 @@ func TestJobAddTags(t *testing.T, db persistence.Storage) {
 	job, err := db.CreateJob(context.Background(), tmp)
 	require.NoError(t, err)
 
-	newTags := make([]string, 0, 2+len(job.Tags))
+	newTags := make([]string, 0)
 	newTags = append(newTags, "foo", "bar")
-	require.NotContains(t, job.Tags, newTags)
+	require.NotContains(t, *job.Tags, newTags)
 
-	newTags = append(newTags, job.Tags...)
+	if job.Tags != nil {
+		newTags = append(newTags, *job.Tags...)
+	}
 	sort.Strings(newTags)
 
 	// add some tags
@@ -41,12 +43,13 @@ func TestJobAddTags(t *testing.T, db persistence.Storage) {
 		AddTags: &newTags,
 	})
 	assert.NoError(t, err)
-	assert.Equal(t, newTags, updatedJob.Tags)
+	assert.Equal(t, newTags, *updatedJob.Tags)
 }
 
 func TestJobAddTagsOverlap(t *testing.T, db persistence.Storage) {
 	tmp := newValidJob(defaultClientID)
-	tmp.Tags = []string{"foo"}
+	tags := []string{"foo"}
+	tmp.Tags = &tags
 	_, err := db.CreateWorkflow(context.Background(), tmp.Workflow)
 	require.NoError(t, err)
 
@@ -61,7 +64,7 @@ func TestJobAddTagsOverlap(t *testing.T, db persistence.Storage) {
 		AddTags: &expectedTags,
 	})
 	assert.NoError(t, err)
-	assert.Equal(t, expectedTags, updatedJob.Tags)
+	assert.Equal(t, expectedTags, *updatedJob.Tags)
 }
 
 func TestJobDeleteTags(t *testing.T, db persistence.Storage) {
@@ -75,7 +78,7 @@ func TestJobDeleteTags(t *testing.T, db persistence.Storage) {
 	require.NoError(t, err)
 
 	updatedJob, err := db.UpdateJob(context.Background(), job, persistence.JobUpdate{
-		DelTags: &job.Tags,
+		DelTags: job.Tags,
 	})
 	assert.NoError(t, err)
 	assert.Empty(t, updatedJob.Tags)
@@ -90,16 +93,16 @@ func TestJobDeleteTagsNonExisting(t *testing.T, db persistence.Storage) {
 	job, err := db.CreateJob(context.Background(), tmp)
 	require.NoError(t, err)
 	oldTags := job.Tags
-	count := len(job.Tags)
+	count := len(*job.Tags)
 
-	require.NotContains(t, job.Tags, "foo")
+	require.NotContains(t, *job.Tags, "foo")
 	updatedJob, err := db.UpdateJob(context.Background(), job, persistence.JobUpdate{
 		DelTags: &[]string{"foo"},
 	})
 	assert.NoError(t, err)
 
 	assert.Equal(t, oldTags, updatedJob.Tags)
-	assert.Len(t, updatedJob.Tags, count)
+	assert.Len(t, *updatedJob.Tags, count)
 }
 
 func TestJobReuseExistingTags(t *testing.T, db persistence.Storage) {

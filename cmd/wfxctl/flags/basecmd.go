@@ -97,7 +97,7 @@ type BaseCmd struct {
 	ClientIDs []string
 	Workflow  string
 	Workflows []string
-	Tags      []string
+	Tags      *[]string
 	State     string
 	Sort      string
 	Groups    []string
@@ -157,6 +157,11 @@ func NewBaseCmd(f *pflag.FlagSet) BaseCmd {
 		zerolog.SetGlobalLevel(lvl)
 	}
 
+	var tags *[]string
+	if strs := k.Strings(TagFlag); len(strs) > 0 {
+		tags = &strs
+	}
+
 	return BaseCmd{
 		ClientID:    k.String(ClientIDFlag),
 		ClientIDs:   k.Strings(ClientIDFlag),
@@ -181,7 +186,7 @@ func NewBaseCmd(f *pflag.FlagSet) BaseCmd {
 		TLSCa:       k.String(TLSCaFlag),
 		TLSHost:     k.String(ClientTLSHostFlag),
 		TLSPort:     k.Int(ClientTLSPortFlag),
-		Tags:        k.Strings(TagFlag),
+		Tags:        tags,
 		Workflow:    k.String(WorkflowFlag),
 		Workflows:   k.Strings(WorkflowFlag),
 		Progress:    k.Int(ProgressFlag),

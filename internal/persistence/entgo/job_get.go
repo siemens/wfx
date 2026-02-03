@@ -74,7 +74,7 @@ func convertJob(entity *ent.Job) api.Job {
 		Stime:      &stime,
 		Mtime:      &mtime,
 		Status:     &entity.Status,
-		Tags:       tags,
+		Tags:       &tags,
 		Workflow:   &wf,
 	}
 

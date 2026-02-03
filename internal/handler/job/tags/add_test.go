@@ -43,12 +43,12 @@ func TestAdd(t *testing.T) {
 	require.NoError(t, err)
 	sort.Strings(tags)
 
-	assert.Equal(t, tags, actual)
+	assert.Equal(t, tags, *actual)
 
 	jobEvent := <-sub.Events
 	assert.Equal(t, events.ActionAddTags, jobEvent.Action)
 	assert.Equal(t, job.ID, jobEvent.Job.ID)
-	assert.Equal(t, tags, jobEvent.Job.Tags)
+	assert.Equal(t, tags, *jobEvent.Job.Tags)
 }
 
 func TestAdd_FaultyStorageGet(t *testing.T) {
@@ -73,8 +73,8 @@ func TestAdd_FaultyStorageUpdate(t *testing.T) {
 	dbMock.On("GetJob", ctx, "1", persistence.FetchParams{History: false}).Return(&dummyJob, nil)
 	dbMock.On("UpdateJob", ctx, &dummyJob, persistence.JobUpdate{AddTags: &tags}).Return(nil, expectedErr)
 
-	tags, err := Add(ctx, dbMock, "1", tags)
-	assert.Nil(t, tags)
+	tagList, err := Add(ctx, dbMock, "1", tags)
+	assert.Nil(t, tagList)
 	assert.NotNil(t, err)
 }
 

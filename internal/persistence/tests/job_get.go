@@ -80,6 +80,7 @@ func TestGetJobWithHistory(t *testing.T, db persistence.Storage) {
 // Create a new, *unpersisted* job entity.
 func newValidJob(clientID string) *api.Job {
 	now := time.Now()
+	tags := []string{"tag1", "tag2"}
 	return &api.Job{
 		Mtime:    &now,
 		Stime:    &now,
@@ -88,10 +89,7 @@ func newValidJob(clientID string) *api.Job {
 			ClientID: clientID,
 			State:    "CREATED",
 		},
-		Tags: []string{
-			"tag1",
-			"tag2",
-		},
+		Tags:     &tags,
 		Workflow: dau.DirectWorkflow(),
 		History:  &[]api.History{},
 	}

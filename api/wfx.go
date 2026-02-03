@@ -304,11 +304,14 @@ func (server WfxServer) PutJobsIdStatus(ctx context.Context, request api.PutJobs
 }
 
 func (server WfxServer) DeleteJobsIdTags(ctx context.Context, request api.DeleteJobsIdTagsRequestObject) (api.DeleteJobsIdTagsResponseObject, error) {
-	var body []string
-	if request.Body != nil {
-		body = *request.Body
+	var tagsToDelete []string
+	if request.Body == nil {
+		return api.DeleteJobsIdTags400JSONResponse(api.ErrorResponse{
+			Errors: &[]api.Error{InvalidRequest},
+		}), nil
 	}
-	tags, err := tags.Delete(ctx, server.storage, request.Id, body)
+	tagsToDelete = *request.Body
+	tags, err := tags.Delete(ctx, server.storage, request.Id, tagsToDelete)
 	if err != nil {
 		if ftag.Get(err) == ftag.NotFound {
 			return api.DeleteJobsIdTags404JSONResponse(api.ErrorResponse{
@@ -320,7 +323,12 @@ func (server WfxServer) DeleteJobsIdTags(ctx context.Context, request api.Delete
 	if request.Params.XResponseFilter != nil {
 		return NewJQFilter(*request.Params.XResponseFilter, tags), nil
 	}
-	return api.DeleteJobsIdTags200JSONResponse(tags), nil
+
+	var tagsVal []string
+	if tags != nil {
+		tagsVal = *tags
+	}
+	return api.DeleteJobsIdTags200JSONResponse(tagsVal), nil
 }
 
 func (server WfxServer) GetJobsIdTags(ctx context.Context, request api.GetJobsIdTagsRequestObject) (api.GetJobsIdTagsResponseObject, error) {
@@ -336,7 +344,12 @@ func (server WfxServer) GetJobsIdTags(ctx context.Context, request api.GetJobsId
 	if request.Params.XResponseFilter != nil {
 		return NewJQFilter(*request.Params.XResponseFilter, tags), nil
 	}
-	return api.GetJobsIdTags200JSONResponse(tags), nil
+
+	var tagsVal []string
+	if tags != nil {
+		tagsVal = *tags
+	}
+	return api.GetJobsIdTags200JSONResponse(tagsVal), nil
 }
 
 func (server WfxServer) PostJobsIdTags(ctx context.Context, request api.PostJobsIdTagsRequestObject) (api.PostJobsIdTagsResponseObject, error) {
@@ -356,7 +369,12 @@ func (server WfxServer) PostJobsIdTags(ctx context.Context, request api.PostJobs
 	if request.Params.XResponseFilter != nil {
 		return NewJQFilter(*request.Params.XResponseFilter, tags), nil
 	}
-	return api.PostJobsIdTags200JSONResponse(tags), nil
+
+	var tagsVal []string
+	if tags != nil {
+		tagsVal = *tags
+	}
+	return api.PostJobsIdTags200JSONResponse(tagsVal), nil
 }
 
 func (server WfxServer) GetWorkflows(ctx context.Context, request api.GetWorkflowsRequestObject) (api.GetWorkflowsResponseObject, error) {

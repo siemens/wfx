@@ -23,17 +23,19 @@ func TestGet(t *testing.T) {
 
 	wf, err := db.CreateWorkflow(context.Background(), dau.DirectWorkflow())
 	require.NoError(t, err)
+	tags := []string{"foo", "bar"}
 	job, err := db.CreateJob(context.Background(), &api.Job{
 		ClientID: "foo",
 		Workflow: wf,
 		Status:   &api.JobStatus{State: "CREATED"},
-		Tags:     []string{"foo", "bar"},
+		Tags:     &tags,
 	})
 	require.NoError(t, err)
 
-	tags, err := Get(context.Background(), db, job.ID)
+	tagList, err := Get(t.Context(), db, job.ID)
 	require.NoError(t, err)
-	assert.Equal(t, []string{"bar", "foo"}, tags)
+	require.NotNil(t, tagList)
+	assert.Equal(t, []string{"bar", "foo"}, *tagList)
 }
 
 func TestGetEmpty(t *testing.T) {

@@ -53,7 +53,7 @@ func (db Database) CreateJob(ctx context.Context, job *api.Job) (*api.Job, error
 func createJobHelper(ctx context.Context, tx *ent.Tx, job *api.Job) (*api.Job, error) {
 	tags := make([]string, 0)
 	if job.Tags != nil {
-		tags = job.Tags
+		tags = *job.Tags
 	}
 	log.Debug().
 		Str("workflow", job.Workflow.Name).

@@ -49,7 +49,7 @@ func TestQueryJobsFilter(t *testing.T, db persistence.Storage) {
 		Status: &api.JobStatus{
 			State: installedState,
 		},
-		Tags: tags,
+		Tags: &tags,
 	})
 	require.NoError(t, err)
 	assert.NotNil(t, firstJob.Stime)
@@ -69,13 +69,14 @@ func TestQueryJobsFilter(t *testing.T, db persistence.Storage) {
 	require.NoError(t, err)
 
 	thirdStime := now.Add(2 * time.Second)
+	tagsList := []string{"meh"}
 	thirdJob, err := db.CreateJob(context.Background(), &api.Job{
 		ClientID: clientID,
 		Workflow: wf,
 		Status: &api.JobStatus{
 			State: activatedState,
 		},
-		Tags:  []string{"meh"},
+		Tags:  &tagsList,
 		Stime: &thirdStime,
 	})
 	require.NoError(t, err)
@@ -287,11 +288,11 @@ func TestGetJobMaxHistorySize(t *testing.T, db persistence.Storage) {
 func TestJobsPagination(t *testing.T, db persistence.Storage) {
 	filterParams := persistence.FilterParams{ClientID: &defaultClientID}
 	total := 5
-	var ids []string
+	ids := make([]string, 0, total)
 
 	_, err := db.CreateWorkflow(context.Background(), dau.DirectWorkflow())
 	assert.NoError(t, err)
-	for i := 0; i < total; i++ {
+	for range total {
 		tmp := newValidJob(*filterParams.ClientID)
 		job, err := db.CreateJob(context.Background(), tmp)
 		require.NoError(t, err)

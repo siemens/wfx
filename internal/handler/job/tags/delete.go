@@ -20,7 +20,7 @@ import (
 	"github.com/siemens/wfx/persistence"
 )
 
-func Delete(ctx context.Context, storage persistence.Storage, jobID string, tags []string) ([]string, error) {
+func Delete(ctx context.Context, storage persistence.Storage, jobID string, tags []string) (*api.TagList, error) {
 	log := logging.LoggerFromCtx(ctx)
 	contextLogger := log.With().Str("id", jobID).Strs("tags", tags).Logger()
 
