@@ -29,7 +29,8 @@ func TestJobAddTags(t *testing.T, db persistence.Storage) {
 	job, err := db.CreateJob(context.Background(), tmp)
 	require.NoError(t, err)
 
-	newTags := []string{"foo", "bar"}
+	newTags := make([]string, 0, 2+len(job.Tags))
+	newTags = append(newTags, "foo", "bar")
 	require.NotContains(t, job.Tags, newTags)
 
 	newTags = append(newTags, job.Tags...)
