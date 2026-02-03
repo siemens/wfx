@@ -40,7 +40,6 @@ echo '{ "title": "Task 1" }' | wfxctl job create --client-id=my_client --workflo
 			log.Debug().
 				Str("clientID", clientID).
 				Str("workflow", workflow).
-				Strs("tags", tags).
 				Msg("Creating new job")
 
 			request := api.PostJobsJSONRequestBody{

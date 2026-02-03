@@ -49,9 +49,7 @@ wfxctl job query --state=CREATED
 			if groups := baseCmd.Groups; len(groups) > 0 {
 				params.ParamGroup = &groups
 			}
-			if tags := baseCmd.Tags; len(tags) > 0 {
-				params.ParamTag = &tags
-			}
+			params.ParamTag = baseCmd.Tags
 
 			params.ParamOffset = &baseCmd.Offset
 			params.ParamLimit = &baseCmd.Limit
@@ -69,7 +67,7 @@ wfxctl job query --state=CREATED
 	f.StringSlice(flags.GroupFlag, []string{}, "Filter jobs based on the group they belong to")
 	f.String(flags.StateFlag, "", "Filter jobs based on the current state value")
 	f.String(flags.WorkflowFlag, "", "Filter jobs based on workflow name")
-	f.StringSlice(flags.TagFlag, []string{}, "Filter jobs by tags")
+	f.StringSlice(flags.TagFlag, nil, "Filter jobs by tags")
 	f.Int64(flags.OffsetFlag, 0, "0-based index of the page")
 	f.Int32(flags.LimitFlag, 10, "maximum number of elements returned in one page ")
 	f.String(flags.SortFlag, "", "sort order. possible values: asc, desc")

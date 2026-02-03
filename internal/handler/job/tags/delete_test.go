@@ -27,25 +27,27 @@ func TestDelete(t *testing.T) {
 
 	wf, err := db.CreateWorkflow(context.Background(), dau.DirectWorkflow())
 	require.NoError(t, err)
+	tags := []string{"foo", "bar"}
 	job, err := db.CreateJob(context.Background(), &api.Job{
 		ClientID: "foo",
 		Workflow: wf,
 		Status:   &api.JobStatus{State: "INSTALL"},
-		Tags:     []string{"foo", "bar"},
+		Tags:     &tags,
 	})
 	require.NoError(t, err)
 
 	sub := events.AddSubscriber(t.Context(), time.Minute, events.FilterParams{}, nil)
 
-	tags, err := Delete(context.Background(), db, job.ID, []string{"foo"})
+	tagList, err := Delete(t.Context(), db, job.ID, []string{"foo"})
 	require.NoError(t, err)
+	require.NotNil(t, tagList)
 	expectedTags := []string{"bar"}
-	assert.Equal(t, expectedTags, tags)
+	assert.Equal(t, expectedTags, *tagList)
 
 	jobEvent := <-sub.Events
 	assert.Equal(t, events.ActionDeleteTags, jobEvent.Action)
 	assert.Equal(t, job.ID, jobEvent.Job.ID)
-	assert.Equal(t, expectedTags, jobEvent.Job.Tags)
+	assert.Equal(t, expectedTags, *jobEvent.Job.Tags)
 }
 
 func TestDelete_FaultyStorageGet(t *testing.T) {
@@ -70,7 +72,7 @@ func TestDelete_FaultyStorageUpdate(t *testing.T) {
 	db.On("GetJob", ctx, "1", persistence.FetchParams{History: false}).Return(&dummyJob, nil)
 	db.On("UpdateJob", ctx, &dummyJob, persistence.JobUpdate{DelTags: &tags}).Return(nil, expectedErr)
 
-	tags, err := Delete(ctx, db, "1", tags)
-	assert.Nil(t, tags)
+	tagList, err := Delete(ctx, db, "1", tags)
+	assert.Nil(t, tagList)
 	assert.NotNil(t, err)
 }

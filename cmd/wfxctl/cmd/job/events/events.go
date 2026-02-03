@@ -133,8 +133,8 @@ wfxctl job events --job-id=1 --job-id=2 --client-id=foo
 				s := strings.Join(workflowNames, ",")
 				params.Workflows = &s
 			}
-			if tags := baseCmd.Tags; len(tags) > 0 {
-				s := strings.Join(tags, ",")
+			if tags := baseCmd.Tags; tags != nil && len(*tags) > 0 {
+				s := strings.Join(*tags, ",")
 				params.Tags = &s
 			}
 			_, err = client.GetJobsEvents(cmd.Context(), params)
