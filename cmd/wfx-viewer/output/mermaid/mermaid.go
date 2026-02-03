@@ -59,7 +59,7 @@ func (g *Generator) Generate(out io.Writer, wf *api.Workflow) error {
 
 	// add legend
 	_, _ = fmt.Fprintf(out, "    Note right of %s: <b>Group to Color Mapping</b><br/>", initialState)
-	lines := make([]string, 0)
+	lines := make([]string, 0, len(wf.Groups))
 	for _, group := range wf.Groups {
 		hex := cp.GroupColor(group.Name).ToHEX().String()
 		lines = append(lines, fmt.Sprintf(`<font color="%s">%s</font> - %s`, hex, group.Name, group.Description))
