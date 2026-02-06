@@ -54,13 +54,15 @@ func NewLoggingMiddleware() func(http.Handler) http.Handler {
 			tracing := contextLogger.GetLevel() <= zerolog.TraceLevel
 			writer := newMyResponseWriter(w, tracing)
 			if tracing {
-				request, err := PeekBody(r)
+				body, err := PeekBody(r)
 				if err != nil {
 					w.WriteHeader(http.StatusInternalServerError)
 					return
 				}
+
 				contextLogger.Trace().
-					Bytes("request", request).
+					Bytes("body", body).
+					Str("query", r.URL.RawQuery).
 					Msg("Request")
 			}
 
