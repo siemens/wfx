@@ -1186,8 +1186,6 @@ components:
       items:
         type: string
         example: EUROPE_WEST
-      x-omitempty: true
-      x-go-type-skip-optional-pointer: true
 
     CheckerResult:
       type: object
