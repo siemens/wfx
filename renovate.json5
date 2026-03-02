@@ -9,6 +9,12 @@
     ":prConcurrentLimitNone",
     "schedule:monthly",
   ],
+  lockFileMaintenance: {
+    schedule: [
+      // at 00:00 on day-of-month 1
+      "0 0 1 * *",
+    ],
+  },
   assigneesFromCodeOwners: true,
   separateMajorMinor: false,
   "pre-commit": {
