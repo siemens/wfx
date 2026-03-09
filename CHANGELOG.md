@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `wfxctl`: removed debug log showing wfxctl version at startup (use `--version` if needed)
 - `wfxctl health`: suppress warning when endpoint is down, as health checks may run during expected failures (e.g., waiting for wfx to start)
 - `wfxctl job events`: fixed usage of the `--workflow` flag to filter job events by workflow name. This flag was previously not considered.
+- `/download` now returns HTTP status 307 instead of 301 (this has changed in Golang 1.26, see https://go.dev/doc/go1.26)
 
 ## [0.4.1] - 2025-08-28
 
