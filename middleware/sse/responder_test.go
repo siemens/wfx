@@ -10,14 +10,18 @@ package sse
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"strings"
 	"sync"
 	"testing"
 	"time"
 
+	"github.com/Southclaws/fault"
 	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/internal/handler/job/events"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestResponder(t *testing.T) {
@@ -50,22 +54,40 @@ func TestResponder(t *testing.T) {
 		}
 	}()
 
-	expected := `data: {"ctime":"0001-01-01T00:00:00.000Z","action":"UPDATE_STATUS","job":{"id":"1","mtime":null,"status":{"clientId":"foo","message":"hello world","state":"INSTALLING"},"stime":null},"tags":[]}
-id: 1
+	expected := `{"ctime":"0001-01-01T00:00:00.000Z","action":"UPDATE_STATUS","job":{"id":"1","status":{"clientId":"foo","message":"hello world","state":"INSTALLING"}},"tags":[]}`
 
-`
 	var resp string
 	for range 100 {
 		resp = rw.Response()
 		time.Sleep(10 * time.Millisecond)
-		if strings.Contains(resp, expected) {
+		if strings.Contains(resp, "data:") {
 			break
 		}
 	}
-	assert.Contains(t, resp, expected)
+
+	obj, err := extractAndParseData(resp)
+	require.NoError(t, err)
+	objJson, _ := json.Marshal(obj)
+
+	assert.JSONEq(t, expected, string(objJson))
+	assert.Contains(t, resp, "id: 1")
+	assert.Contains(t, resp, "\n\n")
 
 	cancel()
 	wg.Wait()
+}
+
+func extractAndParseData(response string) (map[string]any, error) {
+	lines := strings.SplitSeq(response, "\n")
+	for line := range lines {
+		line = strings.TrimSpace(line)
+		if dataStr, ok := strings.CutPrefix(line, "data: "); ok {
+			var result map[string]any
+			err := json.Unmarshal([]byte(dataStr), &result)
+			return result, fault.Wrap(err)
+		}
+	}
+	return nil, fmt.Errorf("no 'data:' line found")
 }
 
 func TestResponder_IdlePing(t *testing.T) {
