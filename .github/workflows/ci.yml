@@ -19,13 +19,18 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    container: golang:1.26.1@sha256:e2ddb153f786ee6210bf8c40f7f35490b3ff7d38be70d1a0d358ba64225f6428
-    strategy:
-      matrix:
-        # even though Windows is not officially supported, we want it to at least compile successfully
-        goos: [linux, windows]
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - name: Export Golang version as env variable
+        run: |
+          GO_VERSION=$(sed -n 's/.*container: golang:\([0-9]*\.[0-9]*\.[0-9]*\).*/\1/p' .github/workflows/ci.yml | head -n1)
+          # You can make an environment variable available to any subsequent
+          # steps in a workflow job by defining or updating the environment
+          # variable and writing this to the GITHUB_ENV environment file.
+          echo "GO_VERSION=$GO_VERSION" | tee -a "$GITHUB_ENV"
+      - uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6
+        with:
+          go-version: "${{ env.GO_VERSION }}"
       - name: Setup Golang caches
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5
         with:
@@ -37,11 +42,23 @@ jobs:
             ${{ runner.os }}-golang-
       - name: Disable git security features
         run: git config --global safe.directory '*'
-      - run: .ci/setup-build.sh
-      - name: build for ${{ matrix.goos }}
-        run: just build
+      - run: sudo .ci/setup-build.sh
+
+      # even though Windows is not officially supported, we want it to at least compile successfully
+      - name: Build for Windows
+        run: /usr/bin/env CC=$(pwd)/.ci/zcc goreleaser build --clean --single-target --snapshot
         env:
-          GOOS: ${{ matrix.goos }}
+          GOOS: windows
+
+      - name: Build Snapshot Release for Linux
+        run: /usr/bin/env CC=$(pwd)/.ci/zcc goreleaser release --clean --snapshot
+
+      - name: build plugins and contrib
+        run: |
+          go build -C example/plugin
+          go build -C contrib/remote-access/client
+          go build -C contrib/config-deployment/client
+
       - uses: actions/upload-artifact@v4
         with:
           name: dist
