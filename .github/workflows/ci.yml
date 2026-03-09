@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Download UI artifact
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8
         with:
           name: ui
           path: ui/priv/static
@@ -35,7 +35,7 @@ jobs:
           # steps in a workflow job by defining or updating the environment
           # variable and writing this to the GITHUB_ENV environment file.
           echo "GO_VERSION=$GO_VERSION" | tee -a "$GITHUB_ENV"
-      - uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6
+      - uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6
         with:
           go-version: "${{ env.GO_VERSION }}"
       - name: Setup Golang caches
@@ -66,7 +66,7 @@ jobs:
           go build -C contrib/remote-access/client
           go build -C contrib/config-deployment/client
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
         with:
           name: dist
           path: dist/**/*
@@ -90,7 +90,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-golang-
       - name: Download UI artifact
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8
         with:
           name: ui
           path: ui/priv/static
@@ -277,7 +277,7 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Download UI artifact
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8
         with:
           name: ui
           path: ui/priv/static
@@ -293,7 +293,7 @@ jobs:
     container: golang:1.26.1@sha256:e2ddb153f786ee6210bf8c40f7f35490b3ff7d38be70d1a0d358ba64225f6428
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
           node-version: lts/*
       - run: .ci/setup-format.sh
@@ -339,7 +339,7 @@ jobs:
   ui:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - run: |
           GLEAM_VERSION=$(grep -oP 'GLEAM_VERSION=\K[0-9.]+' .ci/packages/versions.env)
           REBAR3_VERSION=$(grep -oP 'REBAR3_VERSION=\K[0-9.]+' .ci/packages/versions.env)
@@ -347,12 +347,12 @@ jobs:
           echo "GLEAM_VERSION=$GLEAM_VERSION" | tee -a "$GITHUB_ENV"
           echo "REBAR3_VERSION=$REBAR3_VERSION" | tee -a "$GITHUB_ENV"
           echo "OTP_VERSION=$OTP_VERSION" | tee -a "$GITHUB_ENV"
-      - uses: erlef/setup-beam@v1
+      - uses: erlef/setup-beam@e6d7c94229049569db56a7ad5a540c051a010af9 # v1
         with:
           gleam-version: "${{ env.GLEAM_VERSION }}"
           rebar3-version: "${{ env.REBAR3_VERSION }}"
           otp-version: "${{ env.OTP_VERSION }}"
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
           node-version: lts/*
       - run: sudo .ci/setup-ui.sh
@@ -370,7 +370,7 @@ jobs:
       - name: Build
         run: just build
         working-directory: ui
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
         with:
           name: ui
           path: |
@@ -385,14 +385,14 @@ jobs:
       - build
       - ui
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Download UI artifact
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8
         with:
           name: ui
           path: ui/priv/static
       - name: Download wfx
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8
         with:
           name: dist
           path: dist
@@ -400,7 +400,7 @@ jobs:
       - name: Make 'wfx' binary globally available
         run: install -v -D -m0755 dist/wfx-with-ui_linux_amd64_v1/wfx /usr/local/bin/wfx
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
           node-version: lts/*
 
@@ -413,7 +413,7 @@ jobs:
       - name: Run Playwright tests
         run: npx playwright test --project chromium --project firefox --project webkit
         working-directory: ui/integration
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
@@ -454,7 +454,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Download UI artifact
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8
         with:
           name: ui
           path: ui/priv/static/

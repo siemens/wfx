@@ -27,7 +27,7 @@ jobs:
           fetch-depth: 0 # Fetch all history for .GitInfo and .Lastmod
       - name: Disable git security features
         run: git config --global safe.directory '*'
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
           node-version: lts/*
       - run: .ci/setup-pages.sh
