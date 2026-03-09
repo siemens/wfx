@@ -55,10 +55,7 @@ func TestJobEventsSubscribe(t *testing.T) {
 			var wg sync.WaitGroup
 			expectedTags := []string{"tag1", "tag2"}
 			subscriber := events.AddSubscriber(t.Context(), time.Minute, events.FilterParams{ClientIDs: []string{clientID}}, expectedTags)
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-
+			wg.Go(func() {
 				// wait for job created event
 				payload := <-subscriber.Events
 				assert.Equal(t, events.ActionCreate, payload.Action)
@@ -71,22 +68,20 @@ func TestJobEventsSubscribe(t *testing.T) {
 				// add some extra time to be safe
 				time.Sleep(100 * time.Millisecond)
 				events.RemoveSubscriber(subscriber)
-			}()
+			})
 
 			_, err := job.CreateJob(t.Context(), db, &api.JobRequest{ClientID: clientID, Workflow: wf.Name})
 			require.NoError(t, err)
 
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
+			wg.Go(func() {
 				// wait for subscriber which is created by our GET request below and our test goroutine above
 				for events.SubscriberCount() != 2 {
 					time.Sleep(20 * time.Millisecond)
 				}
 				// update job
-				_, err = status.Update(t.Context(), db, *jobID.Load(), &api.JobStatus{State: "INSTALLING"}, api.CLIENT)
+				_, err := status.Update(t.Context(), db, *jobID.Load(), &api.JobStatus{State: "INSTALLING"}, api.CLIENT)
 				require.NoError(t, err)
-			}()
+			})
 
 			// wait for job id
 			for jobID.Load() == nil {
@@ -95,13 +90,10 @@ func TestJobEventsSubscribe(t *testing.T) {
 
 			ctx, cancel := context.WithCancel(t.Context())
 			rec := sse.NewMockResponseRecorder(t)
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
+			wg.Go(func() {
 				req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/wfx/v1/jobs/events?ids=%s", *jobID.Load()), nil)
-				req = req.WithContext(ctx)
-				handler.ServeHTTP(rec, req)
-			}()
+				handler.ServeHTTP(rec, req.WithContext(ctx))
+			})
 
 			var response string
 			for {
