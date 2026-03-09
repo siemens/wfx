@@ -158,15 +158,15 @@ func (sc *ServerCollection) Start() error {
 		}
 
 		isTLS := scheme == config.SchemeHTTPS
+		log.Info().
+			Bool("tls", isTLS).
+			Str("scheme", scheme.String()).
+			Str("addr", northListener.Addr().String()).
+			Msg("Starting northbound server")
 		g.Go(func() error {
 			defer func() {
 				log.Debug().Msg("Northbound goroutine finished")
 			}()
-			log.Info().
-				Bool("tls", isTLS).
-				Str("scheme", scheme.String()).
-				Str("addr", northListener.Addr().String()).
-				Msg("Starting northbound server")
 
 			var err error
 			if isTLS {
@@ -181,15 +181,16 @@ func (sc *ServerCollection) Start() error {
 			return nil
 		})
 
+		log.Info().
+			Bool("tls", isTLS).
+			Str("scheme", scheme.String()).
+			Str("addr", southListener.Addr().String()).
+			Msg("Starting southbound server")
 		g.Go(func() error {
 			defer func() {
 				log.Debug().Msg("Southbound goroutine finished")
 			}()
-			log.Info().
-				Bool("tls", isTLS).
-				Str("scheme", scheme.String()).
-				Str("addr", southListener.Addr().String()).
-				Msg("Starting southbound server")
+
 			var err error
 			if isTLS {
 				err = sc.south.ServeTLS(southListener, cfg.TLSCertificate(), cfg.TLSKey())
