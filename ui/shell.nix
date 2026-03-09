@@ -15,5 +15,7 @@ pkgs.mkShell {
     beamPackages.rebar3
     inotify-tools
     nodePackages.npm
+    bun
+    tailwindcss_4
   ];
 }

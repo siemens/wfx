@@ -1,5 +1,5 @@
 ---
-version: 1.4.1
+version: 1.5.4
 title: Workflow Details
 file: ./test/app_test.gleam
 test_name: given_app_when_view_workflow_then_job_is_shown_test
@@ -42,7 +42,7 @@ test_name: given_app_when_view_workflow_then_job_is_shown_test
           📋
         </button>
         <pre class="text-left bg-gray-100 text-gray-800 rounded p-4 overflow-x-auto font-mono text-sm border border-gray-200">
-<code class="block max-w-4xl max-h-[40rem] w-full p-2 bg-white border rounded font-mono text-sm overflow-auto" id="workflow-json"><span class="hljs-punctuation">{</span>
+          <code class="block max-w-4xl max-h-[40rem] w-full p-2 bg-white border rounded font-mono text-sm overflow-auto" id="workflow-json"><span class="hljs-punctuation">{</span>
   <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;workflow.test&quot;</span><span class="hljs-punctuation">,</span>
   <span class="hljs-attr">&quot;description&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">null</span></span><span class="hljs-punctuation">,</span>
   <span class="hljs-attr">&quot;states&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
