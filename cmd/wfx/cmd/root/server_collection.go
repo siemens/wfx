@@ -351,7 +351,7 @@ func createListener(scheme config.Scheme, settings ListenerSettings) (net.Listen
 		return nil, fmt.Errorf("unsupported scheme: %s", scheme)
 	}
 	contextLogger := log.With().Str("network", network).Str("addr", addr).Str("scheme", scheme.String()).Logger()
-	for attempt := 0; attempt < 30; attempt++ {
+	for range 30 {
 		ln, err := net.Listen(network, addr)
 		if err == nil {
 			contextLogger.Debug().Msg("Created new listener")
