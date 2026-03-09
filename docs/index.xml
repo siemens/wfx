@@ -5,11 +5,11 @@ for Linux, specifically
 
 &lt;a href="https://go.dev/wiki/MinimumRequirements#arm64" target="_blank"&gt;arm64&lt;/a&gt; architectures.&lt;/p&gt;
 &lt;p&gt;To start a container hosting wfx, follow these commands:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#57606a"&gt;# create a named volume to persist data (only needed the first time)&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="background-color:#f7f7f7;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#57606a"&gt;# create a named volume to persist data (only needed the first time)&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;docker volume create wfx-db
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;docker run --rm -v wfx-db:/home/nonroot &lt;span style="color:#0a3069"&gt;\
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#0a3069"&gt;&lt;/span&gt; -p 8080:8080 -p 8081:8081 &lt;span style="color:#0a3069"&gt;\
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#0a3069"&gt;&lt;/span&gt; ghcr.io/siemens/wfx:latest
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; -p 8080:8080 -p 8081:8081 &lt;span style="color:#0a3069"&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ghcr.io/siemens/wfx:latest
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;If pre-built binaries are not available (refer to &lt;code&gt;go tool dist list&lt;/code&gt; for alternative platforms and architectures, such
 as Windows or macOS), or if specific features need to be disabled during compilation, building wfx from source is
 necessary.&lt;/p&gt;</description></item><item><title>Configuration</title><link>/docs/configuration/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/docs/configuration/</guid><description>&lt;p&gt;wfx is configured in the following order of precedence using&lt;/p&gt;
@@ -25,7 +25,7 @@ need for restarting it.&lt;/p&gt;
 &lt;p&gt;Without configuration,&lt;/p&gt;</description></item><item><title>Operations</title><link>/docs/operations/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/docs/operations/</guid><description>&lt;h2 id="api"&gt;API&lt;/h2&gt;
 &lt;p&gt;wfx provides two RESTful APIs to interact with it: the northbound operator/management interface and the southbound
 interface used by clients as illustrated in the following figure:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-txt" data-lang="txt"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Management
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="background-color:#f7f7f7;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-txt" data-lang="txt"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Management
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; │
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; │

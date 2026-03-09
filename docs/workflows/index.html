@@ -27,7 +27,7 @@ is recorded in the
 <a href=https://github.com/siemens/wfx/issues target=_blank>Roadmap</a>.</p><p>Beyond syntactic requirements such as, e.g., a particular set being non-empty or the uniqueness property of names, the
 following semantic rules and constraints are checked and enforced by wfx upon loading a workflow:</p><ul><li>There&rsquo;s exactly one initial state, i.e., there are no incoming transitions to this state with this state&rsquo;s name in
 <code>to</code>.</li><li>There are no unreachable states, i.e., states without an incoming transition.</li><li>For each state, there can&rsquo;t be more than one outgoing transition whose <code>action</code> is <code>IMMEDIATE</code>.</li><li>Transition tuples (<code>from</code>, <code>to</code>, <code>eligible</code>, <code>action</code>) must be unique.</li><li>There are no cycles in the workflow graph <em>except</em> for trivial cycles, i.e. transitions where <code>from</code> equals <code>to</code> (used
-for e.g. progress reporting).</li><li>Each state belongs to <em>at most one</em> group.</li></ul><p><strong>Tip</strong>: <code>wfxctl</code> can be used to validate workflows offline, e.g.</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>wfxctl workflow validate workflow/dau/wfx.workflow.dau.direct.yml
+for e.g. progress reporting).</li><li>Each state belongs to <em>at most one</em> group.</li></ul><p><strong>Tip</strong>: <code>wfxctl</code> can be used to validate workflows offline, e.g.</p><div class=highlight><pre tabindex=0 style=background-color:#f7f7f7;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>wfxctl workflow validate workflow/dau/wfx.workflow.dau.direct.yml
 </span></span></code></pre></div><p>These definitions are illustrated in more detail in the following exemplary Kanban workflow.</p><h2 id=jobs>Jobs</h2><p>A <em>job</em> is an instance of a workflow in which wfx and a client progress in lock-step. As a result, a job can only be
 created if the corresponding workflow already exists. Jobs can be driven by different workflows. This allows wfx to
 accommodate a variety of use cases and workflows that are tailored to specific needs. For example, firmware and
@@ -44,9 +44,9 @@ also for bandwidth reasons. Clients requiring a job&rsquo;s historical data must
 include the <code>history=true</code> parameter in their request.</p><h3 id=deleting-jobs>Deleting Jobs</h3><p>Jobs can be deleted using the northbound REST API. For example, this can be used to perform maintenance on old jobs.
 Note that wfx does not perform any housekeeping on its own.</p><h2 id=kanban-example-workflow>Kanban Example Workflow</h2><p>An exemplary
 <a href=https://en.wikipedia.org/wiki/Kanban target=_blank>Kanban</a>-inspired workflow YAML specification may be defined as
-follows:</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#0550ae>name</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>wfx.workflow.kanban<span style=color:#fff>
+follows:</p><div class=highlight><pre tabindex=0 style=background-color:#f7f7f7;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#0550ae>name</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>wfx.workflow.kanban<span style=color:#fff>
 </span></span></span><span style=display:flex><span><span style=color:#fff>
-</span></span></span><span style=display:flex><span><span style=color:#fff></span><span style=color:#0550ae>groups</span><span style=color:#1f2328>:</span><span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#0550ae>groups</span><span style=color:#1f2328>:</span><span style=color:#fff>
 </span></span></span><span style=display:flex><span><span style=color:#fff>  </span>- <span style=color:#0550ae>name</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>OPEN<span style=color:#fff>
 </span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>description</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>The task is ready for the client(s).<span style=color:#fff>
 </span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>states</span><span style=color:#1f2328>:</span><span style=color:#fff>
@@ -60,7 +60,7 @@ follows:</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-mo
 </span></span></span><span style=display:flex><span><span style=color:#fff>      </span>- DONE<span style=color:#fff>
 </span></span></span><span style=display:flex><span><span style=color:#fff>      </span>- DISCARDED<span style=color:#fff>
 </span></span></span><span style=display:flex><span><span style=color:#fff>
-</span></span></span><span style=display:flex><span><span style=color:#fff></span><span style=color:#0550ae>states</span><span style=color:#1f2328>:</span><span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#0550ae>states</span><span style=color:#1f2328>:</span><span style=color:#fff>
 </span></span></span><span style=display:flex><span><span style=color:#fff>  </span>- <span style=color:#0550ae>name</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>BACKLOG<span style=color:#fff>
 </span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>description</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>Task is created<span style=color:#fff>
 </span></span></span><span style=display:flex><span><span style=color:#fff>
@@ -79,7 +79,7 @@ follows:</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-mo
 </span></span></span><span style=display:flex><span><span style=color:#fff>  </span>- <span style=color:#0550ae>name</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>DISCARDED<span style=color:#fff>
 </span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>description</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>task is discarded<span style=color:#fff>
 </span></span></span><span style=display:flex><span><span style=color:#fff>
-</span></span></span><span style=display:flex><span><span style=color:#fff></span><span style=color:#0550ae>transitions</span><span style=color:#1f2328>:</span><span style=color:#fff>
+</span></span></span><span style=display:flex><span><span style=color:#0550ae>transitions</span><span style=color:#1f2328>:</span><span style=color:#fff>
 </span></span></span><span style=display:flex><span><span style=color:#fff>  </span>- <span style=color:#0550ae>from</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>BACKLOG<span style=color:#fff>
 </span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>to</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>NEW<span style=color:#fff>
 </span></span></span><span style=display:flex><span><span style=color:#fff>    </span><span style=color:#0550ae>eligible</span><span style=color:#1f2328>:</span><span style=color:#fff> </span>WFX<span style=color:#fff>
@@ -154,37 +154,37 @@ VALIDATE ─────┤
     │         │
     ▼         ▼
   DONE    DISCARDED
-</code></pre><h3 id=hands-on-playing-kanban>Hands-on: Playing Kanban</h3><p>Assuming the preceding Kanban workflow is saved in the file <code>wfx.workflow.kanban.yml</code>,</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>wfxctl workflow create --filter<span style=color:#0550ae>=</span>.transitions wfx.workflow.kanban.yml
+</code></pre><h3 id=hands-on-playing-kanban>Hands-on: Playing Kanban</h3><p>Assuming the preceding Kanban workflow is saved in the file <code>wfx.workflow.kanban.yml</code>,</p><div class=highlight><pre tabindex=0 style=background-color:#f7f7f7;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sh data-lang=sh><span style=display:flex><span>wfxctl workflow create --filter<span style=color:#0550ae>=</span>.transitions wfx.workflow.kanban.yml
 </span></span></code></pre></div><p>loads the Kanban workflow into wfx making it available to create jobs driven by it. Note that the the command&rsquo;s output
 was made less verbose by using a <code>--filter</code> to only show the transitions.</p><p>Henceforth, a job is identified with a &ldquo;Task&rdquo; and a state is identified with a &ldquo;Lane&rdquo; in Kanban board parlance. The
 Product Owner Parker as also owning and managing the Kanban &ldquo;Board&rdquo; instruments the northbound wfx management interface
 while Developers instrument the southbound client interface.</p><p>Now that the Kanban workflow is available, Product Owner Parker creates a new Backlog item ― overriding the Pull
-principle ― to be taken by the highly specialized Developer Dana:</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span><span style=color:#6639ba>echo</span> <span style=color:#0a3069>&#39;{ &#34;title&#34;: &#34;expose job api&#34; }&#39;</span> <span style=color:#1f2328>|</span> <span style=color:#0a3069>\
-</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>    wfxctl job create --workflow wfx.workflow.kanban <span style=color:#0a3069>\
-</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>                      --client-id dana <span style=color:#0a3069>\
-</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>                      --filter<span style=color:#0550ae>=</span><span style=color:#0a3069>&#39;del(.workflow)&#39;</span> -
+principle ― to be taken by the highly specialized Developer Dana:</p><div class=highlight><pre tabindex=0 style=background-color:#f7f7f7;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sh data-lang=sh><span style=display:flex><span><span style=color:#6639ba>echo</span> <span style=color:#0a3069>&#39;{ &#34;title&#34;: &#34;expose job api&#34; }&#39;</span> <span style=color:#1f2328>|</span> <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span>    wfxctl job create --workflow wfx.workflow.kanban <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span>                      --client-id dana <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span>                      --filter<span style=color:#0550ae>=</span><span style=color:#0a3069>&#39;del(.workflow)&#39;</span> -
 </span></span></code></pre></div><p>The Task is immediately transitioned to the &ldquo;NEW&rdquo; state (Kanban Lane) by wfx on behalf of the Product Owner Parker as
 the transition&rsquo;s <code>action</code> is <code>IMMEDIATE</code>. Note that the piped-in JSON document is the <em>Job Definition</em> (see
 <a href=../../wfx.openapi.yml>wfx OpenAPI
 Specification</a>) which is the contract between the operator (Product Owner) creating jobs (Tasks) and
-the clients (Developers) executing those jobs so that they&rsquo;re actually able to process the job.</p><p>Then, Developer Dana, knowing the job (Task) Identifier, pulls the task into &ldquo;PROGRESS&rdquo;</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>wfxctl job update-status <span style=color:#0a3069>\
-</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>    --actor<span style=color:#0550ae>=</span>client <span style=color:#0a3069>\
-</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>    --id<span style=color:#0550ae>=</span><span style=color:#0550ae>1</span> <span style=color:#0a3069>\
-</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>    --state<span style=color:#0550ae>=</span>PROGRESS
-</span></span></code></pre></div><p>and starts working on it.</p><p>Traditional tools like <code>curl</code> can also be used instead of <code>wfxctl</code> to achieve the same result:</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>curl -X PUT <span style=color:#0a3069>\
-</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>  http://localhost:8080/api/wfx/v1/jobs/1/status <span style=color:#0a3069>\
-</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>  -H <span style=color:#0a3069>&#39;Content-Type: application/json&#39;</span> <span style=color:#0a3069>\
-</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>  -H <span style=color:#0a3069>&#39;Accept: application/json&#39;</span> <span style=color:#0a3069>\
-</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>  -d <span style=color:#0a3069>&#39;{&#34;state&#34;:&#34;PROGRESS&#34;}&#39;</span>
-</span></span></code></pre></div><p>Meanwhile, Developer Dana sporadically reports progress</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>wfxctl job update-status <span style=color:#0a3069>\
-</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>    --actor<span style=color:#0550ae>=</span>client <span style=color:#0a3069>\
-</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>    --id<span style=color:#0550ae>=</span><span style=color:#0550ae>1</span> <span style=color:#0a3069>\
-</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>    --state<span style=color:#0550ae>=</span>PROGRESS <span style=color:#0a3069>\
-</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>    --progress <span style=color:#cf222e>$((</span>RANDOM <span style=color:#0550ae>%</span> <span style=color:#0550ae>100</span><span style=color:#cf222e>))</span>
-</span></span></code></pre></div><p>until having finished the task and progressing it into the &ldquo;VALIDATE&rdquo; state:</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>wfxctl job update-status <span style=color:#0a3069>\
-</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>    --actor<span style=color:#0550ae>=</span>client <span style=color:#0a3069>\
-</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>    --id<span style=color:#0550ae>=</span><span style=color:#0550ae>1</span> <span style=color:#0a3069>\
-</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>    --state<span style=color:#0550ae>=</span>VALIDATE
+the clients (Developers) executing those jobs so that they&rsquo;re actually able to process the job.</p><p>Then, Developer Dana, knowing the job (Task) Identifier, pulls the task into &ldquo;PROGRESS&rdquo;</p><div class=highlight><pre tabindex=0 style=background-color:#f7f7f7;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sh data-lang=sh><span style=display:flex><span>wfxctl job update-status <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span>    --actor<span style=color:#0550ae>=</span>client <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span>    --id<span style=color:#0550ae>=</span><span style=color:#0550ae>1</span> <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span>    --state<span style=color:#0550ae>=</span>PROGRESS
+</span></span></code></pre></div><p>and starts working on it.</p><p>Traditional tools like <code>curl</code> can also be used instead of <code>wfxctl</code> to achieve the same result:</p><div class=highlight><pre tabindex=0 style=background-color:#f7f7f7;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sh data-lang=sh><span style=display:flex><span>curl -X PUT <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span>  http://localhost:8080/api/wfx/v1/jobs/1/status <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span>  -H <span style=color:#0a3069>&#39;Content-Type: application/json&#39;</span> <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span>  -H <span style=color:#0a3069>&#39;Accept: application/json&#39;</span> <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span>  -d <span style=color:#0a3069>&#39;{&#34;state&#34;:&#34;PROGRESS&#34;}&#39;</span>
+</span></span></code></pre></div><p>Meanwhile, Developer Dana sporadically reports progress</p><div class=highlight><pre tabindex=0 style=background-color:#f7f7f7;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sh data-lang=sh><span style=display:flex><span>wfxctl job update-status <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span>    --actor<span style=color:#0550ae>=</span>client <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span>    --id<span style=color:#0550ae>=</span><span style=color:#0550ae>1</span> <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span>    --state<span style=color:#0550ae>=</span>PROGRESS <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span>    --progress <span style=color:#cf222e>$((</span>RANDOM <span style=color:#0550ae>%</span> <span style=color:#0550ae>100</span><span style=color:#cf222e>))</span>
+</span></span></code></pre></div><p>until having finished the task and progressing it into the &ldquo;VALIDATE&rdquo; state:</p><div class=highlight><pre tabindex=0 style=background-color:#f7f7f7;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sh data-lang=sh><span style=display:flex><span>wfxctl job update-status <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span>    --actor<span style=color:#0550ae>=</span>client <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span>    --id<span style=color:#0550ae>=</span><span style=color:#0550ae>1</span> <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span>    --state<span style=color:#0550ae>=</span>VALIDATE
 </span></span></code></pre></div><p>Then, Developer Dana may realize that the task result cannot be integrated into the Production software and may put it
 into &ldquo;DISCARDED&rdquo; or Product Owner Parker may come to the conclusion that no customer value is provided by the task
 result, also putting it into &ldquo;DISCARDED&rdquo; ― whoever realizes this first.</p><p>Or, if the task result greatly increases customer value, Developer Dana as being highly experienced may do the

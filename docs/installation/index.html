@@ -11,15 +11,15 @@ To start a container hosting wfx, follow these commands:
 <a href=https://github.com/siemens/wfx/releases target=_blank>here</a>
 for Linux, specifically
 <a href=https://go.dev/wiki/MinimumRequirements#amd64 target=_blank>x86_64</a> and
-<a href=https://go.dev/wiki/MinimumRequirements#arm64 target=_blank>arm64</a> architectures.</p><p>To start a container hosting wfx, follow these commands:</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#57606a># create a named volume to persist data (only needed the first time)</span>
+<a href=https://go.dev/wiki/MinimumRequirements#arm64 target=_blank>arm64</a> architectures.</p><p>To start a container hosting wfx, follow these commands:</p><div class=highlight><pre tabindex=0 style=background-color:#f7f7f7;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#57606a># create a named volume to persist data (only needed the first time)</span>
 </span></span><span style=display:flex><span>docker volume create wfx-db
 </span></span><span style=display:flex><span>docker run --rm -v wfx-db:/home/nonroot <span style=color:#0a3069>\
-</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>    -p 8080:8080 -p 8081:8081 <span style=color:#0a3069>\
-</span></span></span><span style=display:flex><span><span style=color:#0a3069></span>    ghcr.io/siemens/wfx:latest
+</span></span></span><span style=display:flex><span>    -p 8080:8080 -p 8081:8081 <span style=color:#0a3069>\
+</span></span></span><span style=display:flex><span>    ghcr.io/siemens/wfx:latest
 </span></span></code></pre></div><p>If pre-built binaries are not available (refer to <code>go tool dist list</code> for alternative platforms and architectures, such
 as Windows or macOS), or if specific features need to be disabled during compilation, building wfx from source is
 necessary.</p><h2 id=building-wfx>Building wfx</h2><p>A recent
-<a href=https://go.dev/ target=_blank>Go compiler</a> (see <code>go.mod</code>):</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#57606a># build wfx</span>
+<a href=https://go.dev/ target=_blank>Go compiler</a> (see <code>go.mod</code>):</p><div class=highlight><pre tabindex=0 style=background-color:#f7f7f7;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#57606a># build wfx</span>
 </span></span><span style=display:flex><span>go build
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span><span style=color:#57606a># build the rest (optional)</span>
@@ -32,13 +32,13 @@ all features are enabled. The following build tags are available:</p><table><the
 <a href=https://www.sqlite.org/ target=_blank>SQLite</a> support</td></tr><tr><td style=text-align:left><code>libsqlite3</code></td><td style=text-align:left>Dynamically link against <code>libsqlite3</code></td></tr><tr><td style=text-align:left><code>no_postgres</code></td><td style=text-align:left>Disable built-in
 <a href=https://www.postgresql.org target=_blank>PostgreSQL</a> support</td></tr><tr><td style=text-align:left><code>no_mysql</code></td><td style=text-align:left>Disable built-in
 <a href=https://www.mysql.com/ target=_blank>MySQL</a> support</td></tr><tr><td style=text-align:left><code>no_plugin</code></td><td style=text-align:left>Disable support for
-<a href=../../docs/operations/#plugins>external plugins</a></td></tr><tr><td style=text-align:left><code>no_swagger</code></td><td style=text-align:left>Disable legacy <code>swagger.json</code> endpoint</td></tr></tbody></table><p>Example:</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>go build -tags no_mysql,no_sqlite
+<a href=../../docs/operations/#plugins>external plugins</a></td></tr><tr><td style=text-align:left><code>no_swagger</code></td><td style=text-align:left>Disable legacy <code>swagger.json</code> endpoint</td></tr></tbody></table><p>Example:</p><div class=highlight><pre tabindex=0 style=background-color:#f7f7f7;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>go build -tags no_mysql,no_sqlite
 </span></span></code></pre></div><p>Note:</p><ul><li>wfx requires at least one persistent storage to save workflows and jobs</li><li>build tags can impact the size of the <code>wfx</code> binary file and may as well have implications for the software clearing
 process, including obligations that must be met</li></ul><h3 id=debian>Debian</h3><p>The Go toolchain provided by Debian <em>stable</em> is often outdated; it&rsquo;s typically end-of-life upstream but still maintained
 by Debian&rsquo;s security team. Therefore, to compile wfx from source in Debian <em>stable</em>, the <code>-backports</code> repository is
 necessary. In contrast, for Debian <em>testing</em>, it usually works out of the box since it ships with a recent version of
 the Go toolchain.</p><h2 id=installing-wfx>Installing wfx</h2><p>wfx&rsquo;s release binaries are statically linked and self-contained. Hence, an installation isn&rsquo;t strictly necessary,
-although if available, it&rsquo;s recommended to pick the distro packages (e.g. <code>*.deb</code> for Debian-based distros).</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>go install github.com/siemens/wfx@latest
+although if available, it&rsquo;s recommended to pick the distro packages (e.g. <code>*.deb</code> for Debian-based distros).</p><div class=highlight><pre tabindex=0 style=background-color:#f7f7f7;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>go install github.com/siemens/wfx@latest
 </span></span></code></pre></div><p>Alternatively, a pre-built
 <a href=https://www.debian.org target=_blank>Debian</a> package is
 <a href=https://github.com/siemens/wfx/releases target=_blank>provided</a>.</p><p>For convenience and ease of use, all binaries come with shell completions available for
