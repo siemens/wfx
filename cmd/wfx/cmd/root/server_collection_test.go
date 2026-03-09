@@ -83,7 +83,8 @@ func TestDownloadRedirect(t *testing.T) {
 	rec := httptest.NewRecorder()
 	mux.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/download", nil))
 	result := rec.Result()
-	assert.Equal(t, http.StatusMovedPermanently, result.StatusCode)
+	// this has changed from MovedPermanently to StatusTemporaryRedirect in Go 1.26, see https://go.dev/doc/go1.26
+	assert.True(t, result.StatusCode == http.StatusTemporaryRedirect || result.StatusCode == http.StatusMovedPermanently)
 	b, _ := io.ReadAll(result.Body)
 	assert.Contains(t, string(b), "/download/")
 }
