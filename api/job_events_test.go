@@ -13,15 +13,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 	"strings"
 	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
-
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 
 	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/internal/handler/job"
@@ -35,8 +31,6 @@ import (
 )
 
 func TestJobEventsSubscribe(t *testing.T) {
-	log.Logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.Stamp})
-
 	db := newInMemoryDB(t)
 	wf := dau.DirectWorkflow()
 	_, err := workflow.CreateWorkflow(context.Background(), db, wf)
