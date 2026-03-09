@@ -23,6 +23,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `wfxctl job events`: fixed usage of the `--workflow` flag to filter job events by workflow name. This flag was previously not considered.
 - `/download` now returns HTTP status 307 instead of 301 (this has changed in Golang 1.26, see https://go.dev/doc/go1.26)
 
+### Fixed
+
+- Enforce non-empty string validation for incoming params (e.g. `clientID`)
+
 ## [0.4.1] - 2025-08-28
 
 This is a maintenance release.

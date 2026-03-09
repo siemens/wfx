@@ -868,6 +868,7 @@ components:
           type: string
           nullable: false
           example: START
+          minLength: 1
         description:
           type: string
           example: Description of the state
@@ -883,6 +884,7 @@ components:
           type: string
           nullable: false
           example: OPEN
+          minLength: 1
         description:
           type: string
           example: Description of the group
@@ -905,10 +907,12 @@ components:
           type: string
           nullable: false
           example: START
+          minLength: 1
         to:
           type: string
           nullable: false
           example: END
+          minLength: 1
         description:
           type: string
           example: Description of the transition
@@ -951,11 +955,13 @@ components:
           nullable: false
           example: client42
           x-go-name: ClientID
+          minLength: 1
         workflow:
           type: string
           description: Workflow name
           nullable: false
           example: wfx.workflow.dau.direct
+          minLength: 1
         tags:
           $ref: "#/components/schemas/TagList"
         definition:
@@ -977,6 +983,7 @@ components:
           description: Name of the new workflow state
           nullable: false
           example: END
+          minLength: 1
         clientId:
           type: string
           description: Client which sent the status update
@@ -1020,6 +1027,7 @@ components:
         - id
       properties:
         id:
+          minLength: 1
           maxLength: 36
           type: string
           description: Unique job ID (wfx-generated)
