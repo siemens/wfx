@@ -22,24 +22,16 @@ command line parameter or present in one of the default search locations, see &l
 &lt;/ol&gt;
 &lt;p&gt;Note that wfx supports configuration file live reloading so that a running wfx instance can be reconfigured without the
 need for restarting it.&lt;/p&gt;
-&lt;p&gt;Without configuration,&lt;/p&gt;</description></item><item><title>Operations</title><link>/docs/operations/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/docs/operations/</guid><description>&lt;h2 id="api"&gt;API&lt;/h2&gt;
-&lt;p&gt;wfx provides two RESTful APIs to interact with it: the northbound operator/management interface and the southbound
-interface used by clients as illustrated in the following figure:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="background-color:#f7f7f7;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-txt" data-lang="txt"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Management
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; │
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; │
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ▼ Northbound API
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;┌──────────────────┐
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;│ wfx │
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;└──────────────────┘
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ▲ Southbound API
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; │
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; │
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Device
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The northbound API is used to create jobs and execute server-side state transitions, whereas the southbound API is used
-for client-side transitions.&lt;/p&gt;</description></item><item><title>REST API</title><link>/docs/api/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/docs/api/</guid><description>&lt;div id="docsy_swagger_ui"&gt;&lt;/div&gt;
+&lt;p&gt;Without configuration,&lt;/p&gt;</description></item><item><title>Operations</title><link>/docs/operations/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/docs/operations/</guid><description>&lt;h2 id="ui"&gt;UI&lt;/h2&gt;
+&lt;p&gt;A Web UI is available, currently in an experimental state, allowing you to explore wfx&amp;rsquo;s state within a Web browser.
+This UI must be built separately and can optionally be embedded into the wfx binary by using a build tag (see
+
+&lt;a href="../docs/installation/#build-tags"&gt;Installation&lt;/a&gt;). When enabled, the UI is accessible through the northbound interface at the
+&lt;code&gt;/ui&lt;/code&gt; path, defaulting to 
+&lt;a href="http://localhost:8081/ui/" target="_blank"&gt;http://localhost:8081/ui/&lt;/a&gt;:&lt;/p&gt;
+&lt;p&gt;
+&lt;a href="../ui-jobs-table.png"&gt;&lt;img src="../ui-jobs-table.png" alt="wfxui" /&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Note&lt;/strong&gt;: The UI is intentionally read-only; it is not possible to perform any write operations within wfx.&lt;/p&gt;</description></item><item><title>REST API</title><link>/docs/api/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/docs/api/</guid><description>&lt;div id="docsy_swagger_ui"&gt;&lt;/div&gt;
 &lt;script&gt;
  window.onload = function () {
  const ui = SwaggerUIBundle({
