@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"slices"
 	"sync"
 	"time"
 
@@ -32,6 +33,7 @@ import (
 	"github.com/siemens/wfx/middleware/plugin"
 	"github.com/siemens/wfx/persistence"
 	"github.com/siemens/wfx/spec"
+	"github.com/siemens/wfx/ui"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -76,7 +78,9 @@ func NewServerCollection(cfg *config.AppConfig, storage persistence.Storage) (*S
 		pluginErrors = append(pluginErrors, mw.Errors())
 	}
 
-	northServer, err := createServer(cfg, api.NewNorthboundServer(wfx), middlewares, northPluginMWs)
+	basePath := errutil.Must(swag.Servers.BasePath())
+	mux := createMux(cfg, basePath, ui.Enabled)
+	northServer, err := createServer(cfg, api.NewNorthboundServer(wfx), mux, middlewares, northPluginMWs)
 	if err != nil {
 		return nil, fault.Wrap(err)
 	}
@@ -91,7 +95,9 @@ func NewServerCollection(cfg *config.AppConfig, storage persistence.Storage) (*S
 		pluginErrors = append(pluginErrors, mw.Errors())
 	}
 
-	southServer, err := createServer(cfg, api.NewSouthboundServer(wfx), middlewares, southPluginMWs)
+	// southbound, UI is always disabled
+	mux = createMux(cfg, basePath, false)
+	southServer, err := createServer(cfg, api.NewSouthboundServer(wfx), mux, middlewares, southPluginMWs)
 	if err != nil {
 		return nil, fault.Wrap(err)
 	}
@@ -203,6 +209,11 @@ func (sc *ServerCollection) Start() error {
 			}
 			return nil
 		})
+
+		if slices.Contains(buildTags, "ui") {
+			url := fmt.Sprintf("%s://%s/ui", scheme, northListener.Addr())
+			log.Info().Msg(fmt.Sprintf("Serving UI at %s", url))
+		}
 	}
 
 	if len(sc.pluginErrors) > 0 {
@@ -290,7 +301,7 @@ func (sc *ServerCollection) Stop() {
 	})
 }
 
-func createServer(cfg *config.AppConfig, ssi genApi.StrictServerInterface, baseMWs []genApi.MiddlewareFunc, pluginMWs []*plugin.Middleware) (*http.Server, error) {
+func createServer(cfg *config.AppConfig, ssi genApi.StrictServerInterface, router *http.ServeMux, baseMWs []genApi.MiddlewareFunc, pluginMWs []*plugin.Middleware) (*http.Server, error) {
 	combinedMWs := make([]genApi.MiddlewareFunc, 0, len(baseMWs)+len(pluginMWs))
 	combinedMWs = append(combinedMWs, baseMWs...)
 	for _, mw := range pluginMWs {
@@ -300,9 +311,11 @@ func createServer(cfg *config.AppConfig, ssi genApi.StrictServerInterface, baseM
 	swag, _ := genApi.GetSwagger()
 	basePath := errutil.Must(swag.Servers.BasePath())
 	strictHandler := genApi.NewStrictHandler(ssi, nil)
+	router.HandleFunc("GET /version", strictHandler.GetVersion)
+	router.HandleFunc("GET /health", strictHandler.GetHealth)
 	handler := genApi.HandlerWithOptions(strictHandler, genApi.StdHTTPServerOptions{
 		BaseURL:     basePath,
-		BaseRouter:  createMux(cfg, strictHandler),
+		BaseRouter:  router,
 		Middlewares: combinedMWs,
 	})
 	server, err := server.NewHTTPServer(cfg, handler)
@@ -363,10 +376,8 @@ func createListener(scheme config.Scheme, settings ListenerSettings) (net.Listen
 	return nil, errors.New("failed to create listener")
 }
 
-func createMux(cfg *config.AppConfig, server genApi.ServerInterface) *http.ServeMux {
+func createMux(cfg *config.AppConfig, basePath string, registerUI bool) *http.ServeMux {
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /version", func(w http.ResponseWriter, r *http.Request) { server.GetVersion(w, r) })
-	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) { server.GetHealth(w, r) })
 	mux.HandleFunc("GET /download/", func(w http.ResponseWriter, r *http.Request) {
 		rootDir := cfg.SimpleFileserver()
 		enabled := rootDir != ""
@@ -379,6 +390,15 @@ func createMux(cfg *config.AppConfig, server genApi.ServerInterface) *http.Serve
 			_, _ = w.Write([]byte(`{"code":404,"message":"path /download is not served as simple file server is not enabled"}`))
 		}
 	})
+
+	if registerUI {
+		mux.HandleFunc("GET /ui", func(w http.ResponseWriter, r *http.Request) {
+			http.Redirect(w, r, "/ui/", http.StatusMovedPermanently)
+		})
+		uiMux := ui.Mux(basePath, "/ui")
+		mux.Handle("GET /ui/", http.StripPrefix("/ui", uiMux))
+		mux.Handle("GET /favicon.ico", ui.FaviconHandler())
+	}
 
 	for pattern, handler := range spec.Handlers {
 		mux.Handle(pattern, handler)

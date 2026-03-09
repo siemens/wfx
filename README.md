@@ -12,6 +12,8 @@
 
 A lightweight, general-purpose workflow executor.
 
+[![wfxui](./docs/images/wfxui.gif)](./docs/images/wfxui.gif)
+
 ## Overview
 
 [_Workflows_](docs/workflows.md) are modeled as finite-state machines and are instantiated as [_Jobs_](docs/workflows.md#jobs) through which the wfx and a client progress in lock-step to perform a task.
