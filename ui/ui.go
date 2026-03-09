@@ -1,14 +1,14 @@
 //go:build ui
 
-//go:generate zstd -f -19 priv/static/app.min.mjs
-//go:generate openssl dgst -r -sha256 -out priv/static/app.min.mjs.sha256 priv/static/app.min.mjs
-//go:generate sed -i -e "s/ .*//" priv/static/app.min.mjs.sha256
+//go:generate zstd -f -19 dist/app.js
+//go:generate openssl dgst -r -sha256 -out dist/app.js.sha256 dist/app.js
+//go:generate sed -i -e "s/ .*//" dist/app.js.sha256
 
-//go:generate zstd -f -19 priv/static/app.min.css
-//go:generate openssl dgst -r -sha256 -out priv/static/app.min.css.sha256 priv/static/app.min.css
-//go:generate sed -i -e "s/ .*//" priv/static/app.min.css.sha256
+//go:generate zstd -f -19 dist/app.css
+//go:generate openssl dgst -r -sha256 -out dist/app.css.sha256 dist/app.css
+//go:generate sed -i -e "s/ .*//" dist/app.css.sha256
 
-//go:generate zstd -f -19 -o priv/static/logo.svg.zst ../hugo/static/images/logo.svg
+//go:generate zstd -f -19 -o dist/logo.svg.zst ../hugo/static/images/logo.svg
 
 package ui
 
@@ -38,19 +38,19 @@ var indexTmpl string
 
 var indexHTML []byte
 
-//go:embed priv/static/app.min.mjs.zst
+//go:embed dist/app.js.zst
 var appJs []byte
 
-//go:embed priv/static/app.min.mjs.sha256
+//go:embed dist/app.js.sha256
 var appJsHash string
 
-//go:embed priv/static/app.min.css.zst
+//go:embed dist/app.css.zst
 var appCss []byte
 
-//go:embed priv/static/app.min.css.sha256
+//go:embed dist/app.css.sha256
 var appCssHash string
 
-//go:embed priv/static/logo.svg.zst
+//go:embed dist/logo.svg.zst
 var LogoSVG []byte
 
 type TemplateData struct {

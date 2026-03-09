@@ -3,5 +3,6 @@ node_modules
 *.ez
 *.dump
 build
-priv/static
+/dist
 /index.html
+/.lustre

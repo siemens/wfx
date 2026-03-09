@@ -27,7 +27,7 @@ jobs:
         uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8
         with:
           name: ui
-          path: ui/priv/static
+          path: ui/dist
       - name: Export Golang version as env variable
         run: |
           GO_VERSION=$(sed -n 's/.*container: golang:\([0-9]*\.[0-9]*\.[0-9]*\).*/\1/p' .github/workflows/ci.yml | head -n1)
@@ -93,7 +93,7 @@ jobs:
         uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8
         with:
           name: ui
-          path: ui/priv/static
+          path: ui/dist
       - run: apt-get update -q && apt-get install -q -y --no-install-recommends zstd
       - run: go generate -tags ui ./ui
       - run: go test -race -coverprofile=coverage1.out -covermode=atomic -timeout 30s --tags=testing,ui ./...
@@ -280,7 +280,7 @@ jobs:
         uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8
         with:
           name: ui
-          path: ui/priv/static
+          path: ui/dist
       - run: .ci/setup-lint.sh
       - run: go generate -tags ui ./ui
       - name: Disable git security features
@@ -374,7 +374,7 @@ jobs:
         with:
           name: ui
           path: |
-            ui/priv/static/*
+            ui/dist/*
           retention-days: 1
 
   test-ui:
@@ -390,7 +390,7 @@ jobs:
         uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8
         with:
           name: ui
-          path: ui/priv/static
+          path: ui/dist
       - name: Download wfx
         uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8
         with:
@@ -457,7 +457,7 @@ jobs:
         uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8
         with:
           name: ui
-          path: ui/priv/static/
+          path: ui/dist/
       - name: Export Golang version as env variable
         run: |
           GO_VERSION=$(sed -n 's/.*container: golang:\([0-9]*\.[0-9]*\.[0-9]*\).*/\1/p' .github/workflows/ci.yml | head -n1)

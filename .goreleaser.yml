@@ -173,10 +173,10 @@ archives:
     formats: ["tar.zst"]
     files:
       - LICENSE
-      - src: ui/priv/static/app.min.mjs
-        dst: app.min.mjs
-      - src: ui/priv/static/app.min.css
-        dst: app.min.css
+      - src: ui/dist/app.js
+        dst: app.js
+      - src: ui/dist/app.css
+        dst: app.css
       - src: ui/index.html.tmpl
         dst: index.html.tmpl
 
