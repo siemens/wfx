@@ -1,12 +1,16 @@
-<p align="center" width="100%"><img src="hugo/static/images/logo.svg" width="400"/></p>
+<p align="center" width="100%"><img src="hugo/static/images/logo.svg" width="100"/></p>
 
-# wfx
-
-A lightweight, general-purpose workflow executor.
+<div align="center">
 
 [![CI](https://github.com/siemens/wfx/actions/workflows/ci.yml/badge.svg)](https://github.com/siemens/wfx/actions/workflows/ci.yml)
 [![Pages](https://github.com/siemens/wfx/actions/workflows/pages.yml/badge.svg)](https://github.com/siemens/wfx/actions/workflows/pages.yml)
 [![Coverage](https://codecov.io/github/siemens/wfx/coverage.svg?branch=main)](https://codecov.io/github/siemens/wfx?branch=main)
+
+</div>
+
+# wfx
+
+A lightweight, general-purpose workflow executor.
 
 ## Overview
 
