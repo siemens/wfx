@@ -1,6 +1,6 @@
 //go:build !no_plugin
 
-package root
+package server
 
 /*
  * SPDX-FileCopyrightText: 2023 Siemens AG

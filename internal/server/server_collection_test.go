@@ -1,4 +1,4 @@
-package root
+package server
 
 /*
  * SPDX-FileCopyrightText: 2024 Siemens AG
@@ -31,7 +31,7 @@ import (
 
 func TestNewServerCollection(t *testing.T) {
 	dbMock := persistence.NewHealthyMockStorage(t)
-	sc, err := NewServerCollection(new(config.AppConfig), dbMock)
+	sc, err := NewServerCollection(new(config.AppConfig), nil, dbMock)
 	assert.NotNil(t, sc)
 	assert.NoError(t, err)
 }
@@ -50,7 +50,7 @@ func TestCreateServer_UseMiddlewares(t *testing.T) {
 	middlewares := []genAPI.MiddlewareFunc{myMW}
 	cfg := new(config.AppConfig)
 	mux := createMux(cfg, "/api/wfx/v1", false)
-	server, err := createServer(cfg, api.NewNorthboundServer(wfx), mux, middlewares, nil)
+	server, err := createServer(cfg, NewNorthboundServer(wfx), mux, middlewares, nil)
 	require.NoError(t, err)
 
 	rec := httptest.NewRecorder()

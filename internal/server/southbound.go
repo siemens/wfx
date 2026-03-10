@@ -1,4 +1,4 @@
-package api
+package server
 
 /*
  * SPDX-FileCopyrightText: 2024 Siemens AG
@@ -11,6 +11,8 @@ package api
 import (
 	"context"
 
+	"github.com/Southclaws/fault"
+	wfxAPI "github.com/siemens/wfx/api"
 	"github.com/siemens/wfx/generated/api"
 )
 
@@ -18,16 +20,20 @@ import (
 var _ api.StrictServerInterface = (*SouthboundServer)(nil)
 
 type SouthboundServer struct {
-	wfx *WfxServer
+	wfx api.StrictServerInterface
 }
 
-func NewSouthboundServer(wfx *WfxServer) SouthboundServer {
+func NewSouthboundServer(wfx api.StrictServerInterface) SouthboundServer {
 	return SouthboundServer{wfx: wfx}
 }
 
 //revive:disable:var-naming
 func (south SouthboundServer) GetJobs(ctx context.Context, request api.GetJobsRequestObject) (api.GetJobsResponseObject, error) {
-	return south.wfx.GetJobs(ctx, request)
+	resp, err := south.wfx.GetJobs(ctx, request)
+	if err != nil {
+		return nil, fault.Wrap(err)
+	}
+	return resp, nil
 }
 
 func (south SouthboundServer) PostJobs(context.Context, api.PostJobsRequestObject) (api.PostJobsResponseObject, error) {
@@ -35,7 +41,11 @@ func (south SouthboundServer) PostJobs(context.Context, api.PostJobsRequestObjec
 }
 
 func (south SouthboundServer) GetJobsEvents(ctx context.Context, request api.GetJobsEventsRequestObject) (api.GetJobsEventsResponseObject, error) {
-	return south.wfx.GetJobsEvents(ctx, request)
+	resp, err := south.wfx.GetJobsEvents(ctx, request)
+	if err != nil {
+		return nil, fault.Wrap(err)
+	}
+	return resp, nil
 }
 
 func (south SouthboundServer) DeleteJobsId(context.Context, api.DeleteJobsIdRequestObject) (api.DeleteJobsIdResponseObject, error) {
@@ -43,23 +53,43 @@ func (south SouthboundServer) DeleteJobsId(context.Context, api.DeleteJobsIdRequ
 }
 
 func (south SouthboundServer) GetJobsId(ctx context.Context, request api.GetJobsIdRequestObject) (api.GetJobsIdResponseObject, error) {
-	return south.wfx.GetJobsId(ctx, request)
+	resp, err := south.wfx.GetJobsId(ctx, request)
+	if err != nil {
+		return nil, fault.Wrap(err)
+	}
+	return resp, nil
 }
 
 func (south SouthboundServer) GetJobsIdDefinition(ctx context.Context, request api.GetJobsIdDefinitionRequestObject) (api.GetJobsIdDefinitionResponseObject, error) {
-	return south.wfx.GetJobsIdDefinition(ctx, request)
+	resp, err := south.wfx.GetJobsIdDefinition(ctx, request)
+	if err != nil {
+		return nil, fault.Wrap(err)
+	}
+	return resp, nil
 }
 
 func (south SouthboundServer) PutJobsIdDefinition(ctx context.Context, request api.PutJobsIdDefinitionRequestObject) (api.PutJobsIdDefinitionResponseObject, error) {
-	return south.wfx.PutJobsIdDefinition(ctx, request)
+	resp, err := south.wfx.PutJobsIdDefinition(ctx, request)
+	if err != nil {
+		return nil, fault.Wrap(err)
+	}
+	return resp, nil
 }
 
 func (south SouthboundServer) GetJobsIdStatus(ctx context.Context, request api.GetJobsIdStatusRequestObject) (api.GetJobsIdStatusResponseObject, error) {
-	return south.wfx.GetJobsIdStatus(ctx, request)
+	resp, err := south.wfx.GetJobsIdStatus(ctx, request)
+	if err != nil {
+		return nil, fault.Wrap(err)
+	}
+	return resp, nil
 }
 
 func (south SouthboundServer) PutJobsIdStatus(ctx context.Context, request api.PutJobsIdStatusRequestObject) (api.PutJobsIdStatusResponseObject, error) {
-	return south.wfx.PutJobsIdStatus(ctx, request, api.CLIENT)
+	resp, err := south.wfx.PutJobsIdStatus(context.WithValue(ctx, wfxAPI.EligibleKey, api.CLIENT), request)
+	if err != nil {
+		return nil, fault.Wrap(err)
+	}
+	return resp, nil
 }
 
 func (south SouthboundServer) DeleteJobsIdTags(context.Context, api.DeleteJobsIdTagsRequestObject) (api.DeleteJobsIdTagsResponseObject, error) {
@@ -67,7 +97,11 @@ func (south SouthboundServer) DeleteJobsIdTags(context.Context, api.DeleteJobsId
 }
 
 func (south SouthboundServer) GetJobsIdTags(ctx context.Context, request api.GetJobsIdTagsRequestObject) (api.GetJobsIdTagsResponseObject, error) {
-	return south.wfx.GetJobsIdTags(ctx, request)
+	resp, err := south.wfx.GetJobsIdTags(ctx, request)
+	if err != nil {
+		return nil, fault.Wrap(err)
+	}
+	return resp, nil
 }
 
 func (south SouthboundServer) PostJobsIdTags(context.Context, api.PostJobsIdTagsRequestObject) (api.PostJobsIdTagsResponseObject, error) {
@@ -75,7 +109,11 @@ func (south SouthboundServer) PostJobsIdTags(context.Context, api.PostJobsIdTags
 }
 
 func (south SouthboundServer) GetWorkflows(ctx context.Context, request api.GetWorkflowsRequestObject) (api.GetWorkflowsResponseObject, error) {
-	return south.wfx.GetWorkflows(ctx, request)
+	resp, err := south.wfx.GetWorkflows(ctx, request)
+	if err != nil {
+		return nil, fault.Wrap(err)
+	}
+	return resp, nil
 }
 
 func (south SouthboundServer) PostWorkflows(context.Context, api.PostWorkflowsRequestObject) (api.PostWorkflowsResponseObject, error) {
@@ -87,13 +125,25 @@ func (south SouthboundServer) DeleteWorkflowsName(context.Context, api.DeleteWor
 }
 
 func (south SouthboundServer) GetWorkflowsName(ctx context.Context, request api.GetWorkflowsNameRequestObject) (api.GetWorkflowsNameResponseObject, error) {
-	return south.wfx.GetWorkflowsName(ctx, request)
+	resp, err := south.wfx.GetWorkflowsName(ctx, request)
+	if err != nil {
+		return nil, fault.Wrap(err)
+	}
+	return resp, nil
 }
 
 func (south SouthboundServer) GetHealth(ctx context.Context, request api.GetHealthRequestObject) (api.GetHealthResponseObject, error) {
-	return south.wfx.GetHealth(ctx, request)
+	resp, err := south.wfx.GetHealth(ctx, request)
+	if err != nil {
+		return nil, fault.Wrap(err)
+	}
+	return resp, nil
 }
 
 func (south SouthboundServer) GetVersion(ctx context.Context, request api.GetVersionRequestObject) (api.GetVersionResponseObject, error) {
-	return south.wfx.GetVersion(ctx, request)
+	resp, err := south.wfx.GetVersion(ctx, request)
+	if err != nil {
+		return nil, fault.Wrap(err)
+	}
+	return resp, nil
 }

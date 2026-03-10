@@ -1,4 +1,4 @@
-package api
+package server
 
 /*
  * SPDX-FileCopyrightText: 2023 Siemens AG
@@ -30,9 +30,7 @@ func TestNorthboundDeleteWorkflowsNameHandle_NotFound(t *testing.T) {
 	dbMock := persistence.NewHealthyMockStorage(t)
 	dbMock.EXPECT().DeleteWorkflow(context.Background(), workflow).Return(fault.Wrap(errors.New("workflow not found"), ftag.With(ftag.NotFound)))
 
-	wfx := NewWfxServer(dbMock)
-	t.Cleanup(func() { wfx.Stop() })
-	server := NewNorthboundServer(wfx)
+	server := createServerForTesting(t, "north", dbMock)
 	resp, err := server.DeleteWorkflowsName(context.Background(), api.DeleteWorkflowsNameRequestObject{Name: workflow})
 	assert.NoError(t, err)
 
@@ -49,9 +47,7 @@ func TestNorthboundDeleteWorkflowsNameHandle_InternalError(t *testing.T) {
 	dbMock := persistence.NewHealthyMockStorage(t)
 	dbMock.EXPECT().DeleteWorkflow(context.Background(), workflow).Return(errors.New("something went wrong"))
 
-	wfx := NewWfxServer(dbMock)
-	t.Cleanup(func() { wfx.Stop() })
-	server := NewNorthboundServer(wfx)
+	server := createServerForTesting(t, "north", dbMock)
 	resp, err := server.DeleteWorkflowsName(context.Background(), api.DeleteWorkflowsNameRequestObject{Name: workflow})
 	assert.Error(t, err)
 	assert.Nil(t, resp)
@@ -62,9 +58,7 @@ func TestNorthboundPostWorkflows_InternalError(t *testing.T) {
 	dbMock := persistence.NewHealthyMockStorage(t)
 	dbMock.EXPECT().CreateWorkflow(context.Background(), workflow).Return(nil, errors.New("something went wrong"))
 
-	wfx := NewWfxServer(dbMock)
-	t.Cleanup(func() { wfx.Stop() })
-	server := NewNorthboundServer(wfx)
+	server := createServerForTesting(t, "north", dbMock)
 	resp, err := server.PostWorkflows(context.Background(), api.PostWorkflowsRequestObject{Body: workflow})
 	assert.Error(t, err)
 	assert.Nil(t, resp)
@@ -76,9 +70,7 @@ func TestNorthboundPostWorkflows_AlreadyExists(t *testing.T) {
 	dbMock := persistence.NewHealthyMockStorage(t)
 	dbMock.EXPECT().CreateWorkflow(context.Background(), workflow).Return(nil, fault.Wrap(errors.New("already exists"), ftag.With(ftag.AlreadyExists)))
 
-	wfx := NewWfxServer(dbMock)
-	t.Cleanup(func() { wfx.Stop() })
-	server := NewNorthboundServer(wfx)
+	server := createServerForTesting(t, "north", dbMock)
 
 	resp, err := server.PostWorkflows(context.Background(), api.PostWorkflowsRequestObject{Body: workflow})
 	assert.NoError(t, err)
@@ -95,9 +87,7 @@ func TestNorthboundPostWorkflows_InvalidWorkflow(t *testing.T) {
 
 	dbMock := persistence.NewHealthyMockStorage(t)
 
-	wfx := NewWfxServer(dbMock)
-	t.Cleanup(func() { wfx.Stop() })
-	server := NewNorthboundServer(wfx)
+	server := createServerForTesting(t, "north", dbMock)
 
 	resp, err := server.PostWorkflows(context.Background(), api.PostWorkflowsRequestObject{Body: workflow})
 	assert.NoError(t, err)
@@ -116,9 +106,7 @@ func TestNorthboundPostJobs_BadRequest(t *testing.T) {
 	dbMock := persistence.NewHealthyMockStorage(t)
 	dbMock.EXPECT().GetWorkflow(context.Background(), wf.Name).Return(nil, fault.Wrap(errors.New("invalid"), ftag.With(ftag.NotFound)))
 
-	wfx := NewWfxServer(dbMock)
-	t.Cleanup(func() { wfx.Stop() })
-	server := NewNorthboundServer(wfx)
+	server := createServerForTesting(t, "north", dbMock)
 
 	resp, err := server.PostJobs(context.Background(), api.PostJobsRequestObject{Body: &jobRequest})
 	assert.NoError(t, err)
@@ -138,9 +126,7 @@ func TestNorthboundPostJobs_InternalError(t *testing.T) {
 	dbMock.EXPECT().GetWorkflow(context.Background(), wf.Name).Return(wf, nil)
 	dbMock.EXPECT().CreateJob(context.Background(), mock.Anything).Return(nil, errors.New("something went wrong"))
 
-	wfx := NewWfxServer(dbMock)
-	t.Cleanup(func() { wfx.Stop() })
-	server := NewNorthboundServer(wfx)
+	server := createServerForTesting(t, "north", dbMock)
 
 	resp, err := server.PostJobs(context.Background(), api.PostJobsRequestObject{Body: &jobRequest})
 	assert.Error(t, err)
@@ -153,9 +139,7 @@ func TestNorthboundDeleteJobsID_NotFound(t *testing.T) {
 	dbMock := persistence.NewHealthyMockStorage(t)
 	dbMock.EXPECT().GetJob(context.Background(), jobID, persistence.FetchParams{}).Return(nil, fault.Wrap(errors.New("not found"), ftag.With(ftag.NotFound)))
 
-	wfx := NewWfxServer(dbMock)
-	t.Cleanup(func() { wfx.Stop() })
-	server := NewNorthboundServer(wfx)
+	server := createServerForTesting(t, "north", dbMock)
 
 	resp, err := server.DeleteJobsId(context.Background(), api.DeleteJobsIdRequestObject{Id: jobID})
 	assert.NoError(t, err)
@@ -174,9 +158,7 @@ func TestNorthboundDeleteJobsID_InternalError(t *testing.T) {
 	dbMock.EXPECT().GetJob(context.Background(), jobID, persistence.FetchParams{}).Return(&api.Job{ID: jobID}, nil)
 	dbMock.EXPECT().DeleteJob(context.Background(), jobID).Return(fault.Wrap(errors.New("something went wrong"), ftag.With(ftag.Internal)))
 
-	wfx := NewWfxServer(dbMock)
-	t.Cleanup(func() { wfx.Stop() })
-	server := NewNorthboundServer(wfx)
+	server := createServerForTesting(t, "north", dbMock)
 
 	resp, err := server.DeleteJobsId(context.Background(), api.DeleteJobsIdRequestObject{Id: jobID})
 	assert.Error(t, err)
@@ -189,9 +171,7 @@ func TestNorthboundPostJobsIDTags_NotFound(t *testing.T) {
 	dbMock := persistence.NewHealthyMockStorage(t)
 	dbMock.EXPECT().GetJob(context.Background(), jobID, persistence.FetchParams{}).Return(nil, fault.Wrap(errors.New("not found"), ftag.With(ftag.NotFound)))
 
-	wfx := NewWfxServer(dbMock)
-	t.Cleanup(func() { wfx.Stop() })
-	server := NewNorthboundServer(wfx)
+	server := createServerForTesting(t, "north", dbMock)
 
 	resp, err := server.PostJobsIdTags(context.Background(), api.PostJobsIdTagsRequestObject{Id: jobID})
 	assert.NoError(t, err)
@@ -209,9 +189,7 @@ func TestNorthboundPostJobsIDTags_InternalError(t *testing.T) {
 	dbMock := persistence.NewHealthyMockStorage(t)
 	dbMock.EXPECT().GetJob(context.Background(), jobID, persistence.FetchParams{}).Return(nil, fault.Wrap(errors.New("something went wrong"), ftag.With(ftag.Internal)))
 
-	wfx := NewWfxServer(dbMock)
-	t.Cleanup(func() { wfx.Stop() })
-	server := NewNorthboundServer(wfx)
+	server := createServerForTesting(t, "north", dbMock)
 
 	resp, err := server.PostJobsIdTags(context.Background(), api.PostJobsIdTagsRequestObject{Id: jobID})
 	assert.Error(t, err)
@@ -224,9 +202,7 @@ func TestNorthboundDeleteJobsIDTags_NoBody(t *testing.T) {
 	dbMock := persistence.NewHealthyMockStorage(t)
 	dbMock.EXPECT().GetJob(context.Background(), jobID, persistence.FetchParams{}).Return(nil, fault.Wrap(errors.New("not found"), ftag.With(ftag.NotFound)))
 
-	wfx := NewWfxServer(dbMock)
-	t.Cleanup(func() { wfx.Stop() })
-	server := NewNorthboundServer(wfx)
+	server := createServerForTesting(t, "north", dbMock)
 
 	resp, err := server.DeleteJobsIdTags(context.Background(), api.DeleteJobsIdTagsRequestObject{Id: jobID})
 	assert.NoError(t, err)
@@ -244,9 +220,7 @@ func TestNorthboundDeleteJobsIDTags_NotFound(t *testing.T) {
 	dbMock := persistence.NewHealthyMockStorage(t)
 	dbMock.EXPECT().GetJob(context.Background(), jobID, persistence.FetchParams{}).Return(nil, fault.Wrap(errors.New("not found"), ftag.With(ftag.NotFound)))
 
-	wfx := NewWfxServer(dbMock)
-	t.Cleanup(func() { wfx.Stop() })
-	server := NewNorthboundServer(wfx)
+	server := createServerForTesting(t, "north", dbMock)
 
 	resp, err := server.DeleteJobsIdTags(context.Background(), api.DeleteJobsIdTagsRequestObject{Id: jobID, Body: &api.DeleteJobsIdTagsJSONRequestBody{}})
 	assert.NoError(t, err)
@@ -264,9 +238,7 @@ func TestNorthboundDeleteJobsIDTags_InternalError(t *testing.T) {
 	dbMock := persistence.NewHealthyMockStorage(t)
 	dbMock.EXPECT().GetJob(context.Background(), jobID, persistence.FetchParams{}).Return(nil, fault.Wrap(errors.New("not found"), ftag.With(ftag.Internal)))
 
-	wfx := NewWfxServer(dbMock)
-	t.Cleanup(func() { wfx.Stop() })
-	server := NewNorthboundServer(wfx)
+	server := createServerForTesting(t, "north", dbMock)
 
 	resp, err := server.DeleteJobsIdTags(context.Background(), api.DeleteJobsIdTagsRequestObject{Id: jobID, Body: &api.DeleteJobsIdTagsJSONRequestBody{}})
 	assert.Error(t, err)

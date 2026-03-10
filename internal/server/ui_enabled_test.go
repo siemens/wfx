@@ -1,6 +1,6 @@
 //go:build ui
 
-package root
+package server
 
 /*
  * SPDX-FileCopyrightText: 2026 Siemens AG
@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"testing"
 
+	wfxAPI "github.com/siemens/wfx/api"
 	"github.com/siemens/wfx/cmd/wfx/cmd/config"
 	"github.com/siemens/wfx/persistence"
 	"github.com/steinfletcher/apitest"
@@ -22,19 +23,20 @@ import (
 
 func TestUIRedirect(t *testing.T) {
 	dbMock := persistence.NewHealthyMockStorage(t)
-	sc, err := NewServerCollection(new(config.AppConfig), dbMock)
+	wfx := wfxAPI.NewWfxServer(dbMock)
+	sc, err := NewServerCollection(new(config.AppConfig), wfx, dbMock)
 	require.NotNil(t, sc)
 	require.NoError(t, err)
 
 	apitest.New().
-		Handler(sc.north.Handler).
+		Handler(sc.North.Handler).
 		Get("/ui").
 		Expect(t).
 		Status(http.StatusMovedPermanently).
 		End()
 
 	apitest.New().
-		Handler(sc.south.Handler).
+		Handler(sc.South.Handler).
 		Get("/ui").
 		Expect(t).
 		Status(http.StatusNotFound).
@@ -43,19 +45,20 @@ func TestUIRedirect(t *testing.T) {
 
 func TestUI(t *testing.T) {
 	dbMock := persistence.NewHealthyMockStorage(t)
-	sc, err := NewServerCollection(new(config.AppConfig), dbMock)
+	wfx := wfxAPI.NewWfxServer(dbMock)
+	sc, err := NewServerCollection(new(config.AppConfig), wfx, dbMock)
 	require.NotNil(t, sc)
 	require.NoError(t, err)
 
 	apitest.New().
-		Handler(sc.north.Handler).
+		Handler(sc.North.Handler).
 		Get("/ui/").
 		Expect(t).
 		Status(http.StatusOK).
 		End()
 
 	apitest.New().
-		Handler(sc.south.Handler).
+		Handler(sc.South.Handler).
 		Get("/ui/").
 		Expect(t).
 		Status(http.StatusNotFound).
