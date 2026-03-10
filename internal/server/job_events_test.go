@@ -1,4 +1,4 @@
-package api
+package server
 
 /*
  * SPDX-FileCopyrightText: 2023 Siemens AG

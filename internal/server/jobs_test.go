@@ -1,4 +1,4 @@
-package api
+package server
 
 /*
  * SPDX-FileCopyrightText: 2023 Siemens AG
@@ -97,6 +97,36 @@ func TestCreateJob(t *testing.T) {
 	jobs, err := db.QueryJobs(context.Background(), persistence.FilterParams{}, persistence.SortParams{}, persistence.PaginationParams{Offset: 0, Limit: 1})
 	assert.NoError(t, err)
 	assert.Len(t, jobs.Content, 1)
+}
+
+func TestCreateJob_Invalid(t *testing.T) {
+	db := newInMemoryDB(t)
+	north, _ := createNorthAndSouth(t, db)
+
+	wf, err := workflow.CreateWorkflow(t.Context(), db, dau.DirectWorkflow())
+	require.NoError(t, err)
+
+	// create job using that workflow
+	apitest.New().
+		Handler(north).
+		Post("/api/wfx/v1/jobs").
+		Body(fmt.Sprintf(`
+{
+  "workflow": "%s",
+  "definition": {
+    "url": "http://localhost/update.tgz",
+    "sha256": "8fcde8ae3c3641078ed98d5d6f20e706fab34c9768ec6366e2a025fe89e23464"
+  }
+}
+`, wf.Name)).
+		ContentType("application/json").
+		Expect(t).
+		Status(http.StatusBadRequest).
+		End()
+
+	jobs, err := db.QueryJobs(context.Background(), persistence.FilterParams{}, persistence.SortParams{}, persistence.PaginationParams{Offset: 0, Limit: 1})
+	require.NoError(t, err)
+	assert.Len(t, jobs.Content, 0)
 }
 
 func TestCreateJob_SouthNotAllowed(t *testing.T) {

@@ -10,6 +10,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -35,6 +36,12 @@ import (
 const (
 	defaultPageLimit = 10
 )
+
+type contextKey string
+
+const EligibleKey contextKey = "eligible"
+
+var _ api.StrictServerInterface = (*WfxServer)(nil)
 
 type WfxServer struct {
 	storage persistence.Storage
@@ -279,7 +286,15 @@ func (server WfxServer) GetJobsIdStatus(ctx context.Context, request api.GetJobs
 	return api.GetJobsIdStatus200JSONResponse(*status), nil
 }
 
-func (server WfxServer) PutJobsIdStatus(ctx context.Context, request api.PutJobsIdStatusRequestObject, eligible api.EligibleEnum) (api.PutJobsIdStatusResponseObject, error) {
+func (server WfxServer) PutJobsIdStatus(ctx context.Context, request api.PutJobsIdStatusRequestObject) (api.PutJobsIdStatusResponseObject, error) {
+	eligibleAny := ctx.Value(EligibleKey)
+	if eligibleAny == nil {
+		return nil, errors.New("internal error: eligible field not set in context")
+	}
+	eligible, ok := eligibleAny.(api.EligibleEnum)
+	if !ok {
+		return nil, errors.New("internal error: invalid type for eligible")
+	}
 	status, err := status.Update(ctx, server.storage, request.Id, request.Body, eligible)
 	if err != nil {
 		switch ftag.Get(err) {

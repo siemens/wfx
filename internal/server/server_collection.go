@@ -1,4 +1,4 @@
-package root
+package server
 
 /*
  * SPDX-FileCopyrightText: 2024 Siemens AG
@@ -14,7 +14,6 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"slices"
 	"sync"
 	"time"
 
@@ -23,12 +22,10 @@ import (
 	nethttpmiddleware "github.com/oapi-codegen/nethttp-middleware"
 	"github.com/rs/cors"
 	"github.com/rs/zerolog/log"
-	"github.com/siemens/wfx/api"
 	"github.com/siemens/wfx/cmd/wfx/cmd/config"
 	"github.com/siemens/wfx/cmd/wfxctl/errutil"
-	genApi "github.com/siemens/wfx/generated/api"
+	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/internal/handler/job/events"
-	"github.com/siemens/wfx/internal/server"
 	"github.com/siemens/wfx/middleware/logging"
 	"github.com/siemens/wfx/middleware/plugin"
 	"github.com/siemens/wfx/persistence"
@@ -41,29 +38,22 @@ type ServerCollection struct {
 	once    sync.Once
 	cfg     *config.AppConfig
 	storage persistence.Storage
-	north   *http.Server
-	south   *http.Server
-	wfx     *api.WfxServer
+	North   *http.Server
+	South   *http.Server
 
 	pluginMWs    []*plugin.Middleware
 	pluginErrors []<-chan error
 }
 
-func NewServerCollection(cfg *config.AppConfig, storage persistence.Storage) (*ServerCollection, error) {
-	wfx := api.NewWfxServer(storage).
-		WithSSEOpts(api.SSEOpts{
-			PingInterval:  cfg.SSEPingInterval(),
-			GraceInterval: cfg.SSEGraceInterval(),
-		})
-
-	swag, _ := genApi.GetSwagger()
+func NewServerCollection(cfg *config.AppConfig, wfx api.StrictServerInterface, storage persistence.Storage) (*ServerCollection, error) {
+	swag, _ := api.GetSwagger()
 	validator := nethttpmiddleware.OapiRequestValidatorWithOptions(swag,
 		&nethttpmiddleware.Options{SilenceServersWarning: true})
 	corsMW := cors.AllowAll().Handler
 	logMW := logging.NewLoggingMiddleware()
 
 	// LIFO
-	middlewares := []genApi.MiddlewareFunc{validator, corsMW, logMW}
+	middlewares := []api.MiddlewareFunc{validator, corsMW, logMW}
 
 	pluginMWs := make([]*plugin.Middleware, 0)
 	pluginErrors := make([]<-chan error, 0)
@@ -80,7 +70,7 @@ func NewServerCollection(cfg *config.AppConfig, storage persistence.Storage) (*S
 
 	basePath := errutil.Must(swag.Servers.BasePath())
 	mux := createMux(cfg, basePath, ui.Enabled)
-	northServer, err := createServer(cfg, api.NewNorthboundServer(wfx), mux, middlewares, northPluginMWs)
+	northServer, err := createServer(cfg, NewNorthboundServer(wfx), mux, middlewares, northPluginMWs)
 	if err != nil {
 		return nil, fault.Wrap(err)
 	}
@@ -97,7 +87,7 @@ func NewServerCollection(cfg *config.AppConfig, storage persistence.Storage) (*S
 
 	// southbound, UI is always disabled
 	mux = createMux(cfg, basePath, false)
-	southServer, err := createServer(cfg, api.NewSouthboundServer(wfx), mux, middlewares, southPluginMWs)
+	southServer, err := createServer(cfg, NewSouthboundServer(wfx), mux, middlewares, southPluginMWs)
 	if err != nil {
 		return nil, fault.Wrap(err)
 	}
@@ -107,15 +97,12 @@ func NewServerCollection(cfg *config.AppConfig, storage persistence.Storage) (*S
 		storage:      storage,
 		pluginMWs:    pluginMWs,
 		pluginErrors: pluginErrors,
-		wfx:          wfx,
-		north:        northServer,
-		south:        southServer,
+		North:        northServer,
+		South:        southServer,
 	}, nil
 }
 
 func (sc *ServerCollection) Start() error {
-	sc.wfx.Start()
-
 	cfg := sc.cfg
 	schemes := cfg.Schemes()
 	// check for socket-based activation; order of sockets: south, north
@@ -176,9 +163,9 @@ func (sc *ServerCollection) Start() error {
 
 			var err error
 			if isTLS {
-				err = sc.north.ServeTLS(northListener, cfg.TLSCertificate(), cfg.TLSKey())
+				err = sc.North.ServeTLS(northListener, cfg.TLSCertificate(), cfg.TLSKey())
 			} else {
-				err = sc.north.Serve(northListener)
+				err = sc.North.Serve(northListener)
 			}
 			if err != nil && !errors.Is(err, http.ErrServerClosed) {
 				log.Err(err).Msg("Northbound server encountered an error")
@@ -199,9 +186,9 @@ func (sc *ServerCollection) Start() error {
 
 			var err error
 			if isTLS {
-				err = sc.south.ServeTLS(southListener, cfg.TLSCertificate(), cfg.TLSKey())
+				err = sc.South.ServeTLS(southListener, cfg.TLSCertificate(), cfg.TLSKey())
 			} else {
-				err = sc.south.Serve(southListener)
+				err = sc.South.Serve(southListener)
 			}
 			if err != nil && !errors.Is(err, http.ErrServerClosed) {
 				log.Err(err).Msg("Southbound server encountered an error")
@@ -209,11 +196,6 @@ func (sc *ServerCollection) Start() error {
 			}
 			return nil
 		})
-
-		if slices.Contains(buildTags, "ui") {
-			url := fmt.Sprintf("%s://%s/ui", scheme, northListener.Addr())
-			log.Info().Msg(fmt.Sprintf("Serving UI at %s", url))
-		}
 	}
 
 	if len(sc.pluginErrors) > 0 {
@@ -260,31 +242,25 @@ func (sc *ServerCollection) Stop() {
 		events.ShutdownSubscribers()
 
 		var shutdownGroup sync.WaitGroup
-		if sc.north != nil {
+		if sc.North != nil {
 			log.Debug().Msg("Shutting down northbound servers")
-			shutdownGroup.Add(1)
-			go func() {
-				defer shutdownGroup.Done()
-
+			shutdownGroup.Go(func() {
 				timeoutCtx, timeoutCancel := context.WithTimeout(context.Background(), timeout)
 				defer timeoutCancel()
 
-				_ = sc.north.Shutdown(timeoutCtx)
+				_ = sc.North.Shutdown(timeoutCtx)
 				log.Debug().Msg("Northbound server shut down complete")
-			}()
+			})
 		}
-		if sc.south != nil {
+		if sc.South != nil {
 			log.Debug().Msg("Shutting down southbound servers")
-			shutdownGroup.Add(1)
-			go func() {
-				defer shutdownGroup.Done()
-
+			shutdownGroup.Go(func() {
 				timeoutCtx, timeoutCancel := context.WithTimeout(context.Background(), timeout)
 				defer timeoutCancel()
 
-				_ = sc.south.Shutdown(timeoutCtx)
+				_ = sc.South.Shutdown(timeoutCtx)
 				log.Debug().Msg("Southbound server shut down complete")
-			}()
+			})
 		}
 		shutdownGroup.Wait()
 
@@ -293,32 +269,28 @@ func (sc *ServerCollection) Stop() {
 			mw.Stop()
 		}
 
-		log.Debug().Msg("Shutting down wfx")
-		sc.wfx.Stop()
-		log.Debug().Msg("Finished shutting down wfx")
-
 		log.Info().Msg("Server collection shut down complete")
 	})
 }
 
-func createServer(cfg *config.AppConfig, ssi genApi.StrictServerInterface, router *http.ServeMux, baseMWs []genApi.MiddlewareFunc, pluginMWs []*plugin.Middleware) (*http.Server, error) {
-	combinedMWs := make([]genApi.MiddlewareFunc, 0, len(baseMWs)+len(pluginMWs))
+func createServer(cfg *config.AppConfig, ssi api.StrictServerInterface, router *http.ServeMux, baseMWs []api.MiddlewareFunc, pluginMWs []*plugin.Middleware) (*http.Server, error) {
+	combinedMWs := make([]api.MiddlewareFunc, 0, len(baseMWs)+len(pluginMWs))
 	combinedMWs = append(combinedMWs, baseMWs...)
 	for _, mw := range pluginMWs {
 		combinedMWs = append(combinedMWs, mw.Middleware())
 	}
 
-	swag, _ := genApi.GetSwagger()
+	swag, _ := api.GetSwagger()
 	basePath := errutil.Must(swag.Servers.BasePath())
-	strictHandler := genApi.NewStrictHandler(ssi, nil)
+	strictHandler := api.NewStrictHandler(ssi, nil)
 	router.HandleFunc("GET /version", strictHandler.GetVersion)
 	router.HandleFunc("GET /health", strictHandler.GetHealth)
-	handler := genApi.HandlerWithOptions(strictHandler, genApi.StdHTTPServerOptions{
+	handler := api.HandlerWithOptions(strictHandler, api.StdHTTPServerOptions{
 		BaseURL:     basePath,
 		BaseRouter:  router,
 		Middlewares: combinedMWs,
 	})
-	server, err := server.NewHTTPServer(cfg, handler)
+	server, err := NewHTTPServer(cfg, handler)
 	return server, fault.Wrap(err)
 }
 

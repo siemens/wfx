@@ -1,6 +1,6 @@
 //go:build !ui
 
-package root
+package server
 
 /*
  * SPDX-FileCopyrightText: 2026 Siemens AG
@@ -22,13 +22,13 @@ import (
 
 func TestUINotFound(t *testing.T) {
 	dbMock := persistence.NewHealthyMockStorage(t)
-	sc, err := NewServerCollection(new(config.AppConfig), dbMock)
+	sc, err := NewServerCollection(new(config.AppConfig), nil, dbMock)
 	require.NotNil(t, sc)
 	require.NoError(t, err)
 
 	handlers := []http.Handler{
-		sc.north.Handler,
-		sc.south.Handler,
+		sc.North.Handler,
+		sc.South.Handler,
 	}
 
 	for _, handler := range handlers {

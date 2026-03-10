@@ -1,4 +1,4 @@
-package api
+package server
 
 /*
  * SPDX-FileCopyrightText: 2023 Siemens AG
@@ -16,6 +16,8 @@ import (
 	"testing"
 
 	"github.com/Southclaws/fault/ftag"
+	wfxAPI "github.com/siemens/wfx/api"
+	"github.com/siemens/wfx/cmd/wfx/cmd/config"
 	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/internal/handler/job"
 	"github.com/siemens/wfx/internal/handler/workflow"
@@ -196,13 +198,18 @@ func newInMemoryDB(t *testing.T) persistence.Storage {
 }
 
 func createNorthAndSouth(t *testing.T, db persistence.Storage) (http.Handler, http.Handler) {
-	wfx := NewWfxServer(db)
+	flagSet := config.NewFlagset()
+	cfg, err := config.NewAppConfig(flagSet)
+	require.NoError(t, err)
+
+	wfx := wfxAPI.NewWfxServer(db)
+	wfx.Start()
 	t.Cleanup(func() { wfx.Stop() })
-	northAPI := NewNorthboundServer(wfx)
-	north := api.HandlerFromMuxWithBaseURL(api.NewStrictHandler(northAPI, nil), http.NewServeMux(), "/api/wfx/v1")
-	southAPI := NewSouthboundServer(wfx)
-	south := api.HandlerFromMuxWithBaseURL(api.NewStrictHandler(southAPI, nil), http.NewServeMux(), "/api/wfx/v1")
-	return north, south
+
+	sc, err := NewServerCollection(cfg, wfx, db)
+	require.NoError(t, err)
+	t.Cleanup(sc.Stop)
+	return sc.North.Handler, sc.South.Handler
 }
 
 func persistJob(t *testing.T, db persistence.Storage) *api.Job {

@@ -21,9 +21,11 @@ import (
 
 	"github.com/Southclaws/fault"
 	"github.com/rs/zerolog/log"
+	"github.com/siemens/wfx/api"
 	"github.com/siemens/wfx/cmd/wfx/cmd/config"
 	"github.com/siemens/wfx/cmd/wfx/metadata"
 	"github.com/siemens/wfx/internal/cmd/man"
+	"github.com/siemens/wfx/internal/server"
 	"github.com/siemens/wfx/persistence"
 	"github.com/spf13/cobra"
 	"go.uber.org/automaxprocs/maxprocs"
@@ -83,7 +85,16 @@ Examples of tasks are installation of firmware or other types of commands issued
 			signal.Notify(chSignal, os.Interrupt, syscall.SIGTERM)
 
 			chErr := make(chan error, 1)
-			collection, err := NewServerCollection(cfg, storage)
+
+			wfx := api.NewWfxServer(storage).
+				WithSSEOpts(api.SSEOpts{
+					PingInterval:  cfg.SSEPingInterval(),
+					GraceInterval: cfg.SSEGraceInterval(),
+				})
+			wfx.Start()
+			defer wfx.Stop()
+
+			collection, err := server.NewServerCollection(cfg, wfx, storage)
 			if err != nil {
 				return fault.Wrap(err)
 			}
@@ -92,6 +103,7 @@ Examples of tasks are installation of firmware or other types of commands issued
 			g.Add(1)
 			go func() {
 				defer g.Done()
+
 				err := collection.Start()
 				log.Debug().Msg("Server collection done")
 				if err != nil {
