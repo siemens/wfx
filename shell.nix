@@ -24,6 +24,7 @@ mkShell {
     reuse
 
     gnumake
+    gnused
     goreleaser
     syft
     zig_0_13
@@ -31,6 +32,8 @@ mkShell {
     git
     go
     flatbuffers
+    openssl
+    zstd
   ];
 
   shellHook = ''
