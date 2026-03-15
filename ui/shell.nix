@@ -13,6 +13,7 @@ pkgs.mkShell {
   packages = with pkgs; [
     gleam
     beamPackages.rebar3
+    beamPackages.erlang
     inotify-tools
     nodePackages.npm
     bun

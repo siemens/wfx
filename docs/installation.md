@@ -77,13 +77,20 @@ the Go toolchain.
 Prerequisites:
 
 - [Gleam](https://gleam.run/)
+- [Erlang](https://www.erlang.org/)
 - [Rebar3](https://rebar3.org/)
 - [npm](https://www.npmjs.com/)
 
-Then run
+Please consult [versions.env](https://github.com/siemens/wfx/blob/main/.ci/packages/versions.env) to see the minimal version requirements.
+It is strongly recommended to use the [nix environment](https://github.com/siemens/wfx/blob/main/ui/shell.nix) or a modern Linux distribution, as the minimum required versions are rather new.
+
+To build the UI, run:
 
 ```sh
 $ cd ui
+
+# Optional, if you have the nix package manager installed
+$ nix-shell shell.nix
 
 # install deps
 $ npm install
