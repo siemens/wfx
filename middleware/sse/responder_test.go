@@ -90,6 +90,49 @@ func extractAndParseData(response string) (map[string]any, error) {
 	return nil, fmt.Errorf("no 'data:' line found")
 }
 
+func TestResponder_Shutdown(t *testing.T) {
+	ctx, cancel := context.WithCancel(t.Context())
+	t.Cleanup(cancel)
+
+	events.AddSubscriber(ctx, time.Minute, events.FilterParams{}, []string{})
+	sub := events.AddSubscriber(ctx, time.Minute, events.FilterParams{}, []string{})
+
+	events.PublishEvent(ctx, events.JobEvent{
+		Action: events.ActionUpdateStatus,
+		Job: &api.Job{
+			ID: "1",
+			Status: &api.JobStatus{
+				ClientID: "foo",
+				Message:  "hello world",
+				State:    "INSTALLING",
+			},
+		},
+		Tags: []string{},
+	})
+
+	rw := NewMockResponseRecorder(t)
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		responder := NewResponder(ctx, time.Minute, sub)
+		if err := responder.VisitGetJobsEventsResponse(rw); err != nil {
+			t.Log("Received error from VisitGetJobsEventsResponse:", err)
+			t.Fail()
+		}
+	}()
+
+	events.ShutdownSubscribers()
+	assert.Equal(t, 0, events.SubscriberCount())
+
+	// This should trigger `responder` to clean itself up and call
+	// events.RemoveSubscriber(sub).
+	// It shouldn't try to close(sub.ch) since it will have been closed as part
+	// of events.ShutdownSubscribers()
+	cancel()
+	wg.Wait()
+}
+
 func TestResponder_IdlePing(t *testing.T) {
 	ctx, cancel := context.WithCancel(t.Context())
 	t.Cleanup(cancel)
