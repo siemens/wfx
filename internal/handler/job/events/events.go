@@ -10,6 +10,7 @@ package events
 
 import (
 	"context"
+	"slices"
 	"sync"
 	"time"
 
@@ -167,15 +168,15 @@ func RemoveSubscriber(subscriber *Subscriber) {
 	muSubscribers.Lock()
 	defer muSubscribers.Unlock()
 
-	oldSubscribers := subscribers
-	subscribers = make([]*Subscriber, 0, len(subscribers))
-	for _, sub := range oldSubscribers {
+	subscribers = slices.DeleteFunc(subscribers, func(sub *Subscriber) bool {
 		if sub == subscriber {
-			continue
+			close(sub.ch)
+			return true
 		}
-		subscribers = append(subscribers, sub)
-	}
-	close(subscriber.ch)
+
+		return false
+	})
+
 	log.Info().Str("id", subscriber.id).Msg("Removed subscriber")
 }
 
