@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## [0.5.0] - 2026-03-09
+
+### Added
+
 - Include mtime in job events
 - Job Events: Allow clients to filter events based on their action type.
 - IRSA (IAM Roles for Service Accounts) enhancement for improved AWS authentication.
@@ -131,4 +139,5 @@ Initial release of wfx.
 [0.3.3]: https://github.com/siemens/wfx/releases/tag/v0.3.3
 [0.4.0]: https://github.com/siemens/wfx/releases/tag/v0.4.0
 [0.4.1]: https://github.com/siemens/wfx/releases/tag/v0.4.1
-[unreleased]: https://github.com/siemens/wfx/compare/v0.4.1...HEAD
+[0.5.0]: https://github.com/siemens/wfx/releases/tag/v0.5.0
+[unreleased]: https://github.com/siemens/wfx/compare/v0.5.0...HEAD
