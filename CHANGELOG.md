@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Distro-compliant package naming
+
 ### Fixed
 
 - Ensure `Subscriber.ch` channels are not double-closed when stopping the server
