@@ -27,7 +27,7 @@ mkShell {
     gnused
     goreleaser
     syft
-    zig_0_13
+    zig
     just
     git
     go
