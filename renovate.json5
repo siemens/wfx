@@ -69,6 +69,11 @@
       matchFileNames: ["go.tool.mod"],
       postUpdateOptions: ["gomodTidy"],
     },
+    {
+      groupName: "UI dependencies",
+      groupSlug: "all-ui-deps",
+      matchFileNames: ["ui/**"],
+    },
 
     // separate PR for pages as hugo often has breaking changes
     {
