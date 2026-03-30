@@ -183,7 +183,7 @@ archives:
 nfpms:
   - id: wfx
     package_name: wfx
-    file_name_template: '{{ .PackageName }}_{{ .Version }}_{{ .Os }}_{{- if eq .Arch "amd64" }}x86_64{{ else }}{{.Arch}}{{ end }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}'
+    file_name_template: "{{ .ConventionalFileName }}"
     ids:
       - wfx
     vendor: Siemens AG
@@ -221,7 +221,7 @@ nfpms:
 
   - id: wfx-with-ui
     package_name: wfx
-    file_name_template: 'wfx-with-ui_{{ .Version }}_{{ .Os }}_{{- if eq .Arch "amd64" }}x86_64{{ else }}{{.Arch}}{{ end }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}'
+    file_name_template: "{{ .ConventionalFileName }}"
     ids:
       - wfx-with-ui
     vendor: Siemens AG
@@ -259,7 +259,7 @@ nfpms:
 
   - id: wfxctl
     package_name: wfxctl
-    file_name_template: '{{ .PackageName }}_{{ .Version }}_{{ .Os }}_{{- if eq .Arch "amd64" }}x86_64{{ else }}{{.Arch}}{{ end }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}'
+    file_name_template: "{{ .ConventionalFileName }}"
     ids:
       - wfxctl
     vendor: Siemens AG
@@ -287,7 +287,7 @@ nfpms:
 
   - id: wfx-viewer
     package_name: wfx-viewer
-    file_name_template: '{{ .PackageName }}_{{ .Version }}_{{ .Os }}_{{- if eq .Arch "amd64" }}x86_64{{ else }}{{.Arch}}{{ end }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}'
+    file_name_template: "{{ .ConventionalFileName }}"
     ids:
       - wfx-viewer
     vendor: Siemens AG
