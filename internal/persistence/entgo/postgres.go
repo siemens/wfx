@@ -28,6 +28,7 @@ import (
 
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
 	"github.com/siemens/wfx/generated/ent"
@@ -184,7 +185,15 @@ func (wrapper *PostgreSQL) Initialize(options string) error {
 
 	// Create an ent.Driver from `db`.
 	drv := entsql.OpenDB(dialect.Postgres, db)
-	client := ent.NewClient(ent.Driver(drv))
+	client := ent.NewClient(ent.Driver(drv), ent.Log(func(v ...any) {
+		log.Logger.Trace().Str("component", "entgo").Msg(fmt.Sprint(v...))
+	}))
+
+	if zerolog.GlobalLevel() <= zerolog.TraceLevel {
+		// log queries
+		client = client.Debug()
+	}
+
 	wrapper.Database = Database{client: client}
 	return nil
 }

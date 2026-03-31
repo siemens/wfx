@@ -14,6 +14,7 @@ import (
 	"context"
 	"database/sql"
 	"embed"
+	"fmt"
 
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
@@ -21,6 +22,7 @@ import (
 	driver "github.com/go-sql-driver/mysql"
 	"github.com/golang-migrate/migrate/v4/database/mysql"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/siemens/wfx/generated/ent"
 	"github.com/siemens/wfx/persistence"
@@ -91,7 +93,14 @@ func (wrapper *MySQL) Initialize(options string) error {
 
 	// Create an ent.Driver from `db`.
 	drv := entsql.OpenDB(dialect.MySQL, db)
-	client := ent.NewClient(ent.Driver(drv))
+	client := ent.NewClient(ent.Driver(drv), ent.Log(func(v ...any) {
+		log.Logger.Trace().Str("component", "entgo").Msg(fmt.Sprint(v...))
+	}))
+
+	if zerolog.GlobalLevel() <= zerolog.TraceLevel {
+		// log queries
+		client = client.Debug()
+	}
 
 	wrapper.Database = Database{client: client}
 	return nil

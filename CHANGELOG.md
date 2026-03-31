@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Log all SQL queries when `--log-level` is set to `trace`
+
 ### Changed
 
 - Distro-compliant package naming
