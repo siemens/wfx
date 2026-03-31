@@ -12,6 +12,7 @@ package entgo
 
 import (
 	"embed"
+	"fmt"
 	"net/url"
 
 	"entgo.io/ent/dialect"
@@ -19,6 +20,7 @@ import (
 	"github.com/Southclaws/fault"
 	"github.com/golang-migrate/migrate/v4/database/sqlite3"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/siemens/wfx/generated/ent"
 	"github.com/siemens/wfx/persistence"
@@ -45,7 +47,15 @@ func (instance *SQLite) Initialize(dsn string) error {
 		log.Error().Err(err).Msg("Failed opening connection to SQLite")
 		return fault.Wrap(err)
 	}
-	client := ent.NewClient(ent.Driver(drv))
+	client := ent.NewClient(ent.Driver(drv), ent.Log(func(v ...any) {
+		log.Logger.Trace().Str("component", "entgo").Msg(fmt.Sprint(v...))
+	}))
+
+	if zerolog.GlobalLevel() <= zerolog.TraceLevel {
+		// log queries
+		client = client.Debug()
+	}
+
 	log.Debug().Msg("Connected to SQLite")
 	instance.Database = Database{client: client}
 
