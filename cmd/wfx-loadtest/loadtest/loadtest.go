@@ -20,6 +20,7 @@ import (
 	"github.com/knadh/koanf/v2"
 	"github.com/rs/zerolog/log"
 	"github.com/siemens/wfx/cmd/wfx-loadtest/wfx"
+	"github.com/siemens/wfx/cmd/wfxctl/flags"
 	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/workflow/dau"
 	vegeta "github.com/tsenart/vegeta/v12/lib"
@@ -30,10 +31,6 @@ const (
 	// Threshold of data points above which series are downsampled.
 	threshold = 4000
 
-	HostFlag      = "host"
-	PortFlag      = "port"
-	MgmtHostFlag  = "mgmt-host"
-	MgmtPortFlag  = "mgmt-port"
 	ReadFreqFlag  = "read-freq"
 	WriteFreqFlag = "write-freq"
 	DurationFlag  = "duration"
@@ -53,10 +50,10 @@ var (
 )
 
 func Run(k *koanf.Koanf) error {
-	host = k.String(HostFlag)
-	port = k.Int(PortFlag)
-	mgmtHost = k.String(MgmtHostFlag)
-	mgmtPort = k.Int(MgmtPortFlag)
+	host = k.String(flags.ClientHostFlag)
+	port = k.Int(flags.ClientPortFlag)
+	mgmtHost = k.String(flags.MgmtHostFlag)
+	mgmtPort = k.Int(flags.MgmtPortFlag)
 
 	if host == "" || mgmtHost == "" {
 		return errors.New("host or mgmtHost not set")
