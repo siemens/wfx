@@ -13,9 +13,9 @@ mkShell {
 
     hugo
 
-    nodePackages.sql-formatter
-    nodePackages.prettier
-    nodePackages.markdownlint-cli
+    sql-formatter
+    prettier
+    markdownlint-cli
     shfmt
     lychee
 
