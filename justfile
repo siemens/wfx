@@ -165,7 +165,7 @@ postgres-stop: (_container-stop "wfx-postgres")
 
 # Start wfx and connect to Postgres database
 @postgres-wfx: postgres-start
-    ./wfx --log-level debug \
+    ./wfx --log-level trace \
         --storage postgres \
         --storage-opt "host=$PGHOST port=5432 database=$PGDATABASE user=$PGUSER password=$PGPASSWORD sslmode=disable"
 
@@ -228,7 +228,7 @@ mysql-generate-schema name:
 
 # Start wfx and connect to MySQL container.
 mysql-wfx: mysql-start
-    ./wfx --log-level debug \
+    ./wfx --log-level trace \
         --storage mysql \
         --storage-opt "$MYSQL_USER:$MYSQL_PASSWORD@/$MYSQL_DATABASE"
 
