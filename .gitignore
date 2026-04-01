@@ -8,6 +8,7 @@
 *.pem
 *.generated
 cmd/wfx-viewer/wfx-viewer
+cmd/wfx-loadtest/wfx-loadtest
 /public
 /result
 /dist
