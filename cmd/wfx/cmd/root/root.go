@@ -100,10 +100,7 @@ Examples of tasks are installation of firmware or other types of commands issued
 			}
 
 			var g sync.WaitGroup
-			g.Add(1)
-			go func() {
-				defer g.Done()
-
+			g.Go(func() {
 				err := collection.Start()
 				log.Debug().Msg("Server collection done")
 				if err != nil {
@@ -111,7 +108,7 @@ Examples of tasks are installation of firmware or other types of commands issued
 					chErr <- err
 				}
 				close(chErr)
-			}()
+			})
 
 			// reset error variable
 			err = nil
@@ -152,7 +149,7 @@ func initStorage(cfg *config.AppConfig) (persistence.Storage, error) {
 		return nil, fmt.Errorf("unknown storage %s", name)
 	}
 	var err error
-	for i := 0; i < 300; i++ {
+	for range 300 {
 		log.Debug().Str("name", name).Msg("Initializing storage")
 		err = storage.Initialize(options)
 		if err == nil {
