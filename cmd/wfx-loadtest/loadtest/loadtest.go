@@ -84,9 +84,7 @@ func Run(k *koanf.Koanf) error {
 
 	readerResultChan := make(chan vegeta.Result)
 	readerDoneChan := make(chan any)
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		readTargeter := vegeta.NewStaticTargeter(
 			vegeta.Target{
 				Method: http.MethodGet,
@@ -103,14 +101,11 @@ func Run(k *koanf.Koanf) error {
 			readerResultChan <- *res
 		}
 		readerDoneChan <- nil
-	}()
+	})
 
 	writerResultChan := make(chan vegeta.Result)
 	writerDoneChan := make(chan any)
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-
+	wg.Go(func() {
 		attacker := newAttacker()
 		for res := range attacker.Attack(writeTargeter, writeRate, duration, "Generate and update jobs") {
 			// forward result to reporter
@@ -151,7 +146,7 @@ func Run(k *koanf.Koanf) error {
 
 		}
 		writerDoneChan <- nil
-	}()
+	})
 
 	var metrics vegeta.Metrics
 	p := plot.New(
@@ -160,10 +155,8 @@ func Run(k *koanf.Koanf) error {
 		plot.Label(plot.ErrorLabeler),
 	)
 
-	wg.Add(1)
-	go func() {
+	wg.Go(func() {
 		// collect results
-		defer wg.Done()
 
 		doneCounter := 0
 		for doneCounter < 2 {
@@ -182,7 +175,7 @@ func Run(k *koanf.Koanf) error {
 		}
 		metrics.Close()
 		p.Close()
-	}()
+	})
 
 	wg.Wait()
 	if err := dumpResults(&metrics, p); err != nil {
