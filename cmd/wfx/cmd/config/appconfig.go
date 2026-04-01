@@ -137,7 +137,7 @@ func NewAppConfig(flags *pflag.FlagSet) (*AppConfig, error) {
 
 	// start watching config
 	for _, fp := range fileProviders {
-		if err := fp.Watch(func(_ interface{}, err error) {
+		if err := fp.Watch(func(_ any, err error) {
 			if err != nil {
 				return
 			}
