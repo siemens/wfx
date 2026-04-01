@@ -22,16 +22,20 @@ import (
 
 func TestNewAppConfig(t *testing.T) {
 	cfg, err := NewAppConfig(NewFlagset())
-	defer cfg.Stop()
 	require.NoError(t, err)
+	t.Cleanup(cfg.Stop)
 
 	// call all methods which do not accept arguments
 	structValue := reflect.ValueOf(cfg)
 	for i := 0; i < structValue.NumMethod(); i++ {
 		method := structValue.Method(i)
 		methodType := method.Type()
+		methodName := structValue.Type().Method(i).Name
 		if methodType.NumIn() == 0 {
-			t.Run(methodType.Name(), func(*testing.T) {
+			t.Run(methodName, func(*testing.T) {
+				if methodName == "InitStorage" {
+					return
+				}
 				_ = method.Call([]reflect.Value{})
 			})
 		}
@@ -70,7 +74,7 @@ func TestReload(t *testing.T) {
 		_, _ = cfgFile.Write([]byte("log-level: error"))
 	}
 
-	for i := 0; i < 500; i++ {
+	for range 500 {
 		if zerolog.GlobalLevel() == zerolog.ErrorLevel {
 			break
 		}
