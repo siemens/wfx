@@ -9,4 +9,4 @@ public
 test/test_helper/**/*
 hugo/**/*.html
 **/build
-ui/priv/**
+ui/dist/**
