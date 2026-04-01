@@ -24,6 +24,7 @@ import (
 	"github.com/knadh/koanf/v2"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/siemens/wfx/persistence"
 	"github.com/spf13/pflag"
 )
 
@@ -187,7 +188,7 @@ func (cfg *AppConfig) StorageOptions() string {
 	storageOpt := cfg.flags.Lookup(StorageOptFlag)
 	changed := storageOpt != nil && storageOpt.Changed
 	// do not return SQLite options for non-SQLite backends
-	if name != preferedStorage && (!changed || cfg.storageOpts == sqliteDefaultOpts) {
+	if name != PreferedStorage && (!changed || cfg.storageOpts == SqliteDefaultOpts) {
 		return ""
 	}
 	return cfg.storageOpts
@@ -417,4 +418,34 @@ func (cfg *AppConfig) SSEGraceInterval() time.Duration {
 	cfg.mutex.RLock()
 	defer cfg.mutex.RUnlock()
 	return cfg.sseGraceInterval
+}
+
+func (cfg *AppConfig) InitStorage() (persistence.Storage, error) {
+	name, options := cfg.Storage(), cfg.StorageOptions()
+	log.Debug().Str("name", name).Str("options", options).Msg("Setting up persistent storage")
+
+	// note: storage is shared between north- and southbound API
+	storage := persistence.GetStorage(name)
+	if storage == nil {
+		return nil, fmt.Errorf("unknown storage %s", name)
+	}
+	var err error
+	for range 300 {
+		log.Debug().Str("name", name).Msg("Initializing storage")
+		err = storage.Initialize(options)
+		if err == nil {
+			log.Info().Str("name", name).Msg("Initialized storage")
+			break
+		}
+		dur := time.Second
+		log.Warn().
+			Err(err).
+			Str("storage", name).
+			Msg("Failed to initialize persistent storage. Trying again in one second...")
+		time.Sleep(dur)
+	}
+	if err != nil {
+		return nil, fault.Wrap(err)
+	}
+	return storage, nil
 }

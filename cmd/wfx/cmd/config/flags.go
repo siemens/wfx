@@ -65,8 +65,8 @@ const (
 )
 
 const (
-	preferedStorage   = "sqlite"
-	sqliteDefaultOpts = "file:wfx.db?_fk=1&_journal=WAL"
+	PreferedStorage   = "sqlite"
+	SqliteDefaultOpts = "file:wfx.db?_fk=1&_journal=WAL"
 
 	// should be "short enough", i.e. shorter than the timeout for closing
 	// connections due to inactivity (e.g. by the kernel in its default setting or
@@ -114,14 +114,14 @@ func NewFlagset() *pflag.FlagSet {
 
 		supportedStorages := persistence.Storages()
 		defaultStorage := supportedStorages[0]
-		if slices.Index(supportedStorages, preferedStorage) != -1 {
-			defaultStorage = preferedStorage
+		if slices.Index(supportedStorages, PreferedStorage) != -1 {
+			defaultStorage = PreferedStorage
 		}
 		f.String(StorageFlag, defaultStorage, fmt.Sprintf("persistence storage. one of: [%s]", strings.Join(supportedStorages, ", ")))
 
 		var storageOpts string
-		if defaultStorage == preferedStorage {
-			storageOpts = sqliteDefaultOpts
+		if defaultStorage == PreferedStorage {
+			storageOpts = SqliteDefaultOpts
 		}
 		f.String(StorageOptFlag, storageOpts, "storage options")
 	}
