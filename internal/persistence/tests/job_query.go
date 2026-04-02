@@ -11,7 +11,6 @@ package tests
  */
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 	"testing"
@@ -37,13 +36,13 @@ func TestQueryJobsFilter(t *testing.T, db persistence.Storage) {
 
 	clientID := "42"
 	wf := dau.DirectWorkflow()
-	_, err := db.CreateWorkflow(context.Background(), wf)
+	_, err := db.CreateWorkflow(t.Context(), wf)
 	require.NoError(t, err)
 
 	now := time.Now()
 
 	tags := []string{"bar", "foo"}
-	firstJob, err := db.CreateJob(context.Background(), &api.Job{
+	firstJob, err := db.CreateJob(t.Context(), &api.Job{
 		ClientID: clientID,
 		Workflow: wf,
 		Status: &api.JobStatus{
@@ -58,7 +57,7 @@ func TestQueryJobsFilter(t *testing.T, db persistence.Storage) {
 	assert.True(t, time.Time(*firstJob.Mtime).After(now) || time.Time(*firstJob.Mtime).Equal(now))
 
 	secondStime := now.Add(time.Second)
-	secondJob, err := db.CreateJob(context.Background(), &api.Job{
+	secondJob, err := db.CreateJob(t.Context(), &api.Job{
 		ClientID: clientID,
 		Workflow: wf,
 		Status: &api.JobStatus{
@@ -70,7 +69,7 @@ func TestQueryJobsFilter(t *testing.T, db persistence.Storage) {
 
 	thirdStime := now.Add(2 * time.Second)
 	tagsList := []string{"meh"}
-	thirdJob, err := db.CreateJob(context.Background(), &api.Job{
+	thirdJob, err := db.CreateJob(t.Context(), &api.Job{
 		ClientID: clientID,
 		Workflow: wf,
 		Status: &api.JobStatus{
@@ -82,7 +81,7 @@ func TestQueryJobsFilter(t *testing.T, db persistence.Storage) {
 	require.NoError(t, err)
 
 	{ // filter by group
-		result, err := db.QueryJobs(context.Background(), persistence.FilterParams{ClientID: &clientID, Group: []string{"OPEN"}},
+		result, err := db.QueryJobs(t.Context(), persistence.FilterParams{ClientID: &clientID, Group: []string{"OPEN"}},
 			sortAsc, defaultPaginationParams)
 		actual := result.Content
 		require.NoError(t, err)
@@ -93,7 +92,7 @@ func TestQueryJobsFilter(t *testing.T, db persistence.Storage) {
 	}
 
 	{ // filter by group
-		result, err := db.QueryJobs(context.Background(), persistence.FilterParams{ClientID: &clientID, Group: []string{"CLOSED"}},
+		result, err := db.QueryJobs(t.Context(), persistence.FilterParams{ClientID: &clientID, Group: []string{"CLOSED"}},
 			sortAsc, defaultPaginationParams)
 		actual := result.Content
 		require.NoError(t, err)
@@ -102,7 +101,7 @@ func TestQueryJobsFilter(t *testing.T, db persistence.Storage) {
 	}
 
 	{ // filter by group
-		result, err := db.QueryJobs(context.Background(), persistence.FilterParams{ClientID: &clientID, Group: []string{"OPEN", "CLOSED"}},
+		result, err := db.QueryJobs(t.Context(), persistence.FilterParams{ClientID: &clientID, Group: []string{"OPEN", "CLOSED"}},
 			sortAsc, defaultPaginationParams)
 		actual := result.Content
 		require.NoError(t, err)
@@ -113,7 +112,7 @@ func TestQueryJobsFilter(t *testing.T, db persistence.Storage) {
 	}
 
 	{
-		result, err := db.QueryJobs(context.Background(), persistence.FilterParams{ClientID: &clientID, State: &installedState},
+		result, err := db.QueryJobs(t.Context(), persistence.FilterParams{ClientID: &clientID, State: &installedState},
 			sortAsc, defaultPaginationParams)
 		actual := result.Content
 		require.NoError(t, err)
@@ -123,7 +122,7 @@ func TestQueryJobsFilter(t *testing.T, db persistence.Storage) {
 
 	{
 		// filter by name
-		result, err := db.QueryJobs(context.Background(), persistence.FilterParams{ClientID: &clientID, Workflow: &wf.Name},
+		result, err := db.QueryJobs(t.Context(), persistence.FilterParams{ClientID: &clientID, Workflow: &wf.Name},
 			sortAsc, defaultPaginationParams)
 		actual := result.Content
 		require.NoError(t, err)
@@ -131,7 +130,7 @@ func TestQueryJobsFilter(t *testing.T, db persistence.Storage) {
 		assert.Equal(t, []string{firstJob.ID, secondJob.ID, thirdJob.ID}, []string{actual[0].ID, actual[1].ID, actual[2].ID})
 
 		doesNotExist := "doesNotExist"
-		result, err = db.QueryJobs(context.Background(), persistence.FilterParams{ClientID: &clientID, Workflow: &doesNotExist},
+		result, err = db.QueryJobs(t.Context(), persistence.FilterParams{ClientID: &clientID, Workflow: &doesNotExist},
 			sortAsc, defaultPaginationParams)
 		actual = result.Content
 		require.NoError(t, err)
@@ -140,7 +139,7 @@ func TestQueryJobsFilter(t *testing.T, db persistence.Storage) {
 
 	// filter by tags
 	{
-		result, err := db.QueryJobs(context.Background(), persistence.FilterParams{Tags: []string{"foo"}},
+		result, err := db.QueryJobs(t.Context(), persistence.FilterParams{Tags: []string{"foo"}},
 			sortAsc, defaultPaginationParams)
 		actual := result.Content
 		require.NoError(t, err)
@@ -148,7 +147,7 @@ func TestQueryJobsFilter(t *testing.T, db persistence.Storage) {
 		assert.Equal(t, firstJob.ID, actual[0].ID)
 	}
 	{
-		result, err := db.QueryJobs(context.Background(), persistence.FilterParams{Tags: []string{"bar"}},
+		result, err := db.QueryJobs(t.Context(), persistence.FilterParams{Tags: []string{"bar"}},
 			sortAsc, defaultPaginationParams)
 		actual := result.Content
 		require.NoError(t, err)
@@ -156,7 +155,7 @@ func TestQueryJobsFilter(t *testing.T, db persistence.Storage) {
 		assert.Equal(t, firstJob.ID, actual[0].ID)
 	}
 	{
-		result, err := db.QueryJobs(context.Background(), persistence.FilterParams{Tags: []string{"foo", "bar"}},
+		result, err := db.QueryJobs(t.Context(), persistence.FilterParams{Tags: []string{"foo", "bar"}},
 			sortAsc, defaultPaginationParams)
 		actual := result.Content
 		require.NoError(t, err)
@@ -173,12 +172,12 @@ func TestGetJobsSorted(t *testing.T, db persistence.Storage) {
 
 	{
 		tmp := newValidJob(clientID)
-		_, err := db.CreateWorkflow(context.Background(), tmp.Workflow)
+		_, err := db.CreateWorkflow(t.Context(), tmp.Workflow)
 		require.NoError(t, err)
 
 		stime := time.Now().Add(-2 * time.Minute)
 		tmp.Stime = &stime
-		first, err = db.CreateJob(context.Background(), tmp)
+		first, err = db.CreateJob(t.Context(), tmp)
 		require.NoError(t, err)
 	}
 
@@ -186,19 +185,19 @@ func TestGetJobsSorted(t *testing.T, db persistence.Storage) {
 		tmp := newValidJob(clientID)
 		mtime := time.Now().Add(-time.Minute)
 		tmp.Mtime = &mtime
-		second, err = db.CreateJob(context.Background(), tmp)
+		second, err = db.CreateJob(t.Context(), tmp)
 		require.NoError(t, err)
 	}
 
 	{
 		tmp := newValidJob(clientID)
-		third, err = db.CreateJob(context.Background(), tmp)
+		third, err = db.CreateJob(t.Context(), tmp)
 		require.NoError(t, err)
 	}
 
 	{
 		result, err := db.QueryJobs(
-			context.Background(),
+			t.Context(),
 			persistence.FilterParams{ClientID: &clientID},
 			persistence.SortParams{Desc: false},
 			defaultPaginationParams,
@@ -212,7 +211,7 @@ func TestGetJobsSorted(t *testing.T, db persistence.Storage) {
 
 	{
 		result, err := db.QueryJobs(
-			context.Background(),
+			t.Context(),
 			persistence.FilterParams{ClientID: &clientID},
 			persistence.SortParams{Desc: true},
 			defaultPaginationParams,
@@ -240,15 +239,15 @@ func TestGetJobMaxHistorySize(t *testing.T, db persistence.Storage) {
 		tmp := newValidJob("foo")
 		message := "0"
 		tmp.Status.Message = message
-		_, err := db.CreateWorkflow(context.Background(), tmp.Workflow)
+		_, err := db.CreateWorkflow(t.Context(), tmp.Workflow)
 		require.NoError(t, err)
-		job, err := db.CreateJob(context.Background(), tmp)
+		job, err := db.CreateJob(t.Context(), tmp)
 		require.NoError(t, err)
 		jobID = job.ID
 	}
 
 	{
-		job, err := db.GetJob(context.Background(), jobID, persistence.FetchParams{History: true})
+		job, err := db.GetJob(t.Context(), jobID, persistence.FetchParams{History: true})
 		require.NoError(t, err)
 		require.Empty(t, job.History)
 		require.Equal(t, job.Status.Message, "0")
@@ -256,7 +255,7 @@ func TestGetJobMaxHistorySize(t *testing.T, db persistence.Storage) {
 		// update the job n+1 times
 		for i := 1; i <= maxEntries+1; i++ {
 			msg := fmt.Sprintf("%d", i)
-			job, err = db.UpdateJob(context.Background(), job, persistence.JobUpdate{
+			job, err = db.UpdateJob(t.Context(), job, persistence.JobUpdate{
 				Status: &api.JobStatus{
 					State:   job.Status.State,
 					Message: msg,
@@ -267,7 +266,7 @@ func TestGetJobMaxHistorySize(t *testing.T, db persistence.Storage) {
 		}
 	}
 
-	job, err := db.GetJob(context.Background(), jobID, persistence.FetchParams{History: true})
+	job, err := db.GetJob(t.Context(), jobID, persistence.FetchParams{History: true})
 	require.NoError(t, err)
 	require.NotNil(t, job.History)
 	require.Len(t, *job.History, maxEntries)
@@ -290,18 +289,25 @@ func TestJobsPagination(t *testing.T, db persistence.Storage) {
 	total := 5
 	ids := make([]string, 0, total)
 
-	_, err := db.CreateWorkflow(context.Background(), dau.DirectWorkflow())
+	_, err := db.CreateWorkflow(t.Context(), dau.DirectWorkflow())
 	assert.NoError(t, err)
 	for range total {
 		tmp := newValidJob(*filterParams.ClientID)
-		job, err := db.CreateJob(context.Background(), tmp)
+		job, err := db.CreateJob(t.Context(), tmp)
 		require.NoError(t, err)
 		ids = append(ids, job.ID)
 	}
 
 	{
-		result, err := db.QueryJobs(context.Background(), filterParams, sortAsc, persistence.PaginationParams{Offset: 0, Limit: 2})
-		assert.NoError(t, err)
+		result, err := db.QueryJobs(t.Context(), filterParams, sortAsc, persistence.PaginationParams{Offset: 0, Limit: 2, ComputeTotal: false})
+		require.NoError(t, err)
+		assert.Nil(t, result.Pagination)
+		assert.Len(t, result.Content, 2)
+		assert.Equal(t, []string{ids[0], ids[1]}, []string{result.Content[0].ID, result.Content[1].ID})
+	}
+	{
+		result, err := db.QueryJobs(t.Context(), filterParams, sortAsc, persistence.PaginationParams{Offset: 0, Limit: 2, ComputeTotal: true})
+		require.NoError(t, err)
 		assert.Equal(t, int64(0), result.Pagination.Offset)
 		assert.Equal(t, int32(2), result.Pagination.Limit)
 		assert.Equal(t, int64(total), result.Pagination.Total)
@@ -309,8 +315,8 @@ func TestJobsPagination(t *testing.T, db persistence.Storage) {
 		assert.Equal(t, []string{ids[0], ids[1]}, []string{result.Content[0].ID, result.Content[1].ID})
 	}
 	{
-		result, err := db.QueryJobs(context.Background(), filterParams, sortAsc, persistence.PaginationParams{Offset: 1, Limit: 2})
-		assert.NoError(t, err)
+		result, err := db.QueryJobs(t.Context(), filterParams, sortAsc, persistence.PaginationParams{Offset: 1, Limit: 2, ComputeTotal: true})
+		require.NoError(t, err)
 		assert.Equal(t, int64(1), result.Pagination.Offset)
 		assert.Equal(t, int32(2), result.Pagination.Limit)
 		assert.Equal(t, int64(total), result.Pagination.Total)
@@ -318,8 +324,8 @@ func TestJobsPagination(t *testing.T, db persistence.Storage) {
 		assert.Equal(t, ids[1:3], []string{result.Content[0].ID, result.Content[1].ID})
 	}
 	{
-		result, err := db.QueryJobs(context.Background(), filterParams, sortAsc, persistence.PaginationParams{Offset: 2, Limit: 2})
-		assert.NoError(t, err)
+		result, err := db.QueryJobs(t.Context(), filterParams, sortAsc, persistence.PaginationParams{Offset: 2, Limit: 2, ComputeTotal: true})
+		require.NoError(t, err)
 		assert.Equal(t, int64(2), result.Pagination.Offset)
 		assert.Equal(t, int32(2), result.Pagination.Limit)
 		assert.Equal(t, int64(total), result.Pagination.Total)
@@ -327,8 +333,8 @@ func TestJobsPagination(t *testing.T, db persistence.Storage) {
 		assert.Equal(t, ids[2:4], []string{result.Content[0].ID, result.Content[1].ID})
 	}
 	{ // one past the last page
-		result, err := db.QueryJobs(context.Background(), filterParams, sortAsc, persistence.PaginationParams{Offset: 6, Limit: 2})
-		assert.NoError(t, err)
+		result, err := db.QueryJobs(t.Context(), filterParams, sortAsc, persistence.PaginationParams{Offset: 6, Limit: 2, ComputeTotal: true})
+		require.NoError(t, err)
 		assert.Equal(t, int64(6), result.Pagination.Offset)
 		assert.Equal(t, int32(2), result.Pagination.Limit)
 		assert.Equal(t, int64(total), result.Pagination.Total)

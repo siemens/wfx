@@ -9,7 +9,6 @@ package server
  */
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"testing"
@@ -24,42 +23,75 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestGetJobsHandler_Group(t *testing.T) {
+func TestGetJobs(t *testing.T) {
 	db := newInMemoryDB(t)
 
-	workflow, err := db.CreateWorkflow(context.Background(), dau.DirectWorkflow())
+	workflow, err := db.CreateWorkflow(t.Context(), dau.DirectWorkflow())
 	require.NoError(t, err)
 
-	_, err = db.CreateJob(context.Background(), &api.Job{
+	_, err = db.CreateJob(t.Context(), &api.Job{
 		ClientID: "foo",
 		Status: &api.JobStatus{
 			State: "INSTALL",
 		},
 		Workflow: &api.Workflow{Name: workflow.Name},
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	north, south := createNorthAndSouth(t, db)
 	handlers := []http.Handler{north, south}
 	for i, handler := range handlers {
 		t.Run(allAPIs[i], func(t *testing.T) {
-			apitest.New().
-				Handler(handler).
-				Get("/api/wfx/v1/jobs").
-				Query("group", "OPEN").
-				Expect(t).
-				Assert(jsonpath.Len(`$.content`, 1)).
-				Status(http.StatusOK).
-				End()
-
-			apitest.New().
-				Handler(handler).
-				Get("/api/wfx/v1/jobs").
-				Query("group", "CLOSED").
-				Expect(t).
-				Assert(jsonpath.Len(`$.content`, 0)).
-				Status(http.StatusOK).
-				End()
+			t.Run("QueryByGroup", func(t *testing.T) {
+				apitest.New().
+					Handler(handler).
+					Get("/api/wfx/v1/jobs").
+					Query("group", "OPEN").
+					Expect(t).
+					Assert(jsonpath.Len(`$.content`, 1)).
+					Status(http.StatusOK).
+					End()
+				apitest.New().
+					Handler(handler).
+					Get("/api/wfx/v1/jobs").
+					Query("group", "CLOSED").
+					Expect(t).
+					Assert(jsonpath.Len(`$.content`, 0)).
+					Status(http.StatusOK).
+					End()
+			})
+			t.Run("Pagination", func(t *testing.T) {
+				apitest.New().
+					Handler(handler).
+					Get("/api/wfx/v1/jobs").
+					Query("pagination", "true").
+					Expect(t).
+					Assert(jsonpath.Len(`$.content`, 1)).
+					Assert(jsonpath.Equal(`$.pagination.total`, float64(1))).
+					Assert(jsonpath.Equal(`$.pagination.limit`, float64(10))).
+					Assert(jsonpath.Equal(`$.pagination.offset`, float64(0))).
+					Status(http.StatusOK).
+					End()
+			})
+			t.Run("WithoutPagination", func(t *testing.T) {
+				apitest.New().
+					Handler(handler).
+					Get("/api/wfx/v1/jobs").
+					Query("pagination", "false").
+					Expect(t).
+					Assert(jsonpath.Len(`$.content`, 1)).
+					Assert(jsonpath.NotPresent(`$.pagination`)).
+					Status(http.StatusOK).
+					End()
+				apitest.New().
+					Handler(handler).
+					Get("/api/wfx/v1/jobs").
+					Expect(t).
+					Assert(jsonpath.Len(`$.content`, 1)).
+					Assert(jsonpath.NotPresent(`$.pagination`)).
+					Status(http.StatusOK).
+					End()
+			})
 		})
 	}
 }
@@ -68,7 +100,7 @@ func TestCreateJob(t *testing.T) {
 	db := newInMemoryDB(t)
 	north, _ := createNorthAndSouth(t, db)
 
-	wf, err := workflow.CreateWorkflow(context.Background(), db, dau.DirectWorkflow())
+	wf, err := workflow.CreateWorkflow(t.Context(), db, dau.DirectWorkflow())
 	require.NoError(t, err)
 
 	// create job using that workflow
@@ -94,7 +126,7 @@ func TestCreateJob(t *testing.T) {
 		Assert(jsonpath.Equal(`$.definition.url`, "http://localhost/update.tgz")).
 		End()
 
-	jobs, err := db.QueryJobs(context.Background(), persistence.FilterParams{}, persistence.SortParams{}, persistence.PaginationParams{Offset: 0, Limit: 1})
+	jobs, err := db.QueryJobs(t.Context(), persistence.FilterParams{}, persistence.SortParams{}, persistence.PaginationParams{Offset: 0, Limit: 1})
 	assert.NoError(t, err)
 	assert.Len(t, jobs.Content, 1)
 }
@@ -124,7 +156,7 @@ func TestCreateJob_Invalid(t *testing.T) {
 		Status(http.StatusBadRequest).
 		End()
 
-	jobs, err := db.QueryJobs(context.Background(), persistence.FilterParams{}, persistence.SortParams{}, persistence.PaginationParams{Offset: 0, Limit: 1})
+	jobs, err := db.QueryJobs(t.Context(), persistence.FilterParams{}, persistence.SortParams{}, persistence.PaginationParams{Offset: 0, Limit: 1})
 	require.NoError(t, err)
 	assert.Len(t, jobs.Content, 0)
 }

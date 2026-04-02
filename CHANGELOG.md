@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Breaking
+
+- Omit pagination metadata from responses by default. To restore the previous behavior, append the query parameter `pagination=true` to the `/jobs` and `/workflows` endpoints.
+
 ### Added
 
 - Log all SQL queries when `--log-level` is set to `trace`
