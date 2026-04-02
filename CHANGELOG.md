@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Ensure `Subscriber.ch` channels are not double-closed when stopping the server
+- UI: collapse pagination bar for large (> 50) page counts
 
 ## [0.5.0] - 2026-03-09
 
