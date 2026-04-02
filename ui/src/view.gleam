@@ -302,6 +302,53 @@ fn ceil(a: Int, b: Int) -> Int {
   { a + b - 1 } / b
 }
 
+/// Compute which page numbers to display in the pagination bar.
+/// Returns a list of page numbers to show, using -1 as a sentinel for "…".
+/// Always shows the first 2 and last 2 pages, plus a window around the current page.
+fn page_numbers_to_show(current: Int, total_pages: Int) -> List(Int) {
+  // For small page counts, just show everything
+  case total_pages <= 10 {
+    True ->
+      int.range(from: 1, to: total_pages, with: [], run: list.prepend)
+      |> list.reverse
+    False -> {
+      // Always include: first 2, last 2, and a window around current
+      let edge_start = [1, 2]
+      let edge_end = [total_pages - 1, total_pages]
+      let window_start = int.max(1, current - 2)
+      let window_end = int.min(total_pages, current + 2)
+      let window =
+        int.range(
+          from: window_start,
+          to: window_end,
+          with: [],
+          run: list.prepend,
+        )
+        |> list.reverse
+
+      let nums =
+        list.flatten([edge_start, window, edge_end])
+        |> list.unique
+        |> list.sort(int.compare)
+
+      // Insert -1 sentinel between non-consecutive numbers
+      insert_ellipsis(nums, [])
+    }
+  }
+}
+
+fn insert_ellipsis(nums: List(Int), acc: List(Int)) -> List(Int) {
+  case nums {
+    [] -> list.reverse(acc)
+    [only] -> list.reverse([only, ..acc])
+    [first, second, ..rest] ->
+      case second - first > 1 {
+        True -> insert_ellipsis([second, ..rest], [-1, first, ..acc])
+        False -> insert_ellipsis([second, ..rest], [first, ..acc])
+      }
+  }
+}
+
 fn create_pagination(
   prefix: String,
   pagination: wfx.Pagination,
@@ -313,20 +360,25 @@ fn create_pagination(
   let links = case pages > 1 {
     False -> []
     True ->
-      list.range(1, pages)
+      page_numbers_to_show(current_page, pages)
       |> list.map(fn(page) {
-        case page == current_page {
-          True -> p([], [text(int.to_string(page))])
-          False ->
-            a(
-              [
-                href(prefix <> "?page=" <> int.to_string(page)),
-                class(class_link),
-              ],
-              [
-                text(int.to_string(page)),
-              ],
-            )
+        case page {
+          // sentinel value -1 means ellipsis
+          -1 -> p([], [text("…")])
+          _ ->
+            case page == current_page {
+              True -> p([], [text(int.to_string(page))])
+              False ->
+                a(
+                  [
+                    href(prefix <> "?page=" <> int.to_string(page)),
+                    class(class_link),
+                  ],
+                  [
+                    text(int.to_string(page)),
+                  ],
+                )
+            }
         }
       })
   }
