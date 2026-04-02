@@ -20,6 +20,7 @@ import (
 	"github.com/knadh/koanf/v2"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/siemens/wfx/cmd/wfx-loadtest/cmd/populate"
 	"github.com/siemens/wfx/cmd/wfx-loadtest/loadtest"
 	"github.com/siemens/wfx/cmd/wfxctl/flags"
 	"github.com/siemens/wfx/internal/cmd/man"
@@ -32,7 +33,7 @@ func NewCommand() *cobra.Command {
 		Use:     "wfx-loadtest",
 		Short:   "Run a loadtest against wfx",
 		Example: "wfx-loadtest --duration 10s",
-		PreRun: func(cmd *cobra.Command, _ []string) {
+		PersistentPreRun: func(cmd *cobra.Command, _ []string) {
 			envProvider := env.Provider(".", env.Opt{
 				Prefix: "WFX_",
 				TransformFunc: func(k string, v string) (string, any) {
@@ -62,6 +63,7 @@ func NewCommand() *cobra.Command {
 		},
 	}
 	cmd.AddCommand(man.NewCommand())
+	cmd.AddCommand(populate.NewCommand(k))
 	f := cmd.PersistentFlags()
 
 	f.String(flags.ClientHostFlag, "localhost", "host")
