@@ -368,7 +368,7 @@ fn get_jobs(
   let append = string_tree.append
   let url =
     string_tree.from_string(wfx_url)
-    |> append("/jobs?sort=desc&offset=")
+    |> append("/jobs?pagination=true&sort=desc&offset=")
     |> append(int.to_string({ page - 1 } * limit))
     |> append("&limit=")
     |> append(int.to_string(limit))
@@ -386,7 +386,7 @@ fn get_workflows(
   let append = string_tree.append
   let url =
     string_tree.from_string(wfx_url)
-    |> append("/workflows?sort=asc&offset=")
+    |> append("/workflows?pagination=true&sort=asc&offset=")
     |> append(int.to_string({ page - 1 } * limit))
     |> append("&limit=")
     |> append(int.to_string(limit))

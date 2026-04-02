@@ -109,6 +109,7 @@ paths:
         - $ref: "#/components/parameters/limit"
         - $ref: "#/components/parameters/offset"
         - $ref: "#/components/parameters/sort"
+        - $ref: "#/components/parameters/pagination"
       responses:
         default:
           description: Other error with any status code and response body format.
@@ -255,6 +256,7 @@ paths:
         - $ref: "#/components/parameters/group"
         - $ref: "#/components/parameters/clientId"
         - $ref: "#/components/parameters/tag"
+        - $ref: "#/components/parameters/pagination"
         - name: workflow
           x-go-name: paramWorkflow
           in: query
@@ -807,7 +809,6 @@ components:
     PaginatedWorkflowList:
       type: object
       required:
-        - pagination
         - content
       properties:
         pagination:
@@ -1128,7 +1129,6 @@ components:
     PaginatedJobList:
       type: object
       required:
-        - pagination
         - content
       properties:
         pagination:
@@ -1332,6 +1332,15 @@ components:
       required: false
       schema:
         type: string
+    pagination:
+      name: pagination
+      x-go-name: paramPagination
+      in: query
+      description: If true, pagination metadata will be included in the response
+      required: false
+      schema:
+        type: boolean
+        default: false
 
 x-paths-templates:
   Errors:
