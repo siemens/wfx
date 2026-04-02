@@ -54,8 +54,20 @@ func (db Database) QueryJobs(ctx context.Context,
 		builder.Where(job.HasWorkflowWith(workflow.Name(*filterParams.Workflow)))
 	}
 
-	for _, t := range filterParams.Tags {
-		builder.Where(job.HasTagsWith(tag.Name(t)))
+	if len(filterParams.Tags) > 0 {
+		log.Debug().Strs("tags", filterParams.Tags).Msg("Adding filter")
+		builder.Where(func(s *sql.Selector) {
+			tagJobsTable := sql.Table(tag.JobsTable)
+			tagTable := sql.Table(tag.Table)
+
+			s.Join(tagJobsTable).On(s.C(job.FieldID), tagJobsTable.C(tag.JobsPrimaryKey[1]))
+			s.Join(tagTable).On(tagJobsTable.C(tag.JobsPrimaryKey[0]), tagTable.C(tag.FieldID))
+			values := make([]any, len(filterParams.Tags))
+			for i, v := range filterParams.Tags {
+				values[i] = v
+			}
+			s.Where(sql.In(tagTable.C(tag.FieldName), values...))
+		})
 	}
 
 	// deterministic ordering
@@ -64,6 +76,7 @@ func (db Database) QueryJobs(ctx context.Context,
 	} else {
 		builder.Order(ent.Asc(job.FieldStime))
 	}
+	builder.Unique(true)
 
 	// need to clone builder because it is unusable after we call `All`
 	counter := builder.Clone()
