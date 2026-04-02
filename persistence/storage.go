@@ -78,6 +78,9 @@ type PaginationParams struct {
 	Offset int64
 	// Limit is the maximum number of items to return in the response.
 	Limit int32
+	// ComputeTotal, when set to true, computes the total number of available entries.
+	// Note that this requires a separate count query and may significantly impact performance on large data sets.
+	ComputeTotal bool
 }
 
 // FetchParams control the level of detail returned by fetch operations.

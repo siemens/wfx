@@ -10,6 +10,7 @@ package entgo
 
 import (
 	"context"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqljson"
@@ -78,8 +79,26 @@ func (db Database) QueryJobs(ctx context.Context,
 	}
 	builder.Unique(true)
 
-	// need to clone builder because it is unusable after we call `All`
-	counter := builder.Clone()
+	var result api.PaginatedJobList
+
+	if paginationParams.ComputeTotal {
+		counter := builder.Clone()
+
+		start := time.Now()
+		count, err := counter.Count(ctx)
+		if err != nil {
+			log.Error().Err(err).Msg("Failed to count jobs")
+			return nil, fault.Wrap(err)
+		}
+		duration := time.Since(start)
+		log.Debug().Dur("duration", duration).Int("count", count).Msg("Computed total number of jobs")
+
+		result.Pagination = &api.Pagination{
+			Total:  int64(count),
+			Limit:  paginationParams.Limit,
+			Offset: paginationParams.Offset,
+		}
+	}
 
 	jobs, err := builder.
 		Limit(int(paginationParams.Limit)).
@@ -90,30 +109,9 @@ func (db Database) QueryJobs(ctx context.Context,
 		return nil, fault.Wrap(err)
 	}
 
-	total, err := counter.Count(ctx)
-	if err != nil {
-		log.Error().Err(err).Msg("Failed to count jobs")
-		return nil, fault.Wrap(err)
-	}
-
-	content := make([]api.Job, 0, len(jobs))
+	result.Content = make([]api.Job, 0, len(jobs))
 	for _, entity := range jobs {
-		content = append(content, convertJob(entity))
+		result.Content = append(result.Content, convertJob(entity))
 	}
-	result := api.PaginatedJobList{
-		Pagination: api.Pagination{
-			Total:  int64(total),
-			Limit:  paginationParams.Limit,
-			Offset: paginationParams.Offset,
-		},
-		Content: content,
-	}
-
-	log.Debug().
-		Int("total", total).
-		Int32("limit", paginationParams.Limit).
-		Int64("offset", paginationParams.Offset).
-		Msg("Fetched jobs")
-
 	return &result, nil
 }
