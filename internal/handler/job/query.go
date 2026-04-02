@@ -18,7 +18,13 @@ import (
 	"github.com/siemens/wfx/persistence"
 )
 
-func QueryJobs(ctx context.Context, storage persistence.Storage, filterParams persistence.FilterParams, paginationParams persistence.PaginationParams, sort *string) (*api.PaginatedJobList, error) {
+func QueryJobs(
+	ctx context.Context,
+	storage persistence.Storage,
+	filterParams persistence.FilterParams,
+	paginationParams persistence.PaginationParams,
+	sort *string,
+) (*api.PaginatedJobList, error) {
 	log := logging.LoggerFromCtx(ctx)
 
 	var sortParams persistence.SortParams

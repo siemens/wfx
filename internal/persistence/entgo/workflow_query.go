@@ -10,6 +10,7 @@ package entgo
 
 import (
 	"context"
+	"time"
 
 	"github.com/Southclaws/fault"
 	"github.com/siemens/wfx/generated/api"
@@ -46,30 +47,28 @@ func (db Database) QueryWorkflows(ctx context.Context, sortParams persistence.So
 		return nil, fault.Wrap(err)
 	}
 
-	total, err := counter.Count(ctx)
-	if err != nil {
-		log.Error().Err(err).Msg("Failed to count workflows")
-		return nil, fault.Wrap(err)
-	}
+	var result api.PaginatedWorkflowList
 
-	content := make([]api.Workflow, 0, len(workflows))
-	for _, wf := range workflows {
-		content = append(content, convertWorkflow(wf))
-	}
-	result := api.PaginatedWorkflowList{
-		Pagination: api.Pagination{
-			Total:  int64(total),
+	if paginationParams.ComputeTotal {
+		start := time.Now()
+		count, err := counter.Count(ctx)
+		if err != nil {
+			log.Error().Err(err).Msg("Failed to count workflows")
+			return nil, fault.Wrap(err)
+		}
+		duration := time.Since(start)
+		log.Debug().Dur("duration", duration).Int("count", count).Msg("Computed total number of workflows")
+
+		result.Pagination = &api.Pagination{
+			Total:  int64(count),
 			Offset: paginationParams.Offset,
 			Limit:  paginationParams.Limit,
-		},
-		Content: content,
+		}
 	}
 
-	log.Debug().
-		Int("total", total).
-		Int32("limit", paginationParams.Limit).
-		Int64("offset", paginationParams.Offset).
-		Msg("Fetched workflows")
-
+	result.Content = make([]api.Workflow, 0, len(workflows))
+	for _, wf := range workflows {
+		result.Content = append(result.Content, convertWorkflow(wf))
+	}
 	return &result, nil
 }

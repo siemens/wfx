@@ -20,6 +20,7 @@ import (
 	"github.com/knadh/koanf/v2"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/siemens/wfx/cmd/wfx-loadtest/cmd/populate"
 	"github.com/siemens/wfx/cmd/wfx-loadtest/loadtest"
 	"github.com/siemens/wfx/cmd/wfxctl/flags"
 	"github.com/siemens/wfx/internal/cmd/man"
@@ -32,7 +33,7 @@ func NewCommand() *cobra.Command {
 		Use:     "wfx-loadtest",
 		Short:   "Run a loadtest against wfx",
 		Example: "wfx-loadtest --duration 10s",
-		PreRun: func(cmd *cobra.Command, _ []string) {
+		PersistentPreRun: func(cmd *cobra.Command, _ []string) {
 			envProvider := env.Provider(".", env.Opt{
 				Prefix: "WFX_",
 				TransformFunc: func(k string, v string) (string, any) {
@@ -62,12 +63,13 @@ func NewCommand() *cobra.Command {
 		},
 	}
 	cmd.AddCommand(man.NewCommand())
+	cmd.AddCommand(populate.NewCommand(k))
 	f := cmd.PersistentFlags()
 
-	f.String(loadtest.HostFlag, "localhost", "host")
-	f.Int(loadtest.PortFlag, 8080, "port")
-	f.String(loadtest.MgmtHostFlag, "localhost", "management host")
-	f.Int(loadtest.MgmtPortFlag, 8081, "management port")
+	f.String(flags.ClientHostFlag, "localhost", "host")
+	f.Int(flags.ClientPortFlag, 8080, "port")
+	f.String(flags.MgmtHostFlag, "localhost", "management host")
+	f.Int(flags.MgmtPortFlag, 8081, "management port")
 
 	f.String(flags.LogLevelFlag, "info", fmt.Sprintf("set log level. one of: %s,%s,%s,%s,%s,%s,%s",
 		zerolog.TraceLevel.String(),
