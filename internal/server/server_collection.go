@@ -336,16 +336,12 @@ func createListener(scheme config.Scheme, settings ListenerSettings) (net.Listen
 		return nil, fmt.Errorf("unsupported scheme: %s", scheme)
 	}
 	contextLogger := log.With().Str("network", network).Str("addr", addr).Str("scheme", scheme.String()).Logger()
-	for range 30 {
-		ln, err := net.Listen(network, addr)
-		if err == nil {
-			contextLogger.Debug().Msg("Created new listener")
-			return ln, nil
-		}
-		contextLogger.Err(err).Msg("Failed to create listener")
-		time.Sleep(time.Second)
+	ln, err := net.Listen(network, addr)
+	if err != nil {
+		return nil, fault.Wrap(err)
 	}
-	return nil, errors.New("failed to create listener")
+	contextLogger.Debug().Msg("Created new listener")
+	return ln, nil
 }
 
 func createMux(cfg *config.AppConfig, basePath string, registerUI bool) *http.ServeMux {

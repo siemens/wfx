@@ -9,7 +9,6 @@ package server
  */
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -38,10 +37,10 @@ func TestGetWorkflow(t *testing.T) {
 
 	tmp := dau.DirectWorkflow()
 	tmp.Name = "45b68304-4a78-4f78-b4f5-776309c3616f"
-	wf, err := workflow.CreateWorkflow(context.Background(), db, tmp)
+	wf, err := workflow.CreateWorkflow(t.Context(), db, tmp)
 	require.NoError(t, err)
 	t.Cleanup(func() {
-		_ = db.DeleteWorkflow(context.Background(), wf.Name)
+		_ = db.DeleteWorkflow(t.Context(), wf.Name)
 	})
 
 	handlers := []http.Handler{north, south}
@@ -63,19 +62,54 @@ func TestQueryWorkflows(t *testing.T) {
 	db := newInMemoryDB(t)
 	north, south := createNorthAndSouth(t, db)
 
-	_, err := workflow.CreateWorkflow(context.Background(), db, dau.DirectWorkflow())
+	_, err := workflow.CreateWorkflow(t.Context(), db, dau.DirectWorkflow())
 	require.NoError(t, err)
 	handlers := []http.Handler{north, south}
 	for i, name := range allAPIs {
 		t.Run(name, func(t *testing.T) {
-			// read all
-			apitest.New().
-				Handler(handlers[i]).
-				Get("/api/wfx/v1/workflows").
-				Expect(t).
-				Status(http.StatusOK).
-				Assert(jsonpath.GreaterThan(`$.content`, 0)).
-				End()
+			t.Run("Default", func(t *testing.T) {
+				apitest.New().
+					Handler(handlers[i]).
+					Get("/api/wfx/v1/workflows").
+					Expect(t).
+					Status(http.StatusOK).
+					Assert(jsonpath.Len(`$.content`, 1)).
+					End()
+			})
+
+			t.Run("Pagination", func(t *testing.T) {
+				apitest.New().
+					Handler(handlers[i]).
+					Get("/api/wfx/v1/workflows").
+					Query("pagination", "true").
+					Expect(t).
+					Status(http.StatusOK).
+					Assert(jsonpath.Len(`$.content`, 1)).
+					Assert(jsonpath.Equal(`$.pagination.total`, float64(1))).
+					Assert(jsonpath.Equal(`$.pagination.limit`, float64(10))).
+					Assert(jsonpath.Equal(`$.pagination.offset`, float64(0))).
+					End()
+			})
+
+			t.Run("WithoutPagination", func(t *testing.T) {
+				apitest.New().
+					Handler(handlers[i]).
+					Get("/api/wfx/v1/workflows").
+					Query("pagination", "false").
+					Expect(t).
+					Assert(jsonpath.Len(`$.content`, 1)).
+					Assert(jsonpath.NotPresent(`$.pagination`)).
+					Status(http.StatusOK).
+					End()
+				apitest.New().
+					Handler(handlers[i]).
+					Get("/api/wfx/v1/workflows").
+					Expect(t).
+					Assert(jsonpath.Len(`$.content`, 1)).
+					Assert(jsonpath.NotPresent(`$.pagination`)).
+					Status(http.StatusOK).
+					End()
+			})
 		})
 	}
 }
@@ -88,10 +122,10 @@ func TestDeleteWorkflow(t *testing.T) {
 	name := "584802e1-3a90-483a-924f-a638e488c531"
 	tmp.Name = name
 
-	wf, err := workflow.CreateWorkflow(context.Background(), db, tmp)
+	wf, err := workflow.CreateWorkflow(t.Context(), db, tmp)
 	require.NoError(t, err)
 	t.Cleanup(func() {
-		_ = db.DeleteWorkflow(context.Background(), name)
+		_ = db.DeleteWorkflow(t.Context(), name)
 	})
 
 	// delete shall fail for south
@@ -111,7 +145,7 @@ func TestDeleteWorkflow(t *testing.T) {
 		Status(http.StatusNoContent).
 		End()
 
-	actual, err := db.GetWorkflow(context.Background(), wf.Name)
+	actual, err := db.GetWorkflow(t.Context(), wf.Name)
 	assert.Nil(t, actual)
 	assert.Equal(t, ftag.NotFound, ftag.Get(err))
 }
@@ -125,7 +159,7 @@ func TestCreateWorkflow(t *testing.T) {
 	wf.Name = name
 	wfJSON, _ := json.Marshal(wf)
 	t.Cleanup(func() {
-		_ = db.DeleteWorkflow(context.Background(), name)
+		_ = db.DeleteWorkflow(t.Context(), name)
 	})
 
 	// south is not allowed
@@ -182,15 +216,19 @@ func newInMemoryDB(t *testing.T) persistence.Storage {
 	t.Cleanup(db.Shutdown)
 	t.Cleanup(func() {
 		{
-			list, _ := db.QueryJobs(context.Background(), persistence.FilterParams{}, persistence.SortParams{}, persistence.PaginationParams{Limit: 100})
-			for _, job := range list.Content {
-				_ = db.DeleteJob(context.Background(), job.ID)
+			list, _ := db.QueryJobs(t.Context(), persistence.FilterParams{}, persistence.SortParams{}, persistence.PaginationParams{Limit: 100})
+			if list != nil {
+				for _, job := range list.Content {
+					_ = db.DeleteJob(t.Context(), job.ID)
+				}
 			}
 		}
 		{
-			list, _ := db.QueryWorkflows(context.Background(), persistence.SortParams{Desc: false}, persistence.PaginationParams{Limit: 100})
-			for _, wf := range list.Content {
-				_ = db.DeleteWorkflow(context.Background(), wf.Name)
+			list, _ := db.QueryWorkflows(t.Context(), persistence.SortParams{Desc: false}, persistence.PaginationParams{Limit: 100})
+			if list != nil {
+				for _, wf := range list.Content {
+					_ = db.DeleteWorkflow(t.Context(), wf.Name)
+				}
 			}
 		}
 	})
@@ -214,8 +252,8 @@ func createNorthAndSouth(t *testing.T, db persistence.Storage) (http.Handler, ht
 
 func persistJob(t *testing.T, db persistence.Storage) *api.Job {
 	wf := dau.DirectWorkflow()
-	if found, _ := workflow.GetWorkflow(context.Background(), db, wf.Name); found == nil {
-		_, err := workflow.CreateWorkflow(context.Background(), db, wf)
+	if found, _ := workflow.GetWorkflow(t.Context(), db, wf.Name); found == nil {
+		_, err := workflow.CreateWorkflow(t.Context(), db, wf)
 		require.NoError(t, err)
 	}
 
@@ -223,7 +261,7 @@ func persistJob(t *testing.T, db persistence.Storage) *api.Job {
 		ClientID: "foo",
 		Workflow: wf.Name,
 	}
-	job, err := job.CreateJob(context.Background(), db, &jobReq)
+	job, err := job.CreateJob(t.Context(), db, &jobReq)
 	require.NoError(t, err)
 	return job
 }

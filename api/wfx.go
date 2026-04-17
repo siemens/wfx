@@ -131,6 +131,9 @@ func (server WfxServer) GetJobs(ctx context.Context, request api.GetJobsRequestO
 	if request.Params.ParamLimit != nil {
 		pagination.Limit = *request.Params.ParamLimit
 	}
+	if request.Params.ParamPagination != nil {
+		pagination.ComputeTotal = *request.Params.ParamPagination
+	}
 
 	jobs, err := job.QueryJobs(ctx, server.storage, filter, pagination, (*string)(request.Params.ParamSort))
 	if err != nil {
@@ -402,6 +405,10 @@ func (server WfxServer) GetWorkflows(ctx context.Context, request api.GetWorkflo
 		limit = *request.Params.ParamLimit
 	}
 	pagination := persistence.PaginationParams{Offset: offset, Limit: limit}
+	if request.Params.ParamPagination != nil {
+		pagination.ComputeTotal = *request.Params.ParamPagination
+	}
+
 	log := logging.LoggerFromCtx(ctx)
 	workflows, err := workflow.QueryWorkflows(ctx, server.storage, pagination, (*string)(request.Params.ParamSort))
 	if err != nil {

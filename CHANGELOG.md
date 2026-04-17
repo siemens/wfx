@@ -7,11 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Breaking
+
+- Omit pagination metadata from responses by default. To restore the previous behavior, append the query parameter `pagination=true` to the `/jobs` and `/workflows` endpoints.
+
 ### Added
+
+- Log all SQL queries when `--log-level` is set to `trace`
+- wfx-loadtest: add `populate` sub-command to seed a database with sample data
+
+### Removed
+
+- Retry mechanism for storage initialization
+- Retry loop when creating network listeners
 
 ### Changed
 
 - Distro-compliant package naming
+- Querying jobs by tags is about 3x faster (e.g. ~1s instead of ~3s for 1 million jobs)
 
 ### Fixed
 

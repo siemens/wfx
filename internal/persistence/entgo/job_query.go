@@ -10,6 +10,7 @@ package entgo
 
 import (
 	"context"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqljson"
@@ -54,8 +55,20 @@ func (db Database) QueryJobs(ctx context.Context,
 		builder.Where(job.HasWorkflowWith(workflow.Name(*filterParams.Workflow)))
 	}
 
-	for _, t := range filterParams.Tags {
-		builder.Where(job.HasTagsWith(tag.Name(t)))
+	if len(filterParams.Tags) > 0 {
+		log.Debug().Strs("tags", filterParams.Tags).Msg("Adding filter")
+		builder.Where(func(s *sql.Selector) {
+			tagJobsTable := sql.Table(tag.JobsTable)
+			tagTable := sql.Table(tag.Table)
+
+			s.Join(tagJobsTable).On(s.C(job.FieldID), tagJobsTable.C(tag.JobsPrimaryKey[1]))
+			s.Join(tagTable).On(tagJobsTable.C(tag.JobsPrimaryKey[0]), tagTable.C(tag.FieldID))
+			values := make([]any, len(filterParams.Tags))
+			for i, v := range filterParams.Tags {
+				values[i] = v
+			}
+			s.Where(sql.In(tagTable.C(tag.FieldName), values...))
+		})
 	}
 
 	// deterministic ordering
@@ -64,9 +77,28 @@ func (db Database) QueryJobs(ctx context.Context,
 	} else {
 		builder.Order(ent.Asc(job.FieldStime))
 	}
+	builder.Unique(true)
 
-	// need to clone builder because it is unusable after we call `All`
-	counter := builder.Clone()
+	var result api.PaginatedJobList
+
+	if paginationParams.ComputeTotal {
+		counter := builder.Clone()
+
+		start := time.Now()
+		count, err := counter.Count(ctx)
+		if err != nil {
+			log.Error().Err(err).Msg("Failed to count jobs")
+			return nil, fault.Wrap(err)
+		}
+		duration := time.Since(start)
+		log.Debug().Dur("duration", duration).Int("count", count).Msg("Computed total number of jobs")
+
+		result.Pagination = &api.Pagination{
+			Total:  int64(count),
+			Limit:  paginationParams.Limit,
+			Offset: paginationParams.Offset,
+		}
+	}
 
 	jobs, err := builder.
 		Limit(int(paginationParams.Limit)).
@@ -77,30 +109,9 @@ func (db Database) QueryJobs(ctx context.Context,
 		return nil, fault.Wrap(err)
 	}
 
-	total, err := counter.Count(ctx)
-	if err != nil {
-		log.Error().Err(err).Msg("Failed to count jobs")
-		return nil, fault.Wrap(err)
-	}
-
-	content := make([]api.Job, 0, len(jobs))
+	result.Content = make([]api.Job, 0, len(jobs))
 	for _, entity := range jobs {
-		content = append(content, convertJob(entity))
+		result.Content = append(result.Content, convertJob(entity))
 	}
-	result := api.PaginatedJobList{
-		Pagination: api.Pagination{
-			Total:  int64(total),
-			Limit:  paginationParams.Limit,
-			Offset: paginationParams.Offset,
-		},
-		Content: content,
-	}
-
-	log.Debug().
-		Int("total", total).
-		Int32("limit", paginationParams.Limit).
-		Int64("offset", paginationParams.Offset).
-		Msg("Fetched jobs")
-
 	return &result, nil
 }

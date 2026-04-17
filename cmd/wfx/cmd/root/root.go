@@ -17,7 +17,6 @@ import (
 	"strings"
 	"sync"
 	"syscall"
-	"time"
 
 	"github.com/Southclaws/fault"
 	"github.com/rs/zerolog/log"
@@ -26,7 +25,6 @@ import (
 	"github.com/siemens/wfx/cmd/wfx/metadata"
 	"github.com/siemens/wfx/internal/cmd/man"
 	"github.com/siemens/wfx/internal/server"
-	"github.com/siemens/wfx/persistence"
 	"github.com/spf13/cobra"
 	"go.uber.org/automaxprocs/maxprocs"
 )
@@ -74,7 +72,7 @@ Examples of tasks are installation of firmware or other types of commands issued
 				Str("user", username).
 				Msg("Starting wfx")
 
-			storage, err := initStorage(cfg)
+			storage, err := cfg.InitStorage()
 			if err != nil {
 				return fault.Wrap(err)
 			}
@@ -100,10 +98,7 @@ Examples of tasks are installation of firmware or other types of commands issued
 			}
 
 			var g sync.WaitGroup
-			g.Add(1)
-			go func() {
-				defer g.Done()
-
+			g.Go(func() {
 				err := collection.Start()
 				log.Debug().Msg("Server collection done")
 				if err != nil {
@@ -111,7 +106,7 @@ Examples of tasks are installation of firmware or other types of commands issued
 					chErr <- err
 				}
 				close(chErr)
-			}()
+			})
 
 			// reset error variable
 			err = nil
@@ -140,34 +135,4 @@ Examples of tasks are installation of firmware or other types of commands issued
 	_ = cmd.MarkPersistentFlagDirname(config.ClientPluginsDirFlag)
 	_ = cmd.MarkPersistentFlagDirname(config.MgmtPluginsDirFlag)
 	return cmd
-}
-
-func initStorage(cfg *config.AppConfig) (persistence.Storage, error) {
-	name, options := cfg.Storage(), cfg.StorageOptions()
-	log.Debug().Str("name", name).Str("options", options).Msg("Setting up persistent storage")
-
-	// note: storage is shared between north- and southbound API
-	storage := persistence.GetStorage(name)
-	if storage == nil {
-		return nil, fmt.Errorf("unknown storage %s", name)
-	}
-	var err error
-	for i := 0; i < 300; i++ {
-		log.Debug().Str("name", name).Msg("Initializing storage")
-		err = storage.Initialize(options)
-		if err == nil {
-			log.Info().Str("name", name).Msg("Initialized storage")
-			break
-		}
-		dur := time.Second
-		log.Warn().
-			Err(err).
-			Str("storage", name).
-			Msg("Failed to initialize persistent storage. Trying again in one second...")
-		time.Sleep(dur)
-	}
-	if err != nil {
-		return nil, fault.Wrap(err)
-	}
-	return storage, nil
 }
