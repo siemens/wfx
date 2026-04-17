@@ -16,6 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Log all SQL queries when `--log-level` is set to `trace`
 - wfx-loadtest: add `populate` sub-command to seed a database with sample data
 
+### Removed
+
+- Retry mechanism for storage initialization
+- Retry loop when creating network listeners
+
 ### Changed
 
 - Distro-compliant package naming
