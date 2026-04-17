@@ -429,23 +429,10 @@ func (cfg *AppConfig) InitStorage() (persistence.Storage, error) {
 	if storage == nil {
 		return nil, fmt.Errorf("unknown storage %s", name)
 	}
-	var err error
-	for range 300 {
-		log.Debug().Str("name", name).Msg("Initializing storage")
-		err = storage.Initialize(options)
-		if err == nil {
-			log.Info().Str("name", name).Msg("Initialized storage")
-			break
-		}
-		dur := time.Second
-		log.Warn().
-			Err(err).
-			Str("storage", name).
-			Msg("Failed to initialize persistent storage. Trying again in one second...")
-		time.Sleep(dur)
-	}
-	if err != nil {
+	log.Debug().Str("name", name).Msg("Initializing storage")
+	if err := storage.Initialize(options); err != nil {
 		return nil, fault.Wrap(err)
 	}
+	log.Info().Str("name", name).Msg("Initialized storage")
 	return storage, nil
 }
