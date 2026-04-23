@@ -21,7 +21,7 @@ require (
 	github.com/google/flatbuffers v25.12.19+incompatible
 	github.com/gookit/color v1.6.0
 	github.com/itchyny/gojq v0.12.19
-	github.com/jackc/pgx/v5 v5.9.1
+	github.com/jackc/pgx/v5 v5.9.2
 	github.com/klauspost/compress v1.18.5
 	github.com/knadh/koanf/parsers/yaml v1.1.0
 	github.com/knadh/koanf/providers/env/v2 v2.0.0
