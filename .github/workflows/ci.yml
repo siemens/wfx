@@ -77,7 +77,7 @@ jobs:
     needs:
       - ui
     runs-on: ubuntu-latest
-    container: golang:1.26.2@sha256:5f3787b7f902c07c7ec4f3aa91a301a3eda8133aa32661a3b3a3a86ab3a68a36
+    container: golang:1.26.2@sha256:1e598ea5752ae26c093b746fd73c5095af97d6f2d679c43e83e0eac484a33dc3
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Setup Golang caches
@@ -107,10 +107,10 @@ jobs:
   test-postgres:
     runs-on: ubuntu-latest
     name: Test PostgreSQL
-    container: golang:1.26.2@sha256:5f3787b7f902c07c7ec4f3aa91a301a3eda8133aa32661a3b3a3a86ab3a68a36
+    container: golang:1.26.2@sha256:1e598ea5752ae26c093b746fd73c5095af97d6f2d679c43e83e0eac484a33dc3
     services:
       postgres:
-        image: postgres:18@sha256:52e6ffd11fddd081ae63880b635b2a61c14008c17fc98cdc7ce5472265516dd0
+        image: postgres:18@sha256:059fa0289cc5a184034e05a1f4f6d6fd79f69dc718b8b04ab60b6b469eed411e
         env:
           # see https://hub.docker.com/_/postgres
           POSTGRES_HOST: postgres
@@ -154,7 +154,7 @@ jobs:
   test-mysql:
     runs-on: ubuntu-latest
     name: Test MySQL
-    container: golang:1.26.2@sha256:5f3787b7f902c07c7ec4f3aa91a301a3eda8133aa32661a3b3a3a86ab3a68a36
+    container: golang:1.26.2@sha256:1e598ea5752ae26c093b746fd73c5095af97d6f2d679c43e83e0eac484a33dc3
     services:
       mysql:
         image: mysql:8-debian@sha256:49f4fcb0087318aa1c222c7e8ceacbb541cdc457c6307d45e6ee4313f4902e33
@@ -199,7 +199,7 @@ jobs:
   cli-tests:
     name: CLI Tests
     runs-on: ubuntu-latest
-    container: golang:1.26.2@sha256:5f3787b7f902c07c7ec4f3aa91a301a3eda8133aa32661a3b3a3a86ab3a68a36
+    container: golang:1.26.2@sha256:1e598ea5752ae26c093b746fd73c5095af97d6f2d679c43e83e0eac484a33dc3
     services:
       mysql:
         image: mysql:8-debian@sha256:49f4fcb0087318aa1c222c7e8ceacbb541cdc457c6307d45e6ee4313f4902e33
@@ -217,7 +217,7 @@ jobs:
           --health-timeout 5s
           --health-retries 20
       postgres:
-        image: postgres:18@sha256:52e6ffd11fddd081ae63880b635b2a61c14008c17fc98cdc7ce5472265516dd0
+        image: postgres:18@sha256:059fa0289cc5a184034e05a1f4f6d6fd79f69dc718b8b04ab60b6b469eed411e
         env:
           # see https://hub.docker.com/_/postgres
           POSTGRES_HOST: postgres
@@ -273,7 +273,7 @@ jobs:
     needs: [ui]
     runs-on: ubuntu-latest
     name: Lint
-    container: golang:1.26.2@sha256:5f3787b7f902c07c7ec4f3aa91a301a3eda8133aa32661a3b3a3a86ab3a68a36
+    container: golang:1.26.2@sha256:1e598ea5752ae26c093b746fd73c5095af97d6f2d679c43e83e0eac484a33dc3
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Download UI artifact
@@ -290,10 +290,10 @@ jobs:
   format:
     runs-on: ubuntu-latest
     name: Format
-    container: golang:1.26.2@sha256:5f3787b7f902c07c7ec4f3aa91a301a3eda8133aa32661a3b3a3a86ab3a68a36
+    container: golang:1.26.2@sha256:1e598ea5752ae26c093b746fd73c5095af97d6f2d679c43e83e0eac484a33dc3
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version: lts/*
       - run: .ci/setup-format.sh
@@ -313,7 +313,7 @@ jobs:
   generate:
     name: Generate Code
     runs-on: ubuntu-latest
-    container: golang:1.26.2@sha256:5f3787b7f902c07c7ec4f3aa91a301a3eda8133aa32661a3b3a3a86ab3a68a36
+    container: golang:1.26.2@sha256:1e598ea5752ae26c093b746fd73c5095af97d6f2d679c43e83e0eac484a33dc3
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Install packages
@@ -352,7 +352,7 @@ jobs:
           gleam-version: "${{ env.GLEAM_VERSION }}"
           rebar3-version: "${{ env.REBAR3_VERSION }}"
           otp-version: "${{ env.OTP_VERSION }}"
-      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version: lts/*
       - run: sudo .ci/setup-ui.sh
@@ -400,7 +400,7 @@ jobs:
       - name: Make 'wfx' binary globally available
         run: install -v -D -m0755 dist/wfx-with-ui_linux_amd64_v1/wfx /usr/local/bin/wfx
 
-      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version: lts/*
 
