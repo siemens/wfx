@@ -251,6 +251,13 @@ wfxctl workflow create --filter=.transitions wfx.workflow.kanban.yml
 ```
 
 loads the Kanban workflow into wfx making it available to create jobs driven by it.
+
+The command accepts both YAML and JSON formats, so you can also use a JSON file directly (e.g. as returned by the wfx API):
+
+```sh
+wfxctl workflow create wfx.workflow.kanban.json
+```
+
 Note that the the command's output was made less verbose by using a `--filter` to only show the transitions.
 
 Henceforth, a job is identified with a "Task" and a state is identified with a "Lane" in Kanban board parlance.
