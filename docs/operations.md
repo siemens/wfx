@@ -149,7 +149,11 @@ Note: The filter parameters are independent of each other; an event matches if i
 
 #### Examples
 
-`wfxctl` offers a reference client implementation. The following command subscribes to **all** job events:
+`wfxctl` offers a reference client implementation.
+It is configured the same way as `wfx`: via CLI flags, environment variables (sharing the same `WFX_` prefix, e.g. `WFX_LOG_LEVEL`), and the `wfx` config file.
+See [Configuration](configuration.md) for details.
+
+The following command subscribes to **all** job events:
 
 ```bash
 wfxctl job events
