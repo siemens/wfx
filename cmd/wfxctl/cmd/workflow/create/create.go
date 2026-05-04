@@ -9,6 +9,7 @@ package create
  */
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -53,7 +54,7 @@ func NewCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create a new workflow",
-		Long:  `Create a new workflow. The workflow must be in YAML format.`,
+		Long:  `Create a new workflow. The workflow must be in YAML or JSON format.`,
 		Example: fmt.Sprintf(`
 cat <<EOF | wfxctl workflow create -
 %s
@@ -62,7 +63,7 @@ EOF
 		TraverseChildren: true,
 		Args:             cobra.OnlyValidArgs,
 		ValidArgsFunction: func(*cobra.Command, []string, string) ([]string, cobra.ShellCompDirective) {
-			return []string{"yaml", "yml"}, cobra.ShellCompDirectiveFilterFileExt
+			return []string{"yaml", "yml", "json"}, cobra.ShellCompDirectiveFilterFileExt
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			baseCmd := flags.NewBaseCmd(cmd.Flags())
@@ -122,10 +123,15 @@ func readWorkflows(args []string, r io.Reader) ([]api.Workflow, error) {
 }
 
 func unmarshal(raw []byte) (*api.Workflow, error) {
-	// try YAML
 	var wf api.Workflow
-	err := yaml.Unmarshal(raw, &wf)
-	if err != nil {
+	// try JSON first
+	if json.Valid(raw) {
+		if err := json.Unmarshal(raw, &wf); err == nil {
+			return &wf, nil
+		}
+	}
+	// fall back to YAML
+	if err := yaml.Unmarshal(raw, &wf); err != nil {
 		return nil, fault.Wrap(err)
 	}
 	return &wf, nil
