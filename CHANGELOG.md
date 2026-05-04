@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - wfxctl: support JSON format in workflow create command
 - Log all SQL queries when `--log-level` is set to `trace`
 - wfx-loadtest: add `populate` sub-command to seed a database with sample data
+- JSON schema for workflow YAML files (`spec/workflow.schema.json`) enabling editor validation and autocompletion
 
 ### Removed
 

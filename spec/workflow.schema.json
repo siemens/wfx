@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Workflow",
+  "type": "object",
+  "required": ["name", "transitions", "states"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "User provided unique workflow name",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[a-zA-Z0-9\\-\\.]+$",
+      "examples": ["wfx.workflow.dau.direct"]
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of the workflow",
+      "maxLength": 1024,
+      "examples": ["This is a workflow"]
+    },
+    "states": {
+      "type": "array",
+      "maxItems": 4096,
+      "items": {
+        "title": "State",
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "examples": ["START"]
+          },
+          "description": {
+            "type": "string",
+            "examples": ["Description of the state"]
+          }
+        }
+      }
+    },
+    "groups": {
+      "type": "array",
+      "maxItems": 1024,
+      "items": {
+        "title": "Group",
+        "type": "object",
+        "required": ["name", "states"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "examples": ["OPEN"]
+          },
+          "description": {
+            "type": "string",
+            "examples": ["Description of the group"]
+          },
+          "states": {
+            "type": "array",
+            "description": "A list of states belonging to this group",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "transitions": {
+      "type": "array",
+      "maxItems": 16384,
+      "items": {
+        "title": "Transition",
+        "type": "object",
+        "required": ["eligible", "from", "to"],
+        "properties": {
+          "from": {
+            "type": "string",
+            "minLength": 1,
+            "examples": ["START"]
+          },
+          "to": {
+            "type": "string",
+            "minLength": 1,
+            "examples": ["END"]
+          },
+          "description": {
+            "type": "string",
+            "examples": ["Description of the transition"]
+          },
+          "eligible": {
+            "title": "EligibleEnum",
+            "type": "string",
+            "enum": ["CLIENT", "WFX"]
+          },
+          "action": {
+            "title": "ActionEnum",
+            "type": "string",
+            "enum": ["IMMEDIATE", "WAIT"]
+          }
+        }
+      }
+    }
+  }
+}
