@@ -79,6 +79,8 @@ accommodate a variety of use cases and workflows that are tailored to specific n
 For example, firmware and container image updates may have different requirements and constraints that require separate
 workflows to address them.
 
+**Note**: A **Job ID** consists of characters matching the pattern `^[A-Za-z0-9_.-]+$`, i.e. alphanumeric characters, underscores, dots, and hyphens.
+
 ### Creating Jobs
 
 A new job can be created by sending a `JobRequest` object (see [wfx OpenAPI Specification](../spec/wfx.openapi.yml)) to wfx's [northbound REST API](operations.md#API).
