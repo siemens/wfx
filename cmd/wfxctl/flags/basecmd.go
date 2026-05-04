@@ -271,7 +271,7 @@ func (b *BaseCmd) CreateHTTPClient() (*http.Client, error) {
 
 func (b *BaseCmd) CreateClient() (*api.Client, error) {
 	var server string
-	swagger := errutil.Must(api.GetSwagger())
+	swagger := errutil.Must(api.GetSpec())
 	basePath := errutil.Must(swagger.Servers.BasePath())
 	if b.EnableTLS {
 		server = fmt.Sprintf("https://%s:%d%s", b.TLSHost, b.TLSPort, basePath)
@@ -292,7 +292,7 @@ func (b *BaseCmd) CreateClient() (*api.Client, error) {
 
 func (b *BaseCmd) CreateMgmtClient() (*api.Client, error) {
 	var server string
-	swagger := errutil.Must(api.GetSwagger())
+	swagger := errutil.Must(api.GetSpec())
 	basePath := errutil.Must(swagger.Servers.BasePath())
 	if b.EnableTLS {
 		server = fmt.Sprintf("https://%s:%d%s", b.MgmtTLSHost, b.MgmtTLSPort, basePath)

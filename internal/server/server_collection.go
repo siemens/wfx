@@ -46,7 +46,7 @@ type ServerCollection struct {
 }
 
 func NewServerCollection(cfg *config.AppConfig, wfx api.StrictServerInterface, storage persistence.Storage) (*ServerCollection, error) {
-	swag, _ := api.GetSwagger()
+	swag, _ := api.GetSpec()
 	validator := nethttpmiddleware.OapiRequestValidatorWithOptions(swag,
 		&nethttpmiddleware.Options{SilenceServersWarning: true})
 	corsMW := cors.AllowAll().Handler
@@ -280,7 +280,7 @@ func createServer(cfg *config.AppConfig, ssi api.StrictServerInterface, router *
 		combinedMWs = append(combinedMWs, mw.Middleware())
 	}
 
-	swag, _ := api.GetSwagger()
+	swag, _ := api.GetSpec()
 	basePath := errutil.Must(swag.Servers.BasePath())
 	strictHandler := api.NewStrictHandler(ssi, nil)
 	router.HandleFunc("GET /version", strictHandler.GetVersion)

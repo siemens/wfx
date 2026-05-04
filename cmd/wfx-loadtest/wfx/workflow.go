@@ -21,7 +21,7 @@ import (
 )
 
 func CreateWorkflow(host string, port int, workflow api.Workflow) error {
-	swagger := errutil.Must(api.GetSwagger())
+	swagger := errutil.Must(api.GetSpec())
 	basePath := errutil.Must(swagger.Servers.BasePath())
 	server := fmt.Sprintf("http://%s:%d%s", host, port, basePath)
 	log.Info().Str("server", server).Str("name", workflow.Name).Msg("Creating workflow")
