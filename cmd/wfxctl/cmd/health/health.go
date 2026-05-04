@@ -58,7 +58,7 @@ func NewCommand() *cobra.Command {
 				return fmt.Errorf("unsupported color mode: %s", b.ColorMode)
 			}
 
-			swagger := errutil.Must(api.GetSwagger())
+			swagger := errutil.Must(api.GetSpec())
 			basePath := errutil.Must(swagger.Servers.BasePath())
 
 			allEndpoints := []Endpoint{

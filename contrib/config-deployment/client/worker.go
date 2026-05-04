@@ -35,7 +35,7 @@ func worker() {
 	params.ParamState = &initialState
 	params.ParamLimit = &limit
 
-	swagger := errutil.Must(api.GetSwagger())
+	swagger := errutil.Must(api.GetSpec())
 	basePath := errutil.Must(swagger.Servers.BasePath())
 	server := fmt.Sprintf("http://%s:%d%s", host, port, basePath)
 	httpClient := &http.Client{Timeout: time.Second * 10}

@@ -75,7 +75,7 @@ func worker() {
 	initialState := "OPEN"
 	limit := int32(1)
 
-	swagger := errutil.Must(api.GetSwagger())
+	swagger := errutil.Must(api.GetSpec())
 	basePath := errutil.Must(swagger.Servers.BasePath())
 	server := fmt.Sprintf("http://%s:%d%s", host, port, basePath)
 	httpClient := &http.Client{Timeout: time.Second * 10}

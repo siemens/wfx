@@ -502,13 +502,15 @@ func (server WfxServer) GetHealth(ctx context.Context, _ api.GetHealthRequestObj
 		checkerResult.Details = &details
 	}
 
+	noCache := "no-cache"
+	expires := "Thu, 01 Jan 1970 00:00:00 GMT"
 	if result.Status == health.StatusUp {
 		return api.GetHealth200JSONResponse{
 			Headers: api.GetHealth200ResponseHeaders{
 				// avoid caching
-				CacheControl: "no-cache",
-				Pragma:       "no-cache",
-				Expires:      "Thu, 01 Jan 1970 00:00:00 GMT",
+				CacheControl: &noCache,
+				Pragma:       &noCache,
+				Expires:      &expires,
 			},
 			Body: checkerResult,
 		}, nil
@@ -516,9 +518,9 @@ func (server WfxServer) GetHealth(ctx context.Context, _ api.GetHealthRequestObj
 	return api.GetHealth503JSONResponse{
 		Headers: api.GetHealth503ResponseHeaders{
 			// avoid caching
-			CacheControl: "no-cache",
-			Pragma:       "no-cache",
-			Expires:      "Thu, 01 Jan 1970 00:00:00 GMT",
+			CacheControl: &noCache,
+			Pragma:       &noCache,
+			Expires:      &expires,
 		},
 		Body: checkerResult,
 	}, nil
