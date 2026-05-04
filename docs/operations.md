@@ -358,6 +358,32 @@ Plugins are typically used for:
 
 An [example plugin](../example/plugin) written in Go demonstrates denying access to the `/api/wfx/v1/workflows` endpoint.
 
+## Logging
+
+wfx supports several log formats, selectable via the `--log-format` flag: `json`, `pretty`, `journald`, and `auto` (the default).
+In `auto` mode, wfx picks `pretty` when stderr is a terminal, `journald` when stderr is connected to the systemd journal, and `json` otherwise.
+
+### Viewing structured fields under journald
+
+When the `journald` format is used, wfx log entries carry their structured key/value pairs as native journald fields rather than embedding them in the message text.
+As a result, the default `journalctl` output (which shows only `MESSAGE`) does not display them.
+
+To inspect the key/value pairs, use one of the following:
+
+```bash
+# Show all fields of each entry
+journalctl -u wfx -o verbose
+
+# Filter on a specific field (keys are uppercased and sanitized)
+journalctl -u wfx COMPONENT=storage
+```
+
+In addition, the complete original log entry is preserved as JSON under the `JSON` field, which can be extracted with:
+
+```bash
+journalctl -u wfx -o json | jq -r '.JSON'
+```
+
 ## Telemetry
 
 No telemetry or user data is collected or processed by wfx.
