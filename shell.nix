@@ -31,6 +31,8 @@ mkShell {
     just
     git
     go
+    gopls
+    reftools
     flatbuffers
     openssl
     zstd
