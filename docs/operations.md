@@ -382,12 +382,6 @@ journalctl -u wfx -o verbose
 journalctl -u wfx COMPONENT=storage
 ```
 
-In addition, the complete original log entry is preserved as JSON under the `JSON` field, which can be extracted with:
-
-```bash
-journalctl -u wfx -o json | jq -r '.JSON'
-```
-
 ## Telemetry
 
 No telemetry or user data is collected or processed by wfx.

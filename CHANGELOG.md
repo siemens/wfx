@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Ensure `Subscriber.ch` channels are not double-closed when stopping the server
 - UI: collapse pagination bar for large (> 50) page counts
+- Drop redundant JSON field from journald log records, roughly halving per-record journal storage
 
 ## [0.5.0] - 2026-03-09
 
