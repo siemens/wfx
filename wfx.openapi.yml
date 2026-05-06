@@ -1286,10 +1286,11 @@ components:
       name: id
       x-go-name: paramJobID
       in: path
-      description: Job ID
+      description: Job ID (must consist of characters in the set [A-Za-z0-9_.-])
       required: true
       schema:
         type: string
+        pattern: "^[A-Za-z0-9_.-]+$"
     tag:
       name: tag
       x-go-name: paramTag
