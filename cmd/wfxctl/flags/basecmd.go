@@ -125,7 +125,7 @@ func NewBaseCmd(f *pflag.FlagSet) BaseCmd {
 	log.Debug().Strs("configFiles", configFiles).Msg("Checking config files")
 	for _, fname := range configFiles {
 		if _, err := os.Stat(fname); err == nil {
-			log.Debug().Str("fname", fname).Msg("Loading config file")
+			log.Debug().Str("fname", fname).Msgf("Loading config file %q", fname)
 			prov := file.Provider(fname)
 			if err := k.Load(prov, yaml.Parser()); err != nil {
 				log.Fatal().Err(err).Msg("Failed to config file")
@@ -251,7 +251,7 @@ func (b *BaseCmd) CreateHTTPClient() (*http.Client, error) {
 			caCertPool = x509.NewCertPool()
 		}
 
-		log.Debug().Str("tlsCA", b.TLSCa).Msg("Reading CA bundle")
+		log.Debug().Str("tlsCA", b.TLSCa).Msgf("Reading CA bundle %q", b.TLSCa)
 		caCert, err := os.ReadFile(b.TLSCa)
 		if err != nil {
 			return nil, fault.Wrap(err)
@@ -278,7 +278,7 @@ func (b *BaseCmd) CreateClient() (*api.Client, error) {
 	} else {
 		server = fmt.Sprintf("http://%s:%d%s", b.Host, b.Port, basePath)
 	}
-	log.Debug().Str("server", server).Msg("Creating client")
+	log.Debug().Str("server", server).Msgf("Creating client for %q", server)
 	httpClient, err := b.CreateHTTPClient()
 	if err != nil {
 		return nil, fault.Wrap(err)

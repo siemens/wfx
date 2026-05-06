@@ -51,7 +51,7 @@ func (p *FBPlugin) Name() string {
 }
 
 func (p *FBPlugin) Start(chErr chan error) (chan Message, error) {
-	log.Info().Str("path", p.path).Msg("Starting plugin")
+	log.Info().Str("path", p.path).Msgf("Starting plugin %q", p.path)
 	cmd := createCmd(p.path)
 
 	// this ensures that a process group is created (needed to kill all child processes)
@@ -76,7 +76,7 @@ func (p *FBPlugin) Start(chErr chan error) (chan Message, error) {
 	if err := cmd.Start(); err != nil {
 		return nil, fault.Wrap(err)
 	}
-	log.Debug().Str("path", cmd.Path).Msg("Plugin started")
+	log.Debug().Str("path", cmd.Path).Msgf("Plugin %q started", cmd.Path)
 
 	go func() { // our reaper
 		defer close(chErr)
@@ -98,11 +98,11 @@ func (p *FBPlugin) Start(chErr chan error) (chan Message, error) {
 }
 
 func (p *FBPlugin) Stop() error {
-	log.Info().Str("path", p.path).Msg("Stopping plugin")
+	log.Info().Str("path", p.path).Msgf("Stopping plugin %q", p.path)
 	alreadyStopped := p.stopCalled.Swap(true)
 	alreadyWaited := p.waited.Load()
 	if alreadyStopped || alreadyWaited || p.cmd == nil {
-		log.Debug().Str("path", p.path).Msg("Plugin already stopped")
+		log.Debug().Str("path", p.path).Msgf("Plugin %q already stopped", p.path)
 		return nil
 	}
 
@@ -119,7 +119,7 @@ func (p *FBPlugin) sender(w io.Writer, chMessage <-chan Message) {
 			log.Error().Err(err).Msg("Failed to write message")
 			break
 		}
-		log.Debug().Uint64("cookie", msg.request.Cookie).Msg("Request sent to plugin")
+		log.Debug().Uint64("cookie", msg.request.Cookie).Msgf("Request with cookie %d sent to plugin", msg.request.Cookie)
 	}
 	log.Info().Str("name", p.Name()).Msg("Plugin writer stopped")
 }
@@ -136,13 +136,13 @@ func (p *FBPlugin) receiver(r io.Reader) {
 		}
 
 		cookie := resp.Cookie
-		log.Debug().Uint64("cookie", cookie).Msg("Received plugin response")
+		log.Debug().Uint64("cookie", cookie).Msgf("Received plugin response for cookie %d", cookie)
 		p.responsesMutex.Lock()
 		chResp, ok := p.responses[cookie]
 		delete(p.responses, cookie)
 		p.responsesMutex.Unlock()
 		if !ok {
-			log.Error().Uint64("cookie", cookie).Msg("Received unexpected response from plugin")
+			log.Error().Uint64("cookie", cookie).Msgf("Received unexpected response from plugin for cookie %d", cookie)
 			_ = p.terminateProcess() // this results in wfx stopping gracefully because the plugin stops without Stop() being called
 			break
 		}

@@ -108,7 +108,7 @@ func createJobHelper(ctx context.Context, tx *ent.Tx, job *api.Job) (*api.Job, e
 					return nil, fault.Wrap(err)
 				}
 				for _, t := range newTags {
-					log.Debug().Str("name", t.Name).Msg("Persisted new tag")
+					log.Debug().Str("name", t.Name).Msgf("Persisted new tag %q", t.Name)
 					allTagIDs = append(allTagIDs, t.ID)
 				}
 			}

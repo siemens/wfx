@@ -25,7 +25,7 @@ func (db Database) DeleteWorkflow(ctx context.Context, name string) error {
 		Delete().
 		Where(workflow.Name(name)).
 		Exec(ctx)
-	log.Debug().Int("count", count).Str("name", name).Msg("Deleted rows")
+	log.Debug().Int("count", count).Str("name", name).Msgf("Deleted %d row(s) for workflow %q", count, name)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to delete workflow")
 		return fault.Wrap(err)

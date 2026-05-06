@@ -37,26 +37,26 @@ func (db Database) QueryJobs(ctx context.Context,
 	})
 
 	if filterParams.ClientID != nil && *filterParams.ClientID != "" {
-		log.Debug().Str("clientID", *filterParams.ClientID).Msg("Adding filter")
+		log.Debug().Str("clientID", *filterParams.ClientID).Msgf("Adding clientID filter %q", *filterParams.ClientID)
 		builder.Where(job.ClientID(*filterParams.ClientID))
 	}
 	if filterParams.State != nil && *filterParams.State != "" {
-		log.Debug().Str("state", *filterParams.State).Msg("Adding filter")
+		log.Debug().Str("state", *filterParams.State).Msgf("Adding state filter %q", *filterParams.State)
 		builder.Where(func(s *sql.Selector) {
 			s.Where(sqljson.ValueEQ("status", filterParams.State, sqljson.Path("state")))
 		})
 	}
 	if filterParams.Group != nil {
-		log.Debug().Strs("groups", filterParams.Group).Msg("Adding filter")
+		log.Debug().Strs("groups", filterParams.Group).Msgf("Adding groups filter %v", filterParams.Group)
 		builder.Where(job.GroupIn(filterParams.Group...))
 	}
 	if filterParams.Workflow != nil && *filterParams.Workflow != "" {
-		log.Debug().Str("workflow", *filterParams.Workflow).Msg("Adding filter")
+		log.Debug().Str("workflow", *filterParams.Workflow).Msgf("Adding workflow filter %q", *filterParams.Workflow)
 		builder.Where(job.HasWorkflowWith(workflow.Name(*filterParams.Workflow)))
 	}
 
 	if len(filterParams.Tags) > 0 {
-		log.Debug().Strs("tags", filterParams.Tags).Msg("Adding filter")
+		log.Debug().Strs("tags", filterParams.Tags).Msgf("Adding tags filter %v", filterParams.Tags)
 		builder.Where(func(s *sql.Selector) {
 			tagJobsTable := sql.Table(tag.JobsTable)
 			tagTable := sql.Table(tag.Table)

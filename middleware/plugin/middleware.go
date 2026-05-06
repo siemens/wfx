@@ -105,7 +105,7 @@ func (mw *Middleware) Middleware() func(http.Handler) http.Handler {
 					val := resp.Payload.Value.(*client.RequestT)
 
 					if parsedURL, err := url.Parse(val.Destination); err != nil {
-						log.Err(err).Str("destination", val.Destination).Msg("Failed to parse destination")
+						log.Err(err).Str("destination", val.Destination).Msgf("Failed to parse destination %q", val.Destination)
 					} else {
 						r.URL = parsedURL
 					}

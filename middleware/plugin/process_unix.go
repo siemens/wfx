@@ -33,14 +33,14 @@ func (p *FBPlugin) terminateProcess() error {
 	if err := syscall.Kill(-pid, 0); err == nil {
 		pid = -pid // this is the pid of the process group
 	} else {
-		log.Warn().Err(err).Int("pid", pid).Msg("Process group not found")
+		log.Warn().Err(err).Int("pid", pid).Msgf("Process group for pid %d not found", pid)
 		if err := syscall.Kill(pid, 0); err != nil {
 			return fmt.Errorf("plugin pid %d not found", pid)
 		}
 	}
 
 	// signal is sent to *every* process in the process group
-	log.Debug().Int("pid", pid).Msg("Sending SIGTERM")
+	log.Debug().Int("pid", pid).Msgf("Sending SIGTERM to pid %d", pid)
 	if err := syscall.Kill(pid, syscall.SIGTERM); err != nil {
 		return fault.Wrap(err)
 	}
@@ -65,7 +65,7 @@ func (p *FBPlugin) terminateProcess() error {
 			// check if process is still alive
 			if err := syscall.Kill(pid, 0); err == nil {
 				// process is still alive
-				log.Warn().Int("pid", pid).Msg("Process still alive, sending SIGKILL")
+				log.Warn().Int("pid", pid).Msgf("Process %d still alive, sending SIGKILL", pid)
 				_ = syscall.Kill(pid, syscall.SIGKILL)
 			}
 		}

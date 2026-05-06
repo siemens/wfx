@@ -37,12 +37,12 @@ func run(cmd *cobra.Command, k *koanf.Koanf) error {
 			if _, err := storage.CreateWorkflow(ctx, wf); err != nil {
 				return fault.Wrap(err)
 			}
-			log.Info().Str("name", wf.Name).Msg("Created workflow")
+			log.Info().Str("name", wf.Name).Msgf("Created workflow %q", wf.Name)
 		default:
 			return fault.Wrap(err)
 		}
 	} else {
-		log.Info().Str("name", wf.Name).Msg("Worfklow already exists")
+		log.Info().Str("name", wf.Name).Msgf("Workflow %q already exists", wf.Name)
 	}
 
 	count := k.Int(flagCount)

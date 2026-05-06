@@ -71,6 +71,6 @@ func CreateJob(ctx context.Context, storage persistence.Storage, request *api.Jo
 		})
 	}()
 
-	contextLogger.Info().Str("id", createdJob.ID).Msg("Created new job")
+	contextLogger.Info().Str("id", createdJob.ID).Msgf("Created new job %q", createdJob.ID)
 	return createdJob, nil
 }

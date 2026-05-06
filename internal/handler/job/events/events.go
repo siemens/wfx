@@ -163,7 +163,7 @@ func ShutdownSubscribers() {
 }
 
 func RemoveSubscriber(subscriber *Subscriber) {
-	log.Info().Str("id", subscriber.id).Msg("Removing subscriber")
+	log.Info().Str("id", subscriber.id).Msgf("Removing subscriber %q", subscriber.id)
 
 	muSubscribers.Lock()
 	defer muSubscribers.Unlock()
@@ -177,7 +177,7 @@ func RemoveSubscriber(subscriber *Subscriber) {
 		return false
 	})
 
-	log.Info().Str("id", subscriber.id).Msg("Removed subscriber")
+	log.Info().Str("id", subscriber.id).Msgf("Removed subscriber %q", subscriber.id)
 }
 
 // SubscriberCount counts the total number of subscribers across all topics.
