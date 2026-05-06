@@ -41,7 +41,7 @@ func init() {
 }
 
 func (instance *SQLite) Initialize(dsn string) error {
-	log.Debug().Str("dsn", dsn).Msg("Connecting to SQLite")
+	log.Debug().Str("dsn", dsn).Msgf("Connecting to SQLite at %q", dsn)
 	drv, err := sql.Open(dialect.SQLite, dsn)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed opening connection to SQLite")

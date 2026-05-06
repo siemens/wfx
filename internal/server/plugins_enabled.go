@@ -25,7 +25,7 @@ func loadPlugins(dir string) ([]plugin.Plugin, error) {
 	if dir == "" {
 		return []plugin.Plugin{}, nil
 	}
-	log.Debug().Str("dir", dir).Msg("Loading plugins")
+	log.Debug().Str("dir", dir).Msgf("Loading plugins from %q", dir)
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return nil, fault.Wrap(err)
@@ -44,10 +44,10 @@ func loadPlugins(dir string) ([]plugin.Plugin, error) {
 			}
 			// check if file is executable
 			if (info.Mode() & 0o111) != 0 {
-				log.Info().Str("dest", dest).Msg("Loading plugin")
+				log.Info().Str("dest", dest).Msgf("Loading plugin %q", dest)
 				result = append(result, plugin.NewFBPlugin(dest))
 			} else {
-				log.Debug().Str("dest", dest).Msg("Ignoring non-executable file")
+				log.Debug().Str("dest", dest).Msgf("Ignoring non-executable file %q", dest)
 			}
 		}
 	}

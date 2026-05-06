@@ -46,6 +46,6 @@ func DeleteJob(ctx context.Context, storage persistence.Storage, jobID string) e
 		})
 	}()
 
-	log.Info().Str("id", jobID).Msg("Deleted job")
+	log.Info().Str("id", jobID).Msgf("Deleted job %q", jobID)
 	return nil
 }

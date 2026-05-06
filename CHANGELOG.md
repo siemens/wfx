@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Distro-compliant package naming
 - Querying jobs by tags is about 3x faster (e.g. ~1s instead of ~3s for 1 million jobs)
 - Job IDs are now explicitly documented as restricted to characters in the set [A-Za-z0-9_.-]
+- Make non-structured log messages self-contained by embedding relevant identifiers directly into human-readable messages
 
 ### Fixed
 

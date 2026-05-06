@@ -65,7 +65,7 @@ func Update(ctx context.Context, storage persistence.Storage, jobID string, newS
 	// transition is allowed, now apply wfx transitions
 	newTo := workflow.FollowImmediateTransitions(job.Workflow, to)
 	if newTo != to {
-		contextLogger.Debug().Str("to", to).Str("newTo", newTo).Msg("Resetting state since we moved the transition forward")
+		contextLogger.Debug().Str("to", to).Str("newTo", newTo).Msgf("Resetting state from %q to %q after following immediate transitions", to, newTo)
 		newStatus = &api.JobStatus{}
 	}
 	newStatus.State = newTo

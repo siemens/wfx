@@ -90,7 +90,7 @@ Do not use this for confidential information.
 		if err != nil {
 			return fault.Wrap(err)
 		}
-		log.Debug().Str("src", src).Str("dest", dest).Str("format", format).Msg("Starting conversion")
+		log.Debug().Str("src", src).Str("dest", dest).Str("format", format).Msgf("Starting conversion of %q to %q (format %s)", src, dest, format)
 
 		var inFile, outFile *os.File
 		defer func() {
@@ -125,7 +125,7 @@ Do not use this for confidential information.
 				return fault.Wrap(err)
 			}
 		}
-		log.Debug().Str("name", workflow.Name).Msg("Workflow parsed")
+		log.Debug().Str("name", workflow.Name).Msgf("Workflow %q parsed", workflow.Name)
 
 		outWriter := bufio.NewWriter(cmd.OutOrStdout())
 

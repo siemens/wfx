@@ -237,7 +237,7 @@ func (cfg *AppConfig) Reload() bool {
 			case "unix":
 				cfg.schemes = append(cfg.schemes, SchemeUnix)
 			default:
-				log.Error().Str("scheme", s).Msg("Unknown scheme")
+				log.Error().Str("scheme", s).Msgf("Unknown scheme %q", s)
 				ok = false
 			}
 		}
@@ -422,17 +422,17 @@ func (cfg *AppConfig) SSEGraceInterval() time.Duration {
 
 func (cfg *AppConfig) InitStorage() (persistence.Storage, error) {
 	name, options := cfg.Storage(), cfg.StorageOptions()
-	log.Debug().Str("name", name).Str("options", options).Msg("Setting up persistent storage")
+	log.Debug().Str("name", name).Str("options", options).Msgf("Setting up persistent storage %q", name)
 
 	// note: storage is shared between north- and southbound API
 	storage := persistence.GetStorage(name)
 	if storage == nil {
 		return nil, fmt.Errorf("unknown storage %s", name)
 	}
-	log.Debug().Str("name", name).Msg("Initializing storage")
+	log.Debug().Str("name", name).Msgf("Initializing storage %q", name)
 	if err := storage.Initialize(options); err != nil {
 		return nil, fault.Wrap(err)
 	}
-	log.Info().Str("name", name).Msg("Initialized storage")
+	log.Info().Str("name", name).Msgf("Initialized storage %q", name)
 	return storage, nil
 }
