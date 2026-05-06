@@ -23,6 +23,14 @@ import (
 func setupLogging(out *os.File, format string, lvl zerolog.Level) {
 	zerolog.SetGlobalLevel(lvl)
 
+	// Drop the redundant "JSON" field that zerolog/journald otherwise duplicates
+	// for every record. SendFunc is documented as a test hook, but it is the
+	// only available extension point and is safe to set once at startup.
+	journald.SendFunc = func(msg string, prio journal.Priority, args map[string]string) error {
+		delete(args, "JSON")
+		return journal.Send(msg, prio, args)
+	}
+
 	var logger zerolog.Logger
 	if format == "auto" {
 		if term.IsTerminal(int(out.Fd())) {
