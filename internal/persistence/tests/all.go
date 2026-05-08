@@ -25,9 +25,10 @@ var AllTests = []PersistenceTest{
 	TestJobsPagination,
 	TestQueryJobsFilter,
 	TestQueryWorkflows,
+	TestQueryWorkflowsSort,
 	TestUpdateJobDefinition,
 	TestUpdateJobStatus,
 	TestUpdateJobStatusNonExisting,
+	TestUpdateJobStatusStaleView,
 	TestWorkflowsPagination,
-	TestQueryWorkflowsSort,
 }

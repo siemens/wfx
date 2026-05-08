@@ -22,6 +22,7 @@ import (
 	"github.com/siemens/wfx/cmd/wfx/cmd/config"
 	"github.com/siemens/wfx/cmd/wfx/metadata"
 	"github.com/siemens/wfx/generated/api"
+	"github.com/siemens/wfx/internal/errkind"
 	"github.com/siemens/wfx/internal/handler/job"
 	"github.com/siemens/wfx/internal/handler/job/definition"
 	"github.com/siemens/wfx/internal/handler/job/events"
@@ -260,12 +261,20 @@ func (server WfxServer) PutJobsIdDefinition(ctx context.Context, request api.Put
 	}
 	definition, err := definition.Update(ctx, server.storage, request.Id, def)
 	if err != nil {
-		if ftag.Get(err) == ftag.NotFound {
+		switch ftag.Get(err) {
+		case ftag.NotFound:
 			return api.PutJobsIdDefinition404JSONResponse(api.ErrorResponse{
 				Errors: &[]api.Error{JobNotFound},
 			}), nil
+		case errkind.TOCTOU:
+			err2 := JobModifiedConcurrently
+			err2.Message = err.Error()
+			return api.PutJobsIdDefinition400JSONResponse(api.ErrorResponse{
+				Errors: &[]api.Error{err2},
+			}), nil
+		default:
+			return nil, fault.Wrap(err)
 		}
-		return nil, fault.Wrap(err)
 	}
 	if request.Params.XResponseFilter != nil {
 		return NewJQFilter(*request.Params.XResponseFilter, definition), nil
@@ -311,6 +320,12 @@ func (server WfxServer) PutJobsIdStatus(ctx context.Context, request api.PutJobs
 			return api.PutJobsIdStatus400JSONResponse(api.ErrorResponse{
 				Errors: &[]api.Error{err2},
 			}), nil
+		case errkind.TOCTOU:
+			err2 := JobModifiedConcurrently
+			err2.Message = err.Error()
+			return api.PutJobsIdStatus400JSONResponse(api.ErrorResponse{
+				Errors: &[]api.Error{err2},
+			}), nil
 		default:
 			return nil, fault.Wrap(err)
 		}
@@ -331,12 +346,20 @@ func (server WfxServer) DeleteJobsIdTags(ctx context.Context, request api.Delete
 	tagsToDelete = *request.Body
 	tags, err := tags.Delete(ctx, server.storage, request.Id, tagsToDelete)
 	if err != nil {
-		if ftag.Get(err) == ftag.NotFound {
+		switch ftag.Get(err) {
+		case ftag.NotFound:
 			return api.DeleteJobsIdTags404JSONResponse(api.ErrorResponse{
 				Errors: &[]api.Error{JobNotFound},
 			}), nil
+		case errkind.TOCTOU:
+			err2 := JobModifiedConcurrently
+			err2.Message = err.Error()
+			return api.DeleteJobsIdTags400JSONResponse(api.ErrorResponse{
+				Errors: &[]api.Error{err2},
+			}), nil
+		default:
+			return nil, fault.Wrap(err)
 		}
-		return nil, fault.Wrap(err)
 	}
 	if request.Params.XResponseFilter != nil {
 		return NewJQFilter(*request.Params.XResponseFilter, tags), nil
@@ -377,12 +400,20 @@ func (server WfxServer) PostJobsIdTags(ctx context.Context, request api.PostJobs
 	}
 	tags, err := tags.Add(ctx, server.storage, request.Id, body)
 	if err != nil {
-		if ftag.Get(err) == ftag.NotFound {
+		switch ftag.Get(err) {
+		case ftag.NotFound:
 			return api.PostJobsIdTags404JSONResponse(api.ErrorResponse{
 				Errors: &[]api.Error{JobNotFound},
 			}), nil
+		case errkind.TOCTOU:
+			err2 := JobModifiedConcurrently
+			err2.Message = err.Error()
+			return api.PostJobsIdTags400JSONResponse(api.ErrorResponse{
+				Errors: &[]api.Error{err2},
+			}), nil
+		default:
+			return nil, fault.Wrap(err)
 		}
-		return nil, fault.Wrap(err)
 	}
 	if request.Params.XResponseFilter != nil {
 		return NewJQFilter(*request.Params.XResponseFilter, tags), nil

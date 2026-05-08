@@ -10,13 +10,17 @@ package entgo
 
 import (
 	"context"
+	"fmt"
 	"sort"
 	"time"
 
 	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/ftag"
 	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/generated/ent"
+	entjob "github.com/siemens/wfx/generated/ent/job"
 	"github.com/siemens/wfx/generated/ent/tag"
+	"github.com/siemens/wfx/internal/errkind"
 	"github.com/siemens/wfx/internal/workflow"
 	"github.com/siemens/wfx/middleware/logging"
 	"github.com/siemens/wfx/persistence"
@@ -57,9 +61,21 @@ func (db Database) UpdateJob(ctx context.Context, job *api.Job, request persiste
 func doUpdateJob(ctx context.Context, tx *ent.Tx, job *api.Job, request persistence.JobUpdate) (*api.Job, error) {
 	log := logging.LoggerFromCtx(ctx).With().Str("id", job.ID).Logger()
 
-	updater := tx.Job.UpdateOneID(job.ID)
-
 	oldMtime := time.Time(*job.Mtime)
+
+	// Optimistic concurrency control: only update if mtime in the database still matches the mtime of the job we read
+	// earlier. This prevents time-of-check-to-time-of-use races where two callers concurrently transition the same job
+	// (for example, both moving from state A, but to different target states); without this guard, both would succeed
+	// and the second would silently overwrite the first.
+	//
+	// Note: simply wrapping the read + validate + write in a single transaction is NOT sufficient to fix this race. At
+	// the default isolation level (READ COMMITTED on PostgreSQL, REPEATABLE READ on MySQL InnoDB), two transactions can
+	// both SELECT the same row and then both UPDATE it - the second waits for the first to commit and then clobbers its
+	// result. SQLite serializes writers globally, but likewise just runs the second writer after the first. Preventing
+	// the lost update therefore requires either pessimistic row locking (SELECT ... FOR UPDATE, not portable to SQLite
+	// and forcing a transactional Storage API) or this optimistic mtime check, which is portable across all supported
+	// backends and adds no contention.
+	updater := tx.Job.UpdateOneID(job.ID).Where(entjob.MtimeEQ(oldMtime))
 
 	if request.Status != nil {
 		updater.SetStatus(*request.Status)
@@ -144,6 +160,16 @@ func doUpdateJob(ctx context.Context, tx *ent.Tx, job *api.Job, request persiste
 
 	entity, err := updater.Save(ctx)
 	if err != nil {
+		// If no row matched, distinguish between "job no longer exists" and
+		// "job was concurrently modified" so callers (and humans reading logs)
+		// can tell why their update was rejected.
+		if ent.IsNotFound(err) {
+			exists, existsErr := tx.Job.Query().Where(entjob.IDEQ(job.ID)).Exist(ctx)
+			if existsErr == nil && exists {
+				log.Warn().Time("expectedMtime", oldMtime).Msg("Concurrent update detected; aborting")
+				return nil, fault.Wrap(fmt.Errorf("status of job %s was concurrently modified", job.ID), ftag.With(errkind.TOCTOU))
+			}
+		}
 		return nil, fault.Wrap(err)
 	}
 
