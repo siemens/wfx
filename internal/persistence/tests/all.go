@@ -18,6 +18,7 @@ var AllTests = []PersistenceTest{
 	TestGetJobWithHistory,
 	TestGetJobsSorted,
 	TestJobAddTags,
+	TestJobAddTagsConcurrent,
 	TestJobAddTagsOverlap,
 	TestJobDeleteTags,
 	TestJobDeleteTagsNonExisting,
