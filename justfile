@@ -35,7 +35,7 @@ build:
     go build -C contrib/config-deployment/client
 
 test:
-    go test -tags testing,no_mysql,no_postgres ./...
+    go test -count=1 -race -tags testing,no_mysql,no_postgres ./...
 
 # Update dependencies
 update-deps:
@@ -160,6 +160,10 @@ postgres-start:
 @postgres-shell:
     {{ DOCKER }} exec -it wfx-postgres psql -d $PGDATABASE -U $PGUSER
 
+# Run PostgreSQL tests
+postgres-test:
+    go test -count=1 -race -tags testing,no_mysql ./...
+
 # Stop PostgreSQL container
 postgres-stop: (_container-stop "wfx-postgres")
 
@@ -221,6 +225,10 @@ mysql-stop: (_container-stop "wfx-mysql")
 # Enter MySQL shell
 mysql-shell:
     {{ DOCKER }} exec -it wfx-mysql mysql -u$MYSQL_USER -p$MYSQL_PASSWORD -D $MYSQL_DATABASE
+
+# Run MySQL tests
+mysql-test:
+    go test -count=1 -race -tags testing,no_postgres ./...
 
 # Generate schema definitions for MySQL
 mysql-generate-schema name:
