@@ -57,6 +57,9 @@ linters:
     - wrapcheck
     - zerologlint
 
+  disable:
+    - goconst
+
   settings:
     staticcheck:
       # https://staticcheck.io/docs/options#checks
