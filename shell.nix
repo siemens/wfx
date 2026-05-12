@@ -36,6 +36,15 @@ mkShell {
     flatbuffers
     openssl
     zstd
+
+    # ui deps
+    gleam
+    beamPackages.rebar3
+    beamPackages.erlang
+    inotify-tools
+    nodejs
+    bun
+    tailwindcss_4
   ];
 
   shellHook = ''
