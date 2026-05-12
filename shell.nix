@@ -36,12 +36,23 @@ mkShell {
     flatbuffers
     openssl
     zstd
+
+    # ui deps
+    gleam
+    beamPackages.rebar3
+    beamPackages.erlang
+    inotify-tools
+    nodejs
+    bun
+    tailwindcss_4
   ];
 
   shellHook = ''
     export GOFLAGS="-tags=sqlite,mysql,postgres,testing,integration,plugin"
     export LUA_PATH="$(pwd)/hugo/filters/?.lua;;"
     export PATH="$(pwd):$PATH"
+
+    export CC="$(pwd)/.ci/zcc"
 
     export PGUSER=wfx \
            PGPASSWORD=secret\
