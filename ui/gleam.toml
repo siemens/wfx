@@ -16,9 +16,8 @@ links = [{ title = "Website", href = "https://github.com/siemens/wfx" }]
 # https://gleam.run/writing-gleam/gleam-toml/.
 
 [tools.lustre.bin]
-# uncomment to use system binaries
-# bun = "system"
-# tailwindcss = "system"
+bun = "system"
+tailwindcss = "system"
 
 [dependencies]
 gleam_stdlib = ">= 1.0.0 and < 2.0.0"
