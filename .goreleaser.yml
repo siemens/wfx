@@ -224,7 +224,7 @@ nfpms:
       - bash-completion
 
   - id: wfx-with-ui
-    package_name: wfx
+    package_name: wfx-with-ui
     file_name_template: "{{ .ConventionalFileName }}"
     ids:
       - wfx-with-ui
