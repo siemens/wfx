@@ -1,0 +1,58 @@
+# SPDX-FileCopyrightText: 2026 Siemens AG
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Author: Michael Adler <michael.adler@siemens.com>
+---
+name: Setup UI
+description: Install UI dependencies
+
+runs:
+  using: composite
+  steps:
+    - name: Export UI tool versions
+      shell: bash
+      run: |
+        GLEAM_VERSION=$(grep -oP 'GLEAM_VERSION=\K[0-9.]+' .ci/packages/versions.env)
+        REBAR3_VERSION=$(grep -oP 'REBAR3_VERSION=\K[0-9.]+' .ci/packages/versions.env)
+        OTP_VERSION=$(grep -oP 'OTP_VERSION=\K[0-9.]+' .ci/packages/versions.env)
+        BUN_VERSION=$(grep -oP 'BUN_VERSION=\K[0-9.]+' .ci/packages/versions.env)
+        TAILWINDCSS_VERSION=$(grep -oP 'TAILWINDCSS_VERSION=\K[0-9.]+' .ci/packages/versions.env)
+        echo "GLEAM_VERSION=$GLEAM_VERSION" | tee -a "$GITHUB_ENV"
+        echo "REBAR3_VERSION=$REBAR3_VERSION" | tee -a "$GITHUB_ENV"
+        echo "OTP_VERSION=$OTP_VERSION" | tee -a "$GITHUB_ENV"
+        echo "BUN_VERSION=$BUN_VERSION" | tee -a "$GITHUB_ENV"
+        echo "TAILWINDCSS_VERSION=$TAILWINDCSS_VERSION" | tee -a "$GITHUB_ENV"
+    - uses: erlef/setup-beam@fc68ffb90438ef2936bbb3251622353b3dcb2f93 # v1
+      with:
+        gleam-version: "${{ env.GLEAM_VERSION }}"
+        rebar3-version: "${{ env.REBAR3_VERSION }}"
+        otp-version: "${{ env.OTP_VERSION }}"
+    - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+      with:
+        node-version: lts/*
+    - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+      with:
+        bun-version: "${{ env.BUN_VERSION }}"
+    - name: Install tailwindcss
+      shell: bash
+      run: |
+        set -euo pipefail
+        case "$(uname -m)" in
+          x86_64) arch=x64 ;;
+          aarch64|arm64) arch=arm64 ;;
+          *) echo "unsupported arch: $(uname -m)" >&2; exit 1 ;;
+        esac
+        url="https://github.com/tailwindlabs/tailwindcss/releases/download/v${TAILWINDCSS_VERSION}/tailwindcss-linux-${arch}"
+        curl -fsSL -o /tmp/tailwindcss "$url"
+        chmod +x /tmp/tailwindcss
+        sudo mv /tmp/tailwindcss /usr/local/bin/tailwindcss
+        tailwindcss --help | head -n1
+    - shell: bash
+      run: sudo .ci/setup-ui.sh
+    - name: Install deps
+      shell: bash
+      working-directory: ui
+      run: |
+        npm ci
+        gleam deps download
