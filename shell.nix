@@ -52,6 +52,8 @@ mkShell {
     export LUA_PATH="$(pwd)/hugo/filters/?.lua;;"
     export PATH="$(pwd):$PATH"
 
+    export CC="$(pwd)/.ci/zcc"
+
     export PGUSER=wfx \
            PGPASSWORD=secret\
            PGHOST=localhost \
