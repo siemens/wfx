@@ -312,15 +312,27 @@ nfpms:
       - src: dist/wfx-viewer_linux_amd64_v1/*.1.gz
         dst: /usr/share/man/man1/
 
-dockers:
+dockers_v2:
   - id: wfx
     ids:
       - wfx
-    image_templates:
-      - 'ghcr.io/{{ envOrDefault "GITHUB_REPOSITORY" "siemens/wfx" }}:latest'
-      - 'ghcr.io/{{ envOrDefault "GITHUB_REPOSITORY" "siemens/wfx" }}:{{ .Tag }}'
-    build_flag_templates:
-      - "--pull"
+    images:
+      - 'ghcr.io/{{ envOrDefault "GITHUB_REPOSITORY" "siemens/wfx" }}'
+    tags:
+      - "{{ .Tag }}"
+      - "{{ if not .IsSnapshot }}latest{{ end }}"
+    platforms:
+      - linux/amd64
+      - linux/arm64
+    labels:
+      "org.opencontainers.image.created": "{{.Date}}"
+      "org.opencontainers.image.name": "{{.ProjectName}}"
+      "org.opencontainers.image.revision": "{{.FullCommit}}"
+      "org.opencontainers.image.version": "{{.Version}}"
+      "org.opencontainers.image.source": "{{.GitURL}}"
+      "org.opencontainers.image.licenses": "Apache-2.0"
+      "org.opencontainers.image.title": "wfx"
+      "org.opencontainers.image.description": "a lightweight, general-purpose workflow executor"
 
 checksum:
   name_template: "{{.ProjectName}}_{{.Version}}_SHA256SUMS"
