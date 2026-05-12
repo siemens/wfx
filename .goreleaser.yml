@@ -11,7 +11,6 @@ version: 2
 before:
   hooks:
     - go mod download
-    - go generate -tags ui ./ui
 
 builds:
   - id: wfx
@@ -62,6 +61,11 @@ builds:
       - arm64
     mod_timestamp: "{{ .CommitTimestamp }}"
     hooks:
+      pre:
+        - cmd: gleam run -m lustre/dev build --minify
+          dir: ui
+          output: true
+        - go generate -tags ui ./ui
       post:
         - |
           {{ if and (eq .Os "linux") (eq .Arch "amd64") -}}
