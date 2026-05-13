@@ -62,17 +62,21 @@ func Update(ctx context.Context, storage persistence.Storage, jobID string, newS
 		return nil, fault.Wrap(fmt.Errorf("transition from '%s' to '%s' is not allowed for actor '%s'", from, to, actor), ftag.With(ftag.InvalidArgument))
 	}
 
-	// transition is allowed, now apply wfx transitions
+	// transition is allowed, now apply wfx transitions.
+	// Make a local copy so we do not mutate the caller-provided newStatus,
+	// which may be shared across goroutines (e.g. concurrent requests).
 	newTo := workflow.FollowImmediateTransitions(job.Workflow, to)
-	if newTo != to {
+	var updatedStatus api.JobStatus
+	if newTo == to {
+		updatedStatus = *newStatus
+	} else {
 		contextLogger.Debug().Str("to", to).Str("newTo", newTo).Msgf("Resetting state from %q to %q after following immediate transitions", to, newTo)
-		newStatus = &api.JobStatus{}
 	}
-	newStatus.State = newTo
+	updatedStatus.State = newTo
 	// override any definitionHash provided by client
-	newStatus.DefinitionHash = job.Status.DefinitionHash
+	updatedStatus.DefinitionHash = job.Status.DefinitionHash
 
-	result, err := storage.UpdateJob(ctx, job, persistence.JobUpdate{Status: newStatus})
+	result, err := storage.UpdateJob(ctx, job, persistence.JobUpdate{Status: &updatedStatus})
 	if err != nil {
 		contextLogger.Err(err).Msg("Failed to persist job update")
 		return nil, fault.Wrap(err)
@@ -94,7 +98,7 @@ func Update(ctx context.Context, storage persistence.Storage, jobID string, newS
 
 	contextLogger.Info().
 		Str("from", from).
-		Str("to", newStatus.State).
+		Str("to", updatedStatus.State).
 		Msg("Updated job status")
 	return result.Status, nil
 }

@@ -41,3 +41,9 @@ var WorkflowInvalid = api.Error{
 	Logref:  "18f57adc70dd79c7fb4f1246be8a6e04",
 	Message: "Workflow validation failed",
 }
+
+var JobModifiedConcurrently = api.Error{
+	Code:    "wfx.jobModifiedConcurrently",
+	Logref:  "dc00b05825b44934afeb9454f42a6440",
+	Message: "Job was concurrently modified",
+}
