@@ -41,9 +41,9 @@ necessary. In contrast, for Debian <em>testing</em>, it usually works out of the
 the Go toolchain.</p><h2 id=building-webui>Building WebUI</h2><p>Prerequisites:</p><ul><li><a href=https://gleam.run/ target=_blank>Gleam</a></li><li><a href=https://www.erlang.org/ target=_blank>Erlang</a></li><li><a href=https://rebar3.org/ target=_blank>Rebar3</a></li><li><a href=https://www.npmjs.com/ target=_blank>npm</a></li></ul><p>Please consult
 <a href=https://github.com/siemens/wfx/blob/main/.ci/packages/versions.env target=_blank>versions.env</a> to see the minimal
 version requirements. It is strongly recommended to use the
-<a href=https://github.com/siemens/wfx/blob/main/ui/shell.nix target=_blank>nix
-environment</a> or a modern Linux distribution, as the minimum
-required versions are rather new.</p><p>To build the UI, run:</p><div class=highlight><pre tabindex=0 style=background-color:#f7f7f7;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sh data-lang=sh><span style=display:flex><span>$ <span style=color:#6639ba>cd</span> ui
+<a href=https://github.com/siemens/wfx/blob/main/shell.nix target=_blank>nix
+environment</a> or a modern Linux distribution, as the minimum required
+versions are rather new.</p><p>To build the UI, run:</p><div class=highlight><pre tabindex=0 style=background-color:#f7f7f7;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sh data-lang=sh><span style=display:flex><span>$ <span style=color:#6639ba>cd</span> ui
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span><span style=color:#57606a># Optional, if you have the nix package manager installed</span>
 </span></span><span style=display:flex><span>$ nix-shell shell.nix
