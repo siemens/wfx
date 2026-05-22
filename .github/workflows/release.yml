@@ -8,13 +8,16 @@ name: Release
 
 on:
   push:
+    branches:
+      - main
     tags:
       - "v*"
+  pull_request:
+  workflow_dispatch:
 
 jobs:
   release:
     name: Release
-    if: startsWith(github.event.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -31,6 +34,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
       - name: Login to GitHub Container Registry
+        if: startsWith(github.event.ref, 'refs/tags/v')
         uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4
         with:
           registry: ghcr.io
@@ -65,6 +69,12 @@ jobs:
       - name: Setup build
         run: sudo .ci/setup-build.sh
       - name: Run GoReleaser
-        run: export CC="$(pwd)/.ci/zcc"; goreleaser release --clean
+        run: |
+          export CC="$(pwd)/.ci/zcc"
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            goreleaser release --clean
+          else
+            goreleaser release --clean --snapshot --skip=publish,sign
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
