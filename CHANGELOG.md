@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - wfx-loadtest: add `populate` sub-command to seed a database with sample data
 - JSON schema for workflow YAML files (`spec/workflow.schema.json`) enabling editor validation and autocompletion
 - Multi-arch Docker images (linux/amd64, linux/arm64) with attached SBOM attestations
+- Generate SBOM for wfxui
 
 ### Removed
 
