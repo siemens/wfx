@@ -11,3 +11,5 @@ IgnoreURLs:
   - "^https://microsoft.com"
   - "^https://www.gnu.org/.*"
   - "^https://www.npmjs.com/"
+  - "^https://www.zsh.org"
+  - "^https://www.debian.org"
