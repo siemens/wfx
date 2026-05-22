@@ -78,3 +78,19 @@ jobs:
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload snapshot dist
+        if: "!startsWith(github.event.ref, 'refs/tags/v')"
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: dist-snapshot
+          path: dist/
+          retention-days: 1
+
+      - name: Upload snapshot SBOM
+        if: "!startsWith(github.event.ref, 'refs/tags/v')"
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: sbom-snapshot
+          path: ui/*.cyclonedx.sbom.json
+          retention-days: 1
