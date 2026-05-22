@@ -152,6 +152,8 @@ archives:
       - README.md
       - CHANGELOG.md
       - docs/*.md
+      - src: ui/*.cyclonedx.sbom.json
+        dst: .
 
   - id: wfxctl
     ids:
@@ -183,6 +185,8 @@ archives:
         dst: app.css
       - src: ui/index.html.tmpl
         dst: index.html.tmpl
+      - src: ui/*.cyclonedx.sbom.json
+        dst: .
 
 nfpms:
   - id: wfx
