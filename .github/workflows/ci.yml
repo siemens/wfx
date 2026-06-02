@@ -353,6 +353,9 @@ jobs:
   test-ui:
     name: Playwright Tests
     runs-on: ubuntu-latest
+    container:
+      # the tag must track the @playwright/test version resolved in ui/integration/package-lock.json
+      image: mcr.microsoft.com/playwright:v1.59.1-noble
     timeout-minutes: 60
     needs:
       - build
@@ -380,12 +383,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
         working-directory: ui/integration
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
-        working-directory: ui/integration
+
       - name: Run Playwright tests
-        run: npx playwright test --project chromium --project firefox --project webkit
+        run: |
+          export HOME=/root
+          mkdir -p $HOME
+          npx playwright test --project chromium --project firefox --project webkit
         working-directory: ui/integration
+
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         if: ${{ !cancelled() }}
         with:
