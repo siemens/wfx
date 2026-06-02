@@ -54,7 +54,8 @@ func TestUpdateJobStatus(t *testing.T, db persistence.Storage) {
 func TestUpdateJobStatusNonExisting(t *testing.T, db persistence.Storage) {
 	job := newValidJob(defaultClientID)
 	message := "message"
-	updatedJob, err := db.UpdateJob(t.Context(), job,
+	updatedJob, err := db.UpdateJob(
+		t.Context(), job,
 		persistence.JobUpdate{Status: &api.JobStatus{Message: message, State: "ACTIVATING"}},
 	)
 	assert.Error(t, err)
@@ -77,7 +78,8 @@ func TestUpdateJobStatusStaleView(t *testing.T, db persistence.Storage) {
 	// First update succeeds and bumps mtime.
 	freshJob, err := db.GetJob(t.Context(), job.ID, persistence.FetchParams{})
 	require.NoError(t, err)
-	winner, err := db.UpdateJob(t.Context(), freshJob,
+	winner, err := db.UpdateJob(
+		t.Context(), freshJob,
 		persistence.JobUpdate{Status: &api.JobStatus{State: "INSTALLING"}},
 	)
 	require.NoError(t, err)
@@ -85,7 +87,8 @@ func TestUpdateJobStatusStaleView(t *testing.T, db persistence.Storage) {
 	require.Greater(t, *winner.Mtime, *staleJob.Mtime)
 
 	// Second update uses the stale view; it must be rejected.
-	loser, err := db.UpdateJob(t.Context(), staleJob,
+	loser, err := db.UpdateJob(
+		t.Context(), staleJob,
 		persistence.JobUpdate{Status: &api.JobStatus{State: "ACTIVATING"}},
 	)
 	assert.Error(t, err, "stale update must not silently succeed")

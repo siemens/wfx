@@ -65,7 +65,8 @@ func NewWfxServer(storage persistence.Storage) *WfxServer {
 			},
 		}),
 		health.WithStatusListener(healthStatusListener),
-		health.WithDisabledAutostart())
+		health.WithDisabledAutostart(),
+	)
 	wfx := &WfxServer{
 		storage: storage,
 		checker: checker,
@@ -514,7 +515,7 @@ func (server WfxServer) GetHealth(ctx context.Context, _ api.GetHealthRequestObj
 	details := make(map[string]api.CheckResult, len(result.Details))
 	for component, result := range result.Details {
 		componentResult := api.CheckResult{
-			Status:    (api.AvailabilityStatus)(result.Status),
+			Status:    api.AvailabilityStatus(result.Status),
 			Timestamp: result.Timestamp,
 		}
 		if result.Error != nil {
