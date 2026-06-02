@@ -74,6 +74,14 @@
       groupSlug: "all-ui-deps",
       matchFileNames: ["ui/**"],
     },
+    {
+      groupName: "Other dependencies",
+      groupSlug: "all-other",
+      matchFileNames: [
+        "ui/integration/package.json",
+        "ui/integration/package-lock.json",
+      ],
+    },
 
     // separate PR for pages as hugo often has breaking changes
     {
