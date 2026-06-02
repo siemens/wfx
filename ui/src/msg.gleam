@@ -18,9 +18,9 @@ pub type Msg {
   MermaidGeneratedWorklowDiagram(String)
   MermaidGeneratedJobDiagram(String)
 
-  WfxSentJobs(Result(wfx.PaginatedJobList, rsvp.Error))
-  WfxSentWorkflows(Result(wfx.PaginatedWorkflowList, rsvp.Error))
-  WfxSentSingleWorkflow(Result(wfx.Workflow, rsvp.Error))
-  WfxSentSingleJob(Result(wfx.Job, rsvp.Error))
+  WfxSentJobs(Result(wfx.PaginatedJobList, rsvp.Error(String)))
+  WfxSentWorkflows(Result(wfx.PaginatedWorkflowList, rsvp.Error(String)))
+  WfxSentSingleWorkflow(Result(wfx.Workflow, rsvp.Error(String)))
+  WfxSentSingleJob(Result(wfx.Job, rsvp.Error(String)))
   WfxSentJobEvent(String)
 }

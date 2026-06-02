@@ -28,7 +28,7 @@ pub type Model {
 }
 
 pub type ApiError {
-  RsvpError(rsvp.Error)
+  RsvpError(rsvp.Error(String))
 }
 
 pub type Route {
