@@ -51,15 +51,15 @@ func (g *Generator) Generate(out io.Writer, workflow *api.Workflow) error {
 
 	// add legend
 	_, _ = out.Write([]byte("legend right\n"))
-	_, _ = out.Write([]byte(("  | Color | Group | Description |\n")))
+	_, _ = out.Write([]byte("  | Color | Group | Description |\n"))
 	for _, group := range workflow.Groups {
 		color := cp.GroupColor(group.Name)
 		hex := color.ToHEX().String()
 		_, _ = fmt.Fprintf(out, "  | <%s> | %s | %s |\n", hex, group.Name, group.Description)
 	}
 	_, _ = fmt.Fprintf(out, "  | <%s> | %s | %s |\n", colors.DefaultBgColor, "", "The state doesn't belong to any group.")
-	_, _ = out.Write([]byte(("endlegend\n")))
+	_, _ = out.Write([]byte("endlegend\n"))
 
-	_, _ = out.Write([]byte(("@enduml\n")))
+	_, _ = out.Write([]byte("@enduml\n"))
 	return nil
 }
