@@ -129,14 +129,15 @@ pub fn view(model: Model) -> Element(Msg) {
   )
 }
 
-fn format_rsvp_error(err: rsvp.Error) -> String {
+fn format_rsvp_error(err: rsvp.Error(String)) -> String {
   case err {
     rsvp.BadBody -> "Bad body"
-    rsvp.BadUrl(_) -> "Bad URL"
+    rsvp.BadUrl(url) -> "Bad URL: " <> url
     rsvp.HttpError(response.Response(status: _, headers: _, body: body)) -> body
     rsvp.JsonError(_) -> "Failed to unmarshal JSON"
     rsvp.NetworkError -> "Network Error"
-    rsvp.UnhandledResponse(_) -> "Unexpected response type"
+    rsvp.UnhandledResponse(response.Response(status: _, headers: _, body: body)) ->
+      "Unexpected response type: " <> body
   }
 }
 
