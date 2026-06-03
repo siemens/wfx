@@ -20,3 +20,4 @@ coverage*
 *.cov
 /wfx.db*
 *.exe
+*.sbom.json
