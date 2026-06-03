@@ -10,7 +10,10 @@
     "schedule:monthly",
   ],
   lockFileMaintenance: {
+    enabled: true,
     schedule: ["* 0-3 7 * *"],
+    groupName: "lock files",
+    groupSlug: "lock-files",
   },
   assigneesFromCodeOwners: true,
   separateMajorMinor: false,
@@ -78,6 +81,12 @@
         "/github.com/google/docsy/", // docsy and hugo must be compatible with each other
         "/gohugoio/hugo/",
       ],
+    },
+    // group all lock file maintenance updates into a single MR
+    {
+      matchUpdateTypes: ["lockFileMaintenance"],
+      groupName: "lock files",
+      groupSlug: "lock-files",
     },
   ],
 }
