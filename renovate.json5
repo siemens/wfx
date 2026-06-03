@@ -41,43 +41,24 @@
   packageRules: [
     // catch-all
     {
-      groupName: "Other dependencies",
-      groupSlug: "all-other",
-      matchUpdateTypes: [
-        "major",
-        "minor",
-        "patch",
-        "pin",
-        "pinDigest",
-        "digest",
-        "lockFileMaintenance",
-        "rollback",
-        "bump",
-        "replacement",
-      ],
+      groupName: "Catch-all dependencies",
+      groupSlug: "catch-all",
     },
-    // override previous catch-all
+    // overrides for previous catch-all
     {
-      groupName: "Golang app dependencies",
-      groupSlug: "all-golang-app",
-      matchFileNames: ["go.mod"],
-      postUpdateOptions: ["gomodTidy"],
-    },
-    {
-      groupName: "Golang tool dependencies",
-      groupSlug: "all-golang-tools",
-      matchFileNames: ["go.tool.mod"],
+      matchManagers: ["gomod"],
       postUpdateOptions: ["gomodTidy"],
     },
     {
       groupName: "UI dependencies",
-      groupSlug: "all-ui-deps",
+      groupSlug: "ui",
       matchFileNames: ["ui/**"],
     },
     {
-      groupName: "Other dependencies",
-      groupSlug: "all-other",
+      groupName: "UI integration tests",
+      groupSlug: "catch-all",
       matchFileNames: [
+        // these have to be kept in sync with the test-ui job in ci.yml
         "ui/integration/package.json",
         "ui/integration/package-lock.json",
       ],
