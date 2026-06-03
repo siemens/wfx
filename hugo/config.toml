@@ -96,6 +96,12 @@ enable = false
   icon = "fa fa-heart"
   desc = "Siemens loves Open Source!"
 
+[security]
+allowContent = ['.*']
+
+[security.node.permissions]
+disable = true
+
 [security.gotemplates]
 allowActionJSTmpl = true
 
