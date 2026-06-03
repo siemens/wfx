@@ -10,7 +10,7 @@
     "schedule:monthly",
   ],
   lockFileMaintenance: {
-    schedule: ["* 0-3 1 * *"],
+    schedule: ["* 0-3 7 * *"],
   },
   assigneesFromCodeOwners: true,
   separateMajorMinor: false,
