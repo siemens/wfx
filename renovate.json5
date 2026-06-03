@@ -43,6 +43,7 @@
     {
       groupName: "Catch-all dependencies",
       groupSlug: "catch-all",
+      matchPackageNames: ["*"],
     },
     // overrides for previous catch-all
     {
