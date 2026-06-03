@@ -3,11 +3,13 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 // Author: Michael Adler <michael.adler@siemens.com>
+import gleam/dynamic/decode
 import gleam/http/response
 import gleam/int
 import gleam/json
 import gleam/list
 import gleam/option.{None, Some}
+import gleam/string
 import gleam/string_tree
 import gleam/time/calendar
 import gleam/time/timestamp
@@ -134,10 +136,31 @@ fn format_rsvp_error(err: rsvp.Error(String)) -> String {
     rsvp.BadBody -> "Bad body"
     rsvp.BadUrl(url) -> "Bad URL: " <> url
     rsvp.HttpError(response.Response(status: _, headers: _, body: body)) -> body
-    rsvp.JsonError(_) -> "Failed to unmarshal JSON"
+    rsvp.JsonError(err) ->
+      "Failed to unmarshal JSON: " <> format_json_error(err)
     rsvp.NetworkError -> "Network Error"
     rsvp.UnhandledResponse(response.Response(status: _, headers: _, body: body)) ->
       "Unexpected response type: " <> body
+  }
+}
+
+fn format_json_error(err: json.DecodeError) -> String {
+  case err {
+    json.UnexpectedEndOfInput -> "unexpected end of input"
+    json.UnexpectedByte(byte) -> "unexpected byte " <> byte
+    json.UnexpectedSequence(seq) -> "unexpected sequence " <> seq
+    json.UnableToDecode(errs) ->
+      errs
+      |> list.map(fn(e) {
+        let decode.DecodeError(expected:, found:, path:) = e
+        "expected "
+        <> expected
+        <> ", found "
+        <> found
+        <> " at "
+        <> string.join(path, ".")
+      })
+      |> string.join("; ")
   }
 }
 
