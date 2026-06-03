@@ -10,7 +10,7 @@ relativeURLs = true
 
 [languages]
   [languages.en]
-    languageName ="English"
+    label ="English"
     weight = 100
 
 [markup]
