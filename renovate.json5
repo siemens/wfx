@@ -38,13 +38,14 @@
   // necessary. If multiple rules match and set the same config option e.g. groupName the last one wins as the later
   // rules overwrite the result from the earlier ones.
   //
-  // group-slug is used for the branch name
+  // groupName appears in the title of the commit message
+  // groupSlug is used for the branch name
   //
   // see https://docs.renovatebot.com/configuration-options/
   packageRules: [
     // catch-all
     {
-      groupName: "Catch-all dependencies",
+      groupName: "all dependencies",
       groupSlug: "catch-all",
       matchPackageNames: ["*"],
     },
@@ -54,12 +55,11 @@
       postUpdateOptions: ["gomodTidy"],
     },
     {
-      groupName: "UI dependencies",
+      groupName: "ui dependencies",
       groupSlug: "ui",
       matchFileNames: ["ui/**"],
     },
     {
-      groupName: "UI integration tests",
       groupSlug: "catch-all",
       matchFileNames: [
         // these have to be kept in sync with the test-ui job in ci.yml
@@ -75,7 +75,7 @@
       enabled: true,
     },
     {
-      groupName: "all pages dependencies",
+      groupName: "pages dependencies",
       groupSlug: "all-pages",
       matchPackageNames: [
         "/github.com/google/docsy/", // docsy and hugo must be compatible with each other
