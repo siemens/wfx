@@ -12,8 +12,6 @@
   lockFileMaintenance: {
     enabled: true,
     schedule: ["* 0-3 7 * *"],
-    groupName: "lock files",
-    groupSlug: "lock-files",
   },
   assigneesFromCodeOwners: true,
   separateMajorMinor: false,
@@ -46,7 +44,7 @@
     // catch-all
     {
       groupName: "all dependencies",
-      groupSlug: "catch-all",
+      groupSlug: "all",
       matchPackageNames: ["*"],
     },
     // overrides for previous catch-all
@@ -60,7 +58,8 @@
       matchFileNames: ["ui/**"],
     },
     {
-      groupSlug: "catch-all",
+      groupName: "all dependencies",
+      groupSlug: "all",
       matchFileNames: [
         // these have to be kept in sync with the test-ui job in ci.yml
         "ui/integration/package.json",
@@ -85,7 +84,7 @@
     // group all lock file maintenance updates into a single MR
     {
       matchUpdateTypes: ["lockFileMaintenance"],
-      groupName: "lock files",
+      groupName: "all lock files",
       groupSlug: "lock-files",
     },
   ],
