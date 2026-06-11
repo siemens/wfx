@@ -14,7 +14,7 @@ mkShell {
     hugo
 
     sql-formatter
-    prettier
+    biome
     markdownlint-cli
     shfmt
     lychee

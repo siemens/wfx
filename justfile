@@ -92,7 +92,7 @@ format:
     #!/usr/bin/env bash
     set -eux
     go tool -modfile="{{ THISDIR }}/tools/go.mod" mvdan.cc/gofumpt -l -w .
-    prettier -l -w .
+    biome format
     just --fmt --unstable
 
 _generate-openapi:
