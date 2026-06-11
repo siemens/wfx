@@ -21,3 +21,4 @@ coverage*
 /wfx.db*
 *.exe
 *.sbom.json
+.direnv
