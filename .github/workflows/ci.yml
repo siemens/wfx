@@ -283,17 +283,16 @@ jobs:
   format:
     runs-on: ubuntu-latest
     name: Format
-    container: golang:1.26.4@sha256:68cb6d68bed024785b69195b89af7ac7a444f27791435f98647edff595aa0479
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+      - name: Run biome
+        uses: docker://ghcr.io/biomejs/biome:2.4.16@sha256:e43695cefaf3d3dc0713af731ef3ef150fef5a6bf5aebeb0ee3ffbaffd2ddc5e
         with:
-          node-version: lts/*
-      - run: .ci/setup-format.sh
-      - run: just format
-      - name: Disable git security features
-        run: git config --global safe.directory '*'
-      - run: git diff --exit-code
+          args: ci
+      - name: Run gofumpt
+        uses: docker://golang:1.26.4@sha256:68cb6d68bed024785b69195b89af7ac7a444f27791435f98647edff595aa0479
+        with:
+          args: go tool -modfile=tools/go.mod mvdan.cc/gofumpt -d -e .
 
   reuse:
     runs-on: ubuntu-latest
