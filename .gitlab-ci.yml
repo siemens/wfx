@@ -15,7 +15,7 @@ stages:
   - test
   - deploy
 
-image: golang:1.26.4@sha256:68cb6d68bed024785b69195b89af7ac7a444f27791435f98647edff595aa0479
+image: golang:1.26.4@sha256:f96cc555eb8db430159a3aa6797cd5bae561945b7b0fe7d0e284c63a3b291609
 
 build:
   stage: build
@@ -40,7 +40,7 @@ test:
 test-postgres:
   stage: test
   services:
-    - postgres:18@sha256:8ff36f3c66371cba71d20ceedccfc3de9669a68737607888c4ef0af93abe8e39
+    - postgres:18@sha256:4aabea78cf39b90e834caf3af7d602a18565f6fe2508705c8d01aa63245c2e20
   needs: []
   variables:
     CGO_ENABLED: 1
@@ -85,7 +85,7 @@ cli-tests:
   stage: test
   needs: []
   services:
-    - postgres:18@sha256:8ff36f3c66371cba71d20ceedccfc3de9669a68737607888c4ef0af93abe8e39
+    - postgres:18@sha256:4aabea78cf39b90e834caf3af7d602a18565f6fe2508705c8d01aa63245c2e20
     - mysql:8-debian@sha256:49f4fcb0087318aa1c222c7e8ceacbb541cdc457c6307d45e6ee4313f4902e33
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
