@@ -47,7 +47,7 @@ jobs:
         id: ort
         uses: oss-review-toolkit/ort-ci-github-action@086d928d24ef1653dc0777296b312fda5faaaf52 # v1.2.0
         with:
-          image: ghcr.io/oss-review-toolkit/ort-minimal:latest
+          image: ghcr.io/oss-review-toolkit/ort-minimal:latest@sha256:8da0e190af68d710cbf469c22ed1912b2c32cfff0f5de1ff5a87a189de1cfbd0
           project-path: ${{ github.workspace }}/ui
           run: >-
             cache-dependencies,
