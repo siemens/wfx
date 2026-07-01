@@ -300,7 +300,7 @@ jobs:
     container: fsfe/reuse:6.2.0@sha256:85462a75c0f8efda09ddd190b92816b70e7662577c8427429e11e1b9f25a992e
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
-      - run: reuse lint || true # just a warning
+      - run: reuse lint || true # only a warning
 
   generate:
     name: Generate Code

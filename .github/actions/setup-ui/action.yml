@@ -48,8 +48,6 @@ runs:
         chmod +x /tmp/tailwindcss
         sudo mv /tmp/tailwindcss /usr/local/bin/tailwindcss
         tailwindcss --help | head -n1
-    - shell: bash
-      run: sudo .ci/setup-ui.sh
     - name: Install deps
       shell: bash
       working-directory: ui

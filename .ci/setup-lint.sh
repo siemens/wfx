@@ -9,8 +9,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 apt-get update -q
-apt-get install -q -y --no-install-recommends zstd
+apt-get install -q -y --no-install-recommends zstd just
 
-"$SCRIPT_DIR/packages/just.sh"
 "$SCRIPT_DIR/packages/staticcheck.sh"
 "$SCRIPT_DIR/packages/golangci-lint.sh"
