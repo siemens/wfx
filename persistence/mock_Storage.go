@@ -72,7 +72,7 @@ type MockStorage_CheckHealth_Call struct {
 
 // CheckHealth is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockStorage_Expecter) CheckHealth(ctx interface{}) *MockStorage_CheckHealth_Call {
+func (_e *MockStorage_Expecter) CheckHealth(ctx any) *MockStorage_CheckHealth_Call {
 	return &MockStorage_CheckHealth_Call{Call: _e.mock.On("CheckHealth", ctx)}
 }
 
@@ -135,7 +135,7 @@ type MockStorage_CreateJob_Call struct {
 // CreateJob is a helper method to define mock.On call
 //   - ctx context.Context
 //   - job *api.Job
-func (_e *MockStorage_Expecter) CreateJob(ctx interface{}, job interface{}) *MockStorage_CreateJob_Call {
+func (_e *MockStorage_Expecter) CreateJob(ctx any, job any) *MockStorage_CreateJob_Call {
 	return &MockStorage_CreateJob_Call{Call: _e.mock.On("CreateJob", ctx, job)}
 }
 
@@ -203,7 +203,7 @@ type MockStorage_CreateWorkflow_Call struct {
 // CreateWorkflow is a helper method to define mock.On call
 //   - ctx context.Context
 //   - workflow *api.Workflow
-func (_e *MockStorage_Expecter) CreateWorkflow(ctx interface{}, workflow interface{}) *MockStorage_CreateWorkflow_Call {
+func (_e *MockStorage_Expecter) CreateWorkflow(ctx any, workflow any) *MockStorage_CreateWorkflow_Call {
 	return &MockStorage_CreateWorkflow_Call{Call: _e.mock.On("CreateWorkflow", ctx, workflow)}
 }
 
@@ -260,7 +260,7 @@ type MockStorage_DeleteJob_Call struct {
 // DeleteJob is a helper method to define mock.On call
 //   - ctx context.Context
 //   - jobID string
-func (_e *MockStorage_Expecter) DeleteJob(ctx interface{}, jobID interface{}) *MockStorage_DeleteJob_Call {
+func (_e *MockStorage_Expecter) DeleteJob(ctx any, jobID any) *MockStorage_DeleteJob_Call {
 	return &MockStorage_DeleteJob_Call{Call: _e.mock.On("DeleteJob", ctx, jobID)}
 }
 
@@ -317,7 +317,7 @@ type MockStorage_DeleteWorkflow_Call struct {
 // DeleteWorkflow is a helper method to define mock.On call
 //   - ctx context.Context
 //   - name string
-func (_e *MockStorage_Expecter) DeleteWorkflow(ctx interface{}, name interface{}) *MockStorage_DeleteWorkflow_Call {
+func (_e *MockStorage_Expecter) DeleteWorkflow(ctx any, name any) *MockStorage_DeleteWorkflow_Call {
 	return &MockStorage_DeleteWorkflow_Call{Call: _e.mock.On("DeleteWorkflow", ctx, name)}
 }
 
@@ -386,7 +386,7 @@ type MockStorage_GetJob_Call struct {
 //   - ctx context.Context
 //   - jobID string
 //   - fetchParams FetchParams
-func (_e *MockStorage_Expecter) GetJob(ctx interface{}, jobID interface{}, fetchParams interface{}) *MockStorage_GetJob_Call {
+func (_e *MockStorage_Expecter) GetJob(ctx any, jobID any, fetchParams any) *MockStorage_GetJob_Call {
 	return &MockStorage_GetJob_Call{Call: _e.mock.On("GetJob", ctx, jobID, fetchParams)}
 }
 
@@ -459,7 +459,7 @@ type MockStorage_GetWorkflow_Call struct {
 // GetWorkflow is a helper method to define mock.On call
 //   - ctx context.Context
 //   - name string
-func (_e *MockStorage_Expecter) GetWorkflow(ctx interface{}, name interface{}) *MockStorage_GetWorkflow_Call {
+func (_e *MockStorage_Expecter) GetWorkflow(ctx any, name any) *MockStorage_GetWorkflow_Call {
 	return &MockStorage_GetWorkflow_Call{Call: _e.mock.On("GetWorkflow", ctx, name)}
 }
 
@@ -515,7 +515,7 @@ type MockStorage_Initialize_Call struct {
 
 // Initialize is a helper method to define mock.On call
 //   - options string
-func (_e *MockStorage_Expecter) Initialize(options interface{}) *MockStorage_Initialize_Call {
+func (_e *MockStorage_Expecter) Initialize(options any) *MockStorage_Initialize_Call {
 	return &MockStorage_Initialize_Call{Call: _e.mock.On("Initialize", options)}
 }
 
@@ -580,7 +580,7 @@ type MockStorage_QueryJobs_Call struct {
 //   - filterParams FilterParams
 //   - sortParams SortParams
 //   - paginationParams PaginationParams
-func (_e *MockStorage_Expecter) QueryJobs(ctx interface{}, filterParams interface{}, sortParams interface{}, paginationParams interface{}) *MockStorage_QueryJobs_Call {
+func (_e *MockStorage_Expecter) QueryJobs(ctx any, filterParams any, sortParams any, paginationParams any) *MockStorage_QueryJobs_Call {
 	return &MockStorage_QueryJobs_Call{Call: _e.mock.On("QueryJobs", ctx, filterParams, sortParams, paginationParams)}
 }
 
@@ -659,7 +659,7 @@ type MockStorage_QueryWorkflows_Call struct {
 //   - ctx context.Context
 //   - sortParams SortParams
 //   - paginationParams PaginationParams
-func (_e *MockStorage_Expecter) QueryWorkflows(ctx interface{}, sortParams interface{}, paginationParams interface{}) *MockStorage_QueryWorkflows_Call {
+func (_e *MockStorage_Expecter) QueryWorkflows(ctx any, sortParams any, paginationParams any) *MockStorage_QueryWorkflows_Call {
 	return &MockStorage_QueryWorkflows_Call{Call: _e.mock.On("QueryWorkflows", ctx, sortParams, paginationParams)}
 }
 
@@ -766,7 +766,7 @@ type MockStorage_UpdateJob_Call struct {
 //   - ctx context.Context
 //   - job *api.Job
 //   - request JobUpdate
-func (_e *MockStorage_Expecter) UpdateJob(ctx interface{}, job interface{}, request interface{}) *MockStorage_UpdateJob_Call {
+func (_e *MockStorage_Expecter) UpdateJob(ctx any, job any, request any) *MockStorage_UpdateJob_Call {
 	return &MockStorage_UpdateJob_Call{Call: _e.mock.On("UpdateJob", ctx, job, request)}
 }
 
