@@ -56,8 +56,8 @@ Extending the available actions for `WFX`-eligible transitions and providing act
 Beyond syntactic requirements such as, e.g., a particular set being non-empty or the uniqueness property of names, the
 following semantic rules and constraints are checked and enforced by wfx upon loading a workflow:
 
-- There's exactly one initial state, i.e., there are no incoming transitions to this state with this state's name in `to`.
-- There are no unreachable states, i.e., states without an incoming transition.
+- There's exactly one initial state, i.e., exactly one state without any incoming transition (no transition names it in `to`).
+- There are no unreachable states, i.e., every state except the initial one has an incoming transition.
 - For each state, there can't be more than one outgoing transition whose `action` is `IMMEDIATE`.
 - Transition tuples (`from`, `to`, `eligible`, `action`) must be unique.
 - There are no cycles in the workflow graph _except_ for trivial cycles, i.e. transitions where `from` equals `to` (used for e.g. progress reporting).
