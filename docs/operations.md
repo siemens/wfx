@@ -315,9 +315,10 @@ This has led to the following deliberate design choices:
 
 ### Using Plugins
 
-To use plugins at runtime, wfx must be compiled with the `plugin` tag (enabled by default) and started with the
-`--mgmt-plugins-dir` resp. `--client-plugins-dir` flag, specifying a directory containing the plugins to be used. This
-enables the use of different plugin sets for the north- resp. southbound API.
+Plugin support is compiled in by default (it can be opted out via the `no_plugin` build tag, see
+[Build Tags](installation.md#build-tags)). To use plugins at runtime, start wfx with the `--mgmt-plugins-dir` resp.
+`--client-plugins-dir` flag, specifying a directory containing the plugins to be used. This enables the use of different
+plugin sets for the north- resp. southbound API.
 
 **Note**: In a plugin directory, all _executable_ files (including symlinks to executables) are assumed to be plugins.
 Non-executable files, like configuration files, are excluded. For deterministic behavior, plugins are sorted and
