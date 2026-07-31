@@ -260,7 +260,7 @@ The command accepts both YAML and JSON formats, so you can also use a JSON file 
 wfxctl workflow create wfx.workflow.kanban.json
 ```
 
-Note that the the command's output was made less verbose by using a `--filter` to only show the transitions.
+Note that the command's output was made less verbose by using a `--filter` to only show the transitions.
 
 Henceforth, a job is identified with a "Task" and a state is identified with a "Lane" in Kanban board parlance.
 The Product Owner Parker as also owning and managing the Kanban "Board" instruments the northbound wfx management
