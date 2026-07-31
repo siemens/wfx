@@ -50,6 +50,7 @@ This is in particular important for the PostgreSQL and MySQL persistent storage 
 ### SQLite
 
 [SQLite](https://www.sqlite.org/) is the default persistent storage and automatically selected if no other persistent storage option is given.
+Unless overridden, wfx uses the DSN `file:wfx.db?_fk=1&_journal=WAL`, i.e. the database file `wfx.db` is created in wfx's working directory.
 It can be further configured with the `--storage-opt` configuration option, see the [go-sqlite3 Wiki](https://github.com/mattn/go-sqlite3/wiki/DSN) for available Data Source Name (DSN) options.
 
 As an example, the following command runs a wfx instance with an ephemeral in-memory SQLite database:
