@@ -326,11 +326,7 @@ Then, Developer Dana may realize that the task result cannot be integrated into 
 into "DISCARDED" or Product Owner Parker may come to the conclusion that no customer value is provided by the task
 result, also putting it into "DISCARDED" ― whoever realizes this first.
 
-Or, if the task result greatly increases customer value, Developer Dana as being highly experienced may do the
-validation herself, thereafter putting the task to "DONE". The Product Owner Parker may come to the same conclusion ―
-again whoever is faster in realizing the customer benefit.
-
-Alternatively, if the task in question holds significant potential for increased customer value, Developer Dana, being highly
-experienced, may undertake the validation process herself and subsequently mark the task as "DONE."
-Likewise, Product Owner Parker may arrive at the same conclusion and act accordingly - again, whoever realizes this
-first may advance the task accordingly.
+Or, if the task result greatly increases customer value, Developer Dana, being highly experienced, may undertake the
+validation process herself and subsequently mark the task as "DONE".
+Likewise, Product Owner Parker may arrive at the same conclusion and act accordingly ― again, whoever realizes this
+first may advance the task.
