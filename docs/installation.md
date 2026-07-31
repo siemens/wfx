@@ -46,7 +46,7 @@ By default, all features are enabled. The following build tags are available:
 
 | Build Tag     | Description                                                                                           |
 | :------------ | :---------------------------------------------------------------------------------------------------- |
-| `ui`          | Enable built-in WebUI (must have been built separately before, see [building WebUI](#building-webui)) |
+| `ui`          | Enable built-in WebUI (must be built separately beforehand, see [Building WebUI](#building-webui))    |
 | `no_sqlite`   | Disable built-in [SQLite](https://www.sqlite.org/) support                                            |
 | `libsqlite3`  | Dynamically link against `libsqlite3`                                                                 |
 | `no_postgres` | Disable built-in [PostgreSQL](https://www.postgresql.org) support                                     |
