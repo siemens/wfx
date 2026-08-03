@@ -26,4 +26,4 @@ jobs:
       pull-requests: read
     steps:
       - name: Conventional Commitlint
-        uses: opensource-nepal/commitlint@b475c5486b51a090474c55a8dd2eafc84bcd84ba # v1
+        uses: opensource-nepal/commitlint@9c112b70de7b0e51f81d12a5268a451db5419794 # v2
