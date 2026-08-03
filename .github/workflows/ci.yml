@@ -381,12 +381,20 @@ jobs:
         run: |
           export HOME=/root
           mkdir -p $HOME
-          npx playwright test --project chromium --project firefox --project webkit
+          npx playwright test --project chromium --project firefox --project webkit --reporter=list,html
         working-directory: ui/integration
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
-          path: playwright-report/
+          path: ui/integration/playwright-report/
           retention-days: 1
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-test-results
+          path: ui/integration/test-results/
+          retention-days: 1
+          if-no-files-found: ignore
