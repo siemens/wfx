@@ -5,10 +5,21 @@
 // Author: Michael Adler <michael.adler@siemens.com>
 
 import { test, expect } from "@playwright/test";
-import { createJob, createWorkflow, deleteJob, deleteWorkflow } from "./helper";
+import { cleanupDatabase, createJob, createWorkflow, TEST_TAG } from "./helper";
 
 const baseUrl = "http://localhost:8081";
 const uiBaseUrl = baseUrl + "/ui";
+
+// All tests share a single wfx instance. Each test starts and ends by removing
+// the resources it created (identified by TEST_TAG), leaving any pre-existing
+// data untouched. Assertions are scoped to TEST_TAG for the same reason.
+test.beforeEach(async ({ request }) => {
+  await cleanupDatabase(baseUrl, request);
+});
+
+test.afterEach(async ({ request }) => {
+  await cleanupDatabase(baseUrl, request);
+});
 
 test("empty jobs table", async ({ page }) => {
   await page.goto(uiBaseUrl);
@@ -16,11 +27,9 @@ test("empty jobs table", async ({ page }) => {
   // Wait for table to appear
   await page.locator("#jobs-table").waitFor();
 
-  const rows = page.locator("#jobs-table> tbody > tr");
-  const texts = await rows.allTextContents();
-  expect(texts).toEqual([]);
-
-  await expect(rows).toHaveCount(0);
+  await expect(
+    page.locator("#jobs-table> tbody > tr").filter({ hasText: TEST_TAG }),
+  ).toHaveCount(0);
 });
 
 test("empty workflows table", async ({ page }) => {
@@ -32,218 +41,154 @@ test("empty workflows table", async ({ page }) => {
   // Wait for table to appear
   await page.locator("#workflows-table").waitFor();
 
-  const rows = page.locator("#workflows-table > tbody > tr");
-  const texts = await rows.allTextContents();
-  expect(texts).toEqual([]);
-
-  await expect(rows).toHaveCount(0);
+  await expect(
+    page.locator("#workflows-table > tbody > tr").filter({ hasText: TEST_TAG }),
+  ).toHaveCount(0);
 });
 
 test("non-empty workflows table", async ({ page }) => {
-  let name: string | undefined;
+  // Create workflow
+  const workflow = await createWorkflow(baseUrl, page.request);
+  const name = workflow.name as string;
 
-  try {
-    // Create workflow
-    const workflow = await createWorkflow(baseUrl, page.request);
-    name = workflow.name as string;
+  await page.goto(uiBaseUrl);
 
-    await page.goto(uiBaseUrl);
+  // Click on "Workflows"
+  const workflowsLink = page.getByRole("link", { name: "Workflows" });
+  await workflowsLink.click();
 
-    // Click on "Workflows"
-    const workflowsLink = page.getByRole("link", { name: "Workflows" });
-    await workflowsLink.click();
+  // Wait for table to appear
+  await page.locator("#workflows-table").waitFor();
 
-    // Wait for table to appear
-    await page.locator("#workflows-table").waitFor();
+  const matchingRow = page
+    .locator("#workflows-table > tbody > tr")
+    .filter({ hasText: name });
+  await expect(matchingRow).toHaveCount(1);
 
-    const rows = page.locator("#workflows-table > tbody > tr");
-    await expect(rows).toHaveCount(1);
-
-    const firstRow = rows.first();
-    const firstCell = firstRow.locator("td").first();
-    const cellText = await firstCell.textContent();
-
-    expect(cellText).toEqual(workflow.name);
-  } finally {
-    // Cleanup: delete the workflow if it was created
-    if (name) {
-      await deleteWorkflow(baseUrl, page.request, name);
-    }
-  }
+  await expect(matchingRow.locator("td").first()).toHaveText(name);
 });
 
 test("non-empty jobs table", async ({ page }) => {
-  let name: string | undefined;
-  let jobId: string | undefined;
+  // Create workflow
+  const workflow = await createWorkflow(baseUrl, page.request);
+  const name = workflow.name as string;
 
-  try {
-    // Create workflow
-    const workflow = await createWorkflow(baseUrl, page.request);
-    name = workflow.name as string;
+  const job = await createJob(baseUrl, page.request, name);
+  const jobId = job.id as string;
 
-    const job = await createJob(baseUrl, page.request, name);
-    jobId = job.id as string;
+  await page.goto(uiBaseUrl);
 
-    await page.goto(uiBaseUrl);
+  // Wait for table to appear
+  await page.locator("#jobs-table").waitFor();
 
-    // Wait for table to appear
-    await page.locator("#jobs-table").waitFor();
+  const matchingRow = page
+    .locator("#jobs-table > tbody > tr")
+    .filter({ hasText: jobId });
+  await expect(matchingRow).toHaveCount(1);
 
-    const rows = page.locator("#jobs-table > tbody > tr");
-    await expect(rows).toHaveCount(1);
-
-    const firstRow = rows.first();
-    const firstCell = firstRow.locator("td").first();
-    const cellText = await firstCell.textContent();
-
-    expect(cellText).toEqual(jobId);
-  } finally {
-    // Cleanup (in reverse order)
-    if (jobId) {
-      await deleteJob(baseUrl, page.request, jobId);
-    }
-    if (name) {
-      await deleteWorkflow(baseUrl, page.request, name);
-    }
-  }
+  await expect(matchingRow.locator("td").first()).toHaveText(jobId);
 });
 
 test("job added to jobs table due to server-sent event", async ({ page }) => {
-  let name: string | undefined;
-  let jobId: string | undefined;
+  await page.goto(uiBaseUrl);
 
-  try {
-    await page.goto(uiBaseUrl);
+  // Wait for table to appear
+  await page.locator("#jobs-table").waitFor();
+  await expect(
+    page.locator("#jobs-table > tbody > tr").filter({ hasText: TEST_TAG }),
+  ).toHaveCount(0);
 
-    // Wait for table to appear
-    await page.locator("#jobs-table").waitFor();
-    await expect(page.locator("#jobs-table > tbody > tr")).toHaveCount(0);
+  const workflow = await createWorkflow(baseUrl, page.request);
+  const name = workflow.name as string;
 
-    const workflow = await createWorkflow(baseUrl, page.request);
-    name = workflow.name as string;
+  const job = await createJob(baseUrl, page.request, name);
+  const jobId = job.id as string;
 
-    const job = await createJob(baseUrl, page.request, name);
-    jobId = job.id as string;
+  // now job should be added to table due to job event sent by wfx
+  const matchingRow = page
+    .locator("#jobs-table > tbody > tr")
+    .filter({ hasText: jobId });
+  await expect(matchingRow).toHaveCount(1);
 
-    // now job should be added to table due to job event sent by wfx
-    const rows = page.locator("#jobs-table > tbody > tr");
-    await expect(rows).toHaveCount(1);
-
-    const firstRow = rows.first();
-    const firstCell = firstRow.locator("td").first();
-    const cellText = await firstCell.textContent();
-
-    expect(cellText).toEqual(jobId);
-  } finally {
-    // Cleanup (in reverse order)
-    if (jobId) {
-      await deleteJob(baseUrl, page.request, jobId);
-    }
-    if (name) {
-      await deleteWorkflow(baseUrl, page.request, name);
-    }
-  }
+  await expect(matchingRow.locator("td").first()).toHaveText(jobId);
 });
 
 test("workflow details", async ({ page }) => {
-  let name: string | undefined;
+  // Create workflow
+  const workflow = await createWorkflow(baseUrl, page.request);
+  const name = workflow.name as string;
 
-  try {
-    // Create workflow
-    const workflow = await createWorkflow(baseUrl, page.request);
-    name = workflow.name as string;
+  // Open workflow details page
+  await page.goto(`${uiBaseUrl}/workflows/${name}`);
 
-    // Open workflow details page
-    await page.goto(`${uiBaseUrl}/workflows/${name}`);
+  // Check for SVG
 
-    // Check for SVG
+  // Wait for <mermaid> to appear
+  const mermaid = page.locator("mermaid");
+  await mermaid.waitFor();
 
-    // Wait for <mermaid> to appear
-    const mermaid = page.locator("mermaid");
-    await mermaid.waitFor();
+  // Check <svg> was generated by mermaid
+  const svg = mermaid.locator("svg#graphDiv");
+  await expect(svg).toBeVisible();
 
-    // Check <svg> was generated by mermaid
-    const svg = mermaid.locator("svg#graphDiv");
-    await expect(svg).toBeVisible();
+  const classAttr = await svg.getAttribute("class");
+  expect(classAttr).toContain("statediagram");
 
-    const classAttr = await svg.getAttribute("class");
-    expect(classAttr).toContain("statediagram");
-
-    // Check workflow JSON is highlighted
-    const codeBlock = page.locator("code#workflow-json");
-    const stringSpans = codeBlock.locator("span.hljs-string");
-    expect(await stringSpans.count()).toBeGreaterThan(0);
-  } finally {
-    // Cleanup: delete the workflow if it was created
-    if (name) {
-      await deleteWorkflow(baseUrl, page.request, name);
-    }
-  }
+  // Check workflow JSON is highlighted
+  const codeBlock = page.locator("code#workflow-json");
+  await expect(codeBlock.locator("span.hljs-string").first()).toBeVisible();
 });
 
 test("job details", async ({ page }) => {
-  let name: string | undefined;
-  let jobId: string | undefined;
+  const workflow = await createWorkflow(baseUrl, page.request);
+  const name = workflow.name as string;
 
-  try {
-    const workflow = await createWorkflow(baseUrl, page.request);
-    name = workflow.name as string;
+  const job = await createJob(baseUrl, page.request, name);
+  const jobId = job.id as string;
 
-    const job = await createJob(baseUrl, page.request, name);
-    jobId = job.id as string;
+  // Open job details page
+  await page.goto(`${uiBaseUrl}/jobs/${jobId}`);
 
-    // Open job details page
-    await page.goto(`${uiBaseUrl}/jobs/${jobId}`);
+  // Check for SVG
 
-    // Check for SVG
+  // Wait for <mermaid> to appear
+  const mermaid = page.locator("mermaid");
+  await mermaid.waitFor();
 
-    // Wait for <mermaid> to appear
-    const mermaid = page.locator("mermaid");
-    await mermaid.waitFor();
+  // Check <svg> was generated by mermaid
+  const svg = mermaid.locator("svg#graphDiv");
+  await expect(svg).toBeVisible();
 
-    // Check <svg> was generated by mermaid
-    const svg = mermaid.locator("svg#graphDiv");
-    await expect(svg).toBeVisible();
+  const classAttr = await svg.getAttribute("class");
+  expect(classAttr).toContain("statediagram");
 
-    const classAttr = await svg.getAttribute("class");
-    expect(classAttr).toContain("statediagram");
+  // Check workflow JSON is highlighted
+  const codeBlock = page.locator("code#job-json");
+  await expect(codeBlock.locator("span.hljs-string").first()).toBeVisible();
 
-    // Check workflow JSON is highlighted
-    const codeBlock = page.locator("code#job-json");
-    const stringSpans = codeBlock.locator("span.hljs-string");
-    expect(await stringSpans.count()).toBeGreaterThan(0);
-
-    // Check job details
-    const details = page.locator("table#job-details > tbody");
-    await expect(
-      details.locator('tr:has(td:text("Job ID")) td').nth(1),
-    ).toHaveText(jobId);
-    await expect(
-      details.locator('tr:has(td:text("Client ID")) td').nth(1),
-    ).toHaveText("rpi");
-    await expect(
-      details.locator('tr:has(td:text("State")) td').nth(1),
-    ).toHaveText("INSTALL");
-    await expect(
-      details.locator('tr:has(td:text("Group")) td').nth(1),
-    ).toHaveText("OPEN");
-    await expect(
-      details.locator('tr:has(td:text("Tags")) td').nth(1),
-    ).toHaveText("");
-    await expect(
-      details.locator('tr:has(td:text("Created")) td').nth(1),
-    ).toHaveText(formatDate(new Date(job.stime as string)));
-    await expect(
-      details.locator('tr:has(td:text("Modified")) td').nth(1),
-    ).toHaveText(formatDate(new Date(job.mtime as string)));
-  } finally {
-    if (jobId) {
-      await deleteJob(baseUrl, page.request, jobId);
-    }
-    if (name) {
-      await deleteWorkflow(baseUrl, page.request, name);
-    }
-  }
+  // Check job details
+  const details = page.locator("table#job-details > tbody");
+  await expect(
+    details.locator('tr:has(td:text("Job ID")) td').nth(1),
+  ).toHaveText(jobId);
+  await expect(
+    details.locator('tr:has(td:text("Client ID")) td').nth(1),
+  ).toHaveText("rpi");
+  await expect(
+    details.locator('tr:has(td:text("State")) td').nth(1),
+  ).toHaveText("INSTALL");
+  await expect(
+    details.locator('tr:has(td:text("Group")) td').nth(1),
+  ).toHaveText("OPEN");
+  await expect(details.locator('tr:has(td:text("Tags")) td').nth(1)).toHaveText(
+    TEST_TAG,
+  );
+  await expect(
+    details.locator('tr:has(td:text("Created")) td').nth(1),
+  ).toHaveText(formatDate(new Date(job.stime as string)));
+  await expect(
+    details.locator('tr:has(td:text("Modified")) td').nth(1),
+  ).toHaveText(formatDate(new Date(job.mtime as string)));
 });
 
 function formatDate(date: Date): string {
