@@ -24,6 +24,7 @@ type responseWriter struct {
 	bodyWriter   io.Writer
 	httpWriter   http.ResponseWriter
 	statusCode   int
+	hijacked     bool
 }
 
 // responseWriter implements the following interfaces (compile-time check):
@@ -48,11 +49,17 @@ func (w *responseWriter) Header() http.Header {
 }
 
 func (w *responseWriter) WriteHeader(statusCode int) {
+	if w.hijacked {
+		return
+	}
 	w.statusCode = statusCode
 	w.httpWriter.WriteHeader(statusCode)
 }
 
 func (w *responseWriter) Write(b []byte) (int, error) {
+	if w.hijacked {
+		return 0, fault.Wrap(http.ErrHijacked)
+	}
 	n, err := w.bodyWriter.Write(b)
 	return n, fault.Wrap(err)
 }
@@ -60,8 +67,12 @@ func (w *responseWriter) Write(b []byte) (int, error) {
 // Flush is used by the server-sent events implementation to flush a single event to the client.
 // This is part of the http.Flusher interface.
 func (w *responseWriter) Flush() {
-	flusher := w.httpWriter.(http.Flusher)
-	flusher.Flush()
+	if w.hijacked {
+		return
+	}
+	if flusher, ok := w.httpWriter.(http.Flusher); ok {
+		flusher.Flush()
+	}
 }
 
 // Hijack allows an HTTP handler to take over the underlying connection.
@@ -73,5 +84,8 @@ func (w *responseWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
 		return nil, nil, errors.New("hijacker interface not supported")
 	}
 	conn, bw, err := hj.Hijack()
+	if err == nil {
+		w.hijacked = true
+	}
 	return conn, bw, fault.Wrap(err)
 }
