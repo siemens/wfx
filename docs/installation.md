@@ -89,11 +89,8 @@ To build the UI, run:
 ```sh
 $ cd ui
 
-# Optional, if you have the nix package manager installed
-$ nix-shell shell.nix
-
 # install deps
-$ npm install
+$ npm ci
 $ gleam deps download
 
 # build ui
