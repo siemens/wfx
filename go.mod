@@ -101,7 +101,6 @@ require (
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/go-openapi/errors v0.22.8 // indirect
-	github.com/go-openapi/swag/jsonname v0.27.0 // indirect
 	github.com/go-test/deep v1.0.8 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
@@ -119,7 +118,6 @@ require (
 	github.com/oasdiff/yaml v0.1.1 // indirect
 	github.com/oasdiff/yaml3 v0.0.14 // indirect
 	github.com/oklog/ulid/v2 v2.1.1 // indirect
-	github.com/rogpeppe/go-internal v1.14.1 // indirect
 	github.com/rs/dnscache v0.0.0-20230804202142-fc85eb664529 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2 // indirect
