@@ -17,6 +17,7 @@ import (
 	"testing"
 
 	"github.com/alexliesenfeld/health"
+	"github.com/siemens/wfx/cmd/wfx/cmd/config"
 	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/internal/persistence/entgo"
 	"github.com/siemens/wfx/persistence"
@@ -34,6 +35,15 @@ func TestStatusListener(*testing.T) {
 			"db": {Status: health.StatusUp},
 		},
 	})
+}
+
+func TestJQOptsProvider(t *testing.T) {
+	opts := config.JQOpts{FilterMaxResponseSize: 1}
+	wfx := NewWfxServer(persistence.NewHealthyMockStorage(t)).WithJQOpts(func() config.JQOpts { return opts })
+
+	assert.Equal(t, 1, wfx.jqOpts().FilterMaxResponseSize)
+	opts.FilterMaxResponseSize = 2
+	assert.Equal(t, 2, wfx.jqOpts().FilterMaxResponseSize)
 }
 
 func TestGetJobsEvents(t *testing.T) {

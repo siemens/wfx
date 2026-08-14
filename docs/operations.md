@@ -215,6 +215,9 @@ returns the current `state` of the job as a string.
 Note that the (filtered) response might no longer be a valid JSON expression as is the case in this example.
 It's the client's responsibility to handle the filtered response properly ― which it asked for being filtered in the first place.
 
+Filters are executed with a time limit (`--jq-filter-timeout`, default 30s; `0` disables the limit) and their result is capped by `--jq-filter-max-response-size` (default 16 MiB; `0` disables the limit).
+A filter which is invalid, fails at runtime, times out or exceeds the size limit results in an HTTP 400 response with error code `wfx.invalidResponseFilter`; no partial response body is ever emitted.
+
 ### Health Check
 
 wfx includes an internal health check service that's accessible at `/health`, e.g., via

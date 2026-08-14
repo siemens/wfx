@@ -48,6 +48,7 @@ type WfxServer struct {
 	storage persistence.Storage
 	checker health.Checker
 	sseOpts SSEOpts
+	jqOpts  func() config.JQOpts
 }
 
 type SSEOpts struct {
@@ -74,12 +75,23 @@ func NewWfxServer(storage persistence.Storage) *WfxServer {
 			PingInterval:  config.DefaultSSEPingInterval,
 			GraceInterval: config.DefaultSSEGraceInterval,
 		},
+		jqOpts: func() config.JQOpts {
+			return config.JQOpts{
+				FilterTimeout:         config.DefaultJQFilterTimeout,
+				FilterMaxResponseSize: config.DefaultJQFilterMaxResponseSize,
+			}
+		},
 	}
 	return wfx
 }
 
 func (server *WfxServer) WithSSEOpts(sseOpts SSEOpts) *WfxServer {
 	server.sseOpts = sseOpts
+	return server
+}
+
+func (server *WfxServer) WithJQOpts(jqOpts func() config.JQOpts) *WfxServer {
+	server.jqOpts = jqOpts
 	return server
 }
 
@@ -142,7 +154,7 @@ func (server WfxServer) GetJobs(ctx context.Context, request api.GetJobsRequestO
 		return nil, fault.Wrap(err)
 	}
 	if request.Params.XResponseFilter != nil {
-		return NewJQFilter(*request.Params.XResponseFilter, *jobs), nil
+		return NewJQFilter(ctx, *request.Params.XResponseFilter, *jobs, server.jqOpts()), nil
 	}
 	return api.GetJobs200JSONResponse(*jobs), nil
 }
@@ -162,7 +174,7 @@ func (server WfxServer) PostJobs(ctx context.Context, request api.PostJobsReques
 		}
 	}
 	if request.Params.XResponseFilter != nil {
-		return NewJQFilter(*request.Params.XResponseFilter, *job), nil
+		return NewJQFilter(ctx, *request.Params.XResponseFilter, *job, server.jqOpts()), nil
 	}
 	return api.PostJobs201JSONResponse(*job), nil
 }
@@ -234,7 +246,7 @@ func (server WfxServer) GetJobsId(ctx context.Context, request api.GetJobsIdRequ
 		return nil, fault.Wrap(err)
 	}
 	if request.Params.XResponseFilter != nil {
-		return NewJQFilter(*request.Params.XResponseFilter, *job), nil
+		return NewJQFilter(ctx, *request.Params.XResponseFilter, *job, server.jqOpts()), nil
 	}
 	return api.GetJobsId200JSONResponse(*job), nil
 }
@@ -250,7 +262,7 @@ func (server WfxServer) GetJobsIdDefinition(ctx context.Context, request api.Get
 		return nil, fault.Wrap(err)
 	}
 	if request.Params.XResponseFilter != nil {
-		return NewJQFilter(*request.Params.XResponseFilter, definition), nil
+		return NewJQFilter(ctx, *request.Params.XResponseFilter, definition, server.jqOpts()), nil
 	}
 	return api.GetJobsIdDefinition200JSONResponse(definition), nil
 }
@@ -278,7 +290,7 @@ func (server WfxServer) PutJobsIdDefinition(ctx context.Context, request api.Put
 		}
 	}
 	if request.Params.XResponseFilter != nil {
-		return NewJQFilter(*request.Params.XResponseFilter, definition), nil
+		return NewJQFilter(ctx, *request.Params.XResponseFilter, definition, server.jqOpts()), nil
 	}
 	return api.PutJobsIdDefinition200JSONResponse(definition), nil
 }
@@ -294,7 +306,7 @@ func (server WfxServer) GetJobsIdStatus(ctx context.Context, request api.GetJobs
 		return nil, fault.Wrap(err)
 	}
 	if request.Params.XResponseFilter != nil {
-		return NewJQFilter(*request.Params.XResponseFilter, *status), nil
+		return NewJQFilter(ctx, *request.Params.XResponseFilter, *status, server.jqOpts()), nil
 	}
 	return api.GetJobsIdStatus200JSONResponse(*status), nil
 }
@@ -332,7 +344,7 @@ func (server WfxServer) PutJobsIdStatus(ctx context.Context, request api.PutJobs
 		}
 	}
 	if request.Params.XResponseFilter != nil {
-		return NewJQFilter(*request.Params.XResponseFilter, *status), nil
+		return NewJQFilter(ctx, *request.Params.XResponseFilter, *status, server.jqOpts()), nil
 	}
 	return api.PutJobsIdStatus200JSONResponse(*status), nil
 }
@@ -363,7 +375,7 @@ func (server WfxServer) DeleteJobsIdTags(ctx context.Context, request api.Delete
 		}
 	}
 	if request.Params.XResponseFilter != nil {
-		return NewJQFilter(*request.Params.XResponseFilter, tags), nil
+		return NewJQFilter(ctx, *request.Params.XResponseFilter, tags, server.jqOpts()), nil
 	}
 
 	var tagsVal []string
@@ -384,7 +396,7 @@ func (server WfxServer) GetJobsIdTags(ctx context.Context, request api.GetJobsId
 		return nil, fault.Wrap(err)
 	}
 	if request.Params.XResponseFilter != nil {
-		return NewJQFilter(*request.Params.XResponseFilter, tags), nil
+		return NewJQFilter(ctx, *request.Params.XResponseFilter, tags, server.jqOpts()), nil
 	}
 
 	var tagsVal []string
@@ -417,7 +429,7 @@ func (server WfxServer) PostJobsIdTags(ctx context.Context, request api.PostJobs
 		}
 	}
 	if request.Params.XResponseFilter != nil {
-		return NewJQFilter(*request.Params.XResponseFilter, tags), nil
+		return NewJQFilter(ctx, *request.Params.XResponseFilter, tags, server.jqOpts()), nil
 	}
 
 	var tagsVal []string
@@ -448,7 +460,7 @@ func (server WfxServer) GetWorkflows(ctx context.Context, request api.GetWorkflo
 		return nil, fault.Wrap(err)
 	}
 	if request.Params.XResponseFilter != nil {
-		return NewJQFilter(*request.Params.XResponseFilter, *workflows), nil
+		return NewJQFilter(ctx, *request.Params.XResponseFilter, *workflows, server.jqOpts()), nil
 	}
 	return api.GetWorkflows200JSONResponse(*workflows), nil
 }
@@ -474,7 +486,7 @@ func (server WfxServer) PostWorkflows(ctx context.Context, request api.PostWorkf
 		}
 	}
 	if request.Params.XResponseFilter != nil {
-		return NewJQFilter(*request.Params.XResponseFilter, wf), nil
+		return NewJQFilter(ctx, *request.Params.XResponseFilter, wf, server.jqOpts()), nil
 	}
 	return api.PostWorkflows201JSONResponse(*wf), nil
 }
@@ -505,7 +517,7 @@ func (server WfxServer) GetWorkflowsName(ctx context.Context, request api.GetWor
 		return nil, fault.Wrap(err)
 	}
 	if request.Params.XResponseFilter != nil {
-		return NewJQFilter(*request.Params.XResponseFilter, *workflow), nil
+		return NewJQFilter(ctx, *request.Params.XResponseFilter, *workflow, server.jqOpts()), nil
 	}
 	return api.GetWorkflowsName200JSONResponse(*workflow), nil
 }

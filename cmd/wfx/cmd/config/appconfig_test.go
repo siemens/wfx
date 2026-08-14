@@ -52,6 +52,21 @@ func TestNewAppConfig_Invalid(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestNewAppConfigNegativeJQLimit(t *testing.T) {
+	for _, args := range [][]string{
+		{"--" + JQFilterTimeoutFlag, "-1s"},
+		{"--" + JQFilterMaxResponseSizeFlag, "-1"},
+	} {
+		flags := NewFlagset()
+		require.NoError(t, flags.Parse(args))
+
+		cfg, err := NewAppConfig(flags)
+
+		assert.Nil(t, cfg)
+		assert.Error(t, err)
+	}
+}
+
 func TestReload(t *testing.T) {
 	dir, _ := os.MkdirTemp("", "TestReload")
 	cfgFile, _ := os.CreateTemp("", "config.yaml")

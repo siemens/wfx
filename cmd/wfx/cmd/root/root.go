@@ -88,7 +88,8 @@ Examples of tasks are installation of firmware or other types of commands issued
 				WithSSEOpts(api.SSEOpts{
 					PingInterval:  cfg.SSEPingInterval(),
 					GraceInterval: cfg.SSEGraceInterval(),
-				})
+				}).
+				WithJQOpts(cfg.JQOpts)
 			wfx.Start()
 			defer wfx.Stop()
 

@@ -47,3 +47,9 @@ var JobModifiedConcurrently = api.Error{
 	Logref:  "dc00b05825b44934afeb9454f42a6440",
 	Message: "Job was modified concurrently",
 }
+
+var InvalidResponseFilter = api.Error{
+	Code:    "wfx.invalidResponseFilter",
+	Logref:  "731cdc2ae765e840fbd675f15abace97",
+	Message: "The response filter could not be applied",
+}

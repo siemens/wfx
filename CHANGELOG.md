@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Added
+
+- `--jq-filter-timeout` to limit the execution time of JQ response filters (default: 30s, `0` disables the limit)
+- `--jq-filter-max-response-size` to limit the size of a JQ response filter result (default: 16 MiB, `0` disables the limit)
+
+### Changed
+
+- Report failing JQ response filters as HTTP 400 (`wfx.invalidResponseFilter`) instead of 500
+
 ## [0.6.0] - 2026-06-03
 
 ### Breaking
