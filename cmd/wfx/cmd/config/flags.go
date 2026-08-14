@@ -48,13 +48,15 @@ const (
 	MgmtUnixSocketFlag = "mgmt-unix-socket"
 	MgmtPluginsDirFlag = "mgmt-plugins-dir"
 
-	SchemeFlag          = "scheme"
-	KeepAliveFlag       = "keep-alive"
-	MaxHeaderSizeFlag   = "max-header-size"
-	CleanupTimeoutFlag  = "cleanup-timeout"
-	GracefulTimeoutFlag = "graceful-timeout"
-	ReadTimeoutFlag     = "read-timeout"
-	WriteTimoutFlag     = "write-timeout"
+	SchemeFlag                  = "scheme"
+	KeepAliveFlag               = "keep-alive"
+	MaxHeaderSizeFlag           = "max-header-size"
+	CleanupTimeoutFlag          = "cleanup-timeout"
+	GracefulTimeoutFlag         = "graceful-timeout"
+	ReadTimeoutFlag             = "read-timeout"
+	WriteTimoutFlag             = "write-timeout"
+	JQFilterTimeoutFlag         = "jq-filter-timeout"
+	JQFilterMaxResponseSizeFlag = "jq-filter-max-response-size"
 
 	SSEPingIntervalFlag  = "sse-ping-interval"
 	SSEGraceIntervalFlag = "sse-grace-interval"
@@ -73,6 +75,9 @@ const (
 	// some reverse proxy)
 	DefaultSSEPingInterval  = 30 * time.Second
 	DefaultSSEGraceInterval = time.Minute
+
+	DefaultJQFilterTimeout         = 30 * time.Second
+	DefaultJQFilterMaxResponseSize = 16 << 20 // 16 MiB
 )
 
 func NewFlagset() *pflag.FlagSet {
@@ -90,6 +95,8 @@ func NewFlagset() *pflag.FlagSet {
 	f.Bool(KeepAliveFlag, true, "sets the TCP keep-alive timeouts on accepted connections. It prunes dead TCP connections ( e.g. closing laptop mid-download)")
 	f.Duration(ReadTimeoutFlag, 30*time.Second, "maximum duration before timing out read of the request")
 	f.Duration(WriteTimoutFlag, 10*time.Minute, "maximum duration before timing out write of the response")
+	f.Duration(JQFilterTimeoutFlag, DefaultJQFilterTimeout, "maximum duration for applying a JQ response filter (0 = no limit)")
+	f.Int(JQFilterMaxResponseSizeFlag, DefaultJQFilterMaxResponseSize, "maximum size in bytes of a JQ response filter result (0 = no limit)")
 	f.String(SimpleFileServerFlag, "", "root directory for built-in fileserver (available under /download)")
 
 	f.String(TLSCertificateFlag, "", "the certificate file to use for secure connections")

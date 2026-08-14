@@ -46,9 +46,11 @@ type AppConfig struct {
 	ssePingInterval  time.Duration
 	sseGraceInterval time.Duration
 
-	maxHeaderSize  int
-	readTimeout    time.Duration
-	writeTimeout   time.Duration
+	maxHeaderSize int
+	readTimeout   time.Duration
+	writeTimeout  time.Duration
+	jqOpts        JQOpts
+
 	keepAlive      bool
 	cleanupTimeout time.Duration
 
@@ -69,6 +71,11 @@ type AppConfig struct {
 	mgmtTLSPort    int
 	mgmtUnixSocket string
 	mgmtPluginsDir string
+}
+
+type JQOpts struct {
+	FilterTimeout         time.Duration
+	FilterMaxResponseSize int
 }
 
 type Scheme int
@@ -250,6 +257,16 @@ func (cfg *AppConfig) Reload() bool {
 	cfg.maxHeaderSize = cfg.k.Int(MaxHeaderSizeFlag)
 	cfg.readTimeout = cfg.k.Duration(ReadTimeoutFlag)
 	cfg.writeTimeout = cfg.k.Duration(WriteTimoutFlag)
+	cfg.jqOpts.FilterTimeout = cfg.k.Duration(JQFilterTimeoutFlag)
+	cfg.jqOpts.FilterMaxResponseSize = cfg.k.Int(JQFilterMaxResponseSizeFlag)
+	if cfg.jqOpts.FilterTimeout < 0 {
+		log.Error().Msgf("%s must not be negative", JQFilterTimeoutFlag)
+		ok = false
+	}
+	if cfg.jqOpts.FilterMaxResponseSize < 0 {
+		log.Error().Msgf("%s must not be negative", JQFilterMaxResponseSizeFlag)
+		ok = false
+	}
 	cfg.cleanupTimeout = cfg.k.Duration(CleanupTimeoutFlag)
 	cfg.keepAlive = cfg.k.Bool(KeepAliveFlag)
 
@@ -304,6 +321,12 @@ func (cfg *AppConfig) WriteTimeout() time.Duration {
 	cfg.mutex.RLock()
 	defer cfg.mutex.RUnlock()
 	return cfg.writeTimeout
+}
+
+func (cfg *AppConfig) JQOpts() JQOpts {
+	cfg.mutex.RLock()
+	defer cfg.mutex.RUnlock()
+	return cfg.jqOpts
 }
 
 func (cfg *AppConfig) KeepAlive() bool {

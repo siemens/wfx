@@ -9,32 +9,44 @@ package api
  */
 
 import (
+	"bytes"
+	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/Southclaws/fault"
 	"github.com/itchyny/gojq"
 	"github.com/rs/zerolog/log"
+	"github.com/siemens/wfx/cmd/wfx/cmd/config"
+	"github.com/siemens/wfx/generated/api"
 )
 
 // JQFilter applies a JQ filter to the response body.
 type JQFilter struct {
+	ctx    context.Context
 	filter string
 	body   any
+	opts   config.JQOpts
 }
 
-func NewJQFilter(filter string, body any) JQFilter {
-	return JQFilter{filter: filter, body: body}
+func NewJQFilter(ctx context.Context, filter string, body any, opts config.JQOpts) JQFilter {
+	return JQFilter{ctx: ctx, filter: filter, body: body, opts: opts}
 }
 
-func applyFilter(w http.ResponseWriter, body any, filter string) error {
+func applyFilter(ctx context.Context, w http.ResponseWriter, body any, filter string, opts config.JQOpts) error {
 	contextLogger := log.With().Str("filter", filter).Logger()
 	contextLogger.Debug().Msg("Applying JQ filter")
 
 	query, err := gojq.Parse(filter)
 	if err != nil {
 		contextLogger.Err(err).Msg("Failed to parse JQ filter")
-		return fault.Wrap(err)
+		return writeFilterError(w, err)
+	}
+	code, err := gojq.Compile(query)
+	if err != nil {
+		contextLogger.Err(err).Msg("Failed to compile JQ filter")
+		return writeFilterError(w, err)
 	}
 
 	jsonData, err := json.Marshal(body)
@@ -48,17 +60,71 @@ func applyFilter(w http.ResponseWriter, body any, filter string) error {
 	// valid JSON
 	_ = json.Unmarshal(jsonData, &input)
 
-	w.Header().Set("X-Response-Filter", filter)
-	iter := query.Run(input)
-	ok := true
-	encoder := json.NewEncoder(w)
-	for ok {
-		var v any
-		v, ok = iter.Next()
-		if ok {
-			// this cannot fail because we know the input
-			_ = encoder.Encode(v)
+	filterCtx := ctx
+	if timeout := opts.FilterTimeout; timeout > 0 {
+		var cancel context.CancelFunc
+		filterCtx, cancel = context.WithTimeout(ctx, timeout)
+		defer cancel()
+	}
+	iter := code.RunWithContext(filterCtx, input)
+	// buffer the result so that a mid-stream error can still be turned into an
+	// error response instead of a partially written 200
+	buf := limitedBuffer{max: opts.FilterMaxResponseSize}
+	encoder := json.NewEncoder(&buf)
+	for {
+		v, ok := iter.Next()
+		if !ok {
+			break
 		}
+		if err, ok := v.(error); ok {
+			contextLogger.Err(err).Msg("Failed to execute JQ filter")
+			if ctxErr := ctx.Err(); ctxErr != nil {
+				// the client is gone, don't bother writing a response
+				return fault.Wrap(ctxErr)
+			}
+			return writeFilterError(w, err)
+		}
+		if err := encoder.Encode(v); err != nil {
+			if errors.Is(err, errFilterResultTooLarge) {
+				contextLogger.Error().Int("maxSize", opts.FilterMaxResponseSize).Msg("JQ filter result too large")
+				return writeFilterError(w, err)
+			}
+			return fault.Wrap(err)
+		}
+	}
+	w.Header().Set("X-Response-Filter", filter)
+	if _, err := w.Write(buf.Bytes()); err != nil {
+		// response is already (partially) written, nothing left to do but log
+		contextLogger.Err(err).Msg("Failed to write filtered response")
+	}
+	return nil
+}
+
+var errFilterResultTooLarge = errors.New("response filter result exceeds size limit")
+
+type limitedBuffer struct {
+	bytes.Buffer
+	max int
+}
+
+func (buf *limitedBuffer) Write(p []byte) (int, error) {
+	if buf.max > 0 && len(p) > buf.max-buf.Len() {
+		return 0, errFilterResultTooLarge
+	}
+	n, err := buf.Buffer.Write(p)
+	return n, fault.Wrap(err)
+}
+
+// writeFilterError reports a faulty client-supplied filter as HTTP 400.
+func writeFilterError(w http.ResponseWriter, cause error) error {
+	apiErr := InvalidResponseFilter
+	apiErr.Message = cause.Error()
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusBadRequest)
+	if err := json.NewEncoder(w).Encode(api.ErrorResponse{
+		Errors: &[]api.Error{apiErr},
+	}); err != nil {
+		return fault.Wrap(err)
 	}
 	return nil
 }
@@ -67,73 +133,73 @@ func applyFilter(w http.ResponseWriter, body any, filter string) error {
 
 //revive:disable:var-naming
 func (jq JQFilter) VisitGetHealthResponse(w http.ResponseWriter) error {
-	return applyFilter(w, jq.body, jq.filter)
+	return applyFilter(jq.ctx, w, jq.body, jq.filter, jq.opts)
 }
 
 func (jq JQFilter) VisitGetJobsResponse(w http.ResponseWriter) error {
-	return applyFilter(w, jq.body, jq.filter)
+	return applyFilter(jq.ctx, w, jq.body, jq.filter, jq.opts)
 }
 
 func (jq JQFilter) VisitPostJobsResponse(w http.ResponseWriter) error {
-	return applyFilter(w, jq.body, jq.filter)
+	return applyFilter(jq.ctx, w, jq.body, jq.filter, jq.opts)
 }
 
 func (jq JQFilter) VisitGetJobsEventsResponse(w http.ResponseWriter) error {
-	return applyFilter(w, jq.body, jq.filter)
+	return applyFilter(jq.ctx, w, jq.body, jq.filter, jq.opts)
 }
 
 func (jq JQFilter) VisitDeleteJobsIdResponse(w http.ResponseWriter) error {
-	return applyFilter(w, jq.body, jq.filter)
+	return applyFilter(jq.ctx, w, jq.body, jq.filter, jq.opts)
 }
 
 func (jq JQFilter) VisitGetJobsIdResponse(w http.ResponseWriter) error {
-	return applyFilter(w, jq.body, jq.filter)
+	return applyFilter(jq.ctx, w, jq.body, jq.filter, jq.opts)
 }
 
 func (jq JQFilter) VisitGetJobsIdDefinitionResponse(w http.ResponseWriter) error {
-	return applyFilter(w, jq.body, jq.filter)
+	return applyFilter(jq.ctx, w, jq.body, jq.filter, jq.opts)
 }
 
 func (jq JQFilter) VisitPutJobsIdDefinitionResponse(w http.ResponseWriter) error {
-	return applyFilter(w, jq.body, jq.filter)
+	return applyFilter(jq.ctx, w, jq.body, jq.filter, jq.opts)
 }
 
 func (jq JQFilter) VisitGetJobsIdStatusResponse(w http.ResponseWriter) error {
-	return applyFilter(w, jq.body, jq.filter)
+	return applyFilter(jq.ctx, w, jq.body, jq.filter, jq.opts)
 }
 
 func (jq JQFilter) VisitPutJobsIdStatusResponse(w http.ResponseWriter) error {
-	return applyFilter(w, jq.body, jq.filter)
+	return applyFilter(jq.ctx, w, jq.body, jq.filter, jq.opts)
 }
 
 func (jq JQFilter) VisitDeleteJobsIdTagsResponse(w http.ResponseWriter) error {
-	return applyFilter(w, jq.body, jq.filter)
+	return applyFilter(jq.ctx, w, jq.body, jq.filter, jq.opts)
 }
 
 func (jq JQFilter) VisitGetJobsIdTagsResponse(w http.ResponseWriter) error {
-	return applyFilter(w, jq.body, jq.filter)
+	return applyFilter(jq.ctx, w, jq.body, jq.filter, jq.opts)
 }
 
 func (jq JQFilter) VisitPostJobsIdTagsResponse(w http.ResponseWriter) error {
-	return applyFilter(w, jq.body, jq.filter)
+	return applyFilter(jq.ctx, w, jq.body, jq.filter, jq.opts)
 }
 
 func (jq JQFilter) VisitGetVersionResponse(w http.ResponseWriter) error {
-	return applyFilter(w, jq.body, jq.filter)
+	return applyFilter(jq.ctx, w, jq.body, jq.filter, jq.opts)
 }
 
 func (jq JQFilter) VisitGetWorkflowsResponse(w http.ResponseWriter) error {
-	return applyFilter(w, jq.body, jq.filter)
+	return applyFilter(jq.ctx, w, jq.body, jq.filter, jq.opts)
 }
 
 func (jq JQFilter) VisitPostWorkflowsResponse(w http.ResponseWriter) error {
-	return applyFilter(w, jq.body, jq.filter)
+	return applyFilter(jq.ctx, w, jq.body, jq.filter, jq.opts)
 }
 
 func (jq JQFilter) VisitDeleteWorkflowsNameResponse(w http.ResponseWriter) error {
-	return applyFilter(w, jq.body, jq.filter)
+	return applyFilter(jq.ctx, w, jq.body, jq.filter, jq.opts)
 }
 
 func (jq JQFilter) VisitGetWorkflowsNameResponse(w http.ResponseWriter) error {
-	return applyFilter(w, jq.body, jq.filter)
+	return applyFilter(jq.ctx, w, jq.body, jq.filter, jq.opts)
 }
