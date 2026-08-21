@@ -55,9 +55,11 @@ type AppConfig struct {
 	keepAlive      bool
 	cleanupTimeout time.Duration
 
-	corsAllowedOrigins []string
-	corsAllowedMethods []string
-	corsAllowedHeaders []string
+	corsAllowedOrigins   []string
+	corsAllowedMethods   []string
+	corsAllowedHeaders   []string
+	corsAllowCredentials bool
+	corsMaxAge           time.Duration
 
 	tlsCACertificate string
 	tlsCertificate   string
@@ -241,6 +243,12 @@ func (cfg *AppConfig) Reload() bool {
 	cfg.corsAllowedOrigins = cfg.k.Strings(CORSAllowedOriginsFlag)
 	cfg.corsAllowedMethods = cfg.k.Strings(CORSAllowedMethodsFlag)
 	cfg.corsAllowedHeaders = cfg.k.Strings(CORSAllowedHeadersFlag)
+	cfg.corsAllowCredentials = cfg.k.Bool(CORSAllowCredentialsFlag)
+	cfg.corsMaxAge = cfg.k.Duration(CORSMaxAgeFlag)
+	if cfg.corsAllowCredentials && slices.Contains(cfg.corsAllowedOrigins, "*") {
+		fmt.Fprintln(os.Stderr, "cors-allow-credentials requires explicit cors-allowed-origins")
+		ok = false
+	}
 
 	if schemes := cfg.k.Strings(SchemeFlag); len(schemes) > 0 {
 		cfg.schemes = make([]Scheme, 0, len(schemes))
@@ -468,6 +476,21 @@ func (cfg *AppConfig) CORSAllowedHeaders() []string {
 	cfg.mutex.RLock()
 	defer cfg.mutex.RUnlock()
 	return slices.Clone(cfg.corsAllowedHeaders)
+}
+
+func (cfg *AppConfig) CORSAllowCredentials() bool {
+	cfg.mutex.RLock()
+	defer cfg.mutex.RUnlock()
+	return cfg.corsAllowCredentials
+}
+
+// CORSMaxAge returns the preflight cache duration in seconds. Zero (the
+// default) omits the Access-Control-Max-Age header; a negative value forces
+// `Access-Control-Max-Age: 0` so browsers stop caching preflights.
+func (cfg *AppConfig) CORSMaxAge() int {
+	cfg.mutex.RLock()
+	defer cfg.mutex.RUnlock()
+	return int(cfg.corsMaxAge / time.Second)
 }
 
 func (cfg *AppConfig) InitStorage() (persistence.Storage, error) {

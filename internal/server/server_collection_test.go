@@ -94,6 +94,88 @@ func TestCORSPreflightAllowedMethods(t *testing.T) {
 	assert.Empty(t, result.Header.Get("Access-Control-Allow-Methods"))
 }
 
+func TestCORSAllowCredentials(t *testing.T) {
+	dbMock := persistence.NewHealthyMockStorage(t)
+	dbMock.EXPECT().QueryJobs(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(new(genAPI.PaginatedJobList), nil)
+	wfx := api.NewWfxServer(dbMock)
+
+	f := config.NewFlagset()
+	_ = f.Parse([]string{
+		"--" + config.CORSAllowedOriginsFlag, "https://example.com",
+		"--" + config.CORSAllowCredentialsFlag,
+	})
+	cfg, err := config.NewAppConfig(f)
+	require.NoError(t, err)
+	t.Cleanup(cfg.Stop)
+
+	sc, err := NewServerCollection(cfg, wfx, dbMock)
+	require.NoError(t, err)
+
+	// actual request
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/api/wfx/v1/jobs", nil)
+	req.Header.Set("Origin", "https://example.com")
+	sc.North.Handler.ServeHTTP(rec, req)
+	result := rec.Result()
+	assert.Equal(t, http.StatusOK, result.StatusCode)
+	assert.Equal(t, "true", result.Header.Get("Access-Control-Allow-Credentials"))
+
+	// preflight request
+	rec = httptest.NewRecorder()
+	req = httptest.NewRequest(http.MethodOptions, "/api/wfx/v1/jobs", nil)
+	req.Header.Set("Origin", "https://example.com")
+	req.Header.Set("Access-Control-Request-Method", http.MethodDelete)
+	sc.North.Handler.ServeHTTP(rec, req)
+	result = rec.Result()
+	assert.Equal(t, http.StatusNoContent, result.StatusCode)
+	assert.Equal(t, "true", result.Header.Get("Access-Control-Allow-Credentials"))
+}
+
+func TestCORSMaxAge(t *testing.T) {
+	dbMock := persistence.NewHealthyMockStorage(t)
+	wfx := api.NewWfxServer(dbMock)
+
+	f := config.NewFlagset()
+	_ = f.Parse([]string{"--" + config.CORSMaxAgeFlag, "30s"})
+	cfg, err := config.NewAppConfig(f)
+	require.NoError(t, err)
+	t.Cleanup(cfg.Stop)
+
+	sc, err := NewServerCollection(cfg, wfx, dbMock)
+	require.NoError(t, err)
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodOptions, "/api/wfx/v1/jobs", nil)
+	req.Header.Set("Origin", "https://example.com")
+	req.Header.Set("Access-Control-Request-Method", http.MethodGet)
+	sc.North.Handler.ServeHTTP(rec, req)
+
+	assert.Equal(t, "30", rec.Result().Header.Get("Access-Control-Max-Age"))
+}
+
+func TestCORSMaxAgeDisabled(t *testing.T) {
+	dbMock := persistence.NewHealthyMockStorage(t)
+	wfx := api.NewWfxServer(dbMock)
+
+	// default: no --cors-max-age flag, header must be omitted
+	f := config.NewFlagset()
+	_ = f.Parse(nil)
+	cfg, err := config.NewAppConfig(f)
+	require.NoError(t, err)
+	t.Cleanup(cfg.Stop)
+
+	sc, err := NewServerCollection(cfg, wfx, dbMock)
+	require.NoError(t, err)
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodOptions, "/api/wfx/v1/jobs", nil)
+	req.Header.Set("Origin", "https://example.com")
+	req.Header.Set("Access-Control-Request-Method", http.MethodGet)
+	sc.North.Handler.ServeHTTP(rec, req)
+
+	assert.Empty(t, rec.Result().Header.Get("Access-Control-Max-Age"))
+}
+
 func TestCORSDefaultAllowsAnyHeader(t *testing.T) {
 	dbMock := persistence.NewHealthyMockStorage(t)
 	wfx := api.NewWfxServer(dbMock)

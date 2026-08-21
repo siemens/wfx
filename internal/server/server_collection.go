@@ -52,9 +52,11 @@ func NewServerCollection(cfg *config.AppConfig, wfx api.StrictServerInterface, s
 	// CORS must wrap the whole server: preflight (OPTIONS) requests match no
 	// route of our mux, so a per-route middleware would never see them.
 	corsMW := cors.New(cors.Options{
-		AllowedOrigins: cfg.CORSAllowedOrigins(),
-		AllowedMethods: cfg.CORSAllowedMethods(),
-		AllowedHeaders: cfg.CORSAllowedHeaders(),
+		AllowedOrigins:   cfg.CORSAllowedOrigins(),
+		AllowedMethods:   cfg.CORSAllowedMethods(),
+		AllowedHeaders:   cfg.CORSAllowedHeaders(),
+		AllowCredentials: cfg.CORSAllowCredentials(),
+		MaxAge:           cfg.CORSMaxAge(),
 	}).Handler
 	logMW := logging.NewLoggingMiddleware()
 

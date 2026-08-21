@@ -172,11 +172,16 @@ The following connectivity parameters are available:
 The API servers add CORS headers to responses, allowing browser-based clients to access wfx directly.
 The following parameters control these headers:
 
-| Parameter                | Description                                                                                              |
-| :----------------------- | :------------------------------------------------------------------------------------------------------- |
-| `--cors-allowed-origins` | One or multiple origins allowed to make cross-origin requests; defaults to `*` (any origin)              |
-| `--cors-allowed-methods` | One or multiple methods allowed when making cross-origin requests; defaults to `GET,HEAD,POST,PUT,PATCH,DELETE` |
-| `--cors-allowed-headers` | One or multiple headers allowed when making cross-origin requests; defaults to `*` (any header)          |
+| Parameter                  | Description                                                                                                                                                                       |
+|:---------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `--cors-allowed-origins`   | One or multiple origins allowed to make cross-origin requests; defaults to `*` (any origin)                                                                                       |
+| `--cors-allowed-methods`   | One or multiple methods allowed when making cross-origin requests; defaults to `GET,HEAD,POST,PUT,PATCH,DELETE`                                                                   |
+| `--cors-allowed-headers`   | One or multiple headers allowed when making cross-origin requests; defaults to `*` (any header)                                                                                   |
+| `--cors-allow-credentials` | Allow cookies and HTTP authentication in cross-origin requests; disabled by default                                                                                               |
+| `--cors-max-age`           | How long browsers may cache preflight results (e.g. `12h`); zero omits the `Access-Control-Max-Age` header (browser default applies), a negative value disables preflight caching |
+
+`--cors-allow-credentials` requires explicit origins. Configuration is rejected if
+`--cors-allowed-origins` contains `*` while credentials are enabled.
 
 For example, to restrict access to a single origin:
 

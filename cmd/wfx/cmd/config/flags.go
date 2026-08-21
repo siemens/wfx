@@ -61,9 +61,11 @@ const (
 	SSEPingIntervalFlag  = "sse-ping-interval"
 	SSEGraceIntervalFlag = "sse-grace-interval"
 
-	CORSAllowedOriginsFlag = "cors-allowed-origins"
-	CORSAllowedMethodsFlag = "cors-allowed-methods"
-	CORSAllowedHeadersFlag = "cors-allowed-headers"
+	CORSAllowedOriginsFlag   = "cors-allowed-origins"
+	CORSAllowedMethodsFlag   = "cors-allowed-methods"
+	CORSAllowedHeadersFlag   = "cors-allowed-headers"
+	CORSAllowCredentialsFlag = "cors-allow-credentials"
+	CORSMaxAgeFlag           = "cors-max-age"
 
 	TLSCaFlag          = "tls-ca"
 	TLSCertificateFlag = "tls-certificate"
@@ -101,6 +103,8 @@ func NewFlagset() *pflag.FlagSet {
 	f.StringSlice(CORSAllowedOriginsFlag, []string{"*"}, "one or multiple origins allowed to make cross-origin requests")
 	f.StringSlice(CORSAllowedMethodsFlag, defaultCORSAllowedMethods, "one or multiple methods allowed when making cross-origin requests")
 	f.StringSlice(CORSAllowedHeadersFlag, []string{"*"}, "one or multiple headers allowed when making cross-origin requests")
+	f.Bool(CORSAllowCredentialsFlag, false, "allow cookies and HTTP authentication to be included in cross-origin requests; requires explicit allowed origins")
+	f.Duration(CORSMaxAgeFlag, 0, "how long the results of preflight requests may be cached by browsers; zero omits the Access-Control-Max-Age header (browsers use their default), a negative value disables preflight caching")
 
 	f.Int(MaxHeaderSizeFlag, 1000000, "controls the maximum number of bytes the server will read parsing the request header's keys and values, including the request line. It does not limit the size of the request body")
 	f.Bool(KeepAliveFlag, true, "sets the TCP keep-alive timeouts on accepted connections. It prunes dead TCP connections ( e.g. closing laptop mid-download)")
