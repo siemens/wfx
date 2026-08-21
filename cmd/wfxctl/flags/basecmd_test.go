@@ -252,3 +252,16 @@ func TestNewBaseCmd_EnvVariables(t *testing.T) {
 	NewBaseCmd(f)
 	assert.Equal(t, zerolog.TraceLevel, zerolog.GlobalLevel())
 }
+
+func TestNewBaseCmd_EnvHeaders(t *testing.T) {
+	t.Setenv("WFX_CLIENT_HDR", "Authorization: Bearer client-token")
+	t.Setenv("WFX_MGMT_HDR", "Authorization: Bearer mgmt-token")
+	f := pflag.NewFlagSet("test", pflag.ContinueOnError)
+	f.StringArray(ClientHeaderFlag, nil, "")
+	f.StringArray(MgmtHeaderFlag, nil, "")
+
+	b := NewBaseCmd(f)
+
+	assert.Equal(t, []string{"Authorization: Bearer client-token"}, b.ClientHdrs)
+	assert.Equal(t, []string{"Authorization: Bearer mgmt-token"}, b.MgmtHdrs)
+}

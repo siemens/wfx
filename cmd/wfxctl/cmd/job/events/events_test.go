@@ -45,6 +45,27 @@ func TestSubscribeJobStatus(t *testing.T) {
 	assert.Equal(t, expectedPath, actualPath)
 }
 
+func TestSubscribeJobStatusHeaders(t *testing.T) {
+	var actualHeader string
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		actualHeader = r.Header.Get("X-Custom")
+		w.Header().Add("Content-Type", "text/event-stream")
+		w.WriteHeader(http.StatusOK)
+	}))
+	t.Cleanup(ts.Close)
+
+	u, _ := url.Parse(ts.URL)
+	t.Setenv("WFX_CLIENT_HOST", u.Hostname())
+	t.Setenv("WFX_CLIENT_PORT", u.Port())
+
+	cmd := NewCommand()
+	cmd.Flags().StringArray(flags.ClientHeaderFlag, nil, "")
+	cmd.SetArgs([]string{"--" + flags.ClientHeaderFlag, "X-Custom: value"})
+	err := cmd.Execute()
+	assert.ErrorContains(t, err, "connection to server lost")
+	assert.Equal(t, "value", actualHeader)
+}
+
 func TestValidator_OK(t *testing.T) {
 	out := new(bytes.Buffer)
 	resp := http.Response{StatusCode: http.StatusOK}

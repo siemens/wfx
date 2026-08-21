@@ -31,12 +31,14 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/siemens/wfx/cmd/wfxctl/errutil"
+	"github.com/siemens/wfx/cmd/wfxctl/httpclient"
 	"github.com/siemens/wfx/generated/api"
 	"github.com/spf13/pflag"
 )
 
 const (
 	ActorFlag            = "actor"
+	ClientHeaderFlag     = "client-hdr"
 	ClientHostFlag       = "client-host"
 	ClientIDFlag         = "client-id"
 	ClientPortFlag       = "client-port"
@@ -54,6 +56,7 @@ const (
 	LimitFlag            = "limit"
 	LogLevelFlag         = "log-level"
 	MessageFlag          = "message"
+	MgmtHeaderFlag       = "mgmt-hdr"
 	MgmtHostFlag         = "mgmt-host"
 	MgmtPortFlag         = "mgmt-port"
 	MgmtTLSHostFlag      = "mgmt-tls-host"
@@ -109,6 +112,9 @@ type BaseCmd struct {
 	Actor     string
 	Name      string
 	Limit     int32
+
+	ClientHdrs []string
+	MgmtHdrs   []string
 }
 
 func NewBaseCmd(f *pflag.FlagSet) BaseCmd {
@@ -137,7 +143,12 @@ func NewBaseCmd(f *pflag.FlagSet) BaseCmd {
 		Prefix: "WFX",
 		TransformFunc: func(k string, v string) (string, any) {
 			// WFX_LOG_LEVEL becomes log-level
-			return strings.ReplaceAll(strings.ToLower(strings.TrimPrefix(k, "WFX_")), "_", "-"), v
+			key := strings.ReplaceAll(strings.ToLower(strings.TrimPrefix(k, "WFX_")), "_", "-")
+			// Header fields are read with k.Strings, which does not convert scalar strings.
+			if key == ClientHeaderFlag || key == MgmtHeaderFlag {
+				return key, []string{v}
+			}
+			return key, v
 		},
 	})
 	if err := k.Load(envProvider, nil); err != nil {
@@ -195,6 +206,9 @@ func NewBaseCmd(f *pflag.FlagSet) BaseCmd {
 		Actor:       k.String(ActorFlag),
 		Name:        k.String(NameFlag),
 		Limit:       int32(k.Int(LimitFlag)),
+
+		ClientHdrs: k.Strings(ClientHeaderFlag),
+		MgmtHdrs:   k.Strings(MgmtHeaderFlag),
 	}
 }
 
@@ -283,7 +297,11 @@ func (b *BaseCmd) CreateClient() (*api.Client, error) {
 	if err != nil {
 		return nil, fault.Wrap(err)
 	}
-	client, err := api.NewClient(server, api.WithHTTPClient(httpClient))
+	editor, err := httpclient.RequestEditor(b.ClientHdrs)
+	if err != nil {
+		return nil, fault.Wrap(err)
+	}
+	client, err := api.NewClient(server, api.WithHTTPClient(httpClient), api.WithRequestEditorFn(editor))
 	if err != nil {
 		return nil, fault.Wrap(err)
 	}
@@ -303,7 +321,11 @@ func (b *BaseCmd) CreateMgmtClient() (*api.Client, error) {
 	if err != nil {
 		return nil, fault.Wrap(err)
 	}
-	client, err := api.NewClient(server, api.WithHTTPClient(httpClient))
+	editor, err := httpclient.RequestEditor(b.MgmtHdrs)
+	if err != nil {
+		return nil, fault.Wrap(err)
+	}
+	client, err := api.NewClient(server, api.WithHTTPClient(httpClient), api.WithRequestEditorFn(editor))
 	if err != nil {
 		return nil, fault.Wrap(err)
 	}

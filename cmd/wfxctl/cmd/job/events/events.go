@@ -23,6 +23,7 @@ import (
 
 	"github.com/siemens/wfx/cmd/wfxctl/errutil"
 	"github.com/siemens/wfx/cmd/wfxctl/flags"
+	"github.com/siemens/wfx/cmd/wfxctl/httpclient"
 	"github.com/siemens/wfx/generated/api"
 )
 
@@ -57,10 +58,16 @@ var validator = func(out io.Writer) sse.ResponseValidator {
 type SSETransport struct {
 	sseClient *sse.Client
 	out       io.Writer
+	editors   []api.RequestEditorFn
 }
 
 // Do implements the runtime.ClientTransport interface.
 func (t SSETransport) Do(req *http.Request) (*http.Response, error) {
+	for _, editor := range t.editors {
+		if err := editor(req.Context(), req); err != nil {
+			return nil, fault.Wrap(err)
+		}
+	}
 	conn := t.sseClient.NewConnection(req)
 	unsubscribe := conn.SubscribeMessages(func(event sse.Event) {
 		_, _ = t.out.Write([]byte(event.Data))
@@ -104,7 +111,11 @@ wfxctl job events --job-id=1 --job-id=2 --client-id=foo
 			sseClient.OnRetry = func(_ error, sleep time.Duration) {
 				fmt.Fprintf(cmd.ErrOrStderr(), "SSE connection lost. Attempting to reconnect in %v...\n", sleep)
 			}
-			transport := SSETransport{sseClient: sse.DefaultClient, out: cmd.OutOrStdout()}
+			editor, err := httpclient.RequestEditor(baseCmd.ClientHdrs)
+			if err != nil {
+				return fault.Wrap(err)
+			}
+			transport := SSETransport{sseClient: sse.DefaultClient, out: cmd.OutOrStdout(), editors: []api.RequestEditorFn{editor}}
 
 			var server string
 			swagger := errutil.Must(api.GetSpec())
