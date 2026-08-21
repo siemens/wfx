@@ -87,8 +87,36 @@ func TestCORSPreflightAllowedMethods(t *testing.T) {
 	req.Header.Set("Access-Control-Request-Method", "DELETE")
 	sc.North.Handler.ServeHTTP(rec, req)
 
-	// disallowed method in preflight: cors middleware returns 405 without CORS headers
-	assert.Equal(t, http.StatusMethodNotAllowed, rec.Result().StatusCode)
+	// disallowed method in preflight: cors middleware answers without CORS headers,
+	// so the browser rejects the actual request
+	result := rec.Result()
+	assert.Empty(t, result.Header.Get("Access-Control-Allow-Origin"))
+	assert.Empty(t, result.Header.Get("Access-Control-Allow-Methods"))
+}
+
+func TestCORSDefaultAllowsAnyHeader(t *testing.T) {
+	dbMock := persistence.NewHealthyMockStorage(t)
+	wfx := api.NewWfxServer(dbMock)
+
+	f := config.NewFlagset()
+	_ = f.Parse([]string{})
+	cfg, err := config.NewAppConfig(f)
+	require.NoError(t, err)
+	t.Cleanup(cfg.Stop)
+
+	sc, err := NewServerCollection(cfg, wfx, dbMock)
+	require.NoError(t, err)
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodOptions, "/api/wfx/v1/jobs", nil)
+	req.Header.Set("Origin", "https://example.com")
+	req.Header.Set("Access-Control-Request-Method", http.MethodGet)
+	req.Header.Set("Access-Control-Request-Headers", "Authorization")
+	sc.North.Handler.ServeHTTP(rec, req)
+
+	result := rec.Result()
+	assert.Equal(t, "*", result.Header.Get("Access-Control-Allow-Origin"))
+	assert.Contains(t, strings.ToLower(result.Header.Get("Access-Control-Allow-Headers")), "authorization")
 }
 
 func TestCreateServer_UseMiddlewares(t *testing.T) {
