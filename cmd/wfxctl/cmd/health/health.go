@@ -22,6 +22,7 @@ import (
 
 	"github.com/siemens/wfx/cmd/wfxctl/errutil"
 	"github.com/siemens/wfx/cmd/wfxctl/flags"
+	"github.com/siemens/wfx/cmd/wfxctl/httpclient"
 	"github.com/siemens/wfx/generated/api"
 )
 
@@ -29,6 +30,7 @@ type Endpoint struct {
 	Name     string
 	Server   string
 	Response *api.GetHealthResponse
+	Editor   api.RequestEditorFn
 }
 
 const (
@@ -60,27 +62,39 @@ func NewCommand() *cobra.Command {
 
 			swagger := errutil.Must(api.GetSpec())
 			basePath := errutil.Must(swagger.Servers.BasePath())
+			clientEditor, err := httpclient.RequestEditor(b.ClientHdrs)
+			if err != nil {
+				return fault.Wrap(err)
+			}
+			mgmtEditor, err := httpclient.RequestEditor(b.MgmtHdrs)
+			if err != nil {
+				return fault.Wrap(err)
+			}
 
 			allEndpoints := []Endpoint{
 				{
 					Name:     "northbound",
 					Server:   fmt.Sprintf("http://%s:%d%s", b.MgmtHost, b.MgmtPort, basePath),
 					Response: &api.GetHealthResponse{Body: []byte("{}")},
+					Editor:   mgmtEditor,
 				},
 				{
 					Name:     "southbound",
 					Server:   fmt.Sprintf("http://%s:%d%s", b.Host, b.Port, basePath),
 					Response: &api.GetHealthResponse{Body: []byte("{}")},
+					Editor:   clientEditor,
 				},
 				{
 					Name:     "northbound_tls",
 					Server:   fmt.Sprintf("https://%s:%d%s", b.MgmtTLSHost, b.MgmtTLSPort, basePath),
 					Response: &api.GetHealthResponse{Body: []byte("{}")},
+					Editor:   mgmtEditor,
 				},
 				{
 					Name:     "southbound_tls",
 					Server:   fmt.Sprintf("https://%s:%d%s", b.TLSHost, b.TLSPort, basePath),
 					Response: &api.GetHealthResponse{Body: []byte("{}")},
+					Editor:   clientEditor,
 				},
 			}
 
@@ -88,16 +102,13 @@ func NewCommand() *cobra.Command {
 			if err != nil {
 				return fault.Wrap(err)
 			}
-
 			var g sync.WaitGroup
 			for i, endpoint := range allEndpoints {
-				g.Add(1)
-				go func() {
-					defer g.Done()
-					client := errutil.Must(api.NewClientWithResponses(endpoint.Server, api.WithHTTPClient(httpClient)))
+				g.Go(func() {
+					client := errutil.Must(api.NewClientWithResponses(endpoint.Server, api.WithHTTPClient(httpClient), api.WithRequestEditorFn(endpoint.Editor)))
 					resp, _ := client.GetHealthWithResponse(cmd.Context())
 					allEndpoints[i].Response = resp
-				}()
+				})
 			}
 			g.Wait()
 			prettyReport(cmd.OutOrStdout(), useColor, allEndpoints)
