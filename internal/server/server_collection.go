@@ -49,7 +49,11 @@ func NewServerCollection(cfg *config.AppConfig, wfx api.StrictServerInterface, s
 	swag, _ := api.GetSpec()
 	validator := nethttpmiddleware.OapiRequestValidatorWithOptions(swag,
 		&nethttpmiddleware.Options{SilenceServersWarning: true})
-	corsMW := cors.AllowAll().Handler
+	corsMW := cors.New(cors.Options{
+		AllowedOrigins: cfg.CORSAllowedOrigins(),
+		AllowedMethods: cfg.CORSAllowedMethods(),
+		AllowedHeaders: cfg.CORSAllowedHeaders(),
+	}).Handler
 	logMW := logging.NewLoggingMiddleware()
 
 	// LIFO

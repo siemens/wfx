@@ -61,6 +61,10 @@ const (
 	SSEPingIntervalFlag  = "sse-ping-interval"
 	SSEGraceIntervalFlag = "sse-grace-interval"
 
+	CORSAllowedOriginsFlag = "cors-allowed-origins"
+	CORSAllowedMethodsFlag = "cors-allowed-methods"
+	CORSAllowedHeadersFlag = "cors-allowed-headers"
+
 	TLSCaFlag          = "tls-ca"
 	TLSCertificateFlag = "tls-certificate"
 	TLSKeyFlag         = "tls-key"
@@ -80,6 +84,9 @@ const (
 	DefaultJQFilterMaxResponseSize = 16 << 20 // 16 MiB
 )
 
+// mirrors the defaults of cors.AllowAll()
+var defaultCORSAllowedMethods = []string{"GET", "HEAD", "POST", "PUT", "PATCH", "DELETE"}
+
 func NewFlagset() *pflag.FlagSet {
 	f := pflag.NewFlagSet("wfx", pflag.ExitOnError)
 
@@ -90,6 +97,10 @@ func NewFlagset() *pflag.FlagSet {
 	f.Duration(GracefulTimeoutFlag, 15*time.Second, "grace period for which to wait before shutting down the server")
 	f.Duration(SSEPingIntervalFlag, DefaultSSEPingInterval, "interval to send periodic keep-alive messages to prevent server-sent events connections from being closed due to inactivity")
 	f.Duration(SSEGraceIntervalFlag, DefaultSSEGraceInterval, "interval after which non-responsive subscribers are dropped")
+
+	f.StringSlice(CORSAllowedOriginsFlag, []string{"*"}, "one or multiple origins allowed to make cross-origin requests")
+	f.StringSlice(CORSAllowedMethodsFlag, defaultCORSAllowedMethods, "one or multiple methods allowed when making cross-origin requests")
+	f.StringSlice(CORSAllowedHeadersFlag, []string{"*"}, "one or multiple headers allowed when making cross-origin requests")
 
 	f.Int(MaxHeaderSizeFlag, 1000000, "controls the maximum number of bytes the server will read parsing the request header's keys and values, including the request line. It does not limit the size of the request body")
 	f.Bool(KeepAliveFlag, true, "sets the TCP keep-alive timeouts on accepted connections. It prunes dead TCP connections ( e.g. closing laptop mid-download)")
