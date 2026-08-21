@@ -67,6 +67,15 @@ func TestNewAppConfigNegativeJQLimit(t *testing.T) {
 	}
 }
 
+func TestNewAppConfig_CORSWildcardOriginWithCredentials(t *testing.T) {
+	flags := NewFlagset()
+	_ = flags.Parse([]string{"--" + CORSAllowCredentialsFlag})
+
+	cfg, err := NewAppConfig(flags)
+	assert.Nil(t, cfg)
+	assert.Error(t, err)
+}
+
 func TestReload(t *testing.T) {
 	dir, _ := os.MkdirTemp("", "TestReload")
 	cfgFile, _ := os.CreateTemp("", "config.yaml")
