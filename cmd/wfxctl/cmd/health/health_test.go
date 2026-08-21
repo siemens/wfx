@@ -16,6 +16,7 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/siemens/wfx/cmd/wfxctl/flags"
 	"github.com/siemens/wfx/generated/api"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -51,6 +52,43 @@ func TestNewCommand_Up(t *testing.T) {
 	err := cmd.Execute()
 	require.NoError(t, err)
 	assert.Equal(t, "/api/wfx/v1/health", actualPath)
+}
+
+func TestNewCommand_Headers(t *testing.T) {
+	requests := make(chan *http.Request, 4)
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requests <- r
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"body":{"status":"up"}}`))
+	}))
+	defer ts.Close()
+
+	u, err := url.Parse(ts.URL)
+	require.NoError(t, err)
+	t.Setenv("WFX_CLIENT_HOST", u.Hostname())
+	t.Setenv("WFX_CLIENT_PORT", u.Port())
+	t.Setenv("WFX_MGMT_HOST", u.Hostname())
+	t.Setenv("WFX_MGMT_PORT", u.Port())
+
+	cmd := NewCommand()
+	cmd.Flags().StringArray(flags.ClientHeaderFlag, nil, "")
+	cmd.Flags().StringArray(flags.MgmtHeaderFlag, nil, "")
+	cmd.SetArgs([]string{"--client-hdr", "X-Client: custom", "--mgmt-hdr", "X-Mgmt: custom"})
+	require.NoError(t, cmd.Execute())
+
+	seenClient, seenMgmt := false, false
+	for range 2 {
+		req := <-requests
+		if req.Header.Get("X-Client") != "" {
+			assert.Empty(t, req.Header.Get("X-Mgmt"))
+			seenClient = true
+		} else {
+			assert.Equal(t, "custom", req.Header.Get("X-Mgmt"))
+			seenMgmt = true
+		}
+	}
+	assert.True(t, seenClient)
+	assert.True(t, seenMgmt)
 }
 
 func TestNewCommand_ColorModes(t *testing.T) {

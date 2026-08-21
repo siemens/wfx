@@ -60,6 +60,9 @@ Tip: Shell completion is available for Bash, Fish and Zsh. See wfxctl completion
 	f.String(flags.TLSCaFlag, "", "ca bundle (PEM)")
 	f.Bool(flags.EnableTLSFlag, false, "whether to enable TLS (https)")
 
+	f.StringArray(flags.ClientHeaderFlag, nil, "add an HTTP header to client requests, e.g. --client-hdr 'Authorization: Bearer $TOKEN' (may be given multiple times)")
+	f.StringArray(flags.MgmtHeaderFlag, nil, "add an HTTP header to management requests, e.g. --mgmt-hdr 'Authorization: Bearer $TOKEN' (may be given multiple times)")
+
 	f.String(flags.FilterFlag, "", "output filter (jq-expression). example: '.id'")
 	f.Bool(flags.RawFlag, false, "output raw strings, not JSON texts; use --filter to select a single entity")
 
