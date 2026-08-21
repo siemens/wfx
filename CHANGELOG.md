@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Apply reloaded SSE ping and grace intervals to new job event connections
+- CORS is registered globally now
 
 ## [0.6.0] - 2026-06-03
 

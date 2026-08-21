@@ -49,6 +49,8 @@ func NewServerCollection(cfg *config.AppConfig, wfx api.StrictServerInterface, s
 	swag, _ := api.GetSpec()
 	validator := nethttpmiddleware.OapiRequestValidatorWithOptions(swag,
 		&nethttpmiddleware.Options{SilenceServersWarning: true})
+	// CORS must wrap the whole server: preflight (OPTIONS) requests match no
+	// route of our mux, so a per-route middleware would never see them.
 	corsMW := cors.New(cors.Options{
 		AllowedOrigins: cfg.CORSAllowedOrigins(),
 		AllowedMethods: cfg.CORSAllowedMethods(),
@@ -57,7 +59,7 @@ func NewServerCollection(cfg *config.AppConfig, wfx api.StrictServerInterface, s
 	logMW := logging.NewLoggingMiddleware()
 
 	// LIFO
-	middlewares := []api.MiddlewareFunc{validator, corsMW, logMW}
+	middlewares := []api.MiddlewareFunc{validator, logMW}
 
 	pluginMWs := make([]*plugin.Middleware, 0)
 	pluginErrors := make([]<-chan error, 0)
@@ -78,6 +80,7 @@ func NewServerCollection(cfg *config.AppConfig, wfx api.StrictServerInterface, s
 	if err != nil {
 		return nil, fault.Wrap(err)
 	}
+	northServer.Handler = corsMW(northServer.Handler)
 
 	southPluginMWs, err := createPluginMiddlewares(cfg.ClientPluginsDir())
 	if err != nil {
@@ -95,6 +98,7 @@ func NewServerCollection(cfg *config.AppConfig, wfx api.StrictServerInterface, s
 	if err != nil {
 		return nil, fault.Wrap(err)
 	}
+	southServer.Handler = corsMW(southServer.Handler)
 
 	return &ServerCollection{
 		cfg:          cfg,
