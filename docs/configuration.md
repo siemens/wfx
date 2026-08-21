@@ -167,6 +167,23 @@ The following connectivity parameters are available:
 | `--tls-key`         | The location of the TLS key file                                                  |
 | `--tls-ca`          | The certificate authority certificate file for mutual TLS authentication          |
 
+## Cross-Origin Resource Sharing (CORS)
+
+The API servers add CORS headers to responses, allowing browser-based clients to access wfx directly.
+The following parameters control these headers:
+
+| Parameter                | Description                                                                                              |
+| :----------------------- | :------------------------------------------------------------------------------------------------------- |
+| `--cors-allowed-origins` | One or multiple origins allowed to make cross-origin requests; defaults to `*` (any origin)              |
+| `--cors-allowed-methods` | One or multiple methods allowed when making cross-origin requests; defaults to `GET,HEAD,POST,PUT,PATCH,DELETE` |
+| `--cors-allowed-headers` | One or multiple headers allowed when making cross-origin requests; defaults to `*` (any header)          |
+
+For example, to restrict access to a single origin:
+
+```bash
+wfx --cors-allowed-origins https://wfx.example.com
+```
+
 ## File Server
 
 wfx comes with a built-in file server that serves artifacts at `http://<wfx host:{client,mgmt} port>/download/`.

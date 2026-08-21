@@ -12,6 +12,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -53,6 +54,10 @@ type AppConfig struct {
 
 	keepAlive      bool
 	cleanupTimeout time.Duration
+
+	corsAllowedOrigins []string
+	corsAllowedMethods []string
+	corsAllowedHeaders []string
 
 	tlsCACertificate string
 	tlsCertificate   string
@@ -232,6 +237,10 @@ func (cfg *AppConfig) Reload() bool {
 	cfg.gracefulTimeout = cfg.k.Duration(GracefulTimeoutFlag)
 	cfg.ssePingInterval = cfg.k.Duration(SSEPingIntervalFlag)
 	cfg.sseGraceInterval = cfg.k.Duration(SSEGraceIntervalFlag)
+
+	cfg.corsAllowedOrigins = cfg.k.Strings(CORSAllowedOriginsFlag)
+	cfg.corsAllowedMethods = cfg.k.Strings(CORSAllowedMethodsFlag)
+	cfg.corsAllowedHeaders = cfg.k.Strings(CORSAllowedHeadersFlag)
 
 	if schemes := cfg.k.Strings(SchemeFlag); len(schemes) > 0 {
 		cfg.schemes = make([]Scheme, 0, len(schemes))
@@ -441,6 +450,24 @@ func (cfg *AppConfig) SSEGraceInterval() time.Duration {
 	cfg.mutex.RLock()
 	defer cfg.mutex.RUnlock()
 	return cfg.sseGraceInterval
+}
+
+func (cfg *AppConfig) CORSAllowedOrigins() []string {
+	cfg.mutex.RLock()
+	defer cfg.mutex.RUnlock()
+	return slices.Clone(cfg.corsAllowedOrigins)
+}
+
+func (cfg *AppConfig) CORSAllowedMethods() []string {
+	cfg.mutex.RLock()
+	defer cfg.mutex.RUnlock()
+	return slices.Clone(cfg.corsAllowedMethods)
+}
+
+func (cfg *AppConfig) CORSAllowedHeaders() []string {
+	cfg.mutex.RLock()
+	defer cfg.mutex.RUnlock()
+	return slices.Clone(cfg.corsAllowedHeaders)
 }
 
 func (cfg *AppConfig) InitStorage() (persistence.Storage, error) {
