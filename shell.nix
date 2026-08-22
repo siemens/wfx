@@ -3,68 +3,29 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 # Author: Michael Adler <michael.adler@siemens.com>
-{ pkgs ? import <nixpkgs> { } }:
+{
+  pkgs ? import <nixpkgs> { },
+}:
+
+let
+  # Evaluate devenv.nix without the devenv framework so shell.nix and devenv share a single package list.
+  devenv = import ./devenv.nix {
+    inherit pkgs;
+    lib = pkgs.lib;
+    inputs = { };
+    config.devenv.root = toString ./.;
+  };
+
+  profilePackages = pkgs.lib.flatten (
+    pkgs.lib.mapAttrsToList (
+      _: profile: pkgs.lib.mapAttrsToList (_: module: module.packages or [ ]) profile
+    ) devenv.profiles
+  );
+in
 
 with pkgs;
 
 mkShell {
-  nativeBuildInputs = [
-    (python3.withPackages (ps: with ps; [ pyyaml ]))
-
-    hugo
-
-    sql-formatter
-    biome
-    markdownlint-cli
-    shfmt
-    lychee
-
-    golangci-lint
-    go-tools
-    reuse
-
-    gnumake
-    gnused
-    goreleaser
-    syft
-    zig
-    just
-    git
-    go
-    gopls
-    reftools
-    flatbuffers
-    openssl
-    zstd
-
-    # ui deps
-    gleam
-    beamPackages.rebar3
-    beamPackages.erlang
-    inotify-tools
-    nodejs
-    bun
-    tailwindcss_4
-  ];
-
-  shellHook = ''
-    export GOFLAGS="-tags=sqlite,mysql,postgres,testing,integration,plugin"
-    export LUA_PATH="$(pwd)/hugo/filters/?.lua;;"
-    export PATH="$(pwd):$PATH"
-
-    export CC="$(pwd)/.ci/zcc"
-
-    export PGUSER=wfx \
-           PGPASSWORD=secret\
-           PGHOST=localhost \
-           PGPORT=5432      \
-           PGDATABASE=wfx   \
-           PGSSLMODE=disable
-
-    export MYSQL_USER=root \
-           MYSQL_PASSWORD=root \
-           MYSQL_ROOT_PASSWORD=root \
-           MYSQL_DATABASE=wfx \
-           MYSQL_HOST=localhost
-  '';
+  nativeBuildInputs = devenv.packages ++ profilePackages;
+  shellHook = devenv.enterShell;
 }
