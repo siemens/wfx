@@ -1,3 +1,10 @@
+{{/*
+ * SPDX-FileCopyrightText: 2026 Siemens AG
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Author: Michael Adler <michael.adler@siemens.com>
+*/}}
 {{- $img := .Page.Resources.GetMatch .Destination -}}
 {{- if and (not $img) .Page.File -}}
 {{ $path := path.Join .Page.File.Dir .Destination }}

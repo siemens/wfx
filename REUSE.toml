@@ -1,0 +1,104 @@
+# Copyright (c) Siemens AG, 2026
+#
+# Authors:
+#  Michael Adler <michael.adler@siemens.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+version = 1
+
+[[annotations]]
+path = "**/*.md"
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Siemens AG"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "**/*.1"
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Siemens AG"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "**/*.json"
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Siemens AG"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "generated/**"
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Siemens AG"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "**/*.sql"
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Siemens AG"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "**/birdie_snapshots/*"
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Siemens AG"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "**/*.gif"
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Siemens AG"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "**/*.png"
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Siemens AG"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "**/go.mod"
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Siemens AG"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "**/go.sum"
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Siemens AG"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "**/*.approved.txt"
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Siemens AG"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "**/manifest.toml"
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Siemens AG"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "**/*.cast"
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Siemens AG"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "**/*.lock"
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Siemens AG"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "**/*.sum"
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Siemens AG"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = ".github/**"
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Siemens AG"
+SPDX-License-Identifier = "Apache-2.0"
