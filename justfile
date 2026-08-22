@@ -3,27 +3,11 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 # Author: Michael Adler <michael.adler@siemens.com>
+set dotenv-load
+set dotenv-override
 
 THISDIR := justfile_directory()
 DOCKER := env_var_or_default("DOCKER", "docker")
-NIX := "nix --experimental-features 'nix-command flakes'"
-
-# postgres
-
-export PGUSER := env_var_or_default("PGUSER", "wfx")
-export PGPASSWORD := env_var_or_default("PGPASSWORD", "secret")
-export PGHOST := env_var_or_default("PGHOST", "localhost")
-export PGPORT := env_var_or_default("PGPORT", "5432")
-export PGDATABASE := env_var_or_default("PGDATABASE", "wfx")
-export PGSSLMODE := env_var_or_default("PGSSLMODE", "disable")
-
-# mysql
-
-export MYSQL_USER := env_var_or_default("MYSQL_USER", "root")
-export MYSQL_PASSWORD := env_var_or_default("MYSQL_PASSWORD", "root")
-export MYSQL_ROOT_PASSWORD := env_var_or_default("MYSQL_PASSWORD", "root")
-export MYSQL_DATABASE := env_var_or_default("MYSQL_DATABASE", "wfx")
-export MYSQL_HOST := env_var_or_default("MYSQL_HOST", "localhost")
 
 build:
     env CC={{ THISDIR }}/.ci/zcc goreleaser build --id wfx --id wfxctl --clean --single-target --snapshot
@@ -49,6 +33,7 @@ update-deps:
 pages:
     #!/usr/bin/env bash
     set -euxo pipefail
+    export LUA_PATH="{{ THISDIR }}/hugo/filters/?.lua;;"
     rm -rf public hugo/public
     pushd hugo
     make clean && make -j`nproc`
@@ -62,6 +47,7 @@ pages:
 # Serve docs
 docs-serve:
     #!/bin/sh
+    export LUA_PATH="{{ THISDIR }}/hugo/filters/?.lua;;"
     cd hugo && make clean && make -j`nproc` && hugo server -D
 
 # Lint code
