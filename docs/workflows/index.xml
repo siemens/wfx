@@ -2,13 +2,16 @@
 &lt;p&gt;The following clients have support for the Device Artifact Update Workflow Family:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
+
 &lt;a href="https://github.com/sbabic/swupdate/blob/master/doc/source/suricatta.rst#support-for-wfx" target="_blank"&gt;SWUpdate&lt;/a&gt; - Software Update
 for Embedded Linux Devices.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id="workflows"&gt;Workflows&lt;/h2&gt;
 &lt;p&gt;Currently, the DAU Workflow Family comprises two workflows that model the software update process for devices:&lt;/p&gt;
 &lt;p&gt;The 
+
 &lt;a href="../../wfx.workflow.dau.direct.yml"&gt;&lt;code&gt;wfx.workflow.dau.direct&lt;/code&gt;&lt;/a&gt; workflow caters for the fully automated software update
 use case while the 
+
 &lt;a href="../../wfx.workflow.dau.phased.yml"&gt;&lt;code&gt;wfx.workflow.dau.phased&lt;/code&gt;&lt;/a&gt; workflow operates in distinct phases
 requiring external input to advance the workflow.&lt;/p&gt;</description></item></channel></rss>

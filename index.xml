@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>wfx on</title><link>/</link><description>Recent content in wfx on</description><generator>Hugo</generator><language>en</language><atom:link href="/index.xml" rel="self" type="application/rss+xml"/><item><title>Build and Installation</title><link>/docs/installation/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/docs/installation/</guid><description>&lt;p&gt;Pre-built binaries, as well as Debian and RPM packages, are available 
+
 &lt;a href="https://github.com/siemens/wfx/releases" target="_blank"&gt;here&lt;/a&gt;
 for Linux, specifically 
+
 &lt;a href="https://go.dev/wiki/MinimumRequirements#amd64" target="_blank"&gt;x86_64&lt;/a&gt; and
+
 
 &lt;a href="https://go.dev/wiki/MinimumRequirements#arm64" target="_blank"&gt;arm64&lt;/a&gt; architectures.&lt;/p&gt;
 &lt;p&gt;To start a container hosting wfx, follow these commands:&lt;/p&gt;
@@ -17,6 +20,7 @@ necessary.&lt;/p&gt;</description></item><item><title>Configuration</title><link
 &lt;li&gt;command line parameters (e.g. &lt;code&gt;--log-level&lt;/code&gt;),&lt;/li&gt;
 &lt;li&gt;environment variables (prefixed with &lt;code&gt;WFX_&lt;/code&gt;, e.g. &lt;code&gt;WFX_LOG_LEVEL&lt;/code&gt;),&lt;/li&gt;
 &lt;li&gt;configuration files in 
+
 &lt;a href="https://github.com/go-yaml/yaml#compatibility" target="_blank"&gt;YAML&lt;/a&gt; format (either via the &lt;code&gt;--config&lt;/code&gt;
 command line parameter or present in one of the default search locations, see &lt;code&gt;wfx --help&lt;/code&gt;).&lt;/li&gt;
 &lt;/ol&gt;
@@ -26,23 +30,29 @@ need for restarting it.&lt;/p&gt;
 &lt;p&gt;The following clients have support for the Device Artifact Update Workflow Family:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
+
 &lt;a href="https://github.com/sbabic/swupdate/blob/master/doc/source/suricatta.rst#support-for-wfx" target="_blank"&gt;SWUpdate&lt;/a&gt; - Software Update
 for Embedded Linux Devices.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id="workflows"&gt;Workflows&lt;/h2&gt;
 &lt;p&gt;Currently, the DAU Workflow Family comprises two workflows that model the software update process for devices:&lt;/p&gt;
 &lt;p&gt;The 
+
 &lt;a href="./wfx.workflow.dau.direct.yml"&gt;&lt;code&gt;wfx.workflow.dau.direct&lt;/code&gt;&lt;/a&gt; workflow caters for the fully automated software update
 use case while the 
+
 &lt;a href="./wfx.workflow.dau.phased.yml"&gt;&lt;code&gt;wfx.workflow.dau.phased&lt;/code&gt;&lt;/a&gt; workflow operates in distinct phases
 requiring external input to advance the workflow.&lt;/p&gt;</description></item><item><title>Operations</title><link>/docs/operations/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/docs/operations/</guid><description>&lt;h2 id="ui"&gt;UI&lt;/h2&gt;
 &lt;p&gt;A Web UI is available, currently in an experimental state, allowing you to explore wfx&amp;rsquo;s state within a Web browser.
 This UI must be built separately and can optionally be embedded into the wfx binary by using a build tag (see
 
+
 &lt;a href="./docs/installation/#build-tags"&gt;Installation&lt;/a&gt;). When enabled, the UI is accessible through the northbound interface at the
 &lt;code&gt;/ui&lt;/code&gt; path, defaulting to 
+
 &lt;a href="http://localhost:8081/ui/" target="_blank"&gt;http://localhost:8081/ui/&lt;/a&gt;:&lt;/p&gt;
 &lt;p&gt;
+
 &lt;a href="./ui-jobs-table.png"&gt;&lt;img src="./ui-jobs-table.png" alt="wfxui" /&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Note&lt;/strong&gt;: The UI is intentionally read-only; it is not possible to perform any write operations within wfx.&lt;/p&gt;</description></item><item><title>REST API</title><link>/docs/api/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/docs/api/</guid><description>&lt;div id="docsy_swagger_ui"&gt;&lt;/div&gt;
 &lt;script&gt;
@@ -60,13 +70,17 @@ This UI must be built separately and can optionally be embedded into the wfx bin
 &lt;/script&gt;</description></item><item><title>Use Cases</title><link>/docs/use-cases/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/docs/use-cases/</guid><description>&lt;p&gt;This document presents a collection of use cases for employing wfx. Owing to wfx&amp;rsquo;s versatility, the list provided here
 is not exhaustive. Should you identify an important use case missing, please feel free to
 
+
 &lt;a href="https://github.com/siemens/wfx/tree/main/CONTRIBUTING.md" target="_blank"&gt;contribute&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Note&lt;/strong&gt;: Each use case requires an appropriate client implementation to execute the specific &amp;ldquo;business logic&amp;rdquo;. If no
 such client exists yet, this implies writing custom code.&lt;/p&gt;
 &lt;h2 id="software-update"&gt;Software Update&lt;/h2&gt;
 &lt;p&gt;Perform over-the-air (OTA) firmware updates using 
+
 &lt;a href="https://swupdate.org/" target="_blank"&gt;SWUpdate&lt;/a&gt; and the 
+
 &lt;a href="./docs/workflows/dau/"&gt;Device Artifact Update
 (DAU) Workflow Family&lt;/a&gt;. See also SWUpdate&amp;rsquo;s 
+
 &lt;a href="https://github.com/sbabic/swupdate/blob/master/doc/source/suricatta.rst#support-for-wfx" target="_blank"&gt;Suricatta
 documentation&lt;/a&gt;.&lt;/p&gt;</description></item></channel></rss>
