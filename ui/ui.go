@@ -24,9 +24,9 @@ import (
 	"bytes"
 	_ "embed"
 	"fmt"
+	"html/template"
 	"net/http"
 	"strings"
-	"text/template"
 	"time"
 
 	"github.com/klauspost/compress/zstd"
