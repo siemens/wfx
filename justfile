@@ -26,10 +26,11 @@ export MYSQL_DATABASE := env_var_or_default("MYSQL_DATABASE", "wfx")
 export MYSQL_HOST := env_var_or_default("MYSQL_HOST", "localhost")
 
 build:
+    env CC={{ THISDIR }}/.ci/zcc goreleaser build --id wfx --id wfxctl --clean --single-target --snapshot
+
+build-contrib:
     #!/usr/bin/env bash
-    set -euo pipefail
-    # goreleaser requires an absolute path to the compiler
-    /usr/bin/env CC={{ THISDIR }}/.ci/zcc goreleaser build --clean --single-target --snapshot
+    set -euxo pipefail
     go build -C example/plugin
     go build -C contrib/remote-access/client
     go build -C contrib/config-deployment/client
