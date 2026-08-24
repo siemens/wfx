@@ -47,6 +47,7 @@ const (
 	ClientUnixSocketFlag = "client-unix-socket"
 	ColorFlag            = "color"
 	ConfigFlag           = "config"
+	CredentialHelperFlag = "credential-helper"
 	EnableTLSFlag        = "enable-tls"
 	FilterFlag           = "filter"
 	GroupFlag            = "group"
@@ -113,8 +114,9 @@ type BaseCmd struct {
 	Name      string
 	Limit     int32
 
-	ClientHdrs []string
-	MgmtHdrs   []string
+	ClientHdrs       []string
+	MgmtHdrs         []string
+	CredentialHelper string
 }
 
 func NewBaseCmd(f *pflag.FlagSet) BaseCmd {
@@ -207,8 +209,9 @@ func NewBaseCmd(f *pflag.FlagSet) BaseCmd {
 		Name:        k.String(NameFlag),
 		Limit:       int32(k.Int(LimitFlag)),
 
-		ClientHdrs: k.Strings(ClientHeaderFlag),
-		MgmtHdrs:   k.Strings(MgmtHeaderFlag),
+		ClientHdrs:       k.Strings(ClientHeaderFlag),
+		MgmtHdrs:         k.Strings(MgmtHeaderFlag),
+		CredentialHelper: k.String(CredentialHelperFlag),
 	}
 }
 
@@ -297,7 +300,7 @@ func (b *BaseCmd) CreateClient() (*api.Client, error) {
 	if err != nil {
 		return nil, fault.Wrap(err)
 	}
-	editor, err := httpclient.RequestEditor(b.ClientHdrs)
+	editor, err := httpclient.RequestEditor(b.ClientHdrs, b.CredentialHelper)
 	if err != nil {
 		return nil, fault.Wrap(err)
 	}
@@ -321,7 +324,7 @@ func (b *BaseCmd) CreateMgmtClient() (*api.Client, error) {
 	if err != nil {
 		return nil, fault.Wrap(err)
 	}
-	editor, err := httpclient.RequestEditor(b.MgmtHdrs)
+	editor, err := httpclient.RequestEditor(b.MgmtHdrs, b.CredentialHelper)
 	if err != nil {
 		return nil, fault.Wrap(err)
 	}

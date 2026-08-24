@@ -111,7 +111,7 @@ wfxctl job events --job-id=1 --job-id=2 --client-id=foo
 			sseClient.OnRetry = func(_ error, sleep time.Duration) {
 				fmt.Fprintf(cmd.ErrOrStderr(), "SSE connection lost. Attempting to reconnect in %v...\n", sleep)
 			}
-			editor, err := httpclient.RequestEditor(baseCmd.ClientHdrs)
+			editor, err := httpclient.RequestEditor(baseCmd.ClientHdrs, baseCmd.CredentialHelper)
 			if err != nil {
 				return fault.Wrap(err)
 			}

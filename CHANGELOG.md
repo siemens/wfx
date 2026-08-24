@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `--jq-filter-max-response-size` to limit the size of a JQ response filter result (default: 16 MiB, `0` disables the limit)
 - Configurable CORS headers for northbound API
 - wfxctl: new global `--client-hdr` and `--mgmt-hdr` flags to add custom HTTP headers to client and management requests, e.g. `--client-hdr 'Authorization: Bearer $TOKEN'` (similar to curl's `-H` option, may be given multiple times)
+- wfxctl: support Git-style credential helper plugins through `--credential-helper`
 
 ### Changed
 

@@ -30,7 +30,7 @@ func parseHeader(header string) (string, string, error) {
 
 // RequestEditor returns a RequestEditorFn which adds custom headers to each
 // outgoing request. Headers are parsed eagerly so invalid input fails immediately.
-func RequestEditor(values []string) (api.RequestEditorFn, error) {
+func RequestEditor(values []string, credentialHelper string) (api.RequestEditorFn, error) {
 	headers := make(http.Header, len(values))
 	for _, header := range values {
 		name, value, err := parseHeader(header)
@@ -39,7 +39,7 @@ func RequestEditor(values []string) (api.RequestEditorFn, error) {
 		}
 		headers.Add(name, value)
 	}
-	return func(_ context.Context, req *http.Request) error {
+	return func(ctx context.Context, req *http.Request) error {
 		for name, values := range headers {
 			if name == "Host" {
 				req.Host = values[len(values)-1]
@@ -47,6 +47,9 @@ func RequestEditor(values []string) (api.RequestEditorFn, error) {
 			}
 			req.Header[name] = values
 		}
-		return nil
+		if credentialHelper == "" || req.Header.Get("Authorization") != "" {
+			return nil
+		}
+		return addCredential(ctx, credentialHelper, req)
 	}, nil
 }

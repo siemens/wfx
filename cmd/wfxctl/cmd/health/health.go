@@ -62,11 +62,11 @@ func NewCommand() *cobra.Command {
 
 			swagger := errutil.Must(api.GetSpec())
 			basePath := errutil.Must(swagger.Servers.BasePath())
-			clientEditor, err := httpclient.RequestEditor(b.ClientHdrs)
+			clientEditor, err := httpclient.RequestEditor(b.ClientHdrs, b.CredentialHelper)
 			if err != nil {
 				return fault.Wrap(err)
 			}
-			mgmtEditor, err := httpclient.RequestEditor(b.MgmtHdrs)
+			mgmtEditor, err := httpclient.RequestEditor(b.MgmtHdrs, b.CredentialHelper)
 			if err != nil {
 				return fault.Wrap(err)
 			}
