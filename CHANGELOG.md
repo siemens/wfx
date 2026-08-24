@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Report failing JQ response filters as HTTP 400 (`wfx.invalidResponseFilter`) instead of 500
 
+### Fixed
+
+- Apply reloaded SSE ping and grace intervals to new job event connections
+
 ## [0.6.0] - 2026-06-03
 
 ### Breaking
