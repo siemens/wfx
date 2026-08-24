@@ -67,7 +67,6 @@ docs-serve:
 lint:
     #!/usr/bin/env bash
     set -euo pipefail
-    export CGO_ENABLED=0
     golangci-lint run -v
     staticcheck -tags=testing ./...
     go list ./... 2>/dev/null | sed -e 's,github.com/siemens/wfx/,,' | grep -v "^generated" | sort | uniq | while read -r pkg; do
