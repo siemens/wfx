@@ -18,6 +18,33 @@ starts wfx using the built-in SQLite-based persistent storage.
 The northbound (management) API is available at `http://127.0.0.1:8081/api/wfx/v1/`,
 whereas the southbound (client) API is available at a different port: `http://127.0.0.1:8080/api/wfx/v1`.
 
+## wfxctl credential helpers
+
+`wfxctl` can delegate HTTP authentication to a Git-style credential helper. Set
+`--credential-helper=<name>` to run `wfxctl-credential-<name> get`, or pass a
+path containing `/` to run that executable directly. `WFX_CREDENTIAL_HELPER`
+and the `credential-helper` YAML key are also supported.
+
+The helper receives `protocol`, `host`, and `path` fields on standard input. It
+must return either `username` and `password` for Basic authentication, or
+`authtype` and `credential` for schemes such as Bearer authentication:
+
+```text
+protocol=https
+host=wfx.example.com
+path=api/wfx/v1/jobs
+
+```
+
+```text
+authtype=Bearer
+credential=secret-token
+
+```
+
+An explicit `Authorization` header set with `--client-hdr` or `--mgmt-hdr` takes
+precedence over the credential helper.
+
 ## Systemd Integration
 
 For production deployments, it's recommended to run wfx under a service supervisor such as [systemd](https://systemd.io).

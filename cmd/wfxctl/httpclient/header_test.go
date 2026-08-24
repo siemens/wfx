@@ -48,7 +48,7 @@ func TestParseHeader(t *testing.T) {
 }
 
 func TestRequestEditor(t *testing.T) {
-	editor, err := RequestEditor([]string{"X-Foo: bar", "X-Foo: baz", "X-Other:quux", "Host: example.com"})
+	editor, err := RequestEditor([]string{"X-Foo: bar", "X-Foo: baz", "X-Other:quux", "Host: example.com"}, "")
 	require.NoError(t, err)
 
 	req, err := http.NewRequest(http.MethodGet, "http://localhost", nil)
@@ -64,7 +64,7 @@ func TestRequestEditor(t *testing.T) {
 
 func TestRequestEditor_InvalidDoesNotLeakHeader(t *testing.T) {
 	const header = "Authorization Bearer secret"
-	editor, err := RequestEditor([]string{header})
+	editor, err := RequestEditor([]string{header}, "")
 	assert.Error(t, err)
 	assert.NotContains(t, err.Error(), header)
 	assert.Nil(t, editor)
