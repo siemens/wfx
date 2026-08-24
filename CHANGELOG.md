@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - UI: add fallback configuration using default local WFX management API
 - UI: display wfx JSON error messages, hiding other response bodies
 - wfxctl: new global `--client-hdr` and `--mgmt-hdr` flags to add custom HTTP headers to client and management requests, e.g. `--client-hdr 'Authorization: Bearer $TOKEN'` (similar to curl's `-H` option, may be given multiple times)
+- wfxctl: support Git-style credential helper plugins through `--credential-helper`
 
 ### Changed
 
