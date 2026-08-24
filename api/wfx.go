@@ -47,7 +47,7 @@ var _ api.StrictServerInterface = (*WfxServer)(nil)
 type WfxServer struct {
 	storage persistence.Storage
 	checker health.Checker
-	sseOpts SSEOpts
+	sseOpts func() SSEOpts
 	jqOpts  func() config.JQOpts
 }
 
@@ -71,9 +71,11 @@ func NewWfxServer(storage persistence.Storage) *WfxServer {
 	wfx := &WfxServer{
 		storage: storage,
 		checker: checker,
-		sseOpts: SSEOpts{
-			PingInterval:  config.DefaultSSEPingInterval,
-			GraceInterval: config.DefaultSSEGraceInterval,
+		sseOpts: func() SSEOpts {
+			return SSEOpts{
+				PingInterval:  config.DefaultSSEPingInterval,
+				GraceInterval: config.DefaultSSEGraceInterval,
+			}
 		},
 		jqOpts: func() config.JQOpts {
 			return config.JQOpts{
@@ -85,7 +87,7 @@ func NewWfxServer(storage persistence.Storage) *WfxServer {
 	return wfx
 }
 
-func (server *WfxServer) WithSSEOpts(sseOpts SSEOpts) *WfxServer {
+func (server *WfxServer) WithSSEOpts(sseOpts func() SSEOpts) *WfxServer {
 	server.sseOpts = sseOpts
 	return server
 }
@@ -217,8 +219,9 @@ func (server WfxServer) GetJobsEvents(ctx context.Context, request api.GetJobsEv
 	if s := request.Params.Tags; s != nil {
 		tags = strings.Split(*s, ",")
 	}
-	subscriber := events.AddSubscriber(ctx, server.sseOpts.GraceInterval, filter, tags)
-	return sse.NewResponder(ctx, server.sseOpts.PingInterval, subscriber), nil
+	sseOpts := server.sseOpts()
+	subscriber := events.AddSubscriber(ctx, sseOpts.GraceInterval, filter, tags)
+	return sse.NewResponder(ctx, sseOpts.PingInterval, subscriber), nil
 }
 
 func (server WfxServer) DeleteJobsId(ctx context.Context, request api.DeleteJobsIdRequestObject) (api.DeleteJobsIdResponseObject, error) {

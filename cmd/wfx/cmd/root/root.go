@@ -85,9 +85,11 @@ Examples of tasks are installation of firmware or other types of commands issued
 			chErr := make(chan error, 1)
 
 			wfx := api.NewWfxServer(storage).
-				WithSSEOpts(api.SSEOpts{
-					PingInterval:  cfg.SSEPingInterval(),
-					GraceInterval: cfg.SSEGraceInterval(),
+				WithSSEOpts(func() api.SSEOpts {
+					return api.SSEOpts{
+						PingInterval:  cfg.SSEPingInterval(),
+						GraceInterval: cfg.SSEGraceInterval(),
+					}
 				}).
 				WithJQOpts(cfg.JQOpts)
 			wfx.Start()

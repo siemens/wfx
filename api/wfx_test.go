@@ -15,6 +15,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/alexliesenfeld/health"
 	"github.com/siemens/wfx/cmd/wfx/cmd/config"
@@ -44,6 +45,15 @@ func TestJQOptsProvider(t *testing.T) {
 	assert.Equal(t, 1, wfx.jqOpts().FilterMaxResponseSize)
 	opts.FilterMaxResponseSize = 2
 	assert.Equal(t, 2, wfx.jqOpts().FilterMaxResponseSize)
+}
+
+func TestSSEOptsProvider(t *testing.T) {
+	opts := SSEOpts{PingInterval: time.Second}
+	wfx := NewWfxServer(persistence.NewHealthyMockStorage(t)).WithSSEOpts(func() SSEOpts { return opts })
+
+	assert.Equal(t, time.Second, wfx.sseOpts().PingInterval)
+	opts.PingInterval = 2 * time.Second
+	assert.Equal(t, 2*time.Second, wfx.sseOpts().PingInterval)
 }
 
 func TestGetJobsEvents(t *testing.T) {
