@@ -91,7 +91,10 @@ lint:
 format:
     #!/usr/bin/env bash
     set -eux
-    go tool -modfile="{{ THISDIR }}/tools/go.mod" mvdan.cc/gofumpt -l -w .
+    mapfile -d '' -t files < <(fd -0 '\.go$')
+    if ((${#files[@]})); then
+        go tool -modfile="{{ THISDIR }}/tools/go.mod" mvdan.cc/gofumpt -l -w -- "${files[@]}"
+    fi
     biome format
     just --fmt --unstable
 
