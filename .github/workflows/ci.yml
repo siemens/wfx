@@ -20,24 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: ./.github/actions/setup-ui
-      - name: Export Golang version as env variable
-        run: |
-          GO_VERSION=$(sed -n 's/.*container: golang:\([0-9]*\.[0-9]*\.[0-9]*\).*/\1/p' .github/workflows/ci.yml | head -n1)
-          echo "GO_VERSION=$GO_VERSION" | tee -a "$GITHUB_ENV"
-      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
-        with:
-          go-version: "${{ env.GO_VERSION }}"
-      - name: Setup Golang caches
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-golang-
-      - name: Disable git security features
-        run: git config --global safe.directory '*'
+      - uses: ./.github/actions/setup-build
       - run: sudo .ci/setup-build.sh
       - name: Set up QEMU
         uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4
@@ -53,9 +36,8 @@ jobs:
       - name: Build Snapshot Release for Linux
         run: /usr/bin/env CC=$(pwd)/.ci/zcc goreleaser release --clean --snapshot
 
-      - name: build plugins and contrib
+      - name: build contrib
         run: |
-          go build -C example/plugin
           go build -C contrib/remote-access/client
           go build -C contrib/config-deployment/client
 
@@ -65,10 +47,8 @@ jobs:
           path: dist/**/*
           retention-days: 5
 
-  test:
-    name: Test
-    needs:
-      - ui
+  go-unit-test:
+    name: Go Unit Tests
     runs-on: ubuntu-latest
     container: golang:1.26.5@sha256:3aff6657219a4d9c14e27fb1d8976c49c29fddb70ba835014f477e1c70636647
     steps:
@@ -82,14 +62,6 @@ jobs:
           key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-golang-
-      - name: Download UI artifact
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
-        with:
-          name: ui
-          path: ui/dist
-      - run: apt-get update -q && apt-get install -q -y --no-install-recommends zstd
-      - run: go generate -tags ui ./ui
-      - run: go test -race -coverprofile=coverage1.out -covermode=atomic -timeout 30s --tags=testing,ui ./...
       - run: go test -race -coverprofile=coverage2.out -covermode=atomic -timeout 30s --tags=testing ./...
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
@@ -97,100 +69,8 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: coverage*.out
 
-  test-postgres:
-    runs-on: ubuntu-latest
-    name: Test PostgreSQL
-    container: golang:1.26.5@sha256:3aff6657219a4d9c14e27fb1d8976c49c29fddb70ba835014f477e1c70636647
-    services:
-      postgres:
-        image: postgres:18@sha256:3a82e1f56c8f0f5616a11103ac3d47e632c3938698946a7ad26da0df1334744a
-        env:
-          # see https://hub.docker.com/_/postgres
-          POSTGRES_HOST: postgres
-          POSTGRES_PORT: 5432
-          POSTGRES_DB: wfx
-          POSTGRES_USER: wfx
-          POSTGRES_PASSWORD: secret
-          POSTGRES_HOST_AUTH_METHOD: trust
-        # Set health checks to wait until postgres has started
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 3s
-          --health-timeout 5s
-          --health-retries 20
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - name: Setup Golang caches
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-golang-
-      - run: go test -tags testing,integration,no_mysql -coverprofile=coverage.out -covermode=atomic ./...
-        env:
-          PGHOST: postgres
-          PGPORT: 5432
-          PGDATABASE: wfx
-          PGUSER: wfx
-          PGPASSWORD: secret
-          PGSSLMODE: disable
-      - name: Upload coverage to Codecov
-        # note: v4 is buggy and fails to upload this report
-        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: coverage.out
-
-  test-mysql:
-    runs-on: ubuntu-latest
-    name: Test MySQL
-    container: golang:1.26.5@sha256:3aff6657219a4d9c14e27fb1d8976c49c29fddb70ba835014f477e1c70636647
-    services:
-      mysql:
-        image: mysql:8-debian@sha256:49f4fcb0087318aa1c222c7e8ceacbb541cdc457c6307d45e6ee4313f4902e33
-        env:
-          # see https://hub.docker.com/_/mysql
-          MYSQL_DATABASE: wfx
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_USER: wfx
-          MYSQL_PASSWORD: secret
-          MYSQL_HOST: mysql
-        # Set health checks to wait until mysql has started
-        options: >-
-          --health-cmd="mysqladmin ping --silent"
-          --health-interval 3s
-          --health-timeout 5s
-          --health-retries 20
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - name: Setup Golang caches
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-golang-
-      - run: go test -tags testing,integration,no_postgres -coverprofile=coverage.out -covermode=atomic ./...
-        env:
-          MYSQL_DATABASE: wfx
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_USER: wfx
-          MYSQL_PASSWORD: secret
-          MYSQL_HOST: mysql
-      - name: Upload coverage to Codecov
-        # note: v4 is buggy and fails to upload this report
-        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: coverage.out
-
-  cli-tests:
-    name: CLI Tests
+  go-integration-test:
+    name: Go Integration Tests
     runs-on: ubuntu-latest
     container: golang:1.26.5@sha256:3aff6657219a4d9c14e27fb1d8976c49c29fddb70ba835014f477e1c70636647
     services:
@@ -225,6 +105,18 @@ jobs:
           --health-interval 3s
           --health-timeout 5s
           --health-retries 20
+    env:
+      MYSQL_DATABASE: wfx
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: wfx
+      MYSQL_PASSWORD: secret
+      MYSQL_HOST: mysql
+      PGHOST: postgres
+      PGPORT: 5432
+      PGDATABASE: wfx
+      PGUSER: wfx
+      PGPASSWORD: secret
+      PGSSLMODE: disable
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -238,44 +130,34 @@ jobs:
           key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-golang-
+      - name: Run integration tests
+        run: go test -tags testing,integration -coverprofile=coverage.out -covermode=atomic ./...
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.out
+
       - run: .ci/setup-cli-tests.sh
-      - name: Disable git security features
-        run: git config --global safe.directory '*'
       - name: install wfx
         run: go install .
       - name: install wfxctl
         run: go install ./cmd/wfxctl
       - name: build plugins
         run: go build -C example/plugin
-      - name: run tests
-        env:
-          PGHOST: postgres
-          PGPORT: 5432
-          PGUSER: wfx
-          PGPASSWORD: secret
-          PGDATABASE: wfx
-          MYSQL_DATABASE: wfx
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_USER: wfx
-          MYSQL_PASSWORD: secret
-          MYSQL_HOST: mysql
+      - name: Run CLI tests
         working-directory: test
         run: export PATH=$(go env GOPATH)/bin:$PATH; bats .
 
   lint:
-    needs: [ui]
     runs-on: ubuntu-latest
     name: Lint
     container: golang:1.26.5@sha256:3aff6657219a4d9c14e27fb1d8976c49c29fddb70ba835014f477e1c70636647
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - name: Download UI artifact
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
-        with:
-          name: ui
-          path: ui/dist
+      - name: Create UI embed inputs
+        run: mkdir -p ui/dist && touch ui/dist/app.js.zst ui/dist/app.js.sha256 ui/dist/app.css.zst ui/dist/app.css.sha256 ui/dist/logo.svg.zst
       - run: .ci/setup-lint.sh
-      - run: go generate -tags ui ./ui
       - name: Disable git security features
         run: git config --global safe.directory '*'
       - run: just lint
@@ -328,11 +210,14 @@ jobs:
           revision: spec/wfx.openapi.yml
           fail-on: ERR
 
-  ui:
+  ui-unit-tests:
+    name: UI Unit Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: ./.github/actions/setup-ui
+
+      # Gleam
       - name: Test
         run: gleam test
         working-directory: ui
@@ -342,36 +227,40 @@ jobs:
       - name: Build
         run: gleam run -m lustre/dev build --minify
         working-directory: ui
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
-        with:
-          name: ui
-          path: |
-            ui/dist/*
-          retention-days: 1
 
-  test-ui:
-    name: Playwright Tests
+      # Go
+      - uses: ./.github/actions/setup-build
+      - run: go generate -tags ui ./ui
+      - run: go test -race -coverprofile=coverage1.out -covermode=atomic -timeout 30s --tags=testing,ui ./...
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage1.out
+
+  ui-integration-tests:
+    name: UI Integration Tests
     runs-on: ubuntu-latest
+    env:
+      ImageOS: ubuntu24
     container:
       # the tag must track the @playwright/test version resolved in ui/integration/package-lock.json
       image: mcr.microsoft.com/playwright:v1.62.1-noble@sha256:dcc5531e97840b9b5e794f2814476b21571c5124a3fca2267d73041f56e7580e
     timeout-minutes: 60
-    needs:
-      - build
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - name: Download wfx
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
-        with:
-          name: dist
-          path: dist
-      # upload-artifact does not retain permissions, see https://github.com/actions/upload-artifact/issues/38
-      - name: Make 'wfx' binary globally available
-        run: install -v -D -m0755 dist/wfx-with-ui_linux_amd64_v1/wfx /usr/local/bin/wfx
-
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
-        with:
-          node-version: lts/*
+      - uses: ./.github/actions/setup-ui
+      - uses: ./.github/actions/setup-build
+      - name: Build wfx with embedded UI
+        env:
+          CGO_ENABLED: 1
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          apt-get update -q
+          apt-get install -q -y --no-install-recommends zstd libsqlite3-dev gcc
+          (cd ui && gleam run -m lustre/dev build --minify)
+          go generate -tags ui ./ui
+          go build -tags ui,no_mysql,no_postgres,libsqlite3 -o /usr/local/bin/wfx .
 
       - name: Install dependencies
         run: npm ci
