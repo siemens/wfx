@@ -34,13 +34,9 @@ runs:
     - name: Install unzip
       shell: bash
       run: |
-        if command -v sudo >/dev/null 2>&1; then
-          sudo apt-get update -q
-          sudo apt-get install --no-install-recommends -y unzip
-        else
-          apt-get update -q
-          apt-get install --no-install-recommends -y unzip
-        fi
+        SUDO=$(command -v sudo || :)
+        $SUDO apt-get update -q
+        $SUDO apt-get install --no-install-recommends -y unzip
     - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
       with:
         bun-version: "${{ env.BUN_VERSION }}"
@@ -56,12 +52,13 @@ runs:
         url="https://github.com/tailwindlabs/tailwindcss/releases/download/v${TAILWINDCSS_VERSION}/tailwindcss-linux-${arch}"
         curl -fsSL -o /tmp/tailwindcss "$url"
         chmod +x /tmp/tailwindcss
-        if command -v sudo >/dev/null 2>&1; then
-          sudo mv /tmp/tailwindcss /usr/local/bin/tailwindcss
-        else
-          mv /tmp/tailwindcss /usr/local/bin/tailwindcss
-        fi
+        SUDO=$(command -v sudo || :)
+        $SUDO mv /tmp/tailwindcss /usr/local/bin/tailwindcss
         tailwindcss --help | head -n1
+    - shell: bash
+      run: |
+        SUDO=$(command -v sudo || :)
+        $SUDO .ci/setup-ui.sh
     - name: Install deps
       shell: bash
       working-directory: ui
