@@ -12,6 +12,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo "Installing zig $ZIG_VERSION"
 
+if ! command -v xz >/dev/null; then
+    apt-get update -q
+    apt-get install -y --no-install-recommends xz-utils
+fi
 
 URL="https://ziglang.org/download/${ZIG_VERSION}/zig-linux-x86_64-${ZIG_VERSION}.tar.xz"
 echo "Downloading $URL"
