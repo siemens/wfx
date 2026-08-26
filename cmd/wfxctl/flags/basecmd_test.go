@@ -169,7 +169,7 @@ func TestProcessResponse_Error(t *testing.T) {
 	buf := new(bytes.Buffer)
 	b := NewBaseCmd(pflag.NewFlagSet("wfx", pflag.ExitOnError))
 	err := b.ProcessResponse(resp, buf)
-	assert.Error(t, err)
+	require.EqualError(t, err, "empty body, HTTP status 500")
 }
 
 func TestProcessResponse_ErrorResponse(t *testing.T) {
