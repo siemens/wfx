@@ -169,11 +169,12 @@ The following connectivity parameters are available:
 
 ## Cross-Origin Resource Sharing (CORS)
 
-The API servers add CORS headers to responses, allowing browser-based clients to access wfx directly.
-The following parameters control these headers:
+CORS headers are disabled by default and never applied to the southbound API.
+The following parameters control CORS for the northbound API:
 
 | Parameter                  | Description                                                                                                                                                                       |
 |:---------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `--cors-enabled`           | Add CORS headers to northbound API responses; disabled by default                                                                                                                  |
 | `--cors-allowed-origins`   | One or multiple origins allowed to make cross-origin requests; defaults to `*` (any origin)                                                                                       |
 | `--cors-allowed-methods`   | One or multiple methods allowed when making cross-origin requests; defaults to `GET,HEAD,POST,PUT,PATCH,DELETE`                                                                   |
 | `--cors-allowed-headers`   | One or multiple headers allowed when making cross-origin requests; defaults to `*` (any header)                                                                                   |
@@ -183,10 +184,10 @@ The following parameters control these headers:
 `--cors-allow-credentials` requires explicit origins. Configuration is rejected if
 `--cors-allowed-origins` contains `*` while credentials are enabled.
 
-For example, to restrict access to a single origin:
+For example, to enable CORS headers:
 
 ```bash
-wfx --cors-allowed-origins https://wfx.example.com
+wfx --cors-enabled --cors-allowed-origins https://wfx-ui.company.cloud
 ```
 
 ## File Server

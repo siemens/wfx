@@ -235,8 +235,9 @@ func newInMemoryDB(t *testing.T) persistence.Storage {
 	return db
 }
 
-func createNorthAndSouth(t *testing.T, db persistence.Storage) (http.Handler, http.Handler) {
+func createNorthAndSouth(t *testing.T, db persistence.Storage, args ...string) (http.Handler, http.Handler) {
 	flagSet := config.NewFlagset()
+	require.NoError(t, flagSet.Parse(args))
 	cfg, err := config.NewAppConfig(flagSet)
 	require.NoError(t, err)
 

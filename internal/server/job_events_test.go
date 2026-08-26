@@ -37,11 +37,23 @@ func TestJobEventsSubscribe(t *testing.T) {
 	require.NoError(t, err)
 
 	north, south := createNorthAndSouth(t, db)
+	corsNorth, _ := createNorthAndSouth(t, db,
+		"--cors-enabled",
+		"--cors-allowed-origins", "https://example.com",
+	)
 
-	handlers := []http.Handler{north, south}
-	for i, name := range allAPIs {
-		handler := handlers[i]
-		t.Run(name, func(t *testing.T) {
+	tests := []struct {
+		name       string
+		handler    http.Handler
+		corsOrigin string
+	}{
+		{name: "north", handler: north},
+		{name: "south", handler: south},
+		{name: "north-cors", handler: corsNorth, corsOrigin: "https://example.com"},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			handler := tc.handler
 			clientID := "TestJobEventsSubscribe"
 
 			var jobID atomic.Pointer[string]
@@ -86,6 +98,7 @@ func TestJobEventsSubscribe(t *testing.T) {
 			rec := sse.NewMockResponseRecorder(t)
 			wg.Go(func() {
 				req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/wfx/v1/jobs/events?ids=%s", *jobID.Load()), nil)
+				req.Header.Set("Origin", "https://example.com")
 				handler.ServeHTTP(rec, req.WithContext(ctx))
 			})
 
@@ -99,13 +112,22 @@ func TestJobEventsSubscribe(t *testing.T) {
 
 			assert.Contains(t, response, "HTTP/1.1 200")
 			assert.Contains(t, response, "Content-Type: text/event-stream")
+			if tc.corsOrigin == "" {
+				assert.NotContains(t, response, "Access-Control-Allow-Origin")
+			} else {
+				assert.Contains(t, response, "Access-Control-Allow-Origin: "+tc.corsOrigin)
+			}
 
 			lines := strings.Split(response, "\r\n")
 			t.Log("HTTP response:")
 			for _, line := range lines {
 				t.Logf(">> %s", line)
 			}
-			assert.Len(t, lines, 8)
+			expectedLines := 7
+			if tc.corsOrigin != "" {
+				expectedLines += 2
+			}
+			assert.Len(t, lines, expectedLines)
 
 			lines = strings.Split(lines[len(lines)-1], "\n")
 
