@@ -42,8 +42,8 @@ credential=secret-token
 
 ```
 
-An explicit `Authorization` header set with `--client-hdr` or `--mgmt-hdr` takes
-precedence over the credential helper.
+An explicit `Authorization` header set with `--header` takes precedence over
+the credential helper.
 
 ## Systemd Integration
 
@@ -57,10 +57,10 @@ systemctl enable --now wfx@foo.socket
 systemctl enable --now wfx@bar.socket
 ```
 
-The wfx services launch on-demand, i.e., they start when a client connects, such as when retrieving the wfx version:
+The wfx services launch on-demand, i.e., they start when a client connects:
 
 ```bash
-wfxctl --client-unix-socket /var/run/wfx/foo/client.sock version
+wfxctl --host unix:///var/run/wfx/foo/client.sock version
 ```
 
 ## Persistent Storage

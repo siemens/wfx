@@ -32,7 +32,7 @@ func NewCommand() *cobra.Command {
 			baseCmd := flags.NewBaseCmd(cmd.Flags())
 			tags := args
 
-			client := errutil.Must(baseCmd.CreateMgmtClient())
+			client := errutil.Must(baseCmd.CreateClient())
 			resp, err := client.DeleteJobsIdTags(cmd.Context(), baseCmd.ID, nil, api.DeleteJobsIdTagsJSONRequestBody(tags))
 			if err != nil {
 				return fault.Wrap(err)

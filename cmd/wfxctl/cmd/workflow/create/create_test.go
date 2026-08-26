@@ -14,7 +14,6 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"os"
 	"testing"
 
@@ -35,8 +34,6 @@ func TestCreateWorkflow(t *testing.T) {
 		_, _ = w.Write(b)
 	}))
 	t.Cleanup(ts.Close)
-
-	u, _ := url.Parse(ts.URL)
 
 	tests := []struct {
 		name     string
@@ -69,8 +66,7 @@ func TestCreateWorkflow(t *testing.T) {
 		},
 	}
 
-	t.Setenv("WFX_MGMT_HOST", u.Hostname())
-	t.Setenv("WFX_MGMT_PORT", u.Port())
+	t.Setenv("WFX_HOST", ts.URL)
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {

@@ -285,8 +285,7 @@ they're actually able to process the job.
 Then, Developer Dana, knowing the job (Task) Identifier, pulls the task into "PROGRESS"
 
 ```sh
-wfxctl job update-status \
-    --actor=client \
+wfxctl --host http://localhost:8080 job update-status \
     --id=1 \
     --state=PROGRESS
 ```
@@ -306,8 +305,7 @@ curl -X PUT \
 Meanwhile, Developer Dana sporadically reports progress
 
 ```sh
-wfxctl job update-status \
-    --actor=client \
+wfxctl --host http://localhost:8080 job update-status \
     --id=1 \
     --state=PROGRESS \
     --progress $((RANDOM % 100))
@@ -316,8 +314,7 @@ wfxctl job update-status \
 until having finished the task and progressing it into the "VALIDATE" state:
 
 ```sh
-wfxctl job update-status \
-    --actor=client \
+wfxctl --host http://localhost:8080 job update-status \
     --id=1 \
     --state=VALIDATE
 ```
