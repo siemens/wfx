@@ -349,6 +349,9 @@ func (b *BaseCmd) ProcessResponse(resp *http.Response, w io.Writer) error {
 		if err := json.Unmarshal(body, &errorResponse); err == nil {
 			errutil.ProcessErrorResponse(w, errorResponse)
 		}
+		if len(body) == 0 {
+			return fmt.Errorf("empty body, HTTP status %d", statusCode)
+		}
 		return fmt.Errorf("error: %s", string(body))
 	}
 	return nil
