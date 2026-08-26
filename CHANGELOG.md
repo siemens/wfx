@@ -7,11 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Breaking
+
+- CORS is off by default as it is typically not needed to serve the UI (same origin). It can optionally be enabled via the `--cors-enabled` flag.
+- CORS headers will only be set for northbound responses (and never for the southbound API).
+
 ### Added
 
 - `--jq-filter-timeout` to limit the execution time of JQ response filters (default: 30s, `0` disables the limit)
 - `--jq-filter-max-response-size` to limit the size of a JQ response filter result (default: 16 MiB, `0` disables the limit)
-- Configurable CORS headers (`--cors-allowed-origins`, `--cors-allowed-methods`, `--cors-allowed-headers`, `--cors-allow-credentials` and `--cors-max-age` flags)
+- Configurable CORS headers for northbound API
 - UI: add fallback configuration using default local WFX management API
 - UI: display wfx JSON error messages, hiding other response bodies
 
@@ -22,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Apply reloaded SSE ping and grace intervals to new job event connections
-- CORS is registered globally now
+- CORS is registered globally now, thereby adding support for the HTTP OPTIONS method
 
 ## [0.6.0] - 2026-06-03
 

@@ -45,6 +45,13 @@ func NewResponder(ctx context.Context, idleDuration time.Duration, subscriber *e
 func (responder Responder) VisitGetJobsEventsResponse(w http.ResponseWriter) error {
 	log := logging.LoggerFromCtx(responder.ctx).With().Str("subscriberID", responder.subscriber.ID()).Logger()
 
+	// Preserve headers set by middlewares
+	header := w.Header()
+	header.Set("Content-Type", "text/event-stream")
+	header.Set("Cache-Control", "no-cache")
+	header.Set("Connection", "keep-alive")
+	header.Set("X-Accel-Buffering", "no")
+
 	// Check if the ResponseWriter supports hijacking
 	hj, ok := w.(http.Hijacker)
 	if !ok { // e.g. if HTTP/2 is being used
@@ -63,13 +70,10 @@ func (responder Responder) VisitGetJobsEventsResponse(w http.ResponseWriter) err
 	}()
 
 	_, _ = fmt.Fprintf(bufrw, "HTTP/1.1 %d\r\n", http.StatusOK)
-	_, _ = bufrw.WriteString("Content-Type: text/event-stream\r\n")
-	_, _ = bufrw.WriteString("Cache-Control: no-cache\r\n")
-	_, _ = bufrw.WriteString("Connection: keep-alive\r\n")
-	_, _ = bufrw.WriteString("Access-Control-Allow-Origin: *\r\n")
-	_, _ = bufrw.WriteString("X-Accel-Buffering: no\r\n") // notify reverse proxy to disable buffering
-
-	// finish header section
+	// Hijacking bypasses net/http's header write, so include headers manually
+	if err := header.Write(bufrw); err != nil {
+		return fault.Wrap(err)
+	}
 	_, _ = bufrw.WriteString("\r\n")
 
 	if err := bufrw.Flush(); err != nil {

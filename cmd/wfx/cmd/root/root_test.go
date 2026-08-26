@@ -65,10 +65,6 @@ func TestUDS(t *testing.T) {
 			time.Sleep(time.Millisecond * 10)
 			continue
 		}
-		defer func() {
-			_ = conn.Close()
-		}()
-
 		req, err := http.NewRequest(http.MethodGet, "/version", nil)
 		require.NoError(t, err)
 		client := &http.Client{
@@ -79,6 +75,10 @@ func TestUDS(t *testing.T) {
 			},
 		}
 		resp, err := client.Do(req)
+		if resp != nil {
+			_ = resp.Body.Close()
+		}
+		_ = conn.Close()
 		if err == nil && resp.StatusCode == http.StatusOK {
 			break
 		}
