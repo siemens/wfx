@@ -3,6 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 # Author: Michael Adler <michael.adler@siemens.com>
+SOUTHBOUND_HOST="http://localhost:8080"
+NORTHBOUND_HOST="http://localhost:8081"
+
 DM=$(command -v demo-magic.sh || echo "")
 [ "$DM" != "" ] || {
     DM=$(mktemp)

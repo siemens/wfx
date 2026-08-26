@@ -66,10 +66,8 @@ func NewCommand() *cobra.Command {
 	cmd.AddCommand(populate.NewCommand(k))
 	f := cmd.PersistentFlags()
 
-	f.String(flags.ClientHostFlag, "localhost", "host")
-	f.Int(flags.ClientPortFlag, 8080, "port")
-	f.String(flags.MgmtHostFlag, "localhost", "management host")
-	f.Int(flags.MgmtPortFlag, 8081, "management port")
+	f.String(loadtest.ClientHostFlag, "http://localhost:8080", "client server URL")
+	f.String(loadtest.MgmtHostFlag, "http://localhost:8081", "management server URL")
 
 	f.String(flags.LogLevelFlag, "info", fmt.Sprintf("set log level. one of: %s,%s,%s,%s,%s,%s,%s",
 		zerolog.TraceLevel.String(),

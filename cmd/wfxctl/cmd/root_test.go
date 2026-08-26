@@ -21,3 +21,18 @@ func TestRootCmd_ManPage(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotNil(t, cmd)
 }
+
+func TestRootCmd_HostFlag(t *testing.T) {
+	cmd := NewCommand()
+	flag := cmd.PersistentFlags().Lookup("host")
+	require.NotNil(t, flag)
+	assert.Equal(t, "http://localhost:8081", flag.DefValue)
+
+	for _, removed := range []string{
+		"enable-tls",
+		"client-host", "client-port", "client-tls-host", "client-tls-port", "client-unix-socket",
+		"mgmt-host", "mgmt-port", "mgmt-tls-host", "mgmt-tls-port", "mgmt-unix-socket",
+	} {
+		assert.Nil(t, cmd.PersistentFlags().Lookup(removed))
+	}
+}

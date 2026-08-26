@@ -8,16 +8,18 @@ load 'test_helper/bats-support/load'
 load 'test_helper/bats-assert/load'
 load 'test_helper/bats-file/load'
 
-# shellcheck disable=SC2034
-BASEURL="http://localhost:8080/api/wfx/v1"
+SOUTHBOUND_HOST="http://localhost:8080"
+NORTHBOUND_HOST="http://localhost:8081"
+API_BASE_PATH="/api/wfx/v1"
 
 wait_wfx_running() {
     local expected=$1
     local count
     for _i in {1..20}; do
-        count=$(wfxctl health 2>/dev/null || echo "")
-        count=$(echo "$count" | grep -c up || true)
-        if [[ "${count:-0}" -eq "$expected" ]]; then
+        count=0
+        wfxctl --host "$SOUTHBOUND_HOST" health 2>/dev/null | grep -q $'wfx\tup' && count=$((count+1))
+        wfxctl --host "$NORTHBOUND_HOST" health 2>/dev/null | grep -q $'wfx\tup' && count=$((count+1))
+        if [[ "$count" -eq "$expected" ]]; then
             break
         fi
         sleep 0.5

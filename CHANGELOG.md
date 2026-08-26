@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - CORS is off by default as it is typically not needed to serve the UI (same origin). It can optionally be enabled via the `--cors-enabled` flag.
 - CORS headers will only be set for northbound responses (and never for the southbound API).
+- wfxctl now uses a single `--host` parameter defaulting to the northbound API. This replaces the previous separate northbound/southbound host, port, TLS, and Unix socket parameters.
 
 ### Added
 
@@ -19,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Configurable CORS headers for northbound API
 - UI: add fallback configuration using default local WFX management API
 - UI: display wfx JSON error messages, hiding other response bodies
-- wfxctl: new global `--client-hdr` and `--mgmt-hdr` flags to add custom HTTP headers to client and management requests, e.g. `--client-hdr 'Authorization: Bearer $TOKEN'` (similar to curl's `-H` option, may be given multiple times)
+- wfxctl: new global `--header` flag to add custom HTTP headers, e.g. `--header 'Authorization: Bearer $TOKEN'` (similar to curl's `-H` option, may be given multiple times)
 - wfxctl: support Git-style credential helper plugins through `--credential-helper`
 
 ### Changed

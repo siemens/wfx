@@ -73,9 +73,9 @@ EOF
 				return fault.Wrap(err)
 			}
 			log.Info().Int("count", len(allWorkflows)).Msg("Creating workflows")
-			client := errutil.Must(baseCmd.CreateMgmtClient())
+			mgmtClient := errutil.Must(baseCmd.CreateClient())
 			for _, wf := range allWorkflows {
-				resp, err := client.PostWorkflows(cmd.Context(), nil, api.PostWorkflowsJSONRequestBody(wf))
+				resp, err := mgmtClient.PostWorkflows(cmd.Context(), nil, api.PostWorkflowsJSONRequestBody(wf))
 				if err != nil {
 					return fault.Wrap(err)
 				}

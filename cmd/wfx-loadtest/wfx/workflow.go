@@ -10,8 +10,8 @@ package wfx
 
 import (
 	"context"
-	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/Southclaws/fault"
@@ -20,12 +20,12 @@ import (
 	"github.com/siemens/wfx/generated/api"
 )
 
-func CreateWorkflow(host string, port int, workflow api.Workflow) error {
+func CreateWorkflow(mgmtHost string, workflow api.Workflow) error {
 	swagger := errutil.Must(api.GetSpec())
 	basePath := errutil.Must(swagger.Servers.BasePath())
-	server := fmt.Sprintf("http://%s:%d%s", host, port, basePath)
-	log.Info().Str("server", server).Str("name", workflow.Name).Msgf("Creating workflow %q", workflow.Name)
-	client, err := api.NewClientWithResponses(server, api.WithHTTPClient(&http.Client{
+	mgmtAPI := strings.TrimRight(mgmtHost, "/") + basePath
+	log.Info().Str("mgmtHost", mgmtHost).Str("name", workflow.Name).Msgf("Creating workflow %q", workflow.Name)
+	client, err := api.NewClientWithResponses(mgmtAPI, api.WithHTTPClient(&http.Client{
 		Timeout: time.Second * 10,
 	}))
 	if err != nil {

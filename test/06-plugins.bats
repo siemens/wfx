@@ -19,7 +19,7 @@ teardown() {
         --storage=sqlite --storage-opt="file:wfx?mode=memory&cache=shared&_fk=1" \
         --client-plugins-dir ../example/plugin &
     wait_wfx_running 2
-    run curl -s -o /dev/null -w "%{http_code}" "$BASEURL/workflows"
+    run curl -sL --max-redirs 1 -o /dev/null -w "%{http_code}" "$SOUTHBOUND_HOST/$API_BASE_PATH/workflows"
     assert_output "403"
     kill %1 # wfx, expect a clean shutdown
     local job_count=1

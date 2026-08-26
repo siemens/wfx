@@ -13,7 +13,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"testing"
 
 	"github.com/siemens/wfx/cmd/wfxctl/flags"
@@ -22,10 +21,27 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestNewCommand(t *testing.T) {
+func TestNewCommand_Down(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusServiceUnavailable)
+		_ = json.NewEncoder(w).Encode(api.CheckerResult{Status: api.Down})
+	}))
+	defer ts.Close()
+	t.Setenv("WFX_HOST", ts.URL)
+
 	cmd := NewCommand()
 	err := cmd.Execute()
-	require.NoError(t, err)
+	require.ErrorContains(t, err, "wfx is not healthy")
+}
+
+func TestNewCommand_RequestError(t *testing.T) {
+	ts := httptest.NewServer(nil)
+	ts.Close()
+	t.Setenv("WFX_HOST", ts.URL)
+
+	cmd := NewCommand()
+	require.Error(t, cmd.Execute())
 }
 
 func TestNewCommand_Up(t *testing.T) {
@@ -35,18 +51,11 @@ func TestNewCommand_Up(t *testing.T) {
 
 		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		response := api.GetHealth200JSONResponse{
-			Body: api.CheckerResult{
-				Status: api.Up,
-			},
-		}
-		_ = json.NewEncoder(w).Encode(response)
+		_ = json.NewEncoder(w).Encode(api.CheckerResult{Status: api.Up})
 	}))
 	defer ts.Close()
 
-	u, _ := url.Parse(ts.URL)
-	t.Setenv("WFX_CLIENT_HOST", u.Hostname())
-	t.Setenv("WFX_CLIENT_PORT", u.Port())
+	t.Setenv("WFX_HOST", ts.URL)
 
 	cmd := NewCommand()
 	err := cmd.Execute()
@@ -55,43 +64,54 @@ func TestNewCommand_Up(t *testing.T) {
 }
 
 func TestNewCommand_Headers(t *testing.T) {
-	requests := make(chan *http.Request, 4)
+	var actualHeader string
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		requests <- r
+		actualHeader = r.Header.Get("X-Custom")
 		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(`{"body":{"status":"up"}}`))
+		_, _ = w.Write([]byte(`{"status":"up"}`))
 	}))
 	defer ts.Close()
 
-	u, err := url.Parse(ts.URL)
-	require.NoError(t, err)
-	t.Setenv("WFX_CLIENT_HOST", u.Hostname())
-	t.Setenv("WFX_CLIENT_PORT", u.Port())
-	t.Setenv("WFX_MGMT_HOST", u.Hostname())
-	t.Setenv("WFX_MGMT_PORT", u.Port())
+	t.Setenv("WFX_HOST", ts.URL)
 
 	cmd := NewCommand()
-	cmd.Flags().StringArray(flags.ClientHeaderFlag, nil, "")
-	cmd.Flags().StringArray(flags.MgmtHeaderFlag, nil, "")
-	cmd.SetArgs([]string{"--client-hdr", "X-Client: custom", "--mgmt-hdr", "X-Mgmt: custom"})
+	cmd.Flags().StringArray(flags.HeaderFlag, nil, "")
+	cmd.SetArgs([]string{"--header", "X-Custom: value"})
 	require.NoError(t, cmd.Execute())
 
-	seenClient, seenMgmt := false, false
-	for range 2 {
-		req := <-requests
-		if req.Header.Get("X-Client") != "" {
-			assert.Empty(t, req.Header.Get("X-Mgmt"))
-			seenClient = true
-		} else {
-			assert.Equal(t, "custom", req.Header.Get("X-Mgmt"))
-			seenMgmt = true
-		}
-	}
-	assert.True(t, seenClient)
-	assert.True(t, seenMgmt)
+	assert.Equal(t, "value", actualHeader)
+}
+
+func TestNewCommand_HidesBasicAuth(t *testing.T) {
+	var authorization string
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		authorization = r.Header.Get("Authorization")
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"status":"up"}`))
+	}))
+	defer ts.Close()
+
+	host := "http://user:secret@" + ts.Listener.Addr().String()
+	t.Setenv("WFX_HOST", host)
+	var output bytes.Buffer
+	cmd := NewCommand()
+	cmd.SetOut(&output)
+	require.NoError(t, cmd.Execute())
+
+	assert.Equal(t, "Basic dXNlcjpzZWNyZXQ=", authorization)
+	assert.NotContains(t, output.String(), "user")
+	assert.NotContains(t, output.String(), "secret")
+	assert.Contains(t, output.String(), ts.Listener.Addr().String())
 }
 
 func TestNewCommand_ColorModes(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(api.CheckerResult{Status: api.Up})
+	}))
+	defer ts.Close()
+	t.Setenv("WFX_HOST", ts.URL)
+
 	for _, mode := range []string{colorAlways, colorAuto, colorNever} {
 		cmd := NewCommand()
 		cmd.SetArgs([]string{"--color", mode})
@@ -106,21 +126,20 @@ func TestNewCommand_ColorModes(t *testing.T) {
 
 func TestPrettyReport_Empty(t *testing.T) {
 	buf := new(bytes.Buffer)
-	prettyReport(buf, false, nil)
-	prettyReport(buf, true, nil)
+	prettyReport(buf, false, Endpoint{})
+	prettyReport(buf, true, Endpoint{})
 	assert.NotEmpty(t, buf)
 }
 
 func TestPrettyReport(t *testing.T) {
-	buf := new(bytes.Buffer)
-
-	allEndpoints := []Endpoint{
+	for _, endpoint := range []Endpoint{
 		{Name: "Foo", Server: "http://127.0.0.1", Response: &api.GetHealthResponse{JSON200: &api.CheckerResult{Status: api.Up}}},
 		{Name: "Foo", Server: "http://127.0.0.2", Response: &api.GetHealthResponse{JSON503: &api.CheckerResult{Status: api.Down}}},
 		{Name: "Foo", Server: "http://127.0.0.3", Response: &api.GetHealthResponse{JSON503: &api.CheckerResult{Status: api.Unknown}}},
+	} {
+		buf := new(bytes.Buffer)
+		prettyReport(buf, false, endpoint)
+		prettyReport(buf, true, endpoint)
+		assert.NotEmpty(t, buf)
 	}
-
-	prettyReport(buf, false, allEndpoints)
-	prettyReport(buf, true, allEndpoints)
-	assert.NotEmpty(t, buf)
 }
