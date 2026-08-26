@@ -49,15 +49,6 @@ func NewServerCollection(cfg *config.AppConfig, wfx api.StrictServerInterface, s
 	swag, _ := api.GetSpec()
 	validator := nethttpmiddleware.OapiRequestValidatorWithOptions(swag,
 		&nethttpmiddleware.Options{SilenceServersWarning: true})
-	// CORS must wrap the whole server: preflight (OPTIONS) requests match no
-	// route of our mux, so a per-route middleware would never see them.
-	corsMW := cors.New(cors.Options{
-		AllowedOrigins:   cfg.CORSAllowedOrigins(),
-		AllowedMethods:   cfg.CORSAllowedMethods(),
-		AllowedHeaders:   cfg.CORSAllowedHeaders(),
-		AllowCredentials: cfg.CORSAllowCredentials(),
-		MaxAge:           cfg.CORSMaxAge(),
-	}).Handler
 	logMW := logging.NewLoggingMiddleware()
 
 	// LIFO
@@ -82,7 +73,23 @@ func NewServerCollection(cfg *config.AppConfig, wfx api.StrictServerInterface, s
 	if err != nil {
 		return nil, fault.Wrap(err)
 	}
-	northServer.Handler = corsMW(northServer.Handler)
+	// CORS must wrap the whole server: preflight (OPTIONS) requests match no
+	// route of our mux, so a per-route middleware would never see them.
+	northHandler := northServer.Handler
+	northServer.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		corsOpts := cfg.CORSOpts()
+		if !corsOpts.Enabled {
+			northHandler.ServeHTTP(w, r)
+			return
+		}
+		cors.New(cors.Options{
+			AllowedOrigins:   corsOpts.AllowedOrigins,
+			AllowedMethods:   corsOpts.AllowedMethods,
+			AllowedHeaders:   corsOpts.AllowedHeaders,
+			AllowCredentials: corsOpts.AllowCredentials,
+			MaxAge:           corsOpts.MaxAge,
+		}).Handler(northHandler).ServeHTTP(w, r)
+	})
 
 	southPluginMWs, err := createPluginMiddlewares(cfg.ClientPluginsDir())
 	if err != nil {
@@ -100,8 +107,6 @@ func NewServerCollection(cfg *config.AppConfig, wfx api.StrictServerInterface, s
 	if err != nil {
 		return nil, fault.Wrap(err)
 	}
-	southServer.Handler = corsMW(southServer.Handler)
-
 	return &ServerCollection{
 		cfg:          cfg,
 		storage:      storage,

@@ -55,11 +55,7 @@ type AppConfig struct {
 	keepAlive      bool
 	cleanupTimeout time.Duration
 
-	corsAllowedOrigins   []string
-	corsAllowedMethods   []string
-	corsAllowedHeaders   []string
-	corsAllowCredentials bool
-	corsMaxAge           time.Duration
+	corsOpts CORSOpts
 
 	tlsCACertificate string
 	tlsCertificate   string
@@ -83,6 +79,15 @@ type AppConfig struct {
 type JQOpts struct {
 	FilterTimeout         time.Duration
 	FilterMaxResponseSize int
+}
+
+type CORSOpts struct {
+	Enabled          bool
+	AllowedOrigins   []string
+	AllowedMethods   []string
+	AllowedHeaders   []string
+	AllowCredentials bool
+	MaxAge           int
 }
 
 type Scheme int
@@ -240,12 +245,13 @@ func (cfg *AppConfig) Reload() bool {
 	cfg.ssePingInterval = cfg.k.Duration(SSEPingIntervalFlag)
 	cfg.sseGraceInterval = cfg.k.Duration(SSEGraceIntervalFlag)
 
-	cfg.corsAllowedOrigins = cfg.k.Strings(CORSAllowedOriginsFlag)
-	cfg.corsAllowedMethods = cfg.k.Strings(CORSAllowedMethodsFlag)
-	cfg.corsAllowedHeaders = cfg.k.Strings(CORSAllowedHeadersFlag)
-	cfg.corsAllowCredentials = cfg.k.Bool(CORSAllowCredentialsFlag)
-	cfg.corsMaxAge = cfg.k.Duration(CORSMaxAgeFlag)
-	if cfg.corsAllowCredentials && slices.Contains(cfg.corsAllowedOrigins, "*") {
+	cfg.corsOpts.Enabled = cfg.k.Bool(CORSEnabledFlag)
+	cfg.corsOpts.AllowedOrigins = cfg.k.Strings(CORSAllowedOriginsFlag)
+	cfg.corsOpts.AllowedMethods = cfg.k.Strings(CORSAllowedMethodsFlag)
+	cfg.corsOpts.AllowedHeaders = cfg.k.Strings(CORSAllowedHeadersFlag)
+	cfg.corsOpts.AllowCredentials = cfg.k.Bool(CORSAllowCredentialsFlag)
+	cfg.corsOpts.MaxAge = int(cfg.k.Duration(CORSMaxAgeFlag) / time.Second)
+	if cfg.corsOpts.AllowCredentials && slices.Contains(cfg.corsOpts.AllowedOrigins, "*") {
 		fmt.Fprintln(os.Stderr, "cors-allow-credentials requires explicit cors-allowed-origins")
 		ok = false
 	}
@@ -460,37 +466,15 @@ func (cfg *AppConfig) SSEGraceInterval() time.Duration {
 	return cfg.sseGraceInterval
 }
 
-func (cfg *AppConfig) CORSAllowedOrigins() []string {
+func (cfg *AppConfig) CORSOpts() CORSOpts {
 	cfg.mutex.RLock()
 	defer cfg.mutex.RUnlock()
-	return slices.Clone(cfg.corsAllowedOrigins)
-}
 
-func (cfg *AppConfig) CORSAllowedMethods() []string {
-	cfg.mutex.RLock()
-	defer cfg.mutex.RUnlock()
-	return slices.Clone(cfg.corsAllowedMethods)
-}
-
-func (cfg *AppConfig) CORSAllowedHeaders() []string {
-	cfg.mutex.RLock()
-	defer cfg.mutex.RUnlock()
-	return slices.Clone(cfg.corsAllowedHeaders)
-}
-
-func (cfg *AppConfig) CORSAllowCredentials() bool {
-	cfg.mutex.RLock()
-	defer cfg.mutex.RUnlock()
-	return cfg.corsAllowCredentials
-}
-
-// CORSMaxAge returns the preflight cache duration in seconds. Zero (the
-// default) omits the Access-Control-Max-Age header; a negative value forces
-// `Access-Control-Max-Age: 0` so browsers stop caching preflights.
-func (cfg *AppConfig) CORSMaxAge() int {
-	cfg.mutex.RLock()
-	defer cfg.mutex.RUnlock()
-	return int(cfg.corsMaxAge / time.Second)
+	opts := cfg.corsOpts
+	opts.AllowedOrigins = slices.Clone(opts.AllowedOrigins)
+	opts.AllowedMethods = slices.Clone(opts.AllowedMethods)
+	opts.AllowedHeaders = slices.Clone(opts.AllowedHeaders)
+	return opts
 }
 
 func (cfg *AppConfig) InitStorage() (persistence.Storage, error) {

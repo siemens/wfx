@@ -43,6 +43,8 @@ func TestResponder(t *testing.T) {
 	})
 
 	rw := NewMockResponseRecorder(t)
+	rw.Header()["Invalid\r\nName"] = []string{"value"}
+	rw.Header().Set("X-Middleware", "safe\r\nInjected: yes")
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
@@ -72,6 +74,8 @@ func TestResponder(t *testing.T) {
 	assert.JSONEq(t, expected, string(objJson))
 	assert.Contains(t, resp, "id: 1")
 	assert.Contains(t, resp, "\n\n")
+	assert.NotContains(t, resp, "Invalid")
+	assert.Contains(t, resp, "X-Middleware: safe  Injected: yes\r\n")
 
 	cancel()
 	wg.Wait()
