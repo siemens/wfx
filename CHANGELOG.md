@@ -11,13 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - CORS is off by default as it is typically not needed to serve the UI (same origin). It can optionally be enabled via the `--cors-enabled` flag.
 - CORS headers will only be set for northbound responses (and never for the southbound API).
+- wfxctl now uses a single `--host` parameter defaulting to the northbound API. This replaces the previous separate northbound/southbound host, port, TLS, and Unix socket parameters.
 
 ### Added
 
 - `--jq-filter-timeout` to limit the execution time of JQ response filters (default: 30s, `0` disables the limit)
 - `--jq-filter-max-response-size` to limit the size of a JQ response filter result (default: 16 MiB, `0` disables the limit)
 - Configurable CORS headers for northbound API
-- wfxctl: new global `--client-hdr` and `--mgmt-hdr` flags to add custom HTTP headers to client and management requests, e.g. `--client-hdr 'Authorization: Bearer $TOKEN'` (similar to curl's `-H` option, may be given multiple times)
+- wfxctl: new global `--header` flag to add custom HTTP headers, e.g. `--header 'Authorization: Bearer $TOKEN'` (similar to curl's `-H` option, may be given multiple times)
 - wfxctl: support Git-style credential helper plugins through `--credential-helper`
 
 ### Changed

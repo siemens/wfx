@@ -12,7 +12,6 @@ import (
 	"bytes"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"testing"
 
 	"github.com/siemens/wfx/cmd/wfxctl/flags"
@@ -34,9 +33,7 @@ func TestSubscribeJobStatus(t *testing.T) {
 	}))
 	t.Cleanup(ts.Close)
 
-	u, _ := url.Parse(ts.URL)
-	t.Setenv("WFX_CLIENT_HOST", u.Hostname())
-	t.Setenv("WFX_CLIENT_PORT", u.Port())
+	t.Setenv("WFX_HOST", ts.URL)
 
 	cmd := NewCommand()
 	cmd.SetArgs([]string{"--" + flags.JobIDFlag, "1"})
@@ -54,13 +51,11 @@ func TestSubscribeJobStatusHeaders(t *testing.T) {
 	}))
 	t.Cleanup(ts.Close)
 
-	u, _ := url.Parse(ts.URL)
-	t.Setenv("WFX_CLIENT_HOST", u.Hostname())
-	t.Setenv("WFX_CLIENT_PORT", u.Port())
+	t.Setenv("WFX_HOST", ts.URL)
 
 	cmd := NewCommand()
-	cmd.Flags().StringArray(flags.ClientHeaderFlag, nil, "")
-	cmd.SetArgs([]string{"--" + flags.ClientHeaderFlag, "X-Custom: value"})
+	cmd.Flags().StringArray(flags.HeaderFlag, nil, "")
+	cmd.SetArgs([]string{"--" + flags.HeaderFlag, "X-Custom: value"})
 	err := cmd.Execute()
 	assert.ErrorContains(t, err, "connection to server lost")
 	assert.Equal(t, "value", actualHeader)

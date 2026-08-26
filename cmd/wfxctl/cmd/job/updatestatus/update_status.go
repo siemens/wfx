@@ -10,7 +10,6 @@ package updatestatus
 
 import (
 	"errors"
-	"strings"
 
 	"github.com/Southclaws/fault"
 	"github.com/spf13/cobra"
@@ -44,12 +43,7 @@ wfxctl job update-status --id=8ea1e9d7-28e6-4f1f-b444-a8d2d1ad7618 --client-id=c
 				Message:  message,
 			}
 
-			var client *api.Client
-			if strings.ToUpper(baseCmd.Actor) == string(api.CLIENT) {
-				client = errutil.Must(baseCmd.CreateClient())
-			} else {
-				client = errutil.Must(baseCmd.CreateMgmtClient())
-			}
+			client := errutil.Must(baseCmd.CreateClient())
 			resp, err := client.PutJobsIdStatus(cmd.Context(), id, nil, api.PutJobsIdStatusJSONRequestBody(status))
 			if err != nil {
 				return fault.Wrap(err)
@@ -59,7 +53,6 @@ wfxctl job update-status --id=8ea1e9d7-28e6-4f1f-b444-a8d2d1ad7618 --client-id=c
 	}
 	f := cmd.Flags()
 	f.String(flags.IDFlag, "", "job which shall be updated")
-	f.String(flags.ActorFlag, string(api.CLIENT), "actor to use (eligible)")
 	f.String(flags.ClientIDFlag, "", "client which sends the update")
 	f.String(flags.StateFlag, "", "name of the new state")
 	f.Int(flags.ProgressFlag, 0, "progress value (0 <= progress <= 100)")

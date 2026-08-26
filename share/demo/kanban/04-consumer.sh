@@ -14,7 +14,9 @@ source "$SCRIPT_DIR/../demo.sh"
 
 echo "# waiting for wfx..."
 while true; do
-    UP_COUNT=$(wfxctl health | grep -c up)
+    UP_COUNT=0
+    wfxctl --host http://localhost:8080 health | grep -q $'wfx\tup' && UP_COUNT=$((UP_COUNT+1))
+    wfxctl --host http://localhost:8081 health | grep -q $'wfx\tup' && UP_COUNT=$((UP_COUNT+1))
     if [[ "$UP_COUNT" -ge 2 ]]; then
         break
     fi
@@ -45,7 +47,7 @@ while true; do
     p "wfxctl job query --limit 1 --client-id $CLIENT_ID --state=NEW --filter '.content.[].id' --raw"
     p "# found job with id $JOB_ID"
     for state in PROGRESS VALIDATE DONE; do
-        pe "wfxctl job update-status --id=$JOB_ID --state=$state"
+        pe "wfxctl --host http://localhost:8080 job update-status --id=$JOB_ID --state=$state"
         sleep 4
     done
     p "# task is done"

@@ -10,7 +10,6 @@ package loadtest
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"sync/atomic"
 
@@ -55,11 +54,9 @@ func writeTargeter(tgt *vegeta.Target) error {
 		if to != "" {
 			jobID := (*status.Context)["id"].(string)
 
-			var url string
+			url := mgmtHost + "/api/wfx/v1/jobs/" + jobID + "/status"
 			if eligible == api.CLIENT {
-				url = fmt.Sprintf("http://%s:%d/api/wfx/v1/jobs/%s/status", host, port, jobID)
-			} else {
-				url = fmt.Sprintf("http://%s:%d/api/wfx/v1/jobs/%s/status", mgmtHost, mgmtPort, jobID)
+				url = clientHost + "/api/wfx/v1/jobs/" + jobID + "/status"
 			}
 
 			status.State = to
@@ -105,7 +102,7 @@ func writeTargeter(tgt *vegeta.Target) error {
 	}
 	*tgt = vegeta.Target{
 		Method: http.MethodPost,
-		URL:    fmt.Sprintf("http://%s:%d/api/wfx/v1/jobs", mgmtHost, mgmtPort),
+		URL:    mgmtHost + "/api/wfx/v1/jobs",
 		Body:   b,
 		Header: map[string][]string{
 			"Accept":       {"application/json"},

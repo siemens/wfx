@@ -45,23 +45,10 @@ Tip: Shell completion is available for Bash, Fish and Zsh. See wfxctl completion
 	f.StringSlice(flags.ConfigFlag, config.DefaultConfigFiles(), "path to one or more .yaml config files; if this option is not set, then the default paths are tried")
 	_ = cmd.MarkPersistentFlagFilename(flags.ConfigFlag, "yml", "yaml")
 
-	f.String(flags.ClientHostFlag, "localhost", "host")
-	f.Int(flags.ClientPortFlag, 8080, "port")
-	f.String(flags.ClientTLSHostFlag, "localhost", "TLS host")
-	f.Int(flags.ClientTLSPortFlag, 8443, "TLS port")
-	f.String(flags.ClientUnixSocketFlag, "", "connect via the given unix-domain socket (if set, this overrides http/tls)")
-
-	f.String(flags.MgmtHostFlag, "localhost", "management host")
-	f.Int(flags.MgmtPortFlag, 8081, "management port")
-	f.String(flags.MgmtTLSHostFlag, "localhost", "management TLS host")
-	f.Int(flags.MgmtTLSPortFlag, 8444, "management TLS port")
-	f.String(flags.MgmtUnixSocketFlag, "", "connect via the given unix-domain socket (if set, this overrides http/tls)")
-
+	f.String(flags.HostFlag, "http://localhost:8081", "server URL (http://, https://, or unix:///path/to/socket)")
 	f.String(flags.TLSCaFlag, "", "ca bundle (PEM)")
-	f.Bool(flags.EnableTLSFlag, false, "whether to enable TLS (https)")
 
-	f.StringArray(flags.ClientHeaderFlag, nil, "add an HTTP header to client requests, e.g. --client-hdr 'Authorization: Bearer $TOKEN' (may be given multiple times)")
-	f.StringArray(flags.MgmtHeaderFlag, nil, "add an HTTP header to management requests, e.g. --mgmt-hdr 'Authorization: Bearer $TOKEN' (may be given multiple times)")
+	f.StringArray(flags.HeaderFlag, nil, "add an HTTP header, e.g. --header 'Authorization: Bearer $TOKEN' (may be given multiple times)")
 	f.String(flags.CredentialHelperFlag, "", "credential helper to invoke for HTTP authentication (wfxctl-credential-<name>, or path containing '/')")
 
 	f.String(flags.FilterFlag, "", "output filter (jq-expression). example: '.id'")

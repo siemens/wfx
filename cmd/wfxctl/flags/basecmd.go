@@ -9,6 +9,7 @@ package flags
  */
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
@@ -17,6 +18,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -37,32 +39,20 @@ import (
 )
 
 const (
-	ActorFlag            = "actor"
-	ClientHeaderFlag     = "client-hdr"
-	ClientHostFlag       = "client-host"
 	ClientIDFlag         = "client-id"
-	ClientPortFlag       = "client-port"
-	ClientTLSHostFlag    = "client-tls-host"
-	ClientTLSPortFlag    = "client-tls-port"
-	ClientUnixSocketFlag = "client-unix-socket"
 	ColorFlag            = "color"
 	ConfigFlag           = "config"
 	CredentialHelperFlag = "credential-helper"
-	EnableTLSFlag        = "enable-tls"
 	FilterFlag           = "filter"
 	GroupFlag            = "group"
+	HeaderFlag           = "header"
 	HistoryFlag          = "history"
+	HostFlag             = "host"
 	IDFlag               = "id"
 	JobIDFlag            = "job-id"
 	LimitFlag            = "limit"
 	LogLevelFlag         = "log-level"
 	MessageFlag          = "message"
-	MgmtHeaderFlag       = "mgmt-hdr"
-	MgmtHostFlag         = "mgmt-host"
-	MgmtPortFlag         = "mgmt-port"
-	MgmtTLSHostFlag      = "mgmt-tls-host"
-	MgmtTLSPortFlag      = "mgmt-tls-port"
-	MgmtUnixSocketFlag   = "mgmt-unix-socket"
 	OffsetFlag           = "offset"
 	ProgressFlag         = "progress"
 	RawFlag              = "raw"
@@ -76,46 +66,32 @@ const (
 )
 
 type BaseCmd struct {
-	EnableTLS bool
-	TLSCa     string
+	TLSCa string
 
-	Host    string `validate:"required,hostname_rfc1123"`
-	Port    int    `validate:"required"`
-	TLSHost string `validate:"required,hostname_rfc1123"`
-	TLSPort int    `validate:"required"`
-	Socket  string
-
-	MgmtHost    string `validate:"required,hostname_rfc1123"`
-	MgmtPort    int    `validate:"required"`
-	MgmtTLSHost string `validate:"required,hostname_rfc1123"`
-	MgmtTLSPort int    `validate:"required"`
-	MgmtSocket  string
+	Host string `validate:"required"`
 
 	Filter string
 	// Strip quotes to make output usable in shell scripts
 	RawOutput bool
 	ColorMode string
 
-	ID        string
-	ClientID  string
-	ClientIDs []string
-	Workflow  string
-	Workflows []string
-	Tags      *[]string
-	State     string
-	Sort      string
-	Groups    []string
-	Offset    int64
-	JobIDs    []string
-	History   bool
-	Progress  int
-	Message   string
-	Actor     string
-	Name      string
-	Limit     int32
-
-	ClientHdrs       []string
-	MgmtHdrs         []string
+	ID               string
+	ClientID         string
+	ClientIDs        []string
+	Workflow         string
+	Workflows        []string
+	Tags             *[]string
+	State            string
+	Sort             string
+	Groups           []string
+	Offset           int64
+	JobIDs           []string
+	History          bool
+	Progress         int
+	Message          string
+	Name             string
+	Limit            int32
+	Headers          []string
 	CredentialHelper string
 }
 
@@ -146,8 +122,8 @@ func NewBaseCmd(f *pflag.FlagSet) BaseCmd {
 		TransformFunc: func(k string, v string) (string, any) {
 			// WFX_LOG_LEVEL becomes log-level
 			key := strings.ReplaceAll(strings.ToLower(strings.TrimPrefix(k, "WFX_")), "_", "-")
-			// Header fields are read with k.Strings, which does not convert scalar strings.
-			if key == ClientHeaderFlag || key == MgmtHeaderFlag {
+			// Header is read with k.Strings, which does not convert scalar strings.
+			if key == HeaderFlag {
 				return key, []string{v}
 			}
 			return key, v
@@ -176,41 +152,28 @@ func NewBaseCmd(f *pflag.FlagSet) BaseCmd {
 	}
 
 	return BaseCmd{
-		ClientID:    k.String(ClientIDFlag),
-		ClientIDs:   k.Strings(ClientIDFlag),
-		ColorMode:   k.String(ColorFlag),
-		EnableTLS:   k.Bool(EnableTLSFlag),
-		Filter:      k.String(FilterFlag),
-		Groups:      k.Strings(GroupFlag),
-		History:     k.Bool(HistoryFlag),
-		Host:        k.String(ClientHostFlag),
-		ID:          k.String(IDFlag),
-		JobIDs:      k.Strings(JobIDFlag),
-		MgmtHost:    k.String(MgmtHostFlag),
-		MgmtPort:    k.Int(MgmtPortFlag),
-		MgmtSocket:  k.String(MgmtUnixSocketFlag),
-		MgmtTLSHost: k.String(MgmtTLSHostFlag),
-		MgmtTLSPort: k.Int(MgmtTLSPortFlag),
-		Offset:      k.Int64(OffsetFlag),
-		Port:        k.Int(ClientPortFlag),
-		RawOutput:   k.Bool(RawFlag),
-		Socket:      k.String(ClientUnixSocketFlag),
-		Sort:        k.String(SortFlag),
-		TLSCa:       k.String(TLSCaFlag),
-		TLSHost:     k.String(ClientTLSHostFlag),
-		TLSPort:     k.Int(ClientTLSPortFlag),
-		Tags:        tags,
-		Workflow:    k.String(WorkflowFlag),
-		Workflows:   k.Strings(WorkflowFlag),
-		Progress:    k.Int(ProgressFlag),
-		Message:     k.String(MessageFlag),
-		State:       k.String(StateFlag),
-		Actor:       k.String(ActorFlag),
-		Name:        k.String(NameFlag),
-		Limit:       int32(k.Int(LimitFlag)),
-
-		ClientHdrs:       k.Strings(ClientHeaderFlag),
-		MgmtHdrs:         k.Strings(MgmtHeaderFlag),
+		ClientID:         k.String(ClientIDFlag),
+		ClientIDs:        k.Strings(ClientIDFlag),
+		ColorMode:        k.String(ColorFlag),
+		Filter:           k.String(FilterFlag),
+		Groups:           k.Strings(GroupFlag),
+		History:          k.Bool(HistoryFlag),
+		Host:             k.String(HostFlag),
+		ID:               k.String(IDFlag),
+		JobIDs:           k.Strings(JobIDFlag),
+		Offset:           k.Int64(OffsetFlag),
+		RawOutput:        k.Bool(RawFlag),
+		Sort:             k.String(SortFlag),
+		TLSCa:            k.String(TLSCaFlag),
+		Tags:             tags,
+		Workflow:         k.String(WorkflowFlag),
+		Workflows:        k.Strings(WorkflowFlag),
+		Progress:         k.Int(ProgressFlag),
+		Message:          k.String(MessageFlag),
+		State:            k.String(StateFlag),
+		Name:             k.String(NameFlag),
+		Limit:            int32(k.Int(LimitFlag)),
+		Headers:          k.Strings(HeaderFlag),
 		CredentialHelper: k.String(CredentialHelperFlag),
 	}
 }
@@ -232,32 +195,31 @@ func (b *BaseCmd) SortParam() (*api.SortEnum, error) {
 }
 
 func (b *BaseCmd) CreateHTTPClient() (*http.Client, error) {
-	sockets := make([]string, 0, 2)
-	if b.Socket != "" {
-		sockets = append(sockets, b.Socket)
+	u, err := url.Parse(b.Host)
+	if err != nil {
+		return nil, errors.New("invalid host URL")
 	}
-	if b.MgmtSocket != "" {
-		sockets = append(sockets, b.MgmtSocket)
-	}
-	if n := len(sockets); n > 0 {
-		if n == 2 {
-			return nil, fmt.Errorf("you cannot use both --%s and --%s at the same time", ClientUnixSocketFlag, MgmtUnixSocketFlag)
+	switch u.Scheme {
+	case "http", "https":
+		if u.Host == "" {
+			u.User = nil
+			return nil, fmt.Errorf("host missing from %q", u.String())
 		}
-		socket := sockets[0]
-		addr, err := net.ResolveUnixAddr("unix", socket)
-		if err != nil {
-			return nil, fault.Wrap(err)
+	case "unix":
+		if u.Host != "" || u.Path == "" {
+			return nil, fmt.Errorf("unix host must have form unix:///path/to/socket")
 		}
-		log.Info().Msg("Using unix-domain socket transport")
 		return &http.Client{
 			Transport: &http.Transport{
-				Dial: func(_, _ string) (net.Conn, error) {
-					conn, err := net.DialUnix("unix", nil, addr)
+				DialContext: func(ctx context.Context, _, _ string) (net.Conn, error) {
+					conn, err := (&net.Dialer{}).DialContext(ctx, "unix", u.Path)
 					return conn, fault.Wrap(err)
 				},
 			},
 			Timeout: time.Second * 10,
 		}, nil
+	default:
+		return nil, fmt.Errorf("unsupported host scheme %q (want http, https, or unix)", u.Scheme)
 	}
 
 	tlsConfig := new(tls.Config)
@@ -286,53 +248,50 @@ func (b *BaseCmd) CreateHTTPClient() (*http.Client, error) {
 	}, nil
 }
 
-func (b *BaseCmd) CreateClient() (*api.Client, error) {
-	var server string
+func (b *BaseCmd) server() string {
 	swagger := errutil.Must(api.GetSpec())
 	basePath := errutil.Must(swagger.Servers.BasePath())
-	if b.EnableTLS {
-		server = fmt.Sprintf("https://%s:%d%s", b.TLSHost, b.TLSPort, basePath)
-	} else {
-		server = fmt.Sprintf("http://%s:%d%s", b.Host, b.Port, basePath)
+	u, err := url.Parse(b.Host)
+	if err == nil && u.Scheme == "unix" {
+		return "http://localhost" + basePath
 	}
-	log.Debug().Str("server", server).Msgf("Creating client for %q", server)
+	return strings.TrimRight(b.Host, "/") + basePath
+}
+
+func (b *BaseCmd) ServerRedacted() string {
+	u, err := url.Parse(b.server())
+	if err != nil {
+		return ""
+	}
+	u.User = nil
+	return u.String()
+}
+
+func (b *BaseCmd) CreateClient(opts ...api.ClientOption) (*api.Client, error) {
+	server := b.server()
+	log.Debug().Msgf("Creating client for %q", b.ServerRedacted())
 	httpClient, err := b.CreateHTTPClient()
 	if err != nil {
 		return nil, fault.Wrap(err)
 	}
-	editor, err := httpclient.RequestEditor(b.ClientHdrs, b.CredentialHelper)
+	editor, err := httpclient.RequestEditor(b.Headers, b.CredentialHelper)
 	if err != nil {
 		return nil, fault.Wrap(err)
 	}
-	client, err := api.NewClient(server, api.WithHTTPClient(httpClient), api.WithRequestEditorFn(editor))
+	opts = append([]api.ClientOption{api.WithHTTPClient(httpClient), api.WithRequestEditorFn(editor)}, opts...)
+	client, err := api.NewClient(server, opts...)
 	if err != nil {
 		return nil, fault.Wrap(err)
 	}
 	return client, nil
 }
 
-func (b *BaseCmd) CreateMgmtClient() (*api.Client, error) {
-	var server string
-	swagger := errutil.Must(api.GetSpec())
-	basePath := errutil.Must(swagger.Servers.BasePath())
-	if b.EnableTLS {
-		server = fmt.Sprintf("https://%s:%d%s", b.MgmtTLSHost, b.MgmtTLSPort, basePath)
-	} else {
-		server = fmt.Sprintf("http://%s:%d%s", b.MgmtHost, b.MgmtPort, basePath)
-	}
-	httpClient, err := b.CreateHTTPClient()
+func (b *BaseCmd) CreateClientWithResponses(opts ...api.ClientOption) (*api.ClientWithResponses, error) {
+	client, err := b.CreateClient(opts...)
 	if err != nil {
-		return nil, fault.Wrap(err)
+		return nil, err
 	}
-	editor, err := httpclient.RequestEditor(b.MgmtHdrs, b.CredentialHelper)
-	if err != nil {
-		return nil, fault.Wrap(err)
-	}
-	client, err := api.NewClient(server, api.WithHTTPClient(httpClient), api.WithRequestEditorFn(editor))
-	if err != nil {
-		return nil, fault.Wrap(err)
-	}
-	return client, nil
+	return &api.ClientWithResponses{ClientInterface: client}, nil
 }
 
 func (b *BaseCmd) ProcessResponse(resp *http.Response, w io.Writer) error {
