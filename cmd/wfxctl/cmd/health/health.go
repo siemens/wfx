@@ -13,16 +13,13 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"sync"
 
 	"github.com/Southclaws/fault"
 	"github.com/gookit/color"
 	"github.com/mattn/go-isatty"
 	"github.com/spf13/cobra"
 
-	"github.com/siemens/wfx/cmd/wfxctl/errutil"
 	"github.com/siemens/wfx/cmd/wfxctl/flags"
-	"github.com/siemens/wfx/cmd/wfxctl/httpclient"
 	"github.com/siemens/wfx/generated/api"
 )
 
@@ -30,7 +27,6 @@ type Endpoint struct {
 	Name     string
 	Server   string
 	Response *api.GetHealthResponse
-	Editor   api.RequestEditorFn
 }
 
 const (
@@ -60,58 +56,23 @@ func NewCommand() *cobra.Command {
 				return fmt.Errorf("unsupported color mode: %s", b.ColorMode)
 			}
 
-			swagger := errutil.Must(api.GetSpec())
-			basePath := errutil.Must(swagger.Servers.BasePath())
-			clientEditor, err := httpclient.RequestEditor(b.ClientHdrs, b.CredentialHelper)
+			endpoint := Endpoint{
+				Name:     "wfx",
+				Server:   b.ServerRedacted(),
+				Response: &api.GetHealthResponse{Body: []byte("{}")},
+			}
+			client, err := b.CreateClientWithResponses()
 			if err != nil {
 				return fault.Wrap(err)
 			}
-			mgmtEditor, err := httpclient.RequestEditor(b.MgmtHdrs, b.CredentialHelper)
+			endpoint.Response, err = client.GetHealthWithResponse(cmd.Context())
+			prettyReport(cmd.OutOrStdout(), useColor, endpoint)
 			if err != nil {
 				return fault.Wrap(err)
 			}
-
-			allEndpoints := []Endpoint{
-				{
-					Name:     "northbound",
-					Server:   fmt.Sprintf("http://%s:%d%s", b.MgmtHost, b.MgmtPort, basePath),
-					Response: &api.GetHealthResponse{Body: []byte("{}")},
-					Editor:   mgmtEditor,
-				},
-				{
-					Name:     "southbound",
-					Server:   fmt.Sprintf("http://%s:%d%s", b.Host, b.Port, basePath),
-					Response: &api.GetHealthResponse{Body: []byte("{}")},
-					Editor:   clientEditor,
-				},
-				{
-					Name:     "northbound_tls",
-					Server:   fmt.Sprintf("https://%s:%d%s", b.MgmtTLSHost, b.MgmtTLSPort, basePath),
-					Response: &api.GetHealthResponse{Body: []byte("{}")},
-					Editor:   mgmtEditor,
-				},
-				{
-					Name:     "southbound_tls",
-					Server:   fmt.Sprintf("https://%s:%d%s", b.TLSHost, b.TLSPort, basePath),
-					Response: &api.GetHealthResponse{Body: []byte("{}")},
-					Editor:   clientEditor,
-				},
+			if endpoint.Response.JSON200 == nil || endpoint.Response.JSON200.Status != api.Up {
+				return fmt.Errorf("wfx is not healthy")
 			}
-
-			httpClient, err := b.CreateHTTPClient()
-			if err != nil {
-				return fault.Wrap(err)
-			}
-			var g sync.WaitGroup
-			for i, endpoint := range allEndpoints {
-				g.Go(func() {
-					client := errutil.Must(api.NewClientWithResponses(endpoint.Server, api.WithHTTPClient(httpClient), api.WithRequestEditorFn(endpoint.Editor)))
-					resp, _ := client.GetHealthWithResponse(cmd.Context())
-					allEndpoints[i].Response = resp
-				})
-			}
-			g.Wait()
-			prettyReport(cmd.OutOrStdout(), useColor, allEndpoints)
 			return nil
 		},
 	}
@@ -120,31 +81,29 @@ func NewCommand() *cobra.Command {
 	return cmd
 }
 
-func prettyReport(w io.Writer, useColor bool, allEndpoints []Endpoint) {
+func prettyReport(w io.Writer, useColor bool, ep Endpoint) {
 	buf := bufio.NewWriter(w)
 	defer func() { _ = buf.Flush() }()
 	_, _ = buf.WriteString("Health report:\n\n")
-	for _, ep := range allEndpoints {
-		status := api.Down
-		if resp := ep.Response; resp != nil {
-			if resp.JSON200 != nil {
-				status = resp.JSON200.Status
-			} else if resp.JSON503 != nil {
-				status = resp.JSON503.Status
-			}
+	status := api.Down
+	if resp := ep.Response; resp != nil {
+		if resp.JSON200 != nil {
+			status = resp.JSON200.Status
+		} else if resp.JSON503 != nil {
+			status = resp.JSON503.Status
 		}
-
-		formatter := fmt.Sprint
-		if useColor {
-			switch status {
-			case api.Up:
-				formatter = color.FgGreen.Render
-			case api.Down:
-				formatter = color.FgRed.Render
-			default:
-				formatter = color.FgYellow.Render
-			}
-		}
-		fmt.Fprintf(buf, "%s\t%s\t(%s)\n", ep.Name, formatter(status), ep.Server)
 	}
+
+	formatter := fmt.Sprint
+	if useColor {
+		switch status {
+		case api.Up:
+			formatter = color.FgGreen.Render
+		case api.Down:
+			formatter = color.FgRed.Render
+		default:
+			formatter = color.FgYellow.Render
+		}
+	}
+	fmt.Fprintf(buf, "%s\t%s\t(%s)\n", ep.Name, formatter(status), ep.Server)
 }

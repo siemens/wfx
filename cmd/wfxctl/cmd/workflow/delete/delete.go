@@ -24,9 +24,9 @@ func NewCommand() *cobra.Command {
 		Example:          "wfxctl workflow delete wfx.workflow.kanban",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			baseCmd := flags.NewBaseCmd(cmd.Flags())
-			client := errutil.Must(baseCmd.CreateMgmtClient())
+			mgmtClient := errutil.Must(baseCmd.CreateClient())
 			for _, name := range args {
-				resp, err := client.DeleteWorkflowsName(cmd.Context(), name)
+				resp, err := mgmtClient.DeleteWorkflowsName(cmd.Context(), name)
 				if err != nil {
 					return fault.Wrap(err)
 				}

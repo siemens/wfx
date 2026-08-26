@@ -10,6 +10,7 @@ package flags
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -53,7 +54,7 @@ CAUw7C29C79Fv1C5qfPrmAESrciIxpg0X40KPMbp1ZWVbd4=
 	t.Cleanup(func() { _ = os.Remove(tmpFile.Name()) })
 
 	b := NewBaseCmd(pflag.NewFlagSet("wfx", pflag.ExitOnError))
-	b.EnableTLS = true
+	b.Host = "https://localhost:8081"
 	b.TLSCa = tmpFile.Name()
 
 	client, _ := b.CreateHTTPClient()
@@ -61,51 +62,44 @@ CAUw7C29C79Fv1C5qfPrmAESrciIxpg0X40KPMbp1ZWVbd4=
 	assert.NotEmpty(t, transport.TLSClientConfig.RootCAs)
 }
 
-func TestCreateHTTPClient_AmbiguousSockets(t *testing.T) {
-	b := NewBaseCmd(pflag.NewFlagSet("wfx", pflag.ExitOnError))
-	b.Socket = "foo"
-	b.MgmtSocket = "bar"
-	_, err := b.CreateHTTPClient()
-	require.Error(t, err)
+func TestCreateClient(t *testing.T) {
+	for _, tt := range []struct {
+		name     string
+		host     string
+		expected string
+		redacted string
+	}{
+		{name: "HTTP", host: "http://localhost:8081", expected: "http://localhost:8081/api/wfx/v1/"},
+		{name: "HTTPS", host: "https://localhost:8081", expected: "https://localhost:8081/api/wfx/v1/"},
+		{name: "Basic auth", host: "https://user:secret@localhost:8081", expected: "https://user:secret@localhost:8081/api/wfx/v1/", redacted: "https://localhost:8081/api/wfx/v1"},
+		{name: "Unix", host: "unix:///tmp/wfx.sock", expected: "http://localhost/api/wfx/v1/"},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			b := NewBaseCmd(pflag.NewFlagSet("wfx", pflag.ExitOnError))
+			b.Host = tt.host
+
+			client, err := b.CreateClient()
+
+			require.NoError(t, err)
+			assert.Equal(t, tt.expected, client.Server)
+			if tt.redacted != "" {
+				assert.Equal(t, tt.redacted, b.ServerRedacted())
+				assert.NotContains(t, b.ServerRedacted(), "user")
+				assert.NotContains(t, b.ServerRedacted(), "secret")
+			}
+		})
+	}
 }
 
-func TestCreateHTTPClient_Socket(t *testing.T) {
+func TestCreateHTTPClientUnix(t *testing.T) {
 	b := NewBaseCmd(pflag.NewFlagSet("wfx", pflag.ExitOnError))
-	b.Socket = "/tmp/foo.sock"
-	_, err := b.CreateHTTPClient()
+	b.Host = "unix:///tmp/wfx.sock"
+	client, err := b.CreateHTTPClient()
 	require.NoError(t, err)
-}
 
-func TestCreateClient_TLS(t *testing.T) {
-	b := NewBaseCmd(pflag.NewFlagSet("wfx", pflag.ExitOnError))
-	b.EnableTLS = true
-	client, err := b.CreateClient()
-	assert.NotNil(t, client)
-	assert.NoError(t, err)
-}
-
-func TestCreateClient_NoTLS(t *testing.T) {
-	b := NewBaseCmd(pflag.NewFlagSet("wfx", pflag.ExitOnError))
-	b.EnableTLS = false
-	client, err := b.CreateClient()
-	assert.NotNil(t, client)
-	assert.NoError(t, err)
-}
-
-func TestCreateMgmtClient(t *testing.T) {
-	b := NewBaseCmd(pflag.NewFlagSet("wfx", pflag.ExitOnError))
-	b.EnableTLS = true
-	client, err := b.CreateMgmtClient()
-	assert.NotNil(t, client)
-	assert.NoError(t, err)
-}
-
-func TestCreateMgmtClient_NoTLS(t *testing.T) {
-	b := NewBaseCmd(pflag.NewFlagSet("wfx", pflag.ExitOnError))
-	b.EnableTLS = false
-	client, err := b.CreateMgmtClient()
-	assert.NotNil(t, client)
-	assert.NoError(t, err)
+	transport := client.Transport.(*http.Transport)
+	_, err = transport.DialContext(context.Background(), "tcp", "ignored")
+	assert.ErrorContains(t, err, "/tmp/wfx.sock")
 }
 
 func TestDumpPlain(t *testing.T) {
@@ -253,15 +247,15 @@ func TestNewBaseCmd_EnvVariables(t *testing.T) {
 	assert.Equal(t, zerolog.TraceLevel, zerolog.GlobalLevel())
 }
 
-func TestNewBaseCmd_EnvHeaders(t *testing.T) {
-	t.Setenv("WFX_CLIENT_HDR", "Authorization: Bearer client-token")
-	t.Setenv("WFX_MGMT_HDR", "Authorization: Bearer mgmt-token")
+func TestNewBaseCmd_EnvHostAndHeaders(t *testing.T) {
+	t.Setenv("WFX_HOST", "https://example.com:1234")
+	t.Setenv("WFX_HEADER", "Authorization: Bearer token")
 	f := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	f.StringArray(ClientHeaderFlag, nil, "")
-	f.StringArray(MgmtHeaderFlag, nil, "")
+	f.String(HostFlag, "http://localhost:8081", "")
+	f.StringArray(HeaderFlag, nil, "")
 
 	b := NewBaseCmd(f)
 
-	assert.Equal(t, []string{"Authorization: Bearer client-token"}, b.ClientHdrs)
-	assert.Equal(t, []string{"Authorization: Bearer mgmt-token"}, b.MgmtHdrs)
+	assert.Equal(t, "https://example.com:1234", b.Host)
+	assert.Equal(t, []string{"Authorization: Bearer token"}, b.Headers)
 }

@@ -11,8 +11,8 @@ package loadtest
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -20,7 +20,6 @@ import (
 	"github.com/knadh/koanf/v2"
 	"github.com/rs/zerolog/log"
 	"github.com/siemens/wfx/cmd/wfx-loadtest/wfx"
-	"github.com/siemens/wfx/cmd/wfxctl/flags"
 	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/workflow/dau"
 	vegeta "github.com/tsenart/vegeta/v12/lib"
@@ -31,9 +30,11 @@ const (
 	// Threshold of data points above which series are downsampled.
 	threshold = 4000
 
-	ReadFreqFlag  = "read-freq"
-	WriteFreqFlag = "write-freq"
-	DurationFlag  = "duration"
+	ClientHostFlag = "client-host"
+	MgmtHostFlag   = "mgmt-host"
+	ReadFreqFlag   = "read-freq"
+	WriteFreqFlag  = "write-freq"
+	DurationFlag   = "duration"
 )
 
 var (
@@ -43,23 +44,19 @@ var (
 	queue      = make([]*api.JobStatus, 0, 10)
 	queueMutex sync.RWMutex
 
-	host     string
-	port     int
-	mgmtHost string
-	mgmtPort int
+	clientHost string
+	mgmtHost   string
 )
 
 func Run(k *koanf.Koanf) error {
-	host = k.String(flags.ClientHostFlag)
-	port = k.Int(flags.ClientPortFlag)
-	mgmtHost = k.String(flags.MgmtHostFlag)
-	mgmtPort = k.Int(flags.MgmtPortFlag)
+	clientHost = strings.TrimRight(k.String(ClientHostFlag), "/")
+	mgmtHost = strings.TrimRight(k.String(MgmtHostFlag), "/")
 
-	if host == "" || mgmtHost == "" {
-		return errors.New("host or mgmtHost not set")
+	if clientHost == "" || mgmtHost == "" {
+		return errors.New("clientHost or mgmtHost not set")
 	}
 
-	if err := wfx.CreateWorkflow(mgmtHost, mgmtPort, *workflow); err != nil {
+	if err := wfx.CreateWorkflow(mgmtHost, *workflow); err != nil {
 		return fault.Wrap(err)
 	}
 
@@ -68,10 +65,8 @@ func Run(k *koanf.Koanf) error {
 	readRate := vegeta.Rate{Freq: k.Int(ReadFreqFlag), Per: time.Second}
 
 	log.Info().
-		Str("host", host).
-		Int("port", port).
+		Str("clientHost", clientHost).
 		Str("mgmtHost", mgmtHost).
-		Int("mgmtPort", mgmtPort).
 		Dur("duration", duration).
 		Int("writeRate", writeRate.Freq).
 		Int("readRate", readRate.Freq).
@@ -85,11 +80,11 @@ func Run(k *koanf.Koanf) error {
 		readTargeter := vegeta.NewStaticTargeter(
 			vegeta.Target{
 				Method: http.MethodGet,
-				URL:    fmt.Sprintf("http://%s:%d/api/wfx/v1/jobs?class=OPEN", host, port),
+				URL:    clientHost + "/api/wfx/v1/jobs?class=OPEN",
 			},
 			vegeta.Target{
 				Method: http.MethodGet,
-				URL:    fmt.Sprintf("http://%s:%d/api/wfx/v1/workflows", host, port),
+				URL:    clientHost + "/api/wfx/v1/workflows",
 			},
 		)
 		attacker := newAttacker()

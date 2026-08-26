@@ -74,8 +74,8 @@ echo '{ "title": "Task 1" }' | wfxctl job create --client-id=my_client --workflo
 				return errors.New("Too many arguments")
 			}
 
-			client := errutil.Must(baseCmd.CreateMgmtClient())
-			resp, err := client.PostJobs(cmd.Context(), nil, request)
+			mgmtClient := errutil.Must(baseCmd.CreateClient())
+			resp, err := mgmtClient.PostJobs(cmd.Context(), nil, request)
 			if err != nil {
 				return fault.Wrap(err)
 			}

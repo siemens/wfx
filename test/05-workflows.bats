@@ -33,34 +33,30 @@ teardown_file() {
              --filter='.id' --raw -)
 
     # update job using wfxctl
-    wfxctl job update-status \
-        --actor=client \
+    wfxctl --host "$SOUTHBOUND_HOST" job update-status \
         "--id=$ID" \
         --state=PROGRESS
 
     # update job again using curl
     curl -X PUT \
-        "http://localhost:8080/api/wfx/v1/jobs/$ID/status" \
+        "$SOUTHBOUND_HOST/api/wfx/v1/jobs/$ID/status" \
         -H 'Content-Type: application/json' \
         -H 'Accept: application/json' \
         -d '{"state":"PROGRESS"}'
 
     # update progress
-    wfxctl job update-status \
-        --actor=client \
+    wfxctl --host "$SOUTHBOUND_HOST" job update-status \
         "--id=$ID" \
         --state=PROGRESS \
         --progress $((RANDOM % 100))
 
     # update state to VALIDATE
-    wfxctl job update-status \
-        --actor=client \
+    wfxctl --host "$SOUTHBOUND_HOST" job update-status \
         "--id=$ID" \
         --state=VALIDATE
 
     # update state to DONE
-    wfxctl job update-status \
-        --actor=client \
+    wfxctl --host "$SOUTHBOUND_HOST" job update-status \
         "--id=$ID" \
         --state=DONE
 }
@@ -98,12 +94,11 @@ teardown_file() {
             --client-id Dana \
             --filter='.id' --raw - 2>/dev/null)
 
-    curl -s --no-buffer "localhost:8080/api/wfx/v1/jobs/events?jobIds=$ID&tags=bats" > curl.out &
+    curl -s --no-buffer "$SOUTHBOUND_HOST/api/wfx/v1/jobs/events?jobIds=$ID&tags=bats" > curl.out &
     sleep 1
     for state in PROGRESS VALIDATE DONE; do
-        wfxctl job update-status \
-            --actor=client \
-            --id "$ID" \
+        wfxctl --host "$SOUTHBOUND_HOST" job update-status \
+                --id "$ID" \
             --state "$state" 1>/dev/null 2>&1
     done
     for i in {1..30}; do

@@ -12,7 +12,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"testing"
 
 	"github.com/siemens/wfx/cmd/wfxctl/flags"
@@ -36,9 +35,7 @@ func TestGetWorkflow(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	u, _ := url.Parse(ts.URL)
-	t.Setenv("WFX_CLIENT_HOST", u.Hostname())
-	t.Setenv("WFX_CLIENT_PORT", u.Port())
+	t.Setenv("WFX_HOST", ts.URL)
 
 	cmd := NewCommand()
 	cmd.SetArgs([]string{"--" + flags.NameFlag, "test"})
