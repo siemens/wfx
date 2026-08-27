@@ -37,7 +37,7 @@ pages:
     rm -rf public hugo/public
     pushd hugo
     make clean && make -j`nproc`
-    npm install postcss postcss-cli autoprefixer
+    npm ci
     hugo --minify
     popd
     mv hugo/public .
