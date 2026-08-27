@@ -124,7 +124,7 @@ func TestTLSOnly(t *testing.T) {
 
 	var upCount int
 	tlsEndpoints := []string{
-		fmt.Sprintf("https://%s:%s", f.Lookup(config.ClientTLSHostFlag).DefValue, f.Lookup(config.ClientTLSPortFlag).DefValue),
+		fmt.Sprintf("https://%s:%s", testHost, f.Lookup(config.ClientTLSPortFlag).DefValue),
 		fmt.Sprintf("https://%s:%s", f.Lookup(config.MgmtTLSHostFlag).DefValue, f.Lookup(config.MgmtTLSPortFlag).DefValue),
 	}
 	for i := 0; i < 30; i++ {
@@ -147,7 +147,7 @@ func TestTLSOnly(t *testing.T) {
 	}
 
 	insecureEndpoints := []string{
-		fmt.Sprintf("http://%s:%s", f.Lookup(config.ClientHostFlag).DefValue, f.Lookup(config.ClientPortFlag).DefValue),
+		fmt.Sprintf("http://%s:%s", testHost, f.Lookup(config.ClientPortFlag).DefValue),
 		fmt.Sprintf("http://%s:%s", f.Lookup(config.MgmtHostFlag).DefValue, f.Lookup(config.MgmtPortFlag).DefValue),
 	}
 	for _, endpoint := range insecureEndpoints {
@@ -198,8 +198,8 @@ func TestTLSMixedMode(t *testing.T) {
 
 	var upCount int
 	endpoints := []string{
-		fmt.Sprintf("http://%s:%s", f.Lookup(config.ClientHostFlag).DefValue, f.Lookup(config.ClientPortFlag).DefValue),
-		fmt.Sprintf("https://%s:%s", f.Lookup(config.ClientTLSHostFlag).DefValue, f.Lookup(config.ClientTLSPortFlag).DefValue),
+		fmt.Sprintf("http://%s:%s", testHost, f.Lookup(config.ClientPortFlag).DefValue),
+		fmt.Sprintf("https://%s:%s", testHost, f.Lookup(config.ClientTLSPortFlag).DefValue),
 		fmt.Sprintf("http://%s:%s", f.Lookup(config.MgmtHostFlag).DefValue, f.Lookup(config.MgmtPortFlag).DefValue),
 		fmt.Sprintf("https://%s:%s", f.Lookup(config.MgmtTLSHostFlag).DefValue, f.Lookup(config.MgmtTLSPortFlag).DefValue),
 	}
