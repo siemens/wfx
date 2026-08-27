@@ -36,7 +36,7 @@ build-contrib:
     go build -C contrib/config-deployment/client
 
 test:
-    go test -count=1 -race -tags testing,no_mysql,no_postgres ./...
+    go test -count=1 -race -timeout 5s -tags testing,no_mysql,no_postgres ./...
 
 # Update dependencies
 update-deps:
