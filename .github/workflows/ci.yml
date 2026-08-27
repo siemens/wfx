@@ -18,7 +18,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  build-linux:
     name: Build
     runs-on: ubuntu-latest
     steps:
@@ -26,30 +26,36 @@ jobs:
       - uses: ./.github/actions/setup-ui
       - uses: ./.github/actions/setup-build
       - run: sudo .ci/setup-build.sh
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4
-
-      # even though Windows is not officially supported, we want it to at least compile successfully
-      - name: Build for Windows
-        run: /usr/bin/env CC=$(pwd)/.ci/zcc goreleaser build --clean --single-target --snapshot
-        env:
-          GOOS: windows
-
       - name: Build Snapshot Release for Linux
         run: /usr/bin/env CC=$(pwd)/.ci/zcc goreleaser release --clean --snapshot
-
-      - name: build contrib
-        run: |
-          go build -C contrib/remote-access/client
-          go build -C contrib/config-deployment/client
-
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: dist
           path: dist/**/*
           retention-days: 5
+
+  build-windows:
+    name: Build for Windows
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: ./.github/actions/setup-ui
+      - uses: ./.github/actions/setup-build
+      - run: sudo .ci/setup-build.sh
+      # even though Windows is not officially supported, we want it to at least compile successfully
+      - run: /usr/bin/env CC="$(pwd)/.ci/zcc" goreleaser build --clean --single-target --snapshot
+        env:
+          GOOS: windows
+
+  build-contrib:
+    name: Build Contrib
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: ./.github/actions/setup-build
+      - run: |
+          go build -C contrib/remote-access/client
+          go build -C contrib/config-deployment/client
 
   go-unit-test:
     name: Go Unit Tests
