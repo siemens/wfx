@@ -625,7 +625,6 @@ paths:
     put:
       tags:
         - jobs
-        - southbound
         - northbound
       summary: Modify specific job's definition
       description: Modify specific job's definition
@@ -668,6 +667,8 @@ paths:
               example:
                 errors:
                   - "<<": invalidRequestError
+        "403":
+          description: Forbidden
         "404":
           description: Not Found
           content:
