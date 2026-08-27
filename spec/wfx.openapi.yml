@@ -23,6 +23,9 @@ tags:
     description: All northbound API endpoints
 paths:
   /health:
+    servers:
+      - url: /
+      - url: /api/wfx/v1
     get:
       tags:
         - southbound
@@ -68,6 +71,9 @@ paths:
                 $ref: "#/components/schemas/CheckerResult"
 
   /version:
+    servers:
+      - url: /
+      - url: /api/wfx/v1
     get:
       tags:
         - southbound
