@@ -9,7 +9,6 @@ package server
  */
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"testing"
@@ -25,7 +24,7 @@ func TestJobDefinitionGet(t *testing.T) {
 	db := newInMemoryDB(t)
 	north, south := createNorthAndSouth(t, db)
 	job := persistJob(t, db)
-	_, err := db.UpdateJob(context.Background(), job, persistence.JobUpdate{
+	_, err := db.UpdateJob(t.Context(), job, persistence.JobUpdate{
 		Definition: &map[string]any{
 			"foo": "bar",
 		},
@@ -49,7 +48,7 @@ func TestJobDefinitionGet(t *testing.T) {
 
 func TestJobDefinitionUpdate(t *testing.T) {
 	db := newInMemoryDB(t)
-	north, _ := createNorthAndSouth(t, db)
+	north, south := createNorthAndSouth(t, db)
 	job := persistJob(t, db)
 	path := fmt.Sprintf("/api/wfx/v1/jobs/%s/definition", job.ID)
 
@@ -65,11 +64,24 @@ func TestJobDefinitionUpdate(t *testing.T) {
 		Status(http.StatusOK).
 		End()
 
-	job, err := db.GetJob(context.Background(), job.ID, persistence.FetchParams{})
+	job, err := db.GetJob(t.Context(), job.ID, persistence.FetchParams{})
 	assert.NoError(t, err)
 
 	// check that Definition and DefinitionHash have been updated
 	assert.Equal(t, "http://localhost/update2.tgz", job.Definition["url"])
 	assert.Empty(t, job.Definition["sha256"]) // definition is replaced with new value
 	assert.NotEqual(t, oldDefinitionHash, job.Status.DefinitionHash)
+
+	apitest.New().
+		Handler(south).
+		Put(path).
+		Body(`{ "url": "http://localhost/update3.tgz" }`).
+		ContentType("application/json").
+		Expect(t).
+		Status(http.StatusForbidden).
+		End()
+
+	job, err = db.GetJob(t.Context(), job.ID, persistence.FetchParams{})
+	require.NoError(t, err)
+	assert.Equal(t, "http://localhost/update2.tgz", job.Definition["url"])
 }

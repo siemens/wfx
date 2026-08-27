@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CORS is off by default as it is typically not needed to serve the UI (same origin). It can optionally be enabled via the `--cors-enabled` flag.
 - CORS headers will only be set for northbound responses (and never for the southbound API).
 - wfxctl now uses a single `--host` parameter defaulting to the northbound API. This replaces the previous separate northbound/southbound host, port, TLS, and Unix socket parameters.
+- Job definition updates through the southbound API are no longer allowed
 
 ### Added
 

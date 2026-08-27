@@ -68,12 +68,8 @@ func (south SouthboundServer) GetJobsIdDefinition(ctx context.Context, request a
 	return resp, nil
 }
 
-func (south SouthboundServer) PutJobsIdDefinition(ctx context.Context, request api.PutJobsIdDefinitionRequestObject) (api.PutJobsIdDefinitionResponseObject, error) {
-	resp, err := south.wfx.PutJobsIdDefinition(ctx, request)
-	if err != nil {
-		return nil, fault.Wrap(err)
-	}
-	return resp, nil
+func (south SouthboundServer) PutJobsIdDefinition(context.Context, api.PutJobsIdDefinitionRequestObject) (api.PutJobsIdDefinitionResponseObject, error) {
+	return api.PutJobsIdDefinition403Response{}, nil
 }
 
 func (south SouthboundServer) GetJobsIdStatus(ctx context.Context, request api.GetJobsIdStatusRequestObject) (api.GetJobsIdStatusResponseObject, error) {
