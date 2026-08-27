@@ -908,7 +908,6 @@ paths:
         Modify the job definition of an existing job
       tags:
         - jobs
-        - southbound
         - northbound
       consumes:
         - application/json
@@ -946,6 +945,8 @@ paths:
             Error responses occurring at this operation for invalid requests:
               errors:
                 - <<: *invalidRequestError
+        "403":
+          description: Forbidden
         "404":
           description: Not Found
           schema:

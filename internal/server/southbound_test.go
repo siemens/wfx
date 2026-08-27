@@ -205,37 +205,29 @@ func TestGetJobsIDDefinition_InternalError(t *testing.T) {
 
 func TestPutJobsIDDefinition_NotFound(t *testing.T) {
 	jobID := "42"
-	for _, orientation := range allOrientations {
-		t.Run(orientation, func(t *testing.T) {
-			dbMock := persistence.NewHealthyMockStorage(t)
-			dbMock.EXPECT().GetJob(t.Context(), jobID, persistence.FetchParams{}).Return(nil, fault.Wrap(fmt.Errorf("job with id %s does not exist", jobID), ftag.With(ftag.NotFound)))
+	dbMock := persistence.NewHealthyMockStorage(t)
+	dbMock.EXPECT().GetJob(t.Context(), jobID, persistence.FetchParams{}).Return(nil, fault.Wrap(fmt.Errorf("job with id %s does not exist", jobID), ftag.With(ftag.NotFound)))
 
-			server := createServerForTesting(t, orientation, dbMock)
-			resp, err := server.PutJobsIdDefinition(t.Context(), api.PutJobsIdDefinitionRequestObject{Id: jobID})
-			assert.NoError(t, err)
+	server := createServerForTesting(t, "north", dbMock)
+	resp, err := server.PutJobsIdDefinition(t.Context(), api.PutJobsIdDefinitionRequestObject{Id: jobID})
+	assert.NoError(t, err)
 
-			recorder := httptest.NewRecorder()
-			_ = resp.VisitPutJobsIdDefinitionResponse(recorder)
-			response := recorder.Result()
+	recorder := httptest.NewRecorder()
+	_ = resp.VisitPutJobsIdDefinitionResponse(recorder)
+	response := recorder.Result()
 
-			assert.Equal(t, http.StatusNotFound, response.StatusCode)
-		})
-	}
+	assert.Equal(t, http.StatusNotFound, response.StatusCode)
 }
 
 func TestPutJobsIDDefinition_InternalError(t *testing.T) {
 	jobID := "42"
-	for _, orientation := range allOrientations {
-		t.Run(orientation, func(t *testing.T) {
-			dbMock := persistence.NewHealthyMockStorage(t)
-			dbMock.EXPECT().GetJob(t.Context(), jobID, persistence.FetchParams{}).Return(nil, errors.New("something went wrong"))
+	dbMock := persistence.NewHealthyMockStorage(t)
+	dbMock.EXPECT().GetJob(t.Context(), jobID, persistence.FetchParams{}).Return(nil, errors.New("something went wrong"))
 
-			server := createServerForTesting(t, orientation, dbMock)
-			resp, err := server.PutJobsIdDefinition(t.Context(), api.PutJobsIdDefinitionRequestObject{Id: jobID})
-			assert.Error(t, err)
-			assert.Nil(t, resp)
-		})
-	}
+	server := createServerForTesting(t, "north", dbMock)
+	resp, err := server.PutJobsIdDefinition(t.Context(), api.PutJobsIdDefinitionRequestObject{Id: jobID})
+	assert.Error(t, err)
+	assert.Nil(t, resp)
 }
 
 func TestGetWorkflowsName_InternalError(t *testing.T) {
