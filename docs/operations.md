@@ -82,6 +82,9 @@ Below is a high-level overview of how the communication flow operates:
 This ensures that the connection remains open, preventing closure by proxies, the kernel, or other entities since it may not be possible to control all involved parties.
 The keep-alive events are technically comments (as defined in the SSE specification) and must be ignored by clients.
 
+**Note**: Reverse proxies and API gateways in front of `/jobs/events` must stream responses without buffering; otherwise, events may be delayed until the proxy buffer fills (`wfx` sends `X-Accel-Buffering: no`, but not every proxy honors this header).
+Also, the proxy idle timeout must exceed the SSE keep-alive interval.
+
 #### Event Format Specification
 
 The job events stream is composed of [server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events) (SSE).
