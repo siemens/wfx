@@ -36,6 +36,12 @@ The northbound API is used to create jobs and execute server-side state transiti
 API is used for client-side transitions.
 
 The complete [wfx API specification](../spec/wfx.openapi.yml) is accessible at runtime via the `/api/wfx/v1/openapi.json` endpoint.
+As defined by [RFC 8631](https://www.rfc-editor.org/rfc/rfc8631), wfx makes this endpoint discoverable by returning a `Link` header with the `service-desc` relation on `GET /`:
+
+```http
+Link: <https://wfx.example.com/api/wfx/v1/openapi.json>; rel="service-desc"
+```
+
 Clients may inspect this specification at run-time so to obey the various limits imposed, e.g, for parameter value ranges and array lengths.
 
 ### Job Events
