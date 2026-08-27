@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Breaking
+
+- Job definition updates through the southbound API are no longer allowed
+
 ### Added
 
 - `--jq-filter-timeout` to limit the execution time of JQ response filters (default: 30s, `0` disables the limit)
