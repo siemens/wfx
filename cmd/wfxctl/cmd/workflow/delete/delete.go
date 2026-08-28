@@ -20,6 +20,7 @@ func NewCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:              "delete",
 		Short:            "Delete an existing workflow",
+		Args:             cobra.MinimumNArgs(1),
 		TraverseChildren: true,
 		Example:          "wfxctl workflow delete wfx.workflow.kanban",
 		RunE: func(cmd *cobra.Command, args []string) error {

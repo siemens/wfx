@@ -10,11 +10,11 @@ package entgo
 
 import (
 	"context"
-	"fmt"
 	"sort"
 	"time"
 
 	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 	"github.com/Southclaws/fault/ftag"
 	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/generated/ent"
@@ -38,29 +38,25 @@ func (db Database) UpdateJob(ctx context.Context, job *api.Job, request persiste
 	// swallow the benign duplicate-key error and re-resolve, without poisoning the job update.
 	tagsByName, err := db.ensureTagsExist(ctx, request.AddTags)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to ensure tags exist")
-		return nil, fault.Wrap(err)
+		return nil, fault.Wrap(err, fmsg.With("failed to ensure tags exist"))
 	}
 
 	tx, err := db.client.Tx(ctx)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to start transaction")
-		return nil, fault.Wrap(err)
+		return nil, fault.Wrap(err, fmsg.With("failed to start transaction"))
 	}
 
 	updatedJob, err := doUpdateJob(ctx, tx, job, request, tagsByName)
 	if err != nil {
-		log.Error().Err(err).Msg("Rolling back transaction")
 		if txErr := tx.Rollback(); txErr != nil {
 			log.Error().Err(txErr).Msg("Rollback failed")
 		}
-		return nil, fault.Wrap(err)
+		return nil, fault.Wrap(err, fmsg.With("failed to update job; transaction rolled back"))
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to commit transaction")
-		return nil, fault.Wrap(err)
+		return nil, fault.Wrap(err, fmsg.With("failed to commit transaction"))
 	}
 
 	log.Debug().
@@ -117,7 +113,7 @@ func doUpdateJob(ctx context.Context, tx *ent.Tx, job *api.Job, request persiste
 				t, ok := tagsByName[name]
 				if !ok {
 					// Should not happen: ensureTagsExist guarantees coverage.
-					return nil, fault.Wrap(fmt.Errorf("tag %q not pre-resolved", name))
+					return nil, fault.Wrap(fault.Newf("tag %q not pre-resolved", name))
 				}
 				updater.AddTags(t)
 			}
@@ -149,7 +145,7 @@ func doUpdateJob(ctx context.Context, tx *ent.Tx, job *api.Job, request persiste
 			exists, existsErr := tx.Job.Query().Where(entjob.IDEQ(job.ID)).Exist(ctx)
 			if existsErr == nil && exists {
 				log.Warn().Time("expectedMtime", oldMtime).Msg("Concurrent update detected; aborting")
-				return nil, fault.Wrap(fmt.Errorf("status of job %s was concurrently modified", job.ID), ftag.With(errkind.TOCTOU))
+				return nil, fault.Wrap(fault.Newf("status of job %s was concurrently modified", job.ID), ftag.With(errkind.TOCTOU))
 			}
 		}
 		return nil, fault.Wrap(err)
@@ -259,7 +255,7 @@ func (db Database) ensureTagsExist(ctx context.Context, names *[]string) (map[st
 	}
 	for n := range wanted {
 		if _, ok := result[n]; !ok {
-			return nil, fault.Wrap(fmt.Errorf("failed to ensure tag %q exists after %d attempts", n, maxAttempts))
+			return nil, fault.Wrap(fault.Newf("failed to ensure tag %q exists after %d attempts", n, maxAttempts))
 		}
 	}
 	return result, nil

@@ -35,5 +35,6 @@ func NewCommand() *cobra.Command {
 	}
 	f := cmd.Flags()
 	f.String(flags.IDFlag, "", "job id")
+	_ = cmd.MarkFlagRequired(flags.IDFlag)
 	return cmd
 }

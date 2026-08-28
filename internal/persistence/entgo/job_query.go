@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqljson"
 	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 
 	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/generated/ent"
@@ -87,8 +88,7 @@ func (db Database) QueryJobs(ctx context.Context,
 		start := time.Now()
 		count, err := counter.Count(ctx)
 		if err != nil {
-			log.Error().Err(err).Msg("Failed to count jobs")
-			return nil, fault.Wrap(err)
+			return nil, fault.Wrap(err, fmsg.With("failed to count jobs"))
 		}
 		duration := time.Since(start)
 		log.Debug().Dur("duration", duration).Int("count", count).Msg("Computed total number of jobs")
@@ -105,8 +105,7 @@ func (db Database) QueryJobs(ctx context.Context,
 		Offset(int(paginationParams.Offset)).
 		All(ctx)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to fetch jobs")
-		return nil, fault.Wrap(err)
+		return nil, fault.Wrap(err, fmsg.With("failed to fetch jobs"))
 	}
 
 	result.Content = make([]api.Job, 0, len(jobs))

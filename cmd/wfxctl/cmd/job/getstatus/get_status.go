@@ -9,8 +9,6 @@ package getstatus
  */
 
 import (
-	"errors"
-
 	"github.com/Southclaws/fault"
 	"github.com/spf13/cobra"
 
@@ -30,9 +28,6 @@ wfxctl job get-status --id=8ea1e9d7-28e6-4f1f-b444-a8d2d1ad7618
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			baseCmd := flags.NewBaseCmd(cmd.Flags())
 			id := baseCmd.ID
-			if id == "" {
-				return errors.New("id missing")
-			}
 			client := errutil.Must(baseCmd.CreateClient())
 			resp, err := client.GetJobsIdStatus(cmd.Context(), id, nil)
 			if err != nil {
@@ -43,5 +38,6 @@ wfxctl job get-status --id=8ea1e9d7-28e6-4f1f-b444-a8d2d1ad7618
 	}
 	f := cmd.Flags()
 	f.String(flags.IDFlag, "", "job id")
+	_ = cmd.MarkFlagRequired(flags.IDFlag)
 	return cmd
 }

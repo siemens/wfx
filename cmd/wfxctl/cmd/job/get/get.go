@@ -9,8 +9,6 @@ package get
  */
 
 import (
-	"errors"
-
 	"github.com/Southclaws/fault"
 	"github.com/spf13/cobra"
 
@@ -31,9 +29,6 @@ wfxctl job get --id=8ea1e9d7-28e6-4f1f-b444-a8d2d1ad7618
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			baseCmd := flags.NewBaseCmd(cmd.Flags())
 			id := baseCmd.ID
-			if id == "" {
-				return errors.New("id missing")
-			}
 			history := baseCmd.History
 			client := errutil.Must(baseCmd.CreateClient())
 			resp, err := client.GetJobsId(cmd.Context(), id, &api.GetJobsIdParams{ParamHistory: &history})
@@ -47,5 +42,6 @@ wfxctl job get --id=8ea1e9d7-28e6-4f1f-b444-a8d2d1ad7618
 	f := cmd.Flags()
 	f.String(flags.IDFlag, "", "id of the job to be fetched")
 	f.Bool(flags.HistoryFlag, false, "whether to fetch the job history")
+	_ = cmd.MarkFlagRequired(flags.IDFlag)
 	return cmd
 }

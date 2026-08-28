@@ -10,7 +10,6 @@ package loadtest
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 	"strings"
 	"sync"
@@ -53,7 +52,7 @@ func Run(k *koanf.Koanf) error {
 	mgmtHost = strings.TrimRight(k.String(MgmtHostFlag), "/")
 
 	if clientHost == "" || mgmtHost == "" {
-		return errors.New("clientHost or mgmtHost not set")
+		return fault.New("clientHost or mgmtHost not set")
 	}
 
 	if err := wfx.CreateWorkflow(mgmtHost, *workflow); err != nil {

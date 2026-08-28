@@ -9,8 +9,6 @@ package deltags
  */
 
 import (
-	"errors"
-
 	"github.com/Southclaws/fault"
 	"github.com/spf13/cobra"
 
@@ -26,9 +24,6 @@ func NewCommand() *cobra.Command {
 		Example:          "wfxctl job del-tags --id=8ea1e9d7-28e6-4f1f-b444-a8d2d1ad7618 tag1 tag2",
 		TraverseChildren: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) == 0 {
-				return errors.New("no tags provided")
-			}
 			baseCmd := flags.NewBaseCmd(cmd.Flags())
 			tags := args
 
@@ -42,5 +37,7 @@ func NewCommand() *cobra.Command {
 	}
 	f := cmd.Flags()
 	f.String(flags.IDFlag, "", "job id")
+	_ = cmd.MarkFlagRequired(flags.IDFlag)
+	cmd.Args = cobra.MinimumNArgs(1)
 	return cmd
 }

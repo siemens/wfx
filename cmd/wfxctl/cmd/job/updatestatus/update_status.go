@@ -9,8 +9,6 @@ package updatestatus
  */
 
 import (
-	"errors"
-
 	"github.com/Southclaws/fault"
 	"github.com/spf13/cobra"
 
@@ -30,9 +28,6 @@ wfxctl job update-status --id=8ea1e9d7-28e6-4f1f-b444-a8d2d1ad7618 --client-id=c
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			baseCmd := flags.NewBaseCmd(cmd.Flags())
 			id := baseCmd.ID
-			if id == "" {
-				return errors.New("id missing")
-			}
 			clientID := baseCmd.ClientID
 			progress := int32(baseCmd.Progress)
 			message := baseCmd.Message
@@ -53,8 +48,10 @@ wfxctl job update-status --id=8ea1e9d7-28e6-4f1f-b444-a8d2d1ad7618 --client-id=c
 	}
 	f := cmd.Flags()
 	f.String(flags.IDFlag, "", "job which shall be updated")
+	_ = cmd.MarkFlagRequired(flags.IDFlag)
 	f.String(flags.ClientIDFlag, "", "client which sends the update")
 	f.String(flags.StateFlag, "", "name of the new state")
+	_ = cmd.MarkFlagRequired(flags.StateFlag)
 	f.Int(flags.ProgressFlag, 0, "progress value (0 <= progress <= 100)")
 	f.String(flags.MessageFlag, "", "status message / info, free text from client")
 	return cmd

@@ -9,7 +9,6 @@ package config
  */
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"slices"
@@ -152,7 +151,7 @@ func NewAppConfig(flags *pflag.FlagSet) (*AppConfig, error) {
 	cfg.flags = flags
 	cfg.k = k
 	if ok := cfg.Reload(); !ok {
-		return nil, errors.New("configuration contains errors")
+		return nil, fault.New("configuration contains errors")
 	}
 
 	// start watching config
@@ -484,7 +483,7 @@ func (cfg *AppConfig) InitStorage() (persistence.Storage, error) {
 	// note: storage is shared between north- and southbound API
 	storage := persistence.GetStorage(name)
 	if storage == nil {
-		return nil, fmt.Errorf("unknown storage %s", name)
+		return nil, fault.Newf("unknown storage %s", name)
 	}
 	log.Debug().Str("name", name).Msgf("Initializing storage %q", name)
 	if err := storage.Initialize(options); err != nil {

@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 	migrate_pgx "github.com/golang-migrate/migrate/v4/database/pgx/v5"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 
@@ -65,8 +66,7 @@ func iamAuthHook(awsConfig aws.Config, region string) func(context.Context, *pgx
 			awsConfig.Credentials,
 		)
 		if err != nil {
-			log.Error().Err(err).Msg("Failed to build IAM auth token")
-			return fault.Wrap(err)
+			return fault.Wrap(err, fmsg.With("failed to build IAM auth token"))
 		}
 
 		// Update connection config with new token
@@ -119,15 +119,14 @@ func (wrapper *PostgreSQL) Initialize(options string) error {
 			region = os.Getenv("AWS_REGION")
 		}
 		if region == "" {
-			return fmt.Errorf("AWS region not configured: set WFX_POSTGRES_REGION or AWS_REGION environment variable")
+			return fault.New("AWS region not configured: set WFX_POSTGRES_REGION or AWS_REGION environment variable")
 		}
 
 		// Load AWS configuration (supports IRSA, instance profiles, env vars, etc.)
 		ctx := context.Background()
 		awsConfig, err := config.LoadDefaultConfig(ctx)
 		if err != nil {
-			log.Error().Err(err).Msg("Failed to load AWS configuration for IAM auth")
-			return fault.Wrap(err)
+			return fault.Wrap(err, fmsg.With("failed to load AWS configuration for IAM auth"))
 		}
 
 		connector := stdlib.GetConnector(*connConfig, stdlib.OptionBeforeConnect(iamAuthHook(awsConfig, region)))
@@ -160,8 +159,7 @@ func (wrapper *PostgreSQL) Initialize(options string) error {
 	defer cancel()
 
 	if err := db.PingContext(ctx); err != nil {
-		log.Error().Err(err).Msg("Failed to ping PostgreSQL database")
-		return fault.Wrap(err)
+		return fault.Wrap(err, fmsg.With("failed to ping PostgreSQL database"))
 	}
 
 	driver, err := migrate_pgx.WithInstance(db, &migrate_pgx.Config{

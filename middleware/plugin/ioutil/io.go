@@ -10,8 +10,9 @@ package ioutil
 
 import (
 	"encoding/binary"
-	"errors"
 	"io"
+
+	"github.com/Southclaws/fault"
 
 	flatbuffers "github.com/google/flatbuffers/go"
 	"github.com/siemens/wfx/generated/plugin"
@@ -80,7 +81,7 @@ func writeHelper(w io.Writer, packer Packer) error {
 	buf := builder.FinishedBytes()
 	n, err := w.Write(buf)
 	if n != len(buf) {
-		return errors.New("incomplete write")
+		return fault.New("incomplete write")
 	}
 	return err
 }

@@ -12,6 +12,7 @@ import (
 	"errors"
 
 	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database"
 	"github.com/golang-migrate/migrate/v4/source"
@@ -30,8 +31,7 @@ func runMigrations(src source.Driver, db string, driver database.Driver) error {
 			log.Debug().Msg("No schema changes necessary")
 			return nil
 		}
-		log.Error().Err(err).Msg("Failed to apply migrations")
-		return fault.Wrap(err)
+		return fault.Wrap(err, fmsg.With("failed to apply migrations"))
 	}
 	log.Info().Msg("Applied schema migrations")
 	return nil

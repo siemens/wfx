@@ -100,7 +100,7 @@ func applyFilter(ctx context.Context, w http.ResponseWriter, body any, filter st
 	return nil
 }
 
-var errFilterResultTooLarge = errors.New("response filter result exceeds size limit")
+var errFilterResultTooLarge = fault.New("response filter result exceeds size limit")
 
 type limitedBuffer struct {
 	bytes.Buffer

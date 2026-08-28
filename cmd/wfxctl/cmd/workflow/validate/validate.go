@@ -9,7 +9,6 @@ package validate
  */
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -32,7 +31,7 @@ func NewCommand() *cobra.Command {
 wfxctl workflow validate wfx.workflow.dau.direct.yml
 `,
 		TraverseChildren: true,
-		Args:             cobra.OnlyValidArgs,
+		Args:             cobra.MinimumNArgs(1),
 		ValidArgsFunction: func(*cobra.Command, []string, string) ([]string, cobra.ShellCompDirective) {
 			return []string{"yaml", "yml"}, cobra.ShellCompDirectiveFilterFileExt
 		},
@@ -51,9 +50,6 @@ wfxctl workflow validate wfx.workflow.dau.direct.yml
 				}
 				allWorkflows = append(allWorkflows, wf)
 			} else {
-				if n == 0 {
-					return errors.New("workflow must be provided either via file or stdin")
-				}
 				for _, fname := range args {
 					b, err := os.ReadFile(fname)
 					if err != nil {

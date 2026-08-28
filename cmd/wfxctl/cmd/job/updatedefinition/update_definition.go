@@ -10,7 +10,6 @@ package updatedefinition
 
 import (
 	"bufio"
-	"errors"
 
 	"github.com/Southclaws/fault"
 	"github.com/spf13/cobra"
@@ -31,9 +30,6 @@ wfxctl job update-definition
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			baseCmd := flags.NewBaseCmd(cmd.Flags())
 			id := baseCmd.ID
-			if id == "" {
-				return errors.New("job id missing")
-			}
 			client := errutil.Must(baseCmd.CreateClient())
 			resp, err := client.PutJobsIdDefinitionWithBody(cmd.Context(), id, nil, "application/json", bufio.NewReader(cmd.InOrStdin()))
 			if err != nil {
@@ -45,5 +41,6 @@ wfxctl job update-definition
 
 	f := cmd.Flags()
 	f.String(flags.IDFlag, "", "job id")
+	_ = cmd.MarkFlagRequired(flags.IDFlag)
 	return cmd
 }

@@ -10,9 +10,9 @@ package entgo
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 	"github.com/Southclaws/fault/ftag"
 	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/generated/ent"
@@ -48,10 +48,9 @@ func (db Database) GetJob(ctx context.Context, jobID string, fetchParams persist
 	if err != nil {
 		if ent.IsNotFound(err) {
 			contextLogger.Debug().Msg("Job not found")
-			return nil, fault.Wrap(fmt.Errorf("job with id %s does not exist", jobID), ftag.With(ftag.NotFound))
+			return nil, fault.Wrap(fault.Newf("job with id %s does not exist", jobID), ftag.With(ftag.NotFound))
 		}
-		contextLogger.Error().Err(err).Msg("Failed to fetch job")
-		return nil, fault.Wrap(err)
+		return nil, fault.Wrap(err, fmsg.With("failed to fetch job"))
 	}
 	contextLogger.Debug().Msg("Fetched job")
 	job := convertJob(entity)
