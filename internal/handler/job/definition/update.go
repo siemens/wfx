@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 	"github.com/cnf/structhash"
 	"github.com/go-openapi/strfmt"
 	"github.com/siemens/wfx/generated/api"
@@ -29,8 +30,7 @@ func Update(ctx context.Context, storage persistence.Storage, jobID string, defi
 
 	job, err := storage.GetJob(ctx, jobID, persistence.FetchParams{History: false})
 	if err != nil {
-		contextLogger.Err(err).Msg("Failed to get job from storage")
-		return nil, fault.Wrap(err)
+		return nil, fault.Wrap(err, fmsg.With("failed to get job from storage"))
 	}
 
 	job.Definition = definition
@@ -38,8 +38,7 @@ func Update(ctx context.Context, storage persistence.Storage, jobID string, defi
 
 	result, err := storage.UpdateJob(ctx, job, persistence.JobUpdate{Status: job.Status, Definition: &job.Definition})
 	if err != nil {
-		contextLogger.Err(err).Msg("Failed to update job")
-		return nil, fault.Wrap(err)
+		return nil, fault.Wrap(err, fmsg.With("failed to update job"))
 	}
 
 	go func() {

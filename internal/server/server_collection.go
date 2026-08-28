@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 	"github.com/coreos/go-systemd/v22/activation"
 	nethttpmiddleware "github.com/oapi-codegen/nethttp-middleware"
 	"github.com/rs/cors"
@@ -125,10 +126,10 @@ func (sc *ServerCollection) Start() error {
 	if len(systemdListeners) > 0 {
 		// perform sanity checks
 		if len(systemdListeners) != 2 {
-			return errors.New("systemd socket-based activation requires two sockets")
+			return fault.New("systemd socket-based activation requires two sockets")
 		}
 		if len(schemes) != 1 || schemes[0] != config.SchemeUnix {
-			return errors.New("systemd socket-based activation only supports unix scheme")
+			return fault.New("systemd socket-based activation only supports unix scheme")
 		}
 	}
 
@@ -183,8 +184,7 @@ func (sc *ServerCollection) Start() error {
 				err = sc.North.Serve(northListener)
 			}
 			if err != nil && !errors.Is(err, http.ErrServerClosed) {
-				log.Err(err).Msg("Northbound server encountered an error")
-				return fault.Wrap(err)
+				return fault.Wrap(err, fmsg.With("northbound server encountered an error"))
 			}
 			return nil
 		})
@@ -206,8 +206,7 @@ func (sc *ServerCollection) Start() error {
 				err = sc.South.Serve(southListener)
 			}
 			if err != nil && !errors.Is(err, http.ErrServerClosed) {
-				log.Err(err).Msg("Southbound server encountered an error")
-				return fault.Wrap(err)
+				return fault.Wrap(err, fmsg.With("southbound server encountered an error"))
 			}
 			return nil
 		})
@@ -227,8 +226,7 @@ func (sc *ServerCollection) Start() error {
 					case err := <-chErr:
 						running = false
 						if err != nil {
-							log.Err(err).Msg("Received plugin error")
-							return err
+							return fault.Wrap(err, fmsg.With("received plugin error"))
 						}
 					default:
 						// no errors or channel was closed
@@ -242,7 +240,7 @@ func (sc *ServerCollection) Start() error {
 
 	log.Debug().Msg("Waiting for goroutines to finish")
 	err := g.Wait()
-	log.Debug().Err(err).Msg("Goroutines finished")
+	log.Debug().Msg("Goroutines finished")
 
 	return fault.Wrap(err)
 }
@@ -297,7 +295,13 @@ func createServer(cfg *config.AppConfig, ssi api.StrictServerInterface, router *
 
 	swag, _ := api.GetSpec()
 	basePath := errutil.Must(swag.Servers.BasePath())
-	strictHandler := api.NewStrictHandler(ssi, nil)
+	strictHandler := api.NewStrictHandlerWithOptions(ssi, nil, api.StrictHTTPServerOptions{
+		ResponseErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request, err error) {
+			requestLog := logging.LoggerFromCtx(r.Context())
+			requestLog.Error().Stack().Err(err).Msg("request failed")
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		},
+	})
 	router.HandleFunc("GET /version", strictHandler.GetVersion)
 	router.HandleFunc("GET /health", strictHandler.GetHealth)
 	handler := api.HandlerWithOptions(strictHandler, api.StdHTTPServerOptions{
@@ -348,7 +352,7 @@ func createListener(scheme config.Scheme, settings ListenerSettings) (net.Listen
 		network = "tcp"
 		addr = fmt.Sprintf("%s:%d", settings.TLSHost, settings.TLSPort)
 	default:
-		return nil, fmt.Errorf("unsupported scheme: %s", scheme)
+		return nil, fault.Newf("unsupported scheme: %s", scheme)
 	}
 	contextLogger := log.With().Str("network", network).Str("addr", addr).Str("scheme", scheme.String()).Logger()
 	ln, err := net.Listen(network, addr)

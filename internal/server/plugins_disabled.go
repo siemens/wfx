@@ -11,14 +11,14 @@ package server
  */
 
 import (
-	"errors"
+	"github.com/Southclaws/fault"
 
 	"github.com/siemens/wfx/middleware/plugin"
 )
 
 func loadPlugins(dir string) ([]plugin.Plugin, error) {
 	if dir != "" {
-		return nil, errors.New("this binary was built without plugin support")
+		return nil, fault.New("this binary was built without plugin support")
 	}
 	return []plugin.Plugin{}, nil
 }

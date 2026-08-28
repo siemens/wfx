@@ -67,6 +67,7 @@ linters:
       default-signifies-exhaustive: true
     wrapcheck:
       ignore-package-globs:
+        - github.com/Southclaws/fault
         - github.com/siemens/wfx/internal/errutil
         - google.golang.org/protobuf/*
         - io

@@ -12,8 +12,8 @@ import (
 	"context"
 
 	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 	"github.com/siemens/wfx/generated/api"
-	"github.com/siemens/wfx/middleware/logging"
 	"github.com/siemens/wfx/persistence"
 )
 
@@ -21,9 +21,7 @@ func GetJob(ctx context.Context, storage persistence.Storage, id string, history
 	fetchParams := persistence.FetchParams{History: history}
 	job, err := storage.GetJob(ctx, id, fetchParams)
 	if err != nil {
-		log := logging.LoggerFromCtx(ctx)
-		log.Error().Str("id", id).Bool("history", history).Err(err).Msg("Failed to get job from storage")
-		return nil, fault.Wrap(err)
+		return nil, fault.Wrap(err, fmsg.With("failed to get job from storage"))
 	}
 	return job, nil
 }

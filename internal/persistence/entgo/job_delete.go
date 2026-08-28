@@ -10,7 +10,6 @@ package entgo
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/ftag"
@@ -20,7 +19,7 @@ import (
 func (db Database) DeleteJob(ctx context.Context, jobID string) error {
 	err := db.client.Job.DeleteOneID(jobID).Exec(ctx)
 	if ent.IsNotFound(err) {
-		return fault.Wrap(fmt.Errorf("job with id %s was not found", jobID), ftag.With(ftag.NotFound))
+		return fault.Wrap(fault.Newf("job with id %s was not found", jobID), ftag.With(ftag.NotFound))
 	}
 	return fault.Wrap(err)
 }

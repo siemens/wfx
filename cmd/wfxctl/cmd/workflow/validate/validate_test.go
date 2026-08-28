@@ -21,7 +21,7 @@ import (
 func TestCommand_NoWorkflowGiven(t *testing.T) {
 	err := NewCommand().Execute()
 	require.Error(t, err)
-	assert.ErrorContains(t, err, "workflow must be provided either via file or stdin")
+	assert.ErrorContains(t, err, `requires at least 1 arg(s)`)
 }
 
 func TestCommand_Stdin(t *testing.T) {

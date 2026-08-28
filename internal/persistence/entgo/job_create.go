@@ -10,10 +10,10 @@ package entgo
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 	"github.com/rs/zerolog/log"
 	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/generated/ent"
@@ -30,21 +30,18 @@ func (db Database) CreateJob(ctx context.Context, job *api.Job) (*api.Job, error
 
 	tx, err := db.client.Tx(ctx)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to start transaction")
-		return nil, errors.New("failed to start transaction")
+		return nil, fault.Wrap(err, fmsg.With("failed to start transaction"))
 	}
 	createdJob, err := createJobHelper(ctx, tx, job)
 	if err != nil {
-		log.Error().Err(err).Msg("Rolling back transaction")
 		if txErr := tx.Rollback(); txErr != nil {
 			log.Error().Err(txErr).Msg("Rollback failed")
 		}
-		return nil, fault.Wrap(err)
+		return nil, fault.Wrap(err, fmsg.With("failed to create job; transaction rolled back"))
 	}
 
 	if err = tx.Commit(); err != nil {
-		log.Error().Err(err).Msg("Failed to commit transaction")
-		return nil, fault.Wrap(err)
+		return nil, fault.Wrap(err, fmsg.With("failed to commit transaction"))
 	}
 
 	return createdJob, nil
@@ -66,8 +63,7 @@ func createJobHelper(ctx context.Context, tx *ent.Tx, job *api.Job) (*api.Job, e
 		Where(workflow.Name(job.Workflow.Name)).
 		Only(ctx)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to fetch workflow from database")
-		return nil, fault.Wrap(err)
+		return nil, fault.Wrap(err, fmsg.With("failed to fetch workflow from database"))
 	}
 	wf := convertWorkflow(wfEntity)
 	group := wfutil.FindStateGroup(&wf, job.Status.State)
@@ -104,8 +100,7 @@ func createJobHelper(ctx context.Context, tx *ent.Tx, job *api.Job) (*api.Job, e
 				}
 				newTags, err := tx.Tag.CreateBulk(missingTags...).Save(ctx)
 				if err != nil {
-					log.Error().Err(err).Msg("Failed to persist new tags")
-					return nil, fault.Wrap(err)
+					return nil, fault.Wrap(err, fmsg.With("failed to persist new tags"))
 				}
 				for _, t := range newTags {
 					log.Debug().Str("name", t.Name).Msgf("Persisted new tag %q", t.Name)
@@ -135,8 +130,7 @@ func createJobHelper(ctx context.Context, tx *ent.Tx, job *api.Job) (*api.Job, e
 
 	entity, err := builder.Save(ctx)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to persist job")
-		return nil, fault.Wrap(err)
+		return nil, fault.Wrap(err, fmsg.With("failed to persist job"))
 	}
 
 	result := convertJob(entity)

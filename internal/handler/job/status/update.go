@@ -10,10 +10,10 @@ package status
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 	"github.com/Southclaws/fault/ftag"
 	"github.com/go-openapi/strfmt"
 	"github.com/siemens/wfx/generated/api"
@@ -56,10 +56,10 @@ func Update(ctx context.Context, storage persistence.Storage, jobID string, newS
 	if !isAllowed {
 		if !foundTransition {
 			contextLogger.Warn().Msg("Transition does not exist")
-			return nil, fault.Wrap(fmt.Errorf("transition from '%s' to '%s' does not exist", from, to), ftag.With(ftag.InvalidArgument))
+			return nil, fault.Wrap(fault.Newf("transition from '%s' to '%s' does not exist", from, to), ftag.With(ftag.InvalidArgument))
 		}
 		contextLogger.Warn().Msg("Transition exists but actor is not allowed to trigger it")
-		return nil, fault.Wrap(fmt.Errorf("transition from '%s' to '%s' is not allowed for actor '%s'", from, to, actor), ftag.With(ftag.InvalidArgument))
+		return nil, fault.Wrap(fault.Newf("transition from '%s' to '%s' is not allowed for actor '%s'", from, to, actor), ftag.With(ftag.InvalidArgument))
 	}
 
 	// transition is allowed, now apply wfx transitions.
@@ -78,8 +78,7 @@ func Update(ctx context.Context, storage persistence.Storage, jobID string, newS
 
 	result, err := storage.UpdateJob(ctx, job, persistence.JobUpdate{Status: &updatedStatus})
 	if err != nil {
-		contextLogger.Err(err).Msg("Failed to persist job update")
-		return nil, fault.Wrap(err)
+		return nil, fault.Wrap(err, fmsg.With("failed to persist job update"))
 	}
 
 	go func() {

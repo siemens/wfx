@@ -10,7 +10,6 @@ package create
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -61,7 +60,7 @@ cat <<EOF | wfxctl workflow create -
 EOF
 `, kanbanExample),
 		TraverseChildren: true,
-		Args:             cobra.OnlyValidArgs,
+		Args:             cobra.MinimumNArgs(1),
 		ValidArgsFunction: func(*cobra.Command, []string, string) ([]string, cobra.ShellCompDirective) {
 			return []string{"yaml", "yml", "json"}, cobra.ShellCompDirectiveFilterFileExt
 		},
@@ -92,7 +91,7 @@ EOF
 func readWorkflows(args []string, r io.Reader) ([]api.Workflow, error) {
 	n := len(args)
 	if n == 0 {
-		return nil, errors.New("workflow must ge given either via file or stdin")
+		return nil, fault.New("workflow must be given either via file or stdin")
 	}
 	allWorkflows := make([]api.Workflow, 0, len(args))
 	if n == 1 && args[0] == "-" {

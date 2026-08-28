@@ -11,7 +11,6 @@ package plugin
  */
 
 import (
-	"fmt"
 	"os/exec"
 	"syscall"
 	"time"
@@ -35,7 +34,7 @@ func (p *FBPlugin) terminateProcess() error {
 	} else {
 		log.Warn().Err(err).Int("pid", pid).Msgf("Process group for pid %d not found", pid)
 		if err := syscall.Kill(pid, 0); err != nil {
-			return fmt.Errorf("plugin pid %d not found", pid)
+			return fault.Newf("plugin pid %d not found", pid)
 		}
 	}
 

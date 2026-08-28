@@ -10,12 +10,12 @@ package api
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 	"time"
 
 	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 	"github.com/Southclaws/fault/ftag"
 	"github.com/alexliesenfeld/health"
 	"github.com/rs/zerolog/log"
@@ -29,7 +29,6 @@ import (
 	"github.com/siemens/wfx/internal/handler/job/status"
 	"github.com/siemens/wfx/internal/handler/job/tags"
 	"github.com/siemens/wfx/internal/handler/workflow"
-	"github.com/siemens/wfx/middleware/logging"
 	"github.com/siemens/wfx/middleware/sse"
 	"github.com/siemens/wfx/persistence"
 )
@@ -317,11 +316,11 @@ func (server WfxServer) GetJobsIdStatus(ctx context.Context, request api.GetJobs
 func (server WfxServer) PutJobsIdStatus(ctx context.Context, request api.PutJobsIdStatusRequestObject) (api.PutJobsIdStatusResponseObject, error) {
 	eligibleAny := ctx.Value(EligibleKey)
 	if eligibleAny == nil {
-		return nil, errors.New("internal error: eligible field not set in context")
+		return nil, fault.New("internal error: eligible field not set in context")
 	}
 	eligible, ok := eligibleAny.(api.EligibleEnum)
 	if !ok {
-		return nil, errors.New("internal error: invalid type for eligible")
+		return nil, fault.New("internal error: invalid type for eligible")
 	}
 	status, err := status.Update(ctx, server.storage, request.Id, request.Body, eligible)
 	if err != nil {
@@ -456,11 +455,9 @@ func (server WfxServer) GetWorkflows(ctx context.Context, request api.GetWorkflo
 		pagination.ComputeTotal = *request.Params.ParamPagination
 	}
 
-	log := logging.LoggerFromCtx(ctx)
 	workflows, err := workflow.QueryWorkflows(ctx, server.storage, pagination, (*string)(request.Params.ParamSort))
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to query workflows")
-		return nil, fault.Wrap(err)
+		return nil, fault.Wrap(err, fmsg.With("failed to query workflows"))
 	}
 	if request.Params.XResponseFilter != nil {
 		return NewJQFilter(ctx, *request.Params.XResponseFilter, *workflows, server.jqOpts()), nil

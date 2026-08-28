@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/generated/ent"
 	"github.com/siemens/wfx/generated/ent/workflow"
@@ -53,8 +54,7 @@ func (db Database) QueryWorkflows(ctx context.Context, sortParams persistence.So
 		start := time.Now()
 		count, err := counter.Count(ctx)
 		if err != nil {
-			log.Error().Err(err).Msg("Failed to count workflows")
-			return nil, fault.Wrap(err)
+			return nil, fault.Wrap(err, fmsg.With("failed to count workflows"))
 		}
 		duration := time.Since(start)
 		log.Debug().Dur("duration", duration).Int("count", count).Msg("Computed total number of workflows")

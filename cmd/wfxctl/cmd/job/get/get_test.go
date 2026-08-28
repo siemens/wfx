@@ -15,7 +15,16 @@ import (
 
 	"github.com/siemens/wfx/cmd/wfxctl/flags"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
+
+func TestGetJobMissingID(t *testing.T) {
+	cmd := NewCommand()
+	cmd.SetArgs(nil)
+	err := cmd.Execute()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), `required flag(s) "id" not set`)
+}
 
 func TestGetJob(t *testing.T) {
 	const expectedPath = "/api/wfx/v1/jobs/1"

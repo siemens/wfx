@@ -9,8 +9,7 @@ package workflow
  */
 
 import (
-	"errors"
-	"fmt"
+	"github.com/Southclaws/fault"
 
 	"github.com/yourbasic/graph"
 
@@ -29,7 +28,7 @@ func ValidateWorkflow(workflow *api.Workflow) error {
 	for i, s := range workflow.States {
 		if _, found := stateToNode[s.Name]; found {
 			// State name must be unique
-			return fmt.Errorf("%s state has already been created", s.Name)
+			return fault.Newf("%s state has already been created", s.Name)
 		}
 		stateToNode[s.Name] = i
 	}
@@ -47,14 +46,14 @@ func ValidateWorkflow(workflow *api.Workflow) error {
 	// check groups do not overlap
 	for state, count := range stateCount {
 		if count > 1 {
-			return fmt.Errorf("state %s belongs to more than one group", state)
+			return fault.Newf("state %s belongs to more than one group", state)
 		}
 	}
 
 	// ensure that no two groups have the same name
 	for name, count := range groupNameCount {
 		if count > 1 {
-			return fmt.Errorf("group name %s used multiple times", name)
+			return fault.Newf("group name %s used multiple times", name)
 		}
 	}
 
@@ -70,7 +69,7 @@ func ValidateWorkflow(workflow *api.Workflow) error {
 		from, foundFrom := stateToNode[t.From]
 		to, foundTo := stateToNode[t.To]
 		if !foundFrom || !foundTo {
-			return fmt.Errorf("transition %s -> %s contains unknown state name", t.From, t.To)
+			return fault.Newf("transition %s -> %s contains unknown state name", t.From, t.To)
 		}
 		e := edge{From: t.From, To: t.To}
 		transitions[e] = append(transitions[e], t.Eligible)
@@ -93,7 +92,7 @@ func ValidateWorkflow(workflow *api.Workflow) error {
 		if len(eligible) > 1 {
 			eligible := findDuplicate(eligible)
 			if eligible != nil {
-				return fmt.Errorf("duplicate transition: %s -> %s eligible: %s", e.From, e.To, *eligible)
+				return fault.Newf("duplicate transition: %s -> %s eligible: %s", e.From, e.To, *eligible)
 			}
 		}
 	}
@@ -106,10 +105,10 @@ func ValidateWorkflow(workflow *api.Workflow) error {
 			}
 		}
 		if count > 1 {
-			return fmt.Errorf("more than one immediate action from state %s", from)
+			return fault.Newf("more than one immediate action from state %s", from)
 		}
 		if count != 0 && len(actions) > 1 {
-			return fmt.Errorf("transition with source %s contains impossible transition", from)
+			return fault.Newf("transition with source %s contains impossible transition", from)
 		}
 	}
 
@@ -124,12 +123,12 @@ func ValidateWorkflow(workflow *api.Workflow) error {
 			}
 		}
 		if len(initialStates) != 1 {
-			return errors.New("workflow must have exactly one INITIAL state")
+			return fault.New("workflow must have exactly one INITIAL state")
 		}
 	}
 
 	for _, cycle := range dfsResult.Cycles {
-		return fmt.Errorf("workflow contains cycle from %s to %s",
+		return fault.Newf("workflow contains cycle from %s to %s",
 			workflow.States[cycle.From].Name, workflow.States[cycle.To].Name)
 	}
 

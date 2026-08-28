@@ -12,6 +12,7 @@ import (
 	"context"
 
 	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 	"github.com/Southclaws/fault/ftag"
 	"github.com/rs/zerolog/log"
 	"github.com/siemens/wfx/generated/api"
@@ -25,8 +26,7 @@ func CreateWorkflow(ctx context.Context, storage persistence.Storage, wf *api.Wo
 	}
 	wf, err := storage.CreateWorkflow(ctx, wf)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to create workflow")
-		return nil, fault.Wrap(err)
+		return nil, fault.Wrap(err, fmsg.With("failed to create workflow"))
 	}
 	log.Info().Str("name", wf.Name).Msgf("Created new workflow %q", wf.Name)
 	return wf, nil
