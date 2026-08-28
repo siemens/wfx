@@ -40,9 +40,6 @@ func NewHTTPServer(cfg *config.AppConfig, handler http.Handler) (*http.Server, e
 func configureTLS(server *http.Server, caCert string) error {
 	// Inspired by https://blog.bracebin.com/achieving-perfect-ssl-labs-score-with-go
 	server.TLSConfig = &tls.Config{
-		// Causes servers to use Go's default ciphersuite preferences,
-		// which are tuned to avoid attacks. Does nothing on clients.
-		PreferServerCipherSuites: true,
 		// Only use curves which have assembly implementations
 		// https://github.com/golang/go/tree/master/src/crypto/elliptic
 		CurvePreferences: []tls.CurveID{tls.CurveP256},
