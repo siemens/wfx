@@ -185,6 +185,8 @@ archives:
         dst: app.css
       - src: ui/index.html.tmpl
         dst: index.html.tmpl
+      - src: hugo/static/images/logo.svg
+        dst: logo.svg
       - src: ui/*.cyclonedx.sbom.json
         dst: .
 
