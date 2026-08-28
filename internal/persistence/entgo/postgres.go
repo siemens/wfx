@@ -191,6 +191,7 @@ func (wrapper *PostgreSQL) Initialize(options string) error {
 		// log queries
 		client = client.Debug()
 	}
+	addClientIDInterceptor(client)
 
 	wrapper.Database = Database{client: client}
 	return nil
