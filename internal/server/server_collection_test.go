@@ -9,7 +9,6 @@ package server
  */
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -349,7 +348,7 @@ func (server failingServer) GetHealth(context.Context, genAPI.GetHealthRequestOb
 }
 
 func TestCreateServer_InternalErrorIsLoggedWithoutLeaking(t *testing.T) {
-	var logs bytes.Buffer
+	var logs syncBuffer
 	originalLogger := log.Logger
 	originalMarshaler := zerolog.ErrorStackMarshaler
 	t.Cleanup(func() {

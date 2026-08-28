@@ -370,6 +370,13 @@ parameters:
     description: Filter jobs belonging to a specific client with clientId
     required: false
     type: string
+  clientIDHeader:
+    name: X-Client-Id
+    in: header
+    description: Restrict southbound access to jobs belonging to this client ID
+    required: false
+    type: string
+    minLength: 1
   workflow:
     name: workflow
     in: query
@@ -648,6 +655,7 @@ paths:
         - $ref: "#/parameters/state"
         - $ref: "#/parameters/group"
         - $ref: "#/parameters/clientId"
+        - $ref: "#/parameters/clientIDHeader"
         - $ref: "#/parameters/workflow"
         - $ref: "#/parameters/tag"
       responses:
@@ -682,6 +690,7 @@ paths:
         - application/json
         - text/event-stream
       parameters:
+        - $ref: "#/parameters/clientIDHeader"
         - name: clientIds
           in: query
           description: The job's clientId must be one of these clientIds (comma-separated).
@@ -742,6 +751,7 @@ paths:
         - application/json
       parameters:
         - $ref: "#/parameters/jobId"
+        - $ref: "#/parameters/clientIDHeader"
         - $ref: "#/parameters/history"
       responses:
         "default":
@@ -808,6 +818,7 @@ paths:
         - application/json
       parameters:
         - $ref: "#/parameters/jobId"
+        - $ref: "#/parameters/clientIDHeader"
       responses:
         "default":
           description: Other error with any status code and response body format.
@@ -838,6 +849,7 @@ paths:
         - application/json
       parameters:
         - $ref: "#/parameters/jobId"
+        - $ref: "#/parameters/clientIDHeader"
         - in: body
           name: New job status
           description: This contains the new job status
@@ -882,6 +894,7 @@ paths:
         - application/json
       parameters:
         - $ref: "#/parameters/jobId"
+        - $ref: "#/parameters/clientIDHeader"
       responses:
         "default":
           description: Other error with any status code and response body format.
@@ -970,6 +983,7 @@ paths:
         - application/json
       parameters:
         - $ref: "#/parameters/jobId"
+        - $ref: "#/parameters/clientIDHeader"
       responses:
         "default":
           description: Other error with any status code and response body format.

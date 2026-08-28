@@ -35,6 +35,8 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+var getSpec = sync.OnceValues(api.GetSpec)
+
 type ServerCollection struct {
 	once    sync.Once
 	cfg     *config.AppConfig
@@ -47,7 +49,7 @@ type ServerCollection struct {
 }
 
 func NewServerCollection(cfg *config.AppConfig, wfx api.StrictServerInterface, storage persistence.Storage) (*ServerCollection, error) {
-	swag, _ := api.GetSpec()
+	swag, _ := getSpec()
 	validator := nethttpmiddleware.OapiRequestValidatorWithOptions(swag,
 		&nethttpmiddleware.Options{SilenceServersWarning: true})
 	logMW := logging.NewLoggingMiddleware()
@@ -78,6 +80,7 @@ func NewServerCollection(cfg *config.AppConfig, wfx api.StrictServerInterface, s
 	// route of our mux, so a per-route middleware would never see them.
 	northHandler := northServer.Handler
 	northServer.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r.Header.Del("X-Client-Id")
 		corsOpts := cfg.CORSOpts()
 		if !corsOpts.Enabled {
 			northHandler.ServeHTTP(w, r)
@@ -104,7 +107,16 @@ func NewServerCollection(cfg *config.AppConfig, wfx api.StrictServerInterface, s
 
 	// southbound, UI is always disabled
 	mux = createMux(cfg, basePath, false)
-	southServer, err := createServer(cfg, NewSouthboundServer(wfx), mux, middlewares, southPluginMWs)
+	southMiddlewares := append([]api.MiddlewareFunc{}, middlewares...)
+	southMiddlewares = append(southMiddlewares, func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if clientID := r.Header.Get("X-Client-Id"); clientID != "" {
+				r = r.WithContext(persistence.WithClientID(r.Context(), clientID))
+			}
+			next.ServeHTTP(w, r)
+		})
+	})
+	southServer, err := createServer(cfg, NewSouthboundServer(wfx), mux, southMiddlewares, southPluginMWs)
 	if err != nil {
 		return nil, fault.Wrap(err)
 	}
@@ -287,13 +299,7 @@ func (sc *ServerCollection) Stop() {
 }
 
 func createServer(cfg *config.AppConfig, ssi api.StrictServerInterface, router *http.ServeMux, baseMWs []api.MiddlewareFunc, pluginMWs []*plugin.Middleware) (*http.Server, error) {
-	combinedMWs := make([]api.MiddlewareFunc, 0, len(baseMWs)+len(pluginMWs))
-	combinedMWs = append(combinedMWs, baseMWs...)
-	for _, mw := range pluginMWs {
-		combinedMWs = append(combinedMWs, mw.Middleware())
-	}
-
-	swag, _ := api.GetSpec()
+	swag, _ := getSpec()
 	basePath := errutil.Must(swag.Servers.BasePath())
 	strictHandler := api.NewStrictHandlerWithOptions(ssi, nil, api.StrictHTTPServerOptions{
 		ResponseErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request, err error) {
@@ -307,8 +313,11 @@ func createServer(cfg *config.AppConfig, ssi api.StrictServerInterface, router *
 	handler := api.HandlerWithOptions(strictHandler, api.StdHTTPServerOptions{
 		BaseURL:     basePath,
 		BaseRouter:  router,
-		Middlewares: combinedMWs,
+		Middlewares: baseMWs,
 	})
+	for _, mw := range pluginMWs {
+		handler = mw.Middleware()(handler)
+	}
 	server, err := NewHTTPServer(cfg, handler)
 	return server, fault.Wrap(err)
 }

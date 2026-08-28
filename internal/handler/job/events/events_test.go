@@ -126,6 +126,29 @@ func TestFiltering(t *testing.T) {
 	ShutdownSubscribers()
 }
 
+func TestRequiredClientID(t *testing.T) {
+	ctx, cancel := context.WithCancel(t.Context())
+	t.Cleanup(cancel)
+	t.Cleanup(ShutdownSubscribers)
+
+	fooJob := api.Job{ID: "foo-job", ClientID: "foo"}
+	barJob := api.Job{ID: "bar-job", ClientID: "bar"}
+	sub := AddSubscriber(ctx, time.Minute, FilterParams{
+		JobIDs:           []string{fooJob.ID, barJob.ID},
+		RequiredClientID: "foo",
+	}, nil)
+
+	PublishEvent(ctx, JobEvent{Action: ActionUpdateStatus, Job: &barJob})
+	PublishEvent(ctx, JobEvent{Action: ActionUpdateStatus, Job: &fooJob})
+
+	assert.Equal(t, fooJob.ID, receiveEventBlocking(sub).Job.ID)
+	select {
+	case <-sub.Events:
+		assert.Fail(t, "Received event for mismatched client ID")
+	default:
+	}
+}
+
 func TestBacklog(t *testing.T) {
 	ctx, cancel := context.WithCancel(t.Context())
 	t.Cleanup(cancel)

@@ -11,11 +11,19 @@ package server
  */
 
 import (
+	"context"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path"
 	"path/filepath"
 	"testing"
 
+	"github.com/siemens/wfx/cmd/wfx/cmd/config"
+	genAPI "github.com/siemens/wfx/generated/api"
+	genPlugin "github.com/siemens/wfx/generated/plugin"
+	"github.com/siemens/wfx/middleware/plugin"
+	pluginioutil "github.com/siemens/wfx/middleware/plugin/ioutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -144,4 +152,60 @@ func TestLoadPlugins_DirNotExist(t *testing.T) {
 	mws, err := loadPlugins("/does/not/exist")
 	assert.Error(t, err)
 	assert.Empty(t, mws)
+}
+
+func TestCreateServer_PluginModifiesHeadersBeforeBinding(t *testing.T) {
+	pluginPath := path.Join(t.TempDir(), "plugin.sh")
+	require.NoError(t, os.WriteFile(pluginPath, []byte("#!/bin/sh\nexec \"$PLUGIN_HELPER\" -test.run=TestPluginHelperProcess\n"), 0o700))
+	t.Setenv("PLUGIN_HELPER", os.Args[0])
+	p := plugin.NewFBPlugin(pluginPath)
+	mw, err := plugin.NewMiddleware(p, make(chan error, 1))
+	require.NoError(t, err)
+	defer mw.Stop()
+
+	var header string
+	ssi := headerServer{getJobs: func(_ context.Context, request genAPI.GetJobsRequestObject) (genAPI.GetJobsResponseObject, error) {
+		header = string(*request.Params.XClientID)
+		return genAPI.GetJobs200JSONResponse{}, nil
+	}}
+	server, err := createServer(new(config.AppConfig), ssi, http.NewServeMux(), nil, []*plugin.Middleware{mw})
+	require.NoError(t, err)
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/api/wfx/v1/jobs", nil)
+	req.Header.Set("X-Client-Id", "setBeforePlugin")
+	server.Handler.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, "setByPlugin", header)
+}
+
+func TestPluginHelperProcess(t *testing.T) {
+	if os.Getenv("PLUGIN_HELPER") == "" {
+		return
+	}
+	req, err := pluginioutil.ReadRequest(os.Stdin)
+	require.NoError(t, err)
+	for _, header := range req.Request.Envelope {
+		if header.Name == "X-Client-Id" {
+			header.Values = []string{"setByPlugin"}
+		}
+	}
+	require.NoError(t, pluginioutil.WriteResponse(os.Stdout, &genPlugin.PluginResponseT{
+		Cookie: req.Cookie,
+		Payload: &genPlugin.PayloadT{
+			Type:  genPlugin.Payloadgenerated_plugin_client_Request,
+			Value: req.Request,
+		},
+	}))
+	os.Exit(0)
+}
+
+type headerServer struct {
+	genAPI.StrictServerInterface
+	getJobs func(context.Context, genAPI.GetJobsRequestObject) (genAPI.GetJobsResponseObject, error)
+}
+
+func (s headerServer) GetJobs(ctx context.Context, request genAPI.GetJobsRequestObject) (genAPI.GetJobsResponseObject, error) {
+	return s.getJobs(ctx, request)
 }

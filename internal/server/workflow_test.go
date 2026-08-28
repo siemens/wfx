@@ -9,11 +9,14 @@ package server
  */
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"sync"
 	"testing"
 
+	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/ftag"
 	wfxAPI "github.com/siemens/wfx/api"
 	"github.com/siemens/wfx/cmd/wfx/cmd/config"
@@ -30,6 +33,24 @@ import (
 )
 
 var allAPIs = []string{"north", "south"}
+
+type syncBuffer struct {
+	mu sync.Mutex
+	bytes.Buffer
+}
+
+func (b *syncBuffer) Write(p []byte) (int, error) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	n, err := b.Buffer.Write(p)
+	return n, fault.Wrap(err)
+}
+
+func (b *syncBuffer) String() string {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return b.Buffer.String()
+}
 
 func TestGetWorkflow(t *testing.T) {
 	db := newInMemoryDB(t)

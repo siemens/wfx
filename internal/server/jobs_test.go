@@ -96,6 +96,58 @@ func TestGetJobs(t *testing.T) {
 	}
 }
 
+func TestGetJobsClientIDHeader(t *testing.T) {
+	db := newInMemoryDB(t)
+	workflow, err := db.CreateWorkflow(t.Context(), dau.DirectWorkflow())
+	require.NoError(t, err)
+	for _, clientID := range []string{"foo", "bar"} {
+		_, err := db.CreateJob(t.Context(), &api.Job{
+			ClientID: clientID,
+			Status:   &api.JobStatus{State: "INSTALL"},
+			Workflow: &api.Workflow{Name: workflow.Name},
+		})
+		require.NoError(t, err)
+	}
+
+	north, south := createNorthAndSouth(t, db)
+	apitest.New().
+		Handler(north).
+		Get("/api/wfx/v1/jobs").
+		Header("X-Client-Id", "").
+		Expect(t).
+		Status(http.StatusOK).
+		Assert(jsonpath.Len(`$.content`, 2)).
+		End()
+
+	apitest.New().
+		Handler(south).
+		Get("/api/wfx/v1/jobs").
+		Header("X-Client-Id", "foo").
+		Expect(t).
+		Status(http.StatusOK).
+		Assert(jsonpath.Len(`$.content`, 1)).
+		Assert(jsonpath.Equal(`$.content[0].clientId`, "foo")).
+		End()
+
+	apitest.New().
+		Handler(south).
+		Get("/api/wfx/v1/jobs").
+		Header("X-Client-Id", "foo").
+		Query("clientId", "bar").
+		Expect(t).
+		Status(http.StatusBadRequest).
+		Assert(jsonpath.Equal(`$.errors[0].code`, "wfx.clientIDMismatch")).
+		End()
+
+	apitest.New().
+		Handler(south).
+		Get("/api/wfx/v1/jobs").
+		Header("X-Client-Id", "").
+		Expect(t).
+		Status(http.StatusBadRequest).
+		End()
+}
+
 func TestCreateJob(t *testing.T) {
 	db := newInMemoryDB(t)
 	north, _ := createNorthAndSouth(t, db)
