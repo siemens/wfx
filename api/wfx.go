@@ -29,6 +29,7 @@ import (
 	"github.com/siemens/wfx/internal/handler/job/status"
 	"github.com/siemens/wfx/internal/handler/job/tags"
 	"github.com/siemens/wfx/internal/handler/workflow"
+	"github.com/siemens/wfx/middleware/logging"
 	"github.com/siemens/wfx/middleware/sse"
 	"github.com/siemens/wfx/persistence"
 )
@@ -127,8 +128,15 @@ func healthStatusListener(_ context.Context, state health.CheckerState) {
 
 //revive:disable:var-naming
 func (server WfxServer) GetJobs(ctx context.Context, request api.GetJobsRequestObject) (api.GetJobsResponseObject, error) {
+	if request.Params.XClientID != nil && request.Params.ParamClientID != nil && *request.Params.ParamClientID != *request.Params.XClientID {
+		return api.GetJobs400JSONResponse(api.ErrorResponse{Errors: &[]api.Error{ClientIDMismatch}}), nil
+	}
+	clientID := request.Params.ParamClientID
+	if request.Params.XClientID != nil {
+		clientID = (*string)(request.Params.XClientID)
+	}
 	filter := persistence.FilterParams{
-		ClientID: request.Params.ParamClientID,
+		ClientID: clientID,
 		State:    request.Params.ParamState,
 		Workflow: request.Params.ParamWorkflow,
 	}
@@ -182,6 +190,9 @@ func (server WfxServer) PostJobs(ctx context.Context, request api.PostJobsReques
 
 func (server WfxServer) GetJobsEvents(ctx context.Context, request api.GetJobsEventsRequestObject) (api.GetJobsEventsResponseObject, error) {
 	var filter events.FilterParams
+	if clientID := request.Params.XClientID; clientID != nil {
+		filter.RequiredClientID = *clientID
+	}
 	if ids := request.Params.JobIds; ids != nil {
 		filter.JobIDs = strings.Split(*ids, ",")
 	}
@@ -247,6 +258,15 @@ func (server WfxServer) GetJobsId(ctx context.Context, request api.GetJobsIdRequ
 		}
 		return nil, fault.Wrap(err)
 	}
+	if request.Params.XClientID != nil && job.ClientID != *request.Params.XClientID {
+		logger := logging.LoggerFromCtx(ctx)
+		logger.Error().
+			Str("id", request.Id).
+			Str("jobClientID", job.ClientID).
+			Str("headerClientID", *request.Params.XClientID).
+			Msg("Client ID mismatch for job access")
+		return api.GetJobsId404JSONResponse(api.ErrorResponse{Errors: &[]api.Error{JobNotFound}}), nil
+	}
 	if request.Params.XResponseFilter != nil {
 		return NewJQFilter(ctx, *request.Params.XResponseFilter, *job, server.jqOpts()), nil
 	}
@@ -254,7 +274,7 @@ func (server WfxServer) GetJobsId(ctx context.Context, request api.GetJobsIdRequ
 }
 
 func (server WfxServer) GetJobsIdDefinition(ctx context.Context, request api.GetJobsIdDefinitionRequestObject) (api.GetJobsIdDefinitionResponseObject, error) {
-	definition, err := definition.Get(ctx, server.storage, request.Id)
+	foundJob, err := job.GetJob(ctx, server.storage, request.Id, false)
 	if err != nil {
 		if ftag.Get(err) == ftag.NotFound {
 			return api.GetJobsIdDefinition404JSONResponse(api.ErrorResponse{
@@ -263,10 +283,19 @@ func (server WfxServer) GetJobsIdDefinition(ctx context.Context, request api.Get
 		}
 		return nil, fault.Wrap(err)
 	}
-	if request.Params.XResponseFilter != nil {
-		return NewJQFilter(ctx, *request.Params.XResponseFilter, definition, server.jqOpts()), nil
+	if request.Params.XClientID != nil && foundJob.ClientID != *request.Params.XClientID {
+		logger := logging.LoggerFromCtx(ctx)
+		logger.Error().
+			Str("id", request.Id).
+			Str("jobClientID", foundJob.ClientID).
+			Str("headerClientID", *request.Params.XClientID).
+			Msg("Client ID mismatch for job definition access")
+		return api.GetJobsIdDefinition404JSONResponse(api.ErrorResponse{Errors: &[]api.Error{JobNotFound}}), nil
 	}
-	return api.GetJobsIdDefinition200JSONResponse(definition), nil
+	if request.Params.XResponseFilter != nil {
+		return NewJQFilter(ctx, *request.Params.XResponseFilter, foundJob.Definition, server.jqOpts()), nil
+	}
+	return api.GetJobsIdDefinition200JSONResponse(foundJob.Definition), nil
 }
 
 func (server WfxServer) PutJobsIdDefinition(ctx context.Context, request api.PutJobsIdDefinitionRequestObject) (api.PutJobsIdDefinitionResponseObject, error) {
@@ -298,7 +327,7 @@ func (server WfxServer) PutJobsIdDefinition(ctx context.Context, request api.Put
 }
 
 func (server WfxServer) GetJobsIdStatus(ctx context.Context, request api.GetJobsIdStatusRequestObject) (api.GetJobsIdStatusResponseObject, error) {
-	status, err := status.Get(ctx, server.storage, request.Id)
+	foundJob, err := job.GetJob(ctx, server.storage, request.Id, false)
 	if err != nil {
 		if ftag.Get(err) == ftag.NotFound {
 			return api.GetJobsIdStatus404JSONResponse(api.ErrorResponse{
@@ -307,10 +336,19 @@ func (server WfxServer) GetJobsIdStatus(ctx context.Context, request api.GetJobs
 		}
 		return nil, fault.Wrap(err)
 	}
-	if request.Params.XResponseFilter != nil {
-		return NewJQFilter(ctx, *request.Params.XResponseFilter, *status, server.jqOpts()), nil
+	if request.Params.XClientID != nil && foundJob.ClientID != *request.Params.XClientID {
+		logger := logging.LoggerFromCtx(ctx)
+		logger.Error().
+			Str("id", request.Id).
+			Str("jobClientID", foundJob.ClientID).
+			Str("headerClientID", *request.Params.XClientID).
+			Msg("Client ID mismatch for job status access")
+		return api.GetJobsIdStatus404JSONResponse(api.ErrorResponse{Errors: &[]api.Error{JobNotFound}}), nil
 	}
-	return api.GetJobsIdStatus200JSONResponse(*status), nil
+	if request.Params.XResponseFilter != nil {
+		return NewJQFilter(ctx, *request.Params.XResponseFilter, *foundJob.Status, server.jqOpts()), nil
+	}
+	return api.GetJobsIdStatus200JSONResponse(*foundJob.Status), nil
 }
 
 func (server WfxServer) PutJobsIdStatus(ctx context.Context, request api.PutJobsIdStatusRequestObject) (api.PutJobsIdStatusResponseObject, error) {
@@ -321,6 +359,25 @@ func (server WfxServer) PutJobsIdStatus(ctx context.Context, request api.PutJobs
 	eligible, ok := eligibleAny.(api.EligibleEnum)
 	if !ok {
 		return nil, fault.New("internal error: invalid type for eligible")
+	}
+	if request.Params.XClientID != nil {
+		job, err := job.GetJob(ctx, server.storage, request.Id, false)
+		if err != nil {
+			if ftag.Get(err) == ftag.NotFound {
+				return api.PutJobsIdStatus404JSONResponse(api.ErrorResponse{Errors: &[]api.Error{JobNotFound}}), nil
+			}
+			return nil, fault.Wrap(err)
+		}
+		if job.ClientID != *request.Params.XClientID || request.Body.ClientID != *request.Params.XClientID {
+			logger := logging.LoggerFromCtx(ctx)
+			logger.Error().
+				Str("id", request.Id).
+				Str("jobClientID", job.ClientID).
+				Str("statusClientID", request.Body.ClientID).
+				Str("headerClientID", *request.Params.XClientID).
+				Msg("Client ID mismatch for job status update")
+			return api.PutJobsIdStatus404JSONResponse(api.ErrorResponse{Errors: &[]api.Error{JobNotFound}}), nil
+		}
 	}
 	status, err := status.Update(ctx, server.storage, request.Id, request.Body, eligible)
 	if err != nil {
@@ -388,7 +445,7 @@ func (server WfxServer) DeleteJobsIdTags(ctx context.Context, request api.Delete
 }
 
 func (server WfxServer) GetJobsIdTags(ctx context.Context, request api.GetJobsIdTagsRequestObject) (api.GetJobsIdTagsResponseObject, error) {
-	tags, err := tags.Get(ctx, server.storage, request.Id)
+	foundJob, err := job.GetJob(ctx, server.storage, request.Id, false)
 	if err != nil {
 		if ftag.Get(err) == ftag.NotFound {
 			return api.GetJobsIdTags404JSONResponse(api.ErrorResponse{
@@ -397,13 +454,22 @@ func (server WfxServer) GetJobsIdTags(ctx context.Context, request api.GetJobsId
 		}
 		return nil, fault.Wrap(err)
 	}
+	if request.Params.XClientID != nil && foundJob.ClientID != *request.Params.XClientID {
+		logger := logging.LoggerFromCtx(ctx)
+		logger.Error().
+			Str("id", request.Id).
+			Str("jobClientID", foundJob.ClientID).
+			Str("headerClientID", *request.Params.XClientID).
+			Msg("Client ID mismatch for job tags access")
+		return api.GetJobsIdTags404JSONResponse(api.ErrorResponse{Errors: &[]api.Error{JobNotFound}}), nil
+	}
 	if request.Params.XResponseFilter != nil {
-		return NewJQFilter(ctx, *request.Params.XResponseFilter, tags, server.jqOpts()), nil
+		return NewJQFilter(ctx, *request.Params.XResponseFilter, foundJob.Tags, server.jqOpts()), nil
 	}
 
 	var tagsVal []string
-	if tags != nil {
-		tagsVal = *tags
+	if foundJob.Tags != nil {
+		tagsVal = *foundJob.Tags
 	}
 	return api.GetJobsIdTags200JSONResponse(tagsVal), nil
 }

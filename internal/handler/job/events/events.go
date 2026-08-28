@@ -36,6 +36,8 @@ type Subscriber struct {
 	workflowSet map[string]any // workflow filter
 	actionSet   map[Action]any // actions filter
 	tags        []string       // tags to apply
+
+	requiredClientID string // mandatory clientID filter if not empty
 }
 
 func (s *Subscriber) ID() string {
@@ -79,6 +81,8 @@ type FilterParams struct {
 	ClientIDs []string
 	Workflows []string
 	Actions   []Action
+
+	RequiredClientID string
 }
 
 type Action string
@@ -139,6 +143,8 @@ func AddSubscriber(ctx context.Context, graceInterval time.Duration, filter Filt
 		clientIDSet:   clientIDSet,
 		workflowSet:   workflowSet,
 		tags:          tags,
+
+		requiredClientID: filter.RequiredClientID,
 	}
 
 	muSubscribers.Lock()
@@ -201,6 +207,12 @@ func PublishEvent(ctx context.Context, event JobEvent) {
 	log.Debug().Int("count", count).Msg("Publishing event to subscribers")
 	for _, sub := range subscribers {
 		ctxLog := log.With().Str("id", sub.id).Logger()
+
+		if sub.requiredClientID != "" && sub.requiredClientID != event.Job.ClientID {
+			newSubscribers = append(newSubscribers, sub)
+			ctxLog.Debug().Msg("Subscriber client ID mismatch, skipping event notification")
+			continue
+		}
 
 		// check if we shall notify the subscriber about the event
 		// special case: no filters means "catch-all"
