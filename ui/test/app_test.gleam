@@ -6,13 +6,16 @@
 import birdie
 import config
 import gleam/dict
+import gleam/http/response
 import gleam/option.{None, Some}
+import gleam/string
 import gleam/time/timestamp
 import gleeunit
 import lustre/dev/simulate
 import lustre/element
 import model
 import msg
+import rsvp
 import wfx
 
 import app
@@ -30,6 +33,62 @@ pub fn start_empty_test() {
   |> simulate.view
   |> element.to_readable_string
   |> birdie.snap("Empty Paginated Jobs")
+}
+
+pub fn given_empty_app_when_wfx_sends_plain_text_error_then_status_displayed_test() {
+  let body = "Forbidden"
+  let error_response =
+    response.new(403)
+    |> response.set_header("content-type", "text/plain; charset=utf-8")
+    |> response.set_body(body)
+
+  let rendered =
+    simulate.application(fn(_) { app.init(cfg) }, app.update, view.view)
+    |> simulate.start(Nil)
+    |> simulate.message(msg.WfxSentJobs(Error(rsvp.HttpError(error_response))))
+    |> simulate.view
+    |> element.to_readable_string
+
+  assert string.contains(rendered, "Error: HTTP 403")
+  assert !string.contains(rendered, body)
+}
+
+pub fn given_empty_app_when_wfx_sends_json_error_then_message_displayed_test() {
+  let body =
+    "{\"errors\":[{\"code\":\"wfx.forbidden\",\"logref\":\"abc\",\"message\":\"Access denied\"}]}"
+  let error_response =
+    response.new(403)
+    |> response.set_header("content-type", "application/json")
+    |> response.set_body(body)
+
+  let rendered =
+    simulate.application(fn(_) { app.init(cfg) }, app.update, view.view)
+    |> simulate.start(Nil)
+    |> simulate.message(msg.WfxSentJobs(Error(rsvp.HttpError(error_response))))
+    |> simulate.view
+    |> element.to_readable_string
+
+  assert string.contains(rendered, "Error: Access denied")
+  assert !string.contains(rendered, "wfx.forbidden")
+  assert !string.contains(rendered, "abc")
+}
+
+pub fn given_empty_app_when_wfx_sends_multiple_errors_then_messages_displayed_test() {
+  let error_response =
+    response.new(400)
+    |> response.set_header("content-type", "application/json; charset=utf-8")
+    |> response.set_body(
+      "{\"errors\":[{\"message\":\"First error\"},{\"message\":\"Second error\"}]}",
+    )
+
+  let rendered =
+    simulate.application(fn(_) { app.init(cfg) }, app.update, view.view)
+    |> simulate.start(Nil)
+    |> simulate.message(msg.WfxSentJobs(Error(rsvp.HttpError(error_response))))
+    |> simulate.view
+    |> element.to_readable_string
+
+  assert string.contains(rendered, "Error: First error; Second error")
 }
 
 pub fn given_empty_app_when_wfx_sends_jobs_then_jobs_displayed_test() {
