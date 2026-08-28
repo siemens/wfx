@@ -11,7 +11,6 @@ package server
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"fmt"
 	"net/http"
 	"os"
 
@@ -75,7 +74,7 @@ func configureTLS(server *http.Server, caCert string) error {
 		caCertPool.AppendCertsFromPEM(caCert)
 		ok := caCertPool.AppendCertsFromPEM(caCert)
 		if !ok {
-			return fmt.Errorf("cannot parse CA certificate")
+			return fault.New("cannot parse CA certificate")
 		}
 		server.TLSConfig.ClientCAs = caCertPool
 		server.TLSConfig.ClientAuth = tls.RequireAndVerifyClientCert

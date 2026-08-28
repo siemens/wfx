@@ -11,7 +11,6 @@ package plugin
 import (
 	"bufio"
 	"errors"
-	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -84,7 +83,7 @@ func (p *FBPlugin) Start(chErr chan error) (chan Message, error) {
 		log.Debug().Msg("Plugin subprocess has exited")
 		p.waited.Store(true)
 		if !p.stopCalled.Load() {
-			chErr <- fmt.Errorf("plugin '%s' stopped unexpectedly", p.Name())
+			chErr <- fault.Newf("plugin '%s' stopped unexpectedly", p.Name())
 		}
 	}()
 

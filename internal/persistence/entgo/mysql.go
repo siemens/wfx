@@ -19,6 +19,7 @@ import (
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
 	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 	driver "github.com/go-sql-driver/mysql"
 	"github.com/golang-migrate/migrate/v4/database/mysql"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
@@ -60,9 +61,8 @@ func (wrapper *MySQL) Initialize(options string) error {
 
 	db := sql.OpenDB(connector)
 	if err := db.Ping(); err != nil {
-		log.Error().Err(err).Msg("Failed to ping MySQL database")
 		_ = db.Close()
-		return fault.Wrap(err)
+		return fault.Wrap(err, fmsg.With("failed to ping MySQL database"))
 	}
 
 	{

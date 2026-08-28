@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 	"github.com/rs/zerolog/log"
 	"github.com/siemens/wfx/internal/handler/job/events"
 	"github.com/siemens/wfx/middleware/logging"
@@ -55,13 +56,13 @@ func (responder Responder) VisitGetJobsEventsResponse(w http.ResponseWriter) err
 	// Check if the ResponseWriter supports hijacking
 	hj, ok := w.(http.Hijacker)
 	if !ok { // e.g. if HTTP/2 is being used
-		return fmt.Errorf("http.Hijacker interface not supported")
+		return fault.New("http.Hijacker interface not supported")
 	}
 
 	// use raw connection to prevent it being closed by http.Server's idle cleanup routines
 	conn, bufrw, err := hj.Hijack()
 	if err != nil {
-		return fmt.Errorf("failed to hijack connection: %w", err)
+		return fault.Wrap(err, fmsg.With("failed to hijack connection"))
 	}
 	defer func() {
 		events.RemoveSubscriber(responder.subscriber)
@@ -77,8 +78,7 @@ func (responder Responder) VisitGetJobsEventsResponse(w http.ResponseWriter) err
 	_, _ = bufrw.WriteString("\r\n")
 
 	if err := bufrw.Flush(); err != nil {
-		log.Err(err).Msg("Failed to send event to client")
-		return fault.Wrap(err)
+		return fault.Wrap(err, fmsg.With("failed to send event to client"))
 	}
 
 	idleTicker := time.NewTicker(responder.idleDuration)
@@ -95,8 +95,7 @@ Loop:
 				break Loop
 			}
 			if err := sendEvent(id, &ev, bufrw); err != nil {
-				log.Err(err).Msg("Failed to send event")
-				return fault.Wrap(err)
+				return fault.Wrap(err, fmsg.With("failed to send event"))
 			}
 			id++
 		case <-idleTicker.C:
@@ -107,8 +106,7 @@ Loop:
 					break
 				}
 				if err := sendEvent(id, ev, bufrw); err != nil {
-					log.Err(err).Msg("Failed to send event from backlog")
-					return fault.Wrap(err)
+					return fault.Wrap(err, fmsg.With("failed to send event from backlog"))
 				}
 				sent = true
 			}
@@ -118,12 +116,10 @@ Loop:
 			log.Debug().Msg("Sending keep-alive to client")
 			_, err = bufrw.WriteString(": keepalive\n\n")
 			if err != nil {
-				log.Err(err).Msg("Error writing keep-alive")
-				return fault.Wrap(err)
+				return fault.Wrap(err, fmsg.With("error writing keep-alive"))
 			}
 			if err := bufrw.Flush(); err != nil {
-				log.Err(err).Msg("Failed to send keep-alive to client")
-				return fault.Wrap(err)
+				return fault.Wrap(err, fmsg.With("failed to send keep-alive to client"))
 			}
 		case <-responder.ctx.Done():
 			// this typically happens when the client closes the connection
@@ -141,13 +137,11 @@ func sendEvent(id uint64, ev *events.JobEvent, bufrw *bufio.ReadWriter) error {
 	// must end with two newlines as required by the SSE spec:
 	_, err := fmt.Fprintf(bufrw, "data: %s\nid: %d\n\n", b, id)
 	if err != nil {
-		log.Err(err).Msg("Cannot write to buffer")
-		return fault.Wrap(err)
+		return fault.Wrap(err, fmsg.With("cannot write to buffer"))
 	}
 
 	if err := bufrw.Flush(); err != nil {
-		log.Err(err).Msg("Failed to send event to client")
-		return fault.Wrap(err)
+		return fault.Wrap(err, fmsg.With("failed to send event to client"))
 	}
 
 	return nil

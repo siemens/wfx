@@ -9,8 +9,6 @@ package deltags
  */
 
 import (
-	"errors"
-
 	"github.com/Southclaws/fault"
 	"github.com/spf13/cobra"
 
@@ -27,7 +25,7 @@ func NewCommand() *cobra.Command {
 		TraverseChildren: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 {
-				return errors.New("no tags provided")
+				return fault.New("no tags provided")
 			}
 			baseCmd := flags.NewBaseCmd(cmd.Flags())
 			tags := args

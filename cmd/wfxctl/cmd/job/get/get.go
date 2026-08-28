@@ -9,8 +9,6 @@ package get
  */
 
 import (
-	"errors"
-
 	"github.com/Southclaws/fault"
 	"github.com/spf13/cobra"
 
@@ -32,7 +30,7 @@ wfxctl job get --id=8ea1e9d7-28e6-4f1f-b444-a8d2d1ad7618
 			baseCmd := flags.NewBaseCmd(cmd.Flags())
 			id := baseCmd.ID
 			if id == "" {
-				return errors.New("id missing")
+				return fault.New("id missing")
 			}
 			history := baseCmd.History
 			client := errutil.Must(baseCmd.CreateClient())

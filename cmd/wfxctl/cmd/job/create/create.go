@@ -14,7 +14,6 @@ import (
 	"os"
 
 	"github.com/Southclaws/fault"
-	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 
@@ -71,7 +70,7 @@ echo '{ "title": "Task 1" }' | wfxctl job create --client-id=my_client --workflo
 				}
 				log.Debug().RawJSON("definition", b).Msg("Parsed job definition")
 			default:
-				return errors.New("Too many arguments")
+				return fault.New("Too many arguments")
 			}
 
 			client := errutil.Must(baseCmd.CreateClient())

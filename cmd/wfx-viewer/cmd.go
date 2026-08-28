@@ -132,7 +132,7 @@ Do not use this for confidential information.
 		format = strings.ToLower(format)
 		gen, ok := output.Generators[format]
 		if !ok {
-			return fmt.Errorf("unsupported output format: %s", format)
+			return fault.Newf("unsupported output format: %s", format)
 		}
 		log.Debug().Msg("Generating output")
 		if err := gen.Generate(outWriter, &workflow); err != nil {

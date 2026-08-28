@@ -9,8 +9,6 @@ package getdefinition
  */
 
 import (
-	"errors"
-
 	"github.com/Southclaws/fault"
 	"github.com/spf13/cobra"
 
@@ -31,7 +29,7 @@ wfxctl job get-definition --id=8ea1e9d7-28e6-4f1f-b444-a8d2d1ad7618
 			baseCmd := flags.NewBaseCmd(cmd.Flags())
 			id := baseCmd.ID
 			if id == "" {
-				return errors.New("id missing")
+				return fault.New("id missing")
 			}
 			client := errutil.Must(baseCmd.CreateClient())
 			resp, err := client.GetJobsIdDefinition(cmd.Context(), id, nil)

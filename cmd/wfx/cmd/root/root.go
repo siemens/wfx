@@ -117,8 +117,7 @@ Examples of tasks are installation of firmware or other types of commands issued
 			select {
 			case sig := <-chSignal:
 				log.Info().Str("signal", sig.String()).Msg("Caught signal")
-			case err = <-chErr:
-				log.Err(err).Msg("Error in server collection")
+			case err = <-chErr: // logged by main
 			case <-cmd.Context().Done():
 				log.Info().Msg("Context done")
 			}

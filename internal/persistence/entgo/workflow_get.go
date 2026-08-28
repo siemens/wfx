@@ -10,7 +10,6 @@ package entgo
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/ftag"
@@ -26,7 +25,7 @@ func (db Database) GetWorkflow(ctx context.Context, name string) (*api.Workflow,
 		Only(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			return nil, fault.Wrap(fmt.Errorf("workflow %s does not exist", name), ftag.With(ftag.NotFound))
+			return nil, fault.Wrap(fault.Newf("workflow %s does not exist", name), ftag.With(ftag.NotFound))
 		}
 		return nil, fault.Wrap(err)
 	}

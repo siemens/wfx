@@ -11,7 +11,6 @@ package logging
 import (
 	"bufio"
 	"bytes"
-	"errors"
 	"io"
 	"net"
 	"net/http"
@@ -81,7 +80,7 @@ func (w *responseWriter) Flush() {
 func (w *responseWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
 	hj, ok := w.httpWriter.(http.Hijacker)
 	if !ok {
-		return nil, nil, errors.New("hijacker interface not supported")
+		return nil, nil, fault.New("hijacker interface not supported")
 	}
 	conn, bw, err := hj.Hijack()
 	if err == nil {
