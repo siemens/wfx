@@ -5,6 +5,8 @@
 # Author: Michael Adler <michael.adler@siemens.com>
 
 run:
+    mkdir -p assets
+    cp ../hugo/static/images/logo.svg assets/
     gleam run -m lustre/dev start
 
 test:
