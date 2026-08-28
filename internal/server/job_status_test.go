@@ -14,15 +14,12 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/internal/handler/job"
 	"github.com/siemens/wfx/internal/handler/workflow"
 	"github.com/siemens/wfx/workflow/dau"
 	"github.com/steinfletcher/apitest"
 	jsonpath "github.com/steinfletcher/apitest-jsonpath"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -46,11 +43,6 @@ func TestJobStatusGet(t *testing.T) {
 }
 
 func TestGetJobsIDStatusClientIDHeader(t *testing.T) {
-	var logs syncBuffer
-	originalLogger := log.Logger
-	t.Cleanup(func() { log.Logger = originalLogger })
-	log.Logger = zerolog.New(&logs)
-
 	db := newInMemoryDB(t)
 	north, south := createNorthAndSouth(t, db)
 	job := persistJob(t, db)
@@ -80,15 +72,9 @@ func TestGetJobsIDStatusClientIDHeader(t *testing.T) {
 		Status(http.StatusNotFound).
 		Assert(jsonpath.Equal(`$.errors[0].code`, "wfx.jobNotFound")).
 		End()
-	assert.Contains(t, logs.String(), "Client ID mismatch for job status access")
 }
 
 func TestPutJobsIDStatusClientIDHeader(t *testing.T) {
-	var logs syncBuffer
-	originalLogger := log.Logger
-	t.Cleanup(func() { log.Logger = originalLogger })
-	log.Logger = zerolog.New(&logs)
-
 	db := newInMemoryDB(t)
 	north, south := createNorthAndSouth(t, db)
 	job := persistJob(t, db)
@@ -130,7 +116,6 @@ func TestPutJobsIDStatusClientIDHeader(t *testing.T) {
 			result.End()
 		})
 	}
-	assert.Contains(t, logs.String(), "Client ID mismatch for job status update")
 }
 
 func TestPutJobsIDStatusHandlerNotFound(t *testing.T) {

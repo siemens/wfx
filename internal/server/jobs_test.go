@@ -133,6 +133,17 @@ func TestGetJobsClientIDHeader(t *testing.T) {
 		Handler(south).
 		Get("/api/wfx/v1/jobs").
 		Header("X-Client-Id", "foo").
+		Query("clientId", "foo").
+		Expect(t).
+		Status(http.StatusOK).
+		Assert(jsonpath.Len(`$.content`, 1)).
+		Assert(jsonpath.Equal(`$.content[0].clientId`, "foo")).
+		End()
+
+	apitest.New().
+		Handler(south).
+		Get("/api/wfx/v1/jobs").
+		Header("X-Client-Id", "foo").
 		Query("clientId", "bar").
 		Expect(t).
 		Status(http.StatusBadRequest).

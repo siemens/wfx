@@ -11,6 +11,7 @@ package tests
 
 var AllTests = []PersistenceTest{
 	TestCRDWorkflow,
+	TestClientIDContext,
 	TestDeleteJob,
 	TestDeleteJobNotFound,
 	TestGetJob,
