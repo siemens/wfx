@@ -19,6 +19,7 @@ import lustre/effect.{type Effect}
 import mermaid
 import modem
 import plinth/browser/clipboard
+import plinth/javascript/console
 import rsvp
 
 import config.{type Config}
@@ -226,7 +227,7 @@ pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
           |> result.map_error(fn(err) { model.RsvpError(err) }),
         )),
       ),
-      effect.none(),
+      log_error_response(response),
     )
 
     msg.WfxSentWorkflows(response) -> #(
@@ -237,7 +238,7 @@ pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
           |> result.map_error(fn(err) { model.RsvpError(err) }),
         )),
       ),
-      effect.none(),
+      log_error_response(response),
     )
 
     msg.WfxSentSingleWorkflow(response) -> #(
@@ -252,7 +253,7 @@ pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
       ),
       case response {
         Ok(workflow) -> mermaid.get_workflow_diagram(workflow)
-        Error(_) -> effect.none()
+        Error(_) -> log_error_response(response)
       },
     )
 
@@ -268,7 +269,7 @@ pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
       ),
       case response {
         Ok(job) -> mermaid.get_job_diagram(job)
-        Error(_) -> effect.none()
+        Error(_) -> log_error_response(response)
       },
     )
 
@@ -357,6 +358,13 @@ pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
         _ -> #(model, effect.none())
       }
     }
+  }
+}
+
+fn log_error_response(result: Result(a, rsvp.Error(String))) -> Effect(msg) {
+  case result {
+    Error(error) -> effect.from(fn(_) { console.error(error) })
+    Ok(_) -> effect.none()
   }
 }
 

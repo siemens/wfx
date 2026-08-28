@@ -9,6 +9,7 @@ import gleam/int
 import gleam/json
 import gleam/list
 import gleam/option.{None, Some}
+import gleam/result
 import gleam/string
 import gleam/string_tree
 import gleam/time/calendar
@@ -135,13 +136,42 @@ fn format_rsvp_error(err: rsvp.Error(String)) -> String {
   case err {
     rsvp.BadBody -> "Bad body"
     rsvp.BadUrl(url) -> "Bad URL: " <> url
-    rsvp.HttpError(response.Response(status: _, headers: _, body: body)) -> body
+    rsvp.HttpError(response) -> format_http_error(response)
     rsvp.JsonError(err) ->
       "Failed to unmarshal JSON: " <> format_json_error(err)
     rsvp.NetworkError -> "Network Error"
-    rsvp.UnhandledResponse(response.Response(status: _, headers: _, body: body)) ->
-      "Unexpected response type: " <> body
+    rsvp.UnhandledResponse(response) ->
+      "Unexpected response: " <> format_http_error(response)
   }
+}
+
+fn format_http_error(res: response.Response(String)) -> String {
+  let status = "HTTP " <> int.to_string(res.status)
+  let content_type =
+    res
+    |> response.get_header("content-type")
+    |> result.unwrap("")
+    |> string.lowercase
+
+  case string.starts_with(content_type, "application/json") {
+    True ->
+      case json.parse(res.body, wfx_error_messages_decoder()) {
+        Ok([_, ..] as messages) -> string.join(messages, "; ")
+        _ -> status
+      }
+    False -> status
+  }
+}
+
+fn wfx_error_messages_decoder() -> decode.Decoder(List(String)) {
+  use errors <- decode.field(
+    "errors",
+    decode.list({
+      use message <- decode.field("message", decode.string)
+      decode.success(message)
+    }),
+  )
+  decode.success(errors)
 }
 
 fn format_json_error(err: json.DecodeError) -> String {
