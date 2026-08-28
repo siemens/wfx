@@ -46,9 +46,10 @@ func TestJobEventsSubscribe(t *testing.T) {
 		name       string
 		handler    http.Handler
 		corsOrigin string
+		southbound bool
 	}{
 		{name: "north", handler: north},
-		{name: "south", handler: south},
+		{name: "south", handler: south, southbound: true},
 		{name: "north-cors", handler: corsNorth, corsOrigin: "https://example.com"},
 	}
 	for _, tc := range tests {
@@ -84,6 +85,9 @@ func TestJobEventsSubscribe(t *testing.T) {
 				for events.SubscriberCount() != 2 {
 					time.Sleep(20 * time.Millisecond)
 				}
+				if tc.southbound {
+					events.PublishEvent(t.Context(), events.JobEvent{Job: &api.Job{ID: "other", ClientID: "other"}})
+				}
 				// update job
 				_, err := status.Update(t.Context(), db, *jobID.Load(), &api.JobStatus{State: "INSTALLING"}, api.CLIENT)
 				require.NoError(t, err)
@@ -99,6 +103,7 @@ func TestJobEventsSubscribe(t *testing.T) {
 			wg.Go(func() {
 				req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/wfx/v1/jobs/events?ids=%s", *jobID.Load()), nil)
 				req.Header.Set("Origin", "https://example.com")
+				req.Header.Set("X-Client-Id", clientID)
 				handler.ServeHTTP(rec, req.WithContext(ctx))
 			})
 

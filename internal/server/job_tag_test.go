@@ -19,6 +19,7 @@ import (
 	"github.com/siemens/wfx/internal/handler/workflow"
 	"github.com/siemens/wfx/workflow/dau"
 	"github.com/steinfletcher/apitest"
+	jsonpath "github.com/steinfletcher/apitest-jsonpath"
 	"github.com/stretchr/testify/require"
 )
 
@@ -51,6 +52,38 @@ func TestJobTagGet(t *testing.T) {
 				End()
 		})
 	}
+}
+
+func TestJobTagGetClientIDHeader(t *testing.T) {
+	db := newInMemoryDB(t)
+	north, south := createNorthAndSouth(t, db)
+	job := persistJob(t, db)
+	path := fmt.Sprintf("/api/wfx/v1/jobs/%s/tags", job.ID)
+
+	apitest.New().
+		Handler(north).
+		Get(path).
+		Header("X-Client-Id", "other").
+		Expect(t).
+		Status(http.StatusOK).
+		End()
+
+	apitest.New().
+		Handler(south).
+		Get(path).
+		Header("X-Client-Id", job.ClientID).
+		Expect(t).
+		Status(http.StatusOK).
+		End()
+
+	apitest.New().
+		Handler(south).
+		Get(path).
+		Header("X-Client-Id", "other").
+		Expect(t).
+		Status(http.StatusNotFound).
+		Assert(jsonpath.Equal(`$.errors[0].code`, "wfx.jobNotFound")).
+		End()
 }
 
 func TestJobTagPost(t *testing.T) {

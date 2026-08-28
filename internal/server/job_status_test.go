@@ -14,12 +14,15 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/internal/handler/job"
 	"github.com/siemens/wfx/internal/handler/workflow"
 	"github.com/siemens/wfx/workflow/dau"
 	"github.com/steinfletcher/apitest"
 	jsonpath "github.com/steinfletcher/apitest-jsonpath"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -40,6 +43,94 @@ func TestJobStatusGet(t *testing.T) {
 				End()
 		})
 	}
+}
+
+func TestGetJobsIDStatusClientIDHeader(t *testing.T) {
+	var logs syncBuffer
+	originalLogger := log.Logger
+	t.Cleanup(func() { log.Logger = originalLogger })
+	log.Logger = zerolog.New(&logs)
+
+	db := newInMemoryDB(t)
+	north, south := createNorthAndSouth(t, db)
+	job := persistJob(t, db)
+	path := fmt.Sprintf("/api/wfx/v1/jobs/%s/status", job.ID)
+
+	apitest.New().
+		Handler(north).
+		Get(path).
+		Header("X-Client-Id", "other").
+		Expect(t).
+		Status(http.StatusOK).
+		End()
+
+	apitest.New().
+		Handler(south).
+		Get(path).
+		Header("X-Client-Id", job.ClientID).
+		Expect(t).
+		Status(http.StatusOK).
+		End()
+
+	apitest.New().
+		Handler(south).
+		Get(path).
+		Header("X-Client-Id", "other").
+		Expect(t).
+		Status(http.StatusNotFound).
+		Assert(jsonpath.Equal(`$.errors[0].code`, "wfx.jobNotFound")).
+		End()
+	assert.Contains(t, logs.String(), "Client ID mismatch for job status access")
+}
+
+func TestPutJobsIDStatusClientIDHeader(t *testing.T) {
+	var logs syncBuffer
+	originalLogger := log.Logger
+	t.Cleanup(func() { log.Logger = originalLogger })
+	log.Logger = zerolog.New(&logs)
+
+	db := newInMemoryDB(t)
+	north, south := createNorthAndSouth(t, db)
+	job := persistJob(t, db)
+	path := fmt.Sprintf("/api/wfx/v1/jobs/%s/status", job.ID)
+
+	apitest.New().
+		Handler(north).
+		Put(path).
+		Header("X-Client-Id", "other").
+		Body(fmt.Sprintf(`{"clientId":%q,"state":"INSTALL"}`, job.ClientID)).
+		ContentType("application/json").
+		Expect(t).
+		Status(http.StatusOK).
+		End()
+
+	tests := []struct {
+		name     string
+		headerID string
+		bodyID   string
+		status   int
+	}{
+		{name: "match", headerID: job.ClientID, bodyID: job.ClientID, status: http.StatusOK},
+		{name: "body mismatch", headerID: "other", bodyID: job.ClientID, status: http.StatusNotFound},
+		{name: "job mismatch", headerID: "other", bodyID: "other", status: http.StatusNotFound},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			result := apitest.New().
+				Handler(south).
+				Put(path).
+				Header("X-Client-Id", tc.headerID).
+				Body(fmt.Sprintf(`{"clientId":%q,"state":"INSTALL"}`, tc.bodyID)).
+				ContentType("application/json").
+				Expect(t).
+				Status(tc.status)
+			if tc.status == http.StatusNotFound {
+				result.Assert(jsonpath.Equal(`$.errors[0].code`, "wfx.jobNotFound"))
+			}
+			result.End()
+		})
+	}
+	assert.Contains(t, logs.String(), "Client ID mismatch for job status update")
 }
 
 func TestPutJobsIDStatusHandlerNotFound(t *testing.T) {
