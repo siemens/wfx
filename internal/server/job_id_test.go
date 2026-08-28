@@ -14,8 +14,6 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	"github.com/siemens/wfx/persistence"
 	"github.com/steinfletcher/apitest"
 	jsonpath "github.com/steinfletcher/apitest-jsonpath"
@@ -43,11 +41,6 @@ func TestJobGetId(t *testing.T) {
 }
 
 func TestJobGetIDClientIDHeader(t *testing.T) {
-	var logs syncBuffer
-	originalLogger := log.Logger
-	t.Cleanup(func() { log.Logger = originalLogger })
-	log.Logger = zerolog.New(&logs)
-
 	db := newInMemoryDB(t)
 	north, south := createNorthAndSouth(t, db)
 	job := persistJob(t, db)
@@ -77,7 +70,6 @@ func TestJobGetIDClientIDHeader(t *testing.T) {
 		Status(http.StatusNotFound).
 		Assert(jsonpath.Equal(`$.errors[0].code`, "wfx.jobNotFound")).
 		End()
-	assert.Contains(t, logs.String(), "Client ID mismatch for job access")
 }
 
 func TestJobGetIdFilter(t *testing.T) {

@@ -120,6 +120,13 @@ func NewServerCollection(cfg *config.AppConfig, wfx api.StrictServerInterface, s
 	if err != nil {
 		return nil, fault.Wrap(err)
 	}
+	southHandler := southServer.Handler
+	southServer.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if clientID := r.Header.Get("X-Client-Id"); clientID != "" {
+			r = r.WithContext(persistence.WithClientID(r.Context(), clientID))
+		}
+		southHandler.ServeHTTP(w, r)
+	})
 	return &ServerCollection{
 		cfg:          cfg,
 		storage:      storage,
