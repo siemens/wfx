@@ -75,6 +75,7 @@
 
   enterShell = ''
     set -a; source .env; set +a
-    ${pkgs.prek}/bin/prek install --overwrite
+    ${pkgs.prek}/bin/prek install --overwrite --quiet
+    ${pkgs.prek}/bin/prek install --quiet --force --hook-type commit-msg --hook-type pre-push
   '';
 }

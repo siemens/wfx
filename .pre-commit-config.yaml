@@ -22,3 +22,39 @@ repos:
     rev: 44.7.2
     hooks:
       - id: renovate-config-validator
+  - repo: https://github.com/fsfe/reuse-tool
+    rev: v6.2.0
+    hooks:
+      - id: reuse
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v4.18.0
+    hooks:
+      - id: commitizen
+  - repo: local
+    hooks:
+      - id: gofumpt
+        name: gofumpt
+        entry: go tool -modfile=tools/go.mod mvdan.cc/gofumpt -l -w
+        language: system
+        types: [go]
+      - id: just-fmt
+        name: just fmt
+        entry: just --fmt --unstable
+        language: system
+        files: ^justfile$
+        pass_filenames: false
+      - id: biome
+        name: biome check
+        entry: biome check --write --files-ignore-unknown=true --no-errors-on-unmatched
+        language: system
+      - id: golangci-lint
+        name: golangci-lint
+        entry: golangci-lint run --new-from-rev=HEAD
+        language: system
+        types: [go]
+        pass_filenames: false
+      - id: staticcheck
+        name: staticcheck
+        entry: .ci/hooks/staticcheck.sh
+        language: system
+        types: [go]
