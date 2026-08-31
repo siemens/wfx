@@ -54,7 +54,8 @@ type AppConfig struct {
 	keepAlive      bool
 	cleanupTimeout time.Duration
 
-	corsOpts CORSOpts
+	corsOpts  CORSOpts
+	oauthOpts OAuthOpts
 
 	tlsCACertificate string
 	tlsCertificate   string
@@ -87,6 +88,12 @@ type CORSOpts struct {
 	AllowedHeaders   []string
 	AllowCredentials bool
 	MaxAge           int
+}
+
+type OAuthOpts struct {
+	IssuerURL string
+	ClientID  string
+	Scope     string
 }
 
 type Scheme int
@@ -254,6 +261,10 @@ func (cfg *AppConfig) Reload() bool {
 		fmt.Fprintln(os.Stderr, "cors-allow-credentials requires explicit cors-allowed-origins")
 		ok = false
 	}
+
+	cfg.oauthOpts.IssuerURL = cfg.k.String(OAuthIssuerURLFlag)
+	cfg.oauthOpts.ClientID = cfg.k.String(OAuthClientIDFlag)
+	cfg.oauthOpts.Scope = cfg.k.String(OAuthScopeFlag)
 
 	if schemes := cfg.k.Strings(SchemeFlag); len(schemes) > 0 {
 		cfg.schemes = make([]Scheme, 0, len(schemes))
@@ -474,6 +485,12 @@ func (cfg *AppConfig) CORSOpts() CORSOpts {
 	opts.AllowedMethods = slices.Clone(opts.AllowedMethods)
 	opts.AllowedHeaders = slices.Clone(opts.AllowedHeaders)
 	return opts
+}
+
+func (cfg *AppConfig) OAuthOpts() OAuthOpts {
+	cfg.mutex.RLock()
+	defer cfg.mutex.RUnlock()
+	return cfg.oauthOpts
 }
 
 func (cfg *AppConfig) InitStorage() (persistence.Storage, error) {

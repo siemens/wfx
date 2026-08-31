@@ -68,6 +68,10 @@ const (
 	CORSAllowCredentialsFlag = "cors-allow-credentials"
 	CORSMaxAgeFlag           = "cors-max-age"
 
+	OAuthIssuerURLFlag = "oauth-issuer-url"
+	OAuthClientIDFlag  = "oauth-client-id"
+	OAuthScopeFlag     = "oauth-scope"
+
 	TLSCaFlag          = "tls-ca"
 	TLSCertificateFlag = "tls-certificate"
 	TLSKeyFlag         = "tls-key"
@@ -85,6 +89,10 @@ const (
 
 	DefaultJQFilterTimeout         = 30 * time.Second
 	DefaultJQFilterMaxResponseSize = 16 << 20 // 16 MiB
+
+	DefaultOAuthIssuerURL = ""
+	DefaultOAuthClientID  = ""
+	DefaultOAuthScope     = "openid email profile"
 )
 
 func NewFlagset() *pflag.FlagSet {
@@ -104,6 +112,10 @@ func NewFlagset() *pflag.FlagSet {
 	f.StringSlice(CORSAllowedHeadersFlag, []string{"*"}, "one or multiple headers allowed when making cross-origin requests")
 	f.Bool(CORSAllowCredentialsFlag, false, "allow cookies and HTTP authentication to be included in cross-origin requests; requires explicit allowed origins")
 	f.Duration(CORSMaxAgeFlag, 0, "how long the results of preflight requests may be cached by browsers; zero omits the Access-Control-Max-Age header (browsers use their default), a negative value disables preflight caching")
+
+	f.String(OAuthIssuerURLFlag, DefaultOAuthIssuerURL, "OAuth issuer URL for UI authentication")
+	f.String(OAuthClientIDFlag, DefaultOAuthClientID, "OAuth client ID for UI authentication")
+	f.String(OAuthScopeFlag, DefaultOAuthScope, "OAuth scopes requested by the UI")
 
 	f.Int(MaxHeaderSizeFlag, 1000000, "controls the maximum number of bytes the server will read parsing the request header's keys and values, including the request line. It does not limit the size of the request body")
 	f.Bool(KeepAliveFlag, true, "sets the TCP keep-alive timeouts on accepted connections. It prunes dead TCP connections ( e.g. closing laptop mid-download)")

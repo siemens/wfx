@@ -16,8 +16,13 @@ Author: Michael Adler <michael.adler@siemens.com>
     <script>
       function loadConfig() {
         return {
-          "wfx_url": "{{ .WfxURL }}",
-          "base_path": "{{ .BasePath }}"
+          "wfx_url": {{ .WfxURL | json }},
+          "base_path": {{ .BasePath | json }},
+          "oauth": {{ if or .OAuth.IssuerURL .OAuth.ClientID }}{
+            "issuer_url": {{ .OAuth.IssuerURL | json }},
+            "client_id": {{ .OAuth.ClientID | json }},
+            "scope": {{ .OAuth.Scope | json }}
+          }{{ else }}null{{ end }}
         }
       }
     </script>

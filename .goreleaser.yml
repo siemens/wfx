@@ -65,6 +65,8 @@ builds:
         - cmd: gleam run -m lustre/dev build --minify
           dir: ui
           output: true
+        - cmd: sh -c 'go run ./render > dist/index.html'
+          dir: ui
         - go generate -tags ui ./ui
       post:
         - |
@@ -183,8 +185,8 @@ archives:
         dst: app.js
       - src: ui/dist/app.css
         dst: app.css
-      - src: ui/index.html.tmpl
-        dst: index.html.tmpl
+      - src: ui/dist/index.html
+        dst: index.html
       - src: hugo/static/images/logo.svg
         dst: logo.svg
       - src: ui/*.cyclonedx.sbom.json

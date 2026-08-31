@@ -3,10 +3,32 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 // Author: Michael Adler <michael.adler@siemens.com>
+import { None, Some } from "../gleam_stdlib/gleam/option.mjs";
+
+const oauthDefaults = {
+  issuer_url: "",
+  client_id: "",
+  scope: "openid email profile",
+};
+
+const defaults = {
+  wfx_url: "http://127.0.0.1:8081/api/wfx/v1",
+  base_path: "",
+  oauth: null,
+};
+
 export function loadConfig() {
-  if (window.loadConfig) {
-    return window.loadConfig();
+  const config = window.loadConfig
+    ? { ...defaults, ...window.loadConfig() }
+    : defaults;
+  if (!window.loadConfig) {
+    console.warn("No config provided; using default config.");
   }
-  console.warn("No config provided; using default config.");
-  return { wfx_url: "http://127.0.0.1:8081/api/wfx/v1", base_path: "" };
+  return {
+    ...config,
+    oauth:
+      config.oauth === null
+        ? new None()
+        : new Some({ ...oauthDefaults, ...config.oauth }),
+  };
 }

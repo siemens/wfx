@@ -11,6 +11,7 @@ package ui
  */
 
 import (
+	"bytes"
 	"encoding/xml"
 	"fmt"
 	"io"
@@ -26,7 +27,11 @@ import (
 
 func TestMux(t *testing.T) {
 	t.Parallel()
-	mux := Mux("http://localhost:1234", "/ui")
+	mux := Mux("http://localhost:1234", "/ui", OAuthSettings{
+		IssuerURL: "https://id.example",
+		ClientID:  "wfx-ui",
+		Scope:     "openid profile",
+	})
 	t.Run("Index", func(t *testing.T) {
 		t.Parallel()
 		resp := apitest.New().
@@ -36,7 +41,13 @@ func TestMux(t *testing.T) {
 			Status(http.StatusOK).
 			Header("Content-Type", "text/html; charset=utf-8").
 			End()
-		_, err := html.Parse(resp.Response.Body)
+		body, err := io.ReadAll(resp.Response.Body)
+		require.NoError(t, err)
+		assert.Contains(t, string(body), `"oauth": {`)
+		assert.Contains(t, string(body), `"issuer_url": "https://id.example"`)
+		assert.Contains(t, string(body), `"client_id": "wfx-ui"`)
+		assert.Contains(t, string(body), `"scope": "openid profile"`)
+		_, err = html.Parse(bytes.NewReader(body))
 		assert.NoError(t, err)
 	})
 	t.Run("Logo", func(t *testing.T) {

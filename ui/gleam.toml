@@ -29,6 +29,7 @@ lustre = ">= 5.6.0 and < 6.0.0"
 rsvp = ">= 1.2.0 and < 3.0.0"
 modem = ">= 2.1.2 and < 3.0.0"
 plinth = ">= 0.9.3 and < 1.0.0"
+glow_auth = ">= 1.1.0 and < 2.0.0"
 
 [dev-dependencies]
 gleeunit = "== 1.11.0"
