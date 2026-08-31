@@ -1,0 +1,160 @@
+# SPDX-FileCopyrightText: 2026 Siemens AG
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Author: Michael Adler <michael.adler@siemens.com>
+---
+server:
+  address: tcp://127.0.0.1:9091
+
+log:
+  level: info
+  format: text
+
+authentication_backend:
+  file:
+    path: '@STATE@/users.yml'
+    watch: false
+    extra_attributes:
+      wfx_client_id:
+        multi_valued: false
+        value_type: string
+
+access_control:
+  default_policy: one_factor
+
+session:
+  redis:
+    host: 127.0.0.1
+    port: 6379
+  cookies:
+    - domain: authelia.localhost
+      authelia_url: https://authelia.localhost:8443
+      same_site: lax
+
+storage:
+  local:
+    path: '@STATE@/authelia.sqlite3'
+
+notifier:
+  filesystem:
+    filename: '@STATE@/authelia-notifications.txt'
+
+identity_providers:
+  oidc:
+    # PoC: short access token for testing auto-refresh
+    lifespans:
+      access_token: '5 minute'
+      refresh_token: '1 hour'
+    jwks:
+      - key_id: wfx
+        key: |
+          {{- fileContent "@STATE@/certs/oidc-key.pem" | nindent 10 }}
+        certificate_chain: |
+          {{- fileContent "@STATE@/certs/oidc-cert.pem" | nindent 10 }}
+    claims_policies:
+      wfx:
+        id_token:
+          - https://siemens.github.io/wfx/client-id
+          - picture
+        access_token:
+          - groups
+          - https://siemens.github.io/wfx/client-id
+        custom_claims:
+          wfx_client_id:
+            name: https://siemens.github.io/wfx/client-id
+            attribute: wfx_client_id
+    scopes:
+      read:jobs:
+        claims:
+          - https://siemens.github.io/wfx/client-id
+      write:jobs:
+        claims:
+          - https://siemens.github.io/wfx/client-id
+    clients:
+      # Browser SPA sign-in: public because browser code cannot protect a secret. Authorization code with S256 PKCE protects the flow; callback returns to the UI.
+      - client_id: wfx-ui
+        client_name: wfx UI
+        public: true
+        redirect_uris:
+          - https://wfx-mgmt.localhost:8443/ui/
+        audience:
+          - wfx-northbound-api
+        requested_audience_mode: implicit
+        scopes:
+          - openid
+          - profile
+          - email
+          - groups
+          - offline_access
+          - read:jobs
+          - write:jobs
+        grant_types:
+          - authorization_code
+          - refresh_token
+        response_types:
+          - code
+        require_pkce: true
+        pkce_challenge_method: S256
+        token_endpoint_auth_method: none
+        access_token_signed_response_alg: RS256
+        claims_policy: wfx
+        authorization_policy: one_factor
+        consent_mode: implicit
+
+      # Admin CLI's non-interactive northbound access: client credentials and a state-held secret avoid user sign-in; scopes and audience limit API access.
+      - client_id: wfxctl
+        client_name: wfxctl
+        client_secret: '{{ secret "@STATE@/wfxctl-client-secret-digest" }}'
+        audience:
+          - wfx-northbound-api
+        requested_audience_mode: implicit
+        scopes:
+          - read:jobs
+          - write:jobs
+        grant_types:
+          - client_credentials
+        token_endpoint_auth_method: client_secret_post
+        access_token_signed_response_alg: RS256
+
+      # Shared public device client: device code suits headless sign-in; refresh tokens support later use. Southbound audience is limited to devices.
+      # Signed user wfx_client_id identifies each device; client_id is shared. One factor is used because device accounts have password-only sign-in.
+      - client_id: wfx-devices
+        client_name: wfx devices
+        public: true
+        audience:
+          - wfx-southbound-api
+        requested_audience_mode: implicit
+        scopes:
+          - openid
+          - offline_access
+          - read:jobs
+          - write:jobs
+        grant_types:
+          - urn:ietf:params:oauth:grant-type:device_code
+          - refresh_token
+        token_endpoint_auth_method: none
+        access_token_signed_response_alg: RS256
+        # RFC 9068 mode: required for custom claims in the access token
+        access_token_signed_response_key_id: wfx
+        claims_policy: wfx
+        # device users have a password only; the device grant replaces the second factor
+        authorization_policy: one_factor
+
+      # Server-side oauth2-proxy client can protect its secret. Callback matches the proxy route; profile, group, and job scopes provide claims for
+      # its session and downstream authorization checks.
+      - client_id: wfx-proxy
+        client_name: wfx oauth2-proxy
+        client_secret: '{{ secret "@STATE@/oauth2-client-secret-digest" }}'
+        redirect_uris:
+          - https://wfx-mgmt.localhost:8443/oauth2/callback
+        scopes:
+          - openid
+          - profile
+          - email
+          - groups
+          - read:jobs
+          - write:jobs
+        claims_policy: wfx
+        authorization_policy: one_factor
+        consent_mode: implicit

@@ -25,6 +25,11 @@
       "ci"
     ];
 
+    secured = {
+      extends = [ "fullstack" ];
+      module = import ./contrib/secured-deployment/devenv.nix;
+    };
+
     backend.module = {
 
       packages = [

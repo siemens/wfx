@@ -1,0 +1,87 @@
+# SPDX-FileCopyrightText: 2026 Siemens AG
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Author: Michael Adler <michael.adler@siemens.com>
+services:
+  redis:
+    image: redis:8-alpine
+    command: redis-server --appendonly yes
+
+  authelia:
+    image: authelia/authelia:4.39.22
+    depends_on:
+      redis:
+        condition: service_started
+    env_file: state/secrets.env
+    volumes:
+      # not :ro, authelia writes local storage and notifier to /data
+      - ./state:/data
+    tmpfs:
+      - /config
+    # entrypoint only passes args through when first arg is exactly "--config"
+    # (string compare, so space-separated, not --config=...)
+    command:
+      - --config
+      - /data/authelia.yml
+      - --config.experimental.filters=template
+
+  oauth2-proxy:
+    image: quay.io/oauth2-proxy/oauth2-proxy:v7.15.4
+    # state contains OAuth client secret generated with mode 0600
+    user: "0"
+    depends_on:
+      nginx:
+        condition: service_healthy
+    env_file: state/secrets.env
+    volumes:
+      - ./state:/data:ro
+    command:
+      - --config=/data/oauth2-proxy.cfg
+      - --alpha-config=/data/oauth2-proxy-alpha.yml
+
+  wfx:
+    image: ghcr.io/siemens/wfx:main
+    restart: unless-stopped
+    volumes:
+      - ./state:/data
+    command:
+      - --client-host=http://0.0.0.0:8080
+      - --mgmt-host=http://0.0.0.0:8081
+      - --storage=sqlite
+      - --storage-opt=file:/data/wfx.db?_fk=1&_journal=WAL
+
+  nginx:
+    image: nginx:1.31.4-alpine
+    init: true
+    depends_on:
+      authelia:
+        condition: service_started
+      wfx:
+        condition: service_started
+    healthcheck:
+      test: "wget -qO- --no-check-certificate --header='Host: authelia.localhost:8443' https://localhost:8443/api/health"
+      interval: 1s
+      timeout: 5s
+      retries: 30
+    networks:
+      default:
+        aliases:
+          - authelia.localhost
+    ports:
+      - "8443:8443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/templates/default.conf.template:ro
+      - ./state:/data:ro
+      - ../../ui/dist:/usr/share/nginx/html/ui:ro
+    environment:
+      STATE: /data
+      UI_DIST: /usr/share/nginx/html/ui
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        resolver=$$(sed -n "s/^nameserver //p" /etc/resolv.conf | head -n1)
+        printf 'resolver %s valid=10s;\nmap "" $$oauth2_proxy { default "http://oauth2-proxy:4180"; }\n' "$$resolver" > /etc/nginx/conf.d/default.conf
+        sed -e "s|@STATE@|$$STATE|g" -e "s|@UI_DIST@|$$UI_DIST|g" -e 's|http://127.0.0.1:4180|$$oauth2_proxy|g' -e "s|127.0.0.1:8080|wfx:8080|g" -e "s|127.0.0.1:8081|wfx:8081|g" -e "s|127.0.0.1:9091|authelia:9091|g" /etc/nginx/templates/default.conf.template >> /etc/nginx/conf.d/default.conf
+        exec nginx -g "daemon off;"

@@ -1,0 +1,92 @@
+# SPDX-FileCopyrightText: 2026 Siemens AG
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Author: Michael Adler <michael.adler@siemens.com>
+
+# Generate local secrets, credentials, and certificates.
+bootstrap:
+    ./bootstrap.py
+
+# Build UI for secured deployment
+build-ui:
+    cd ../../ui && just build
+    go run -tags '!ui' ../../ui/render \
+      --base-path=/ui \
+      --wfx-url=https://wfx-mgmt.localhost:8443/api/wfx/v1 \
+      --oauth-issuer=https://authelia.localhost:8443 \
+      --oauth-client-id=wfx-ui \
+      --oauth-scope="openid profile email groups offline_access read:jobs write:jobs" > ../../ui/dist/index.html
+
+check-authorization:
+    @python3 check-authorization.py
+
+clean:
+    rm -rf state
+
+# Launch Firefox with an isolated profile that trusts the local CA.
+browser:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    profile="state/firefox"
+    mkdir -p "$profile"
+    certutil -N -d "sql:$profile" --empty-password 2>/dev/null || true
+    certutil -D -d "sql:$profile" -n "wfx local CA" 2>/dev/null || true
+    certutil -A -d "sql:$profile" -n "wfx local CA" -t "C,," -i state/certs/ca.pem
+    echo "Login with user: wfx-admin, pass: wfx-admin
+
+    Press <ctrl-c> to quit..."
+    exec firefox --no-remote --profile "$profile" https://wfx-mgmt.localhost:8443/ui/
+
+_get-token CLIENT_ID SECRET_FILE AUD:
+    @oauth2c https://authelia.localhost:8443 \
+      --client-id {{ CLIENT_ID }} \
+      --client-secret "$(cat state/{{ SECRET_FILE }})" \
+      --grant-type client_credentials \
+      --auth-method client_secret_post \
+      --audience {{ AUD }} \
+      --scopes read:jobs,write:jobs \
+      --tls-root-ca state/certs/ca.pem \
+      --silent
+
+# Device code enrollment is interactive on first use; afterwards the stored
+# refresh token is used headlessly. Delete state/<device>-tokens.json to re-enroll.
+_get-device-token DEVICE:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    umask 077
+    tokens="state/{{ DEVICE }}-tokens.json"
+    if [[ -e "$tokens" ]]; then
+        chmod 600 "$tokens"
+    fi
+    if [[ -s "$tokens" ]]; then
+        result="$(oauth2c https://authelia.localhost:8443 \
+            --client-id wfx-devices \
+            --grant-type refresh_token \
+            --refresh-token "$(jq -r .refresh_token "$tokens")" \
+            --auth-method none \
+            --tls-root-ca state/certs/ca.pem \
+            --silent)"
+    else
+        echo "Log in as {{ DEVICE }}, password: $(cat state/{{ DEVICE }}-password)" >&2
+        result="$(oauth2c https://authelia.localhost:8443 \
+            --client-id wfx-devices \
+            --grant-type urn:ietf:params:oauth:grant-type:device_code \
+            --auth-method none \
+            --scopes openid,offline_access,read:jobs,write:jobs \
+            --tls-root-ca state/certs/ca.pem \
+            --no-browser \
+            --silent)"
+    fi
+    printf '%s\n' "$result" | jq -e .access_token >/dev/null
+    printf '%s\n' "$result" > "$tokens"
+    printf '%s\n' "$result"
+
+get-wfx-admin-tokens:
+    @just _get-token wfxctl wfxctl-client-secret wfx-northbound-api
+
+get-wfx-client-1-tokens:
+    @just _get-device-token wfx-client-1
+
+get-wfx-client-2-tokens:
+    @just _get-device-token wfx-client-2

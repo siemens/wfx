@@ -1,0 +1,69 @@
+# SPDX-FileCopyrightText: 2026 Siemens AG
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Author: Michael Adler <michael.adler@siemens.com>
+---
+server:
+  bindAddress: 127.0.0.1:4180
+
+upstreamConfig:
+  upstreams:
+    - id: static
+      path: /
+      static: true
+      staticCode: 202
+
+injectResponseHeaders:
+  - name: X-Wfx-Device-Id
+    values:
+      - claimSource:
+          claim: https://siemens.github.io/wfx/client-id
+  - name: X-Accel-Redirect
+    values:
+      - claimSource:
+          claim: aud
+          prefix: /_token_audience/
+  - name: X-OAuth-Scope
+    values:
+      - claimSource:
+          claim: scp
+  - name: X-Wfx-Groups
+    values:
+      - claimSource:
+          claim: groups
+  - name: X-Wfx-OIDC-Client-Id
+    values:
+      - claimSource:
+          claim: client_id
+
+providers:
+  - id: authelia
+    provider: oidc
+    clientID: wfx-proxy
+    clientSecretFile: '@STATE@/oauth2-client-secret'
+    code_challenge_method: S256
+    scope: openid profile email groups read:jobs write:jobs
+    caFiles:
+      - '@STATE@/certs/ca.pem'
+    oidcConfig:
+      issuerURL: https://authelia.localhost:8443
+      insecureSkipNonce: false
+      # Verify the signed 'client_id' against the allow-list below; each client maps to a
+      # single audience. nginx then checks the 'aud' claim against the requested vhost.
+      audienceClaims:
+        - client_id
+      extraAudiences:
+        - wfx-northbound-api
+        - wfx-southbound-api
+        - wfx-ui
+        - wfxctl
+        - wfx-devices
+      enabledSigningAlgs:
+        - RS256
+    skipClaimsFromProfileURL: true
+    additionalClaims:
+      - aud
+      - scp
+      - client_id
+      - https://siemens.github.io/wfx/client-id

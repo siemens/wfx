@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: 2026 Siemens AG
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Author: Michael Adler <michael.adler@siemens.com>
+#
+# Generate passwords with:
+#   authelia crypto hash generate pbkdf2 --variant sha512 --iterations 310000 --password <password>
+---
+users:
+  wfx-admin:
+    disabled: false
+    displayname: WFX Admin
+    password: $pbkdf2-sha512$310000$uduEXocdmEIF9jVAzwde8A$XrDgMjmOduR5FIXzf3DBACZ.UX27tyK8WHHemaHVJ84yanS3a/j8hkm/tiqp4XJUmkfc4CmUD8MBskiYV9lbuw
+    email: wfx-admin@local
+    picture: https://wfx-mgmt.localhost:8443/ui/logo.svg
+    groups: [wfx]
+
+  # One user per device; bootstrap.py generates the passwords.
+  wfx-client-1:
+    disabled: false
+    displayname: wfx-client-1
+    password: '@PASSWORD_DIGEST_WFX_CLIENT_1@'
+    extra:
+      wfx_client_id: 3eb9312f-1d86-4669-a3e7-ccc69edb1dc0
+
+  wfx-client-2:
+    disabled: false
+    displayname: wfx-client-2
+    password: '@PASSWORD_DIGEST_WFX_CLIENT_2@'
+    extra:
+      wfx_client_id: 78b062b5-0f10-48d3-bfa5-6a79d44a6d8b
