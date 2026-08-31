@@ -26,6 +26,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - wfxctl: new global `--header` flag to add custom HTTP headers, e.g. `--header 'Authorization: Bearer $TOKEN'` (similar to curl's `-H` option, may be given multiple times)
 - wfxctl: support Git-style credential helper plugins through `--credential-helper`
 - Optional `X-Client-Id` header for restricting southbound job listing/event streaming/retrieval/updates to a client ID; deployments may set it at a trusted gateway to enforce client isolation
+- Generate SBOMs for container images
+- Use cyclonedx-gomod to generate higher-quality CycloneDX SBOMs for Go
+- Upload attested SBOMs into OCI registry
 
 ### Changed
 

@@ -21,7 +21,8 @@ coverage*
 *.cov
 /wfx.db*
 *.exe
-*.sbom.json
+*.cdx.json
+*.spdx.json
 .direnv
 .devenv*
 devenv.local.nix
