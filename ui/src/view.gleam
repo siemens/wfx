@@ -14,10 +14,13 @@ import gleam/string
 import gleam/string_tree
 import gleam/time/calendar
 import gleam/time/timestamp
-import lustre/attribute.{class, colspan, href, src, title}
+import lustre/attribute.{
+  alt, class, colspan, href, id, popover, popovertarget, src, title,
+}
 import lustre/element.{type Element}
 import lustre/element/html.{
-  a, button, div, h1, img, nav, p, table, td, text, tfoot, th, thead, tr,
+  a, button, div, h1, img, nav, p, span, strong, table, td, text, tfoot, th,
+  thead, tr,
 }
 import lustre/element/keyed
 import lustre/event
@@ -38,8 +41,13 @@ const class_table_row = "px-4 py-2 text-left"
 const class_link = "text-blue-500 hover:text-blue-700 underline"
 
 pub fn view(model: Model) -> Element(Msg) {
-  let empty = div([], [])
+  case model.user {
+    Some(model.SignedOut) -> view_logged_out(model.base_path)
+    _ -> view_app(model)
+  }
+}
 
+fn view_app(model: Model) -> Element(Msg) {
   let loading = p([], [text("Waiting for response from wfx...")])
 
   let content =
@@ -82,7 +90,7 @@ pub fn view(model: Model) -> Element(Msg) {
           ),
         ],
         [
-          empty,
+          div([], []),
           div([class("space-x-4")], [
             a([href("https://github.com/siemens/wfx")], [
               img([
@@ -91,7 +99,7 @@ pub fn view(model: Model) -> Element(Msg) {
               ]),
             ]),
           ]),
-          empty,
+          view_user(model.user),
         ],
       ),
       // Tab Bar
@@ -130,6 +138,97 @@ pub fn view(model: Model) -> Element(Msg) {
       content,
     ],
   )
+}
+
+fn view_logged_out(base_path: String) -> Element(Msg) {
+  div(
+    [
+      class(
+        "min-h-screen bg-gray-100 flex flex-col items-center justify-center px-4 text-center",
+      ),
+    ],
+    [
+      img([
+        class("w-20 h-20 mb-8"),
+        src(base_path <> "/logo.svg"),
+        alt("wfx"),
+      ]),
+      div([class("bg-white rounded-lg shadow-md max-w-md w-full px-8 py-10")], [
+        h1([class("text-2xl font-semibold text-gray-900 mb-3")], [
+          text("You are logged out"),
+        ]),
+        p([class("text-gray-600")], [
+          text("You can safely close this window."),
+        ]),
+      ]),
+    ],
+  )
+}
+
+fn view_user(user: option.Option(model.User)) -> Element(Msg) {
+  case user {
+    None -> div([], [])
+    Some(model.SignedOut) -> div([], [])
+    Some(model.SignedIn(name:, picture:, ..)) -> {
+      let avatar = case picture {
+        "" ->
+          span(
+            [
+              class(
+                "flex h-8 max-w-40 items-center rounded-full bg-gray-700 px-3 text-sm font-medium",
+              ),
+              title(name),
+            ],
+            [text(name)],
+          )
+        picture ->
+          img([
+            class("h-8 w-8 rounded-full object-cover ring-1 ring-white/20"),
+            src(picture),
+            alt(name),
+            title(name),
+          ])
+      }
+      div([class("relative")], [
+        button(
+          [
+            class(
+              "cursor-pointer rounded-full transition hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800",
+            ),
+            popovertarget("user-menu"),
+            title("Open user menu"),
+          ],
+          [avatar],
+        ),
+        div(
+          [
+            id("user-menu"),
+            popover("auto"),
+            class(
+              "absolute inset-auto right-4 top-12 z-10 mt-2 w-56 overflow-visible rounded-md border border-gray-200 bg-white py-2 text-gray-900 shadow-xl before:absolute before:-top-1.5 before:right-3 before:h-3 before:w-3 before:rotate-45 before:border-l before:border-t before:border-gray-200 before:bg-white",
+            ),
+          ],
+          [
+            div([class("border-b border-gray-200 px-4 pb-3 pt-1 text-sm")], [
+              p([class("text-xs text-gray-500")], [text("Signed in as")]),
+              strong([class("mt-0.5 block truncate font-semibold")], [
+                text(name),
+              ]),
+            ]),
+            button(
+              [
+                class(
+                  "mt-1 block w-full cursor-pointer px-4 py-2 text-left text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none",
+                ),
+                event.on_click(msg.UserClickedLogout),
+              ],
+              [text("Sign out")],
+            ),
+          ],
+        ),
+      ])
+    }
+  }
 }
 
 fn format_rsvp_error(err: rsvp.Error(String)) -> String {

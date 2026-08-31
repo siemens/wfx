@@ -17,7 +17,7 @@ import (
 )
 
 func TestMux(t *testing.T) {
-	assert.NotNil(t, Mux("", ""))
+	assert.NotNil(t, Mux("", "", OAuthSettings{}))
 }
 
 func TestFaviconHandler(t *testing.T) {

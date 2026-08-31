@@ -11,6 +11,7 @@ import wfx
 pub type Msg {
   // Subject Verb Object
   UserClickedRefresh
+  UserClickedLogout
 
   DocumentChangedRoute(model.Route)
   CopyToClipboard(String)
