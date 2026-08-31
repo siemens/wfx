@@ -13,7 +13,7 @@ build:
     env CC={{ THISDIR }}/.ci/zcc goreleaser build --id wfx --id wfxctl --clean --single-target --snapshot
 
 build-wfx-with-ui:
-    env CC={{ THISDIR }}/.ci/zcc goreleaser build --id wfx-with-ui --snapshot
+    env CC={{ THISDIR }}/.ci/zcc goreleaser build --id wfx-with-ui --snapshot --clean --single-target
 
 build-contrib:
     #!/usr/bin/env bash
