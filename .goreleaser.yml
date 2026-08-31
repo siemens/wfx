@@ -377,23 +377,17 @@ changelog:
       - "^test.*"
 
 sboms:
-  - id: spdx
-    ids:
-      - wfx
-      - wfxctl
-      - wfx-viewer
-    artifacts: binary
-    cmd: syft
-    args: ["$artifact", "--output", "spdx-json=$document"]
-    documents:
-      - "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.spdx.sbom.json"
   - id: cyclonedx
     ids:
       - wfx
       - wfxctl
       - wfx-viewer
     artifacts: binary
-    cmd: syft
-    args: ["$artifact", "--output", "cyclonedx-json=$document"]
+    cmd: cyclonedx-gomod
+    args: ["app", "-main", "./cmd/{{ .Binary }}", "-licenses", "-packages", "-std", "-json", "-output", "$document", "../"]
+    env:
+      - GOARCH={{ .Arch }}
+      - GOOS={{ .Os }}
+      - CGO_ENABLED=1
     documents:
       - "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.cyclonedx.sbom.json"

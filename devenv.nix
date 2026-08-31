@@ -69,6 +69,7 @@
       packages = [
         pkgs.reuse
         pkgs.biome
+        pkgs.cyclonedx-gomod
       ];
     };
   };
