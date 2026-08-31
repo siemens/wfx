@@ -305,8 +305,13 @@ forward request to wfx
 In both cases, the gateway must reject missing or invalid JWTs and missing `client_id` claims. It must also replace,
 rather than preserve, any client-supplied `X-Client-Id` header.
 
-Thus, for productive deployments, a deployment along the lines of the following figure is recommended with an _API
-Gateway_ handling authentication and authorization and setting the trusted client identity header.
+A custom [wfx plugin](#plugins) can perform the same validation and header injection without an API gateway. Configure it
+for the southbound API with `--client-plugins-dir`. The plugin receives the complete request and can either reject it or
+return a modified request containing the trusted `X-Client-Id`. As with a gateway, the plugin must validate the client's
+credentials, reject missing or invalid identity claims, and replace rather than trust any client-supplied `X-Client-Id`.
+
+For productive deployments using an API gateway, a deployment along the lines of the following figure is recommended,
+with the gateway handling authentication and authorization and setting the trusted client identity header.
 
 ```txt
 ┌──────────────────┐
