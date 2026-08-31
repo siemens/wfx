@@ -5,10 +5,13 @@
 # Author: Michael Adler <michael.adler@siemens.com>
 {
   pkgs,
+  config,
   ...
 }:
 
 {
+  stdenv = pkgs.stdenvNoCC;
+
   packages = [
     pkgs.git
     pkgs.just
@@ -25,6 +28,8 @@
     ];
 
     backend.module = {
+      env.CC = "${config.devenv.root}/.ci/zcc";
+
       packages = [
         pkgs.goreleaser
         pkgs.zig
