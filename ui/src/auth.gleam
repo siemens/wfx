@@ -6,7 +6,6 @@
 import gleam/http/request.{type Request}
 import gleam/result
 import gleam/uri
-import glow_auth
 import lustre/effect.{type Effect}
 import rsvp.{type Handler}
 
@@ -28,7 +27,7 @@ pub fn authorize_request(
 ) -> Request(body) {
   case token {
     "" -> request
-    token -> glow_auth.authorization_header(request, token)
+    token -> request.set_header(request, "authorization", "Bearer " <> token)
   }
 }
 

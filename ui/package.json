@@ -1,6 +1,10 @@
 {
+  "scripts": {
+    "test": "node --experimental-test-module-mocks --no-warnings test/auth_ffi_test.mjs"
+  },
   "dependencies": {
     "highlight.js": "^11.11.1",
-    "mermaid": "^11.13.0"
+    "mermaid": "^11.13.0",
+    "oidc-client-ts": "^3.5.0"
   }
 }
