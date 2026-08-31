@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 // Author: Michael Adler <michael.adler@siemens.com>
+import auth
 import events
 import gleam/bool
 import gleam/int
@@ -30,9 +31,11 @@ import wfx/decoder
 
 pub fn main() {
   let cfg = config.load_config()
-  let app = lustre.application(fn(_) { init(cfg) }, update, view)
-  let assert Ok(_) = lustre.start(app, "#app", Nil)
-  Nil
+  auth.authenticate(cfg, fn() {
+    let app = lustre.application(fn(_) { init(cfg) }, update, view)
+    let assert Ok(_) = lustre.start(app, "#app", Nil)
+    Nil
+  })
 }
 
 pub fn init(cfg: Config) -> #(Model, Effect(Msg)) {
@@ -47,7 +50,13 @@ pub fn init(cfg: Config) -> #(Model, Effect(Msg)) {
     }
     False -> cfg.wfx_url
   }
-  let model = model.new(wfx_url: wfx_url, base_path: cfg.base_path)
+  let user = case auth.current_user() {
+    Some(#(name, email, picture)) ->
+      Some(model.SignedIn(name:, email:, picture:))
+    None -> None
+  }
+  let model =
+    model.Model(..model.new(wfx_url: wfx_url, base_path: cfg.base_path), user:)
 
   let #(route, initial_eff) =
     initial_uri
@@ -98,7 +107,8 @@ pub fn init(cfg: Config) -> #(Model, Effect(Msg)) {
     }
 
   // subscribe to all job events because we want to be informed about new jobs and updates for those new jobs
-  let event_source = events.create_job_events_source(model.wfx_url, None)
+  let event_source =
+    events.create_job_events_source(model.wfx_url, None, auth.access_token())
   let model = model.Model(..model, route: route, event_source: event_source)
 
   #(
@@ -196,6 +206,11 @@ pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
           }
       }
     }
+
+    msg.UserClickedLogout -> #(
+      Model(..model, user: Some(model.SignedOut)),
+      auth.logout(),
+    )
 
     msg.UserClickedRefresh -> {
       case model.route {
@@ -383,7 +398,7 @@ fn get_jobs(
     |> string_tree.to_string
   let handler =
     rsvp.expect_json(decoder.paginated_job_list_decoder(), msg.WfxSentJobs)
-  rsvp.get(url, handler)
+  auth.get(url, handler)
 }
 
 fn get_workflows(
@@ -404,7 +419,7 @@ fn get_workflows(
       decoder.paginated_workflow_list_decoder(),
       msg.WfxSentWorkflows,
     )
-  rsvp.get(url, handler)
+  auth.get(url, handler)
 }
 
 fn get_single_workflow(
@@ -414,7 +429,7 @@ fn get_single_workflow(
   let url = wfx_url <> "/workflows/" <> name
   let handler =
     rsvp.expect_json(decoder.workflow_decoder(), msg.WfxSentSingleWorkflow)
-  rsvp.get(url, handler)
+  auth.get(url, handler)
 }
 
 fn get_single_job(
@@ -431,7 +446,7 @@ fn get_single_job(
     |> append(bool.to_string(history))
     |> string_tree.to_string
   let handler = rsvp.expect_json(decoder.job_decoder(), msg.WfxSentSingleJob)
-  rsvp.get(url, handler)
+  auth.get(url, handler)
 }
 
 pub fn get_job_events(source: events.JobsEventSource) -> Effect(Msg) {

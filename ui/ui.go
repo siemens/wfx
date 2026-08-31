@@ -24,7 +24,6 @@ import (
 	"bytes"
 	_ "embed"
 	"fmt"
-	"html/template"
 	"net/http"
 	"strings"
 	"time"
@@ -32,9 +31,6 @@ import (
 	"github.com/klauspost/compress/zstd"
 	"github.com/rs/zerolog/log"
 )
-
-//go:embed index.html.tmpl
-var indexTmpl string
 
 var indexHTML []byte
 
@@ -53,13 +49,6 @@ var appCssHash string
 //go:embed dist/logo.svg.zst
 var LogoSVG []byte
 
-type TemplateData struct {
-	AppCSS   string
-	AppMJS   string
-	WfxURL   string
-	BasePath string
-}
-
 const Enabled = true
 
 const (
@@ -67,21 +56,22 @@ const (
 	oneYear = time.Hour * 24 * 365 // approximately
 )
 
-func Mux(wfxBasePath string, uiBasePath string) *http.ServeMux {
+func Mux(wfxBasePath string, uiBasePath string, oauth OAuthSettings) *http.ServeMux {
 	appJsHash = strings.TrimSpace(appJsHash)
 	appCssHash = strings.TrimSpace(appCssHash)
-
-	tmpl := template.Must(template.New("index").Parse(indexTmpl))
 
 	data := TemplateData{
 		AppCSS:   fmt.Sprintf("%s/%s.css", uiBasePath, appCssHash),
 		AppMJS:   fmt.Sprintf("%s/%s.mjs", uiBasePath, appJsHash),
 		WfxURL:   wfxBasePath,
 		BasePath: uiBasePath,
+		OAuth:    oauth,
 	}
 
 	var buf bytes.Buffer
-	_ = tmpl.Execute(&buf, data)
+	if err := RenderIndex(&buf, data); err != nil {
+		panic(err)
+	}
 	indexHTML = buf.Bytes()
 
 	log.Info().Msg("Creating UI router")

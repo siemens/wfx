@@ -21,7 +21,11 @@ import wfx
 import app
 import view
 
-const cfg = config.Config(wfx_url: "http://localhost", base_path: "/ui")
+const cfg = config.Config(
+  wfx_url: "http://localhost",
+  base_path: "/ui",
+  oauth: None,
+)
 
 pub fn main() -> Nil {
   gleeunit.main()
@@ -259,6 +263,71 @@ pub fn given_app_when_view_workflows_then_workflow_table_shown_test() {
   |> simulate.view
   |> element.to_readable_string
   |> birdie.snap("Paginated Workflows")
+}
+
+pub fn given_logged_in_user_then_avatar_menu_shown_test() {
+  let model =
+    model.Model(
+      ..model.new(wfx_url: "http://localhost", base_path: "/ui"),
+      user: Some(model.SignedIn(
+        name: "Ada Lovelace",
+        email: "ada@example.com",
+        picture: "https://example.com/ada.png",
+      )),
+    )
+  let rendered = view.view(model) |> element.to_readable_string
+
+  assert string.contains(rendered, "https://example.com/ada.png")
+  assert string.contains(rendered, "Open user menu")
+  assert string.contains(rendered, "popovertarget=\"user-menu\"")
+  assert string.contains(rendered, "popover=\"auto\"")
+  assert string.contains(rendered, "Sign out")
+  assert !string.contains(rendered, "ada@example.com")
+}
+
+pub fn given_logged_in_user_without_picture_then_name_shown_test() {
+  let model =
+    model.Model(
+      ..model.new(wfx_url: "http://localhost", base_path: "/ui"),
+      user: Some(model.SignedIn(
+        name: "Ada Lovelace",
+        email: "ada@example.com",
+        picture: "",
+      )),
+    )
+  let rendered = view.view(model) |> element.to_readable_string
+
+  assert string.contains(rendered, "Ada Lovelace")
+  assert string.contains(rendered, "Open user menu")
+  assert string.contains(rendered, "popovertarget=\"user-menu\"")
+  assert string.contains(rendered, "popover=\"auto\"")
+  assert string.contains(rendered, "Sign out")
+  assert !string.contains(rendered, "ada@example.com")
+}
+
+pub fn given_anonymous_user_then_logout_hidden_test() {
+  let rendered =
+    view.view(model.new(wfx_url: "http://localhost", base_path: "/ui"))
+    |> element.to_readable_string
+
+  assert !string.contains(rendered, "Sign out")
+  assert !string.contains(rendered, "Logged out")
+}
+
+pub fn given_app_when_user_clicks_logout_then_logged_out_page_shown_test() {
+  let rendered =
+    simulate.application(fn(_) { app.init(cfg) }, app.update, view.view)
+    |> simulate.start(Nil)
+    |> simulate.message(msg.UserClickedLogout)
+    |> simulate.view
+    |> element.to_readable_string
+
+  assert string.contains(rendered, "You are logged out")
+  assert string.contains(rendered, "You can safely close this window.")
+  assert string.contains(rendered, "/ui/logo.svg")
+  assert !string.contains(rendered, "Sign out")
+  assert !string.contains(rendered, "Jobs")
+  assert !string.contains(rendered, "Workflows")
 }
 
 pub fn given_app_when_view_workflow_then_job_is_shown_test() {

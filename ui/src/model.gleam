@@ -14,6 +14,11 @@ import wfx/utils
 
 pub const default_limit = 10
 
+pub type User {
+  SignedIn(name: String, email: String, picture: String)
+  SignedOut
+}
+
 pub type Model {
   Model(
     wfx_url: String,
@@ -24,6 +29,7 @@ pub type Model {
     job: Option(Job),
     workflow: Option(Workflow),
     event_source: Option(events.JobsEventSource),
+    user: Option(User),
   )
 }
 
@@ -72,6 +78,7 @@ pub fn new(wfx_url wfx_url: String, base_path base_path: String) -> Model {
     job: None,
     workflow: None,
     event_source: None,
+    user: None,
   )
 }
 

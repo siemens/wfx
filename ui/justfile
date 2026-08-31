@@ -4,6 +4,10 @@
 #
 # Author: Michael Adler <michael.adler@siemens.com>
 
+build:
+    gleam run -m lustre/dev build
+    go run -tags '!ui' ./render > dist/index.html
+
 run:
     mkdir -p assets
     cp ../hugo/static/images/logo.svg assets/
@@ -15,6 +19,7 @@ test:
     export LC_TIME=C
     export TZ=UTC
     gleam test
+    npm test
 
 integration-test:
     # By using Google Chrome, Playwright does not attempt to install the browser itself, allowing it to work on non-Ubuntu systems as well.

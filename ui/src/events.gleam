@@ -13,6 +13,7 @@ pub type JobsEventSource
 pub fn do_create_job_events_source(
   _wfx_url: String,
   _filter: String,
+  _access_token: String,
 ) -> Result(JobsEventSource, Nil) {
   Error(Nil)
 }
@@ -20,6 +21,7 @@ pub fn do_create_job_events_source(
 pub fn create_job_events_source(
   wfx_url: String,
   job_ids: Option(List(String)),
+  access_token: String,
 ) -> Option(JobsEventSource) {
   let filter = case job_ids {
     Some(job_ids) ->
@@ -32,7 +34,8 @@ pub fn create_job_events_source(
       }
     None -> ""
   }
-  do_create_job_events_source(wfx_url, filter) |> option.from_result
+  do_create_job_events_source(wfx_url, filter, access_token)
+  |> option.from_result
 }
 
 @external(javascript, "./events.ffi.mjs", "start")

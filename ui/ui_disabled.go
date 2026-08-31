@@ -14,7 +14,7 @@ import "net/http"
 
 const Enabled = false
 
-func Mux(string, string) *http.ServeMux {
+func Mux(string, string, OAuthSettings) *http.ServeMux {
 	return http.NewServeMux()
 }
 
