@@ -156,7 +156,7 @@ archives:
       - README.md
       - CHANGELOG.md
       - docs/*.md
-      - src: ui/*.cyclonedx.sbom.json
+      - src: ui/*.cdx.json
         dst: .
 
   - id: wfxctl
@@ -193,7 +193,7 @@ archives:
         dst: index.html
       - src: hugo/static/images/logo.svg
         dst: logo.svg
-      - src: ui/*.cyclonedx.sbom.json
+      - src: ui/*.cdx.json
         dst: .
 
 nfpms:
@@ -361,23 +361,17 @@ changelog:
       - "^test.*"
 
 sboms:
-  - id: spdx
-    ids:
-      - wfx
-      - wfxctl
-      - wfx-viewer
-    artifacts: binary
-    cmd: syft
-    args: ["$artifact", "--output", "spdx-json=$document"]
-    documents:
-      - "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.spdx.sbom.json"
   - id: cyclonedx
     ids:
       - wfx
       - wfxctl
       - wfx-viewer
     artifacts: binary
-    cmd: syft
-    args: ["$artifact", "--output", "cyclonedx-json=$document"]
+    cmd: cyclonedx-gomod
+    args: ["app", "-main", "./cmd/{{ .Binary }}", "-licenses", "-packages", "-std", "-json", "-output", "$document", "../"]
+    env:
+      - GOARCH={{ .Arch }}
+      - GOOS={{ .Os }}
+      - CGO_ENABLED=1
     documents:
-      - "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.cyclonedx.sbom.json"
+      - "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.cdx.json"

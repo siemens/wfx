@@ -44,7 +44,7 @@ jobs:
           report-formats: "CycloneDx"
           ort-cli-report-args: "-O CycloneDX=output.file.formats=json"
       - name: Copy SBOM into ui/
-        run: cp "${{ steps.ort.outputs.results-sbom-cyclonedx-json-path }}" ui/ui.cyclonedx.sbom.json
+        run: cp "${{ steps.ort.outputs.results-sbom-cyclonedx-json-path }}" ui/ui.cdx.json
 
       - name: Setup build
         run: sudo .ci/setup-build.sh
@@ -68,7 +68,7 @@ jobs:
           CLEAN_REF=$(echo "${{ github.ref_name }}" | tr '/' '-')
           echo "IMAGE_VERSION=$CLEAN_REF" >> "$GITHUB_ENV"
 
-          TAGS="$CLEAN_REF"
+          TAGS="$CLEAN_REF ${{ github.sha }}"
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
             TAGS="$TAGS latest"
           fi
@@ -102,6 +102,58 @@ jobs:
           containerfiles: |
             ./source/Dockerfile
 
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: 3.14
+      - name: Install debsbom
+        run: |
+          python -m pip install --upgrade pip
+          pip install debsbom[cdx,download]
+
+      - name: Generating container SBOMs
+        env:
+          IMAGE: ${{ steps.build_image_multiarch.outputs.image }}
+          TAG: ${{ github.sha }}
+        run: |
+          ARCHES=$(buildah manifest inspect "localhost/${IMAGE}:${TAG}" \
+            | jq -r '.manifests[].platform.architecture' | sort -u | tr '\n' ' ')
+          echo "ARCHES=$ARCHES" >> "$GITHUB_ENV"
+
+          for ARCH in $ARCHES; do
+            buildah unshare bash -c '
+              ARCH="'"$ARCH"'"
+              container=$(buildah from --arch "$ARCH" "localhost/${IMAGE}:${TAG}")
+              mountpoint=$(buildah mount "$container")
+
+              echo "Assembling /var/lib/dpkg/status for $ARCH"
+              for f in "$mountpoint"/var/lib/dpkg/status.d/*; do
+                if [ -f "$f" ] && grep -q "^Package:" "$f"; then
+                  cat "$f"
+                  echo ""
+                fi
+              done > "$mountpoint/var/lib/dpkg/status"
+
+              echo "Generating container-${ARCH}.cdx.json"
+              debsbom generate -t cdx \
+                --distro-name distroless \
+                --distro-arch "$ARCH" \
+                --with-licenses \
+                --base-distro-vendor debian \
+                --root "$mountpoint" \
+                --out "container-${ARCH}"
+
+              buildah unmount "$container" || true
+              buildah rm "$container" || true
+            '
+          done
+
+      - name: Log in to ghcr.io
+        uses: redhat-actions/podman-login@v1
+        with:
+          registry: ghcr.io/${{ github.repository_owner }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Push to registry
         if: github.event_name != 'pull_request'
         uses: redhat-actions/push-to-registry@94ade333c38ecc0e60e94785125d9a52ca423b37 # v3
@@ -109,8 +161,46 @@ jobs:
           image: ${{ steps.build_image_multiarch.outputs.image }}
           tags: ${{ steps.build_image_multiarch.outputs.tags }}
           registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: sigstore/cosign-installer@v4.1.0
+      - name: Attest SBOM per architecture
+        env:
+          IMAGE: ghcr.io/${{ steps.build_image_multiarch.outputs.image }}
+          TAG: ${{ github.sha }}
+        run: |
+          for ARCH in $ARCHES; do
+              DIGEST=$(buildah manifest inspect "${IMAGE}:${TAG}" |
+                  jq -r --arg a "$ARCH" '.manifests[] | select(.platform.architecture==$a) | .digest')
+
+              # NOTE: cosign auto-detects CI env and uses keyless flow via GitHub OIDC token
+              echo "$ARCH: ${IMAGE}@${DIGEST}: attesting container sbom"
+              cosign attest --yes --type cyclonedx --predicate "container-${ARCH}.cdx.json" "${IMAGE}@${DIGEST}"
+              echo "$ARCH: ${IMAGE}@${DIGEST}: attesting golang sbom"
+              cosign attest --yes --type cyclonedx --predicate dist/wfx_*_${ARCH}.cdx.json "${IMAGE}@${DIGEST}"
+          done
+
+      - name: Verify SBOM per architecture
+        env:
+          IMAGE: ghcr.io/${{ steps.build_image_multiarch.outputs.image }}
+          TAG: ${{ github.sha }}
+        run: |
+          for ARCH in $ARCHES; do
+              DIGEST=$(buildah manifest inspect "${IMAGE}:${TAG}" |
+                  jq -r --arg a "$ARCH" '.manifests[] | select(.platform.architecture==$a) | .digest')
+
+              COUNT=$(cosign verify-attestation \
+                  --type cyclonedx \
+                  --certificate-identity-regexp '^${{ github.server_url }}/${{ github.repository }}/\.github/workflows/release\.yml@refs/.*$' \
+                  --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+                  "${IMAGE}@${DIGEST}" 2>/dev/null | jq -s 'length')
+
+              if [ "$COUNT" -eq 2 ]; then
+                  echo "✅ $ARCH: ${IMAGE}@${DIGEST}: both SBOM attestations verified"
+              else
+                  echo "❌ $ARCH: ${IMAGE}@${DIGEST}: expected 2 cyclonedx attestations, got $COUNT"
+                  exit 1
+              fi
+          done
 
       - name: Upload snapshot dist
         if: "!startsWith(github.event.ref, 'refs/tags/v')"
@@ -120,10 +210,12 @@ jobs:
           path: dist/
           retention-days: 1
 
-      - name: Upload snapshot SBOM
+      - name: Upload snapshot SBOMs
         if: "!startsWith(github.event.ref, 'refs/tags/v')"
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: sbom-snapshot
-          path: ui/*.cyclonedx.sbom.json
+          name: sboms
           retention-days: 1
+          path: |
+            ui/*.cdx.json
+            *.cdx.json

@@ -117,3 +117,30 @@ Alternatively, a pre-built [Debian](https://www.debian.org) package is [provided
 
 For convenience and ease of use, all binaries come with shell completions available for [Bash](https://www.gnu.org/software/bash/), [Fish](https://fishshell.com) and [Zsh](https://www.zsh.org).
 To install the completions, refer to the binary's `completion --help` output, e.g. `wfx completion bash --help`.
+
+## Software Bill of Materials (SBOM)
+
+wfx releases include [CycloneDX](https://cyclonedx.org/) Software Bill of Materials (SBOM) files:
+
+- Release archives include CycloneDX SBOM files (`*.cdx.json`) for wfx binaries and WebUI assets.
+- Container images published to `ghcr.io/siemens/wfx` have CycloneDX SBOMs attached as [Cosign](https://github.com/sigstore/cosign) attestations for both container packages and Go binaries per architecture.
+
+Because container images are multi-architecture indexes, verification and download must target the architecture-specific image digest:
+
+```bash
+# resolve architecture digest (e.g. linux/amd64 or linux/arm64)
+DIGEST=$(buildah manifest inspect ghcr.io/siemens/wfx:latest | \
+    jq -r --arg arch "amd64" '.manifests[] | select(.platform.architecture == $arch and .platform.os == "linux") | .digest')
+
+# verify attestations (keyless verification via Sigstore)
+cosign verify-attestation \
+    --type cyclonedx \
+    --certificate-identity-regexp '^https://github.com/siemens/wfx/\.github/workflows/release\.yml@refs/.*$' \
+    --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+    "ghcr.io/siemens/wfx@${DIGEST}"
+
+# download all SBOM attetations
+cosign download attestation \
+    --predicate-type=https://cyclonedx.org/bom \
+    "ghcr.io/siemens/wfx@${DIGEST}" | jq -r '.dsseEnvelope.payload | @base64d | fromjson | .predicate'
+```
