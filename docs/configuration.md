@@ -231,6 +231,10 @@ Set both `--oauth-issuer-url` and `--oauth-client-id` to enable OAuth. Register 
 in `/ui/` as the redirect URL at the identity provider. As with other options, equivalent `WFX_OAUTH_*`
 environment variables and configuration file keys are supported.
 
+The UI renews expiring access tokens with a refresh token when the identity provider issues one, otherwise
+it starts a new authorization flow. Add the provider's refresh-token scope (often `offline_access`) to
+`--oauth-scope` when required.
+
 ## File Server
 
 wfx comes with a built-in file server that serves artifacts at `http://<wfx host:{client,mgmt} port>/download/`.

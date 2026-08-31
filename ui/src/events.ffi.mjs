@@ -4,11 +4,11 @@
 //
 // Author: Michael Adler <michael.adler@siemens.com>
 import { Ok, Error } from "./gleam.mjs";
+import { accessToken } from "./auth.ffi.mjs";
 
 class AuthenticatedEventSource {
-  constructor(url, accessToken) {
+  constructor(url) {
     this.url = url;
-    this.accessToken = accessToken;
     this.controller = new AbortController();
     this.closed = false;
     this.connect();
@@ -20,7 +20,7 @@ class AuthenticatedEventSource {
         const response = await fetch(this.url, {
           headers: {
             Accept: "text/event-stream",
-            Authorization: `Bearer ${this.accessToken}`,
+            Authorization: `Bearer ${accessToken()}`,
           },
           signal: this.controller.signal,
         });
@@ -63,7 +63,7 @@ class AuthenticatedEventSource {
   }
 }
 
-export function createJobEventsSource(wfx_url, filter, accessToken) {
+export function createJobEventsSource(wfx_url, filter, initialAccessToken) {
   // Remove trailing slash
   const base = wfx_url.replace(/\/$/, "");
   const fullPath = `${base}/jobs/events`;
@@ -77,12 +77,12 @@ export function createJobEventsSource(wfx_url, filter, accessToken) {
 
   if (
     typeof EventSource !== "undefined" ||
-    (accessToken && typeof fetch !== "undefined")
+    (initialAccessToken && typeof fetch !== "undefined")
   ) {
     try {
       console.log("SSE: subscribing to URL", finalUrl);
-      const source = accessToken
-        ? new AuthenticatedEventSource(finalUrl, accessToken)
+      const source = initialAccessToken
+        ? new AuthenticatedEventSource(finalUrl)
         : new EventSource(finalUrl);
       return new Ok(source);
     } catch (err) {
