@@ -18,8 +18,8 @@ Author: Michael Adler <michael.adler@siemens.com>
         return {
           "wfx_url": {{ .WfxURL | json }},
           "base_path": {{ .BasePath | json }},
-          "oauth": {{ if or .OAuth.IssuerURL .OAuth.ClientID }}{
-            "issuer_url": {{ .OAuth.IssuerURL | json }},
+          "oauth": {{ if or .OAuth.Issuer .OAuth.ClientID }}{
+            "issuer": {{ .OAuth.Issuer | json }},
             "client_id": {{ .OAuth.ClientID | json }},
             "scope": {{ .OAuth.Scope | json }}
           }{{ else }}null{{ end }}

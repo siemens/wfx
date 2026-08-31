@@ -17,9 +17,9 @@ import (
 )
 
 type OAuthSettings struct {
-	IssuerURL string
-	ClientID  string
-	Scope     string
+	Issuer   string
+	ClientID string
+	Scope    string
 }
 
 type TemplateData struct {

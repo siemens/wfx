@@ -6,7 +6,7 @@
 import { None, Some } from "../gleam_stdlib/gleam/option.mjs";
 
 const oauthDefaults = {
-  issuer_url: "",
+  issuer: "",
   client_id: "",
   scope: "openid email profile",
 };

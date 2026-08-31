@@ -24,9 +24,9 @@ func TestRenderIndex(t *testing.T) {
 		WfxURL:   "http://127.0.0.1:8081/api/wfx/v1",
 		BasePath: "",
 		OAuth: OAuthSettings{
-			IssuerURL: "https://id.example",
-			ClientID:  "</script>",
-			Scope:     "openid email profile",
+			Issuer:   "https://id.example",
+			ClientID: "</script>",
+			Scope:    "openid email profile",
 		},
 	})
 	require.NoError(t, err)
@@ -35,7 +35,7 @@ func TestRenderIndex(t *testing.T) {
 	assert.Contains(t, output.String(), `"wfx_url": "http://127.0.0.1:8081/api/wfx/v1"`)
 	assert.Contains(t, output.String(), `"base_path": ""`)
 	assert.Contains(t, output.String(), `"oauth": {`)
-	assert.Contains(t, output.String(), `"issuer_url": "https://id.example"`)
+	assert.Contains(t, output.String(), `"issuer": "https://id.example"`)
 	assert.Contains(t, output.String(), `"client_id": "\u003c/script\u003e"`)
 	assert.Contains(t, output.String(), `"scope": "openid email profile"`)
 

@@ -400,9 +400,9 @@ func createMux(cfg *config.AppConfig, basePath string, registerUI bool) *http.Se
 		})
 		oauth := cfg.OAuthOpts()
 		uiMux := ui.Mux(basePath, "/ui", ui.OAuthSettings{
-			IssuerURL: oauth.IssuerURL,
-			ClientID:  oauth.ClientID,
-			Scope:     oauth.Scope,
+			Issuer:   oauth.Issuer,
+			ClientID: oauth.ClientID,
+			Scope:    oauth.Scope,
 		})
 		mux.Handle("GET /ui/", http.StripPrefix("/ui", uiMux))
 		mux.Handle("GET /favicon.ico", ui.FaviconHandler())

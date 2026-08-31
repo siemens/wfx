@@ -20,7 +20,7 @@ function getManager(config, oauth) {
   if (manager) return manager;
 
   manager = new UserManager({
-    authority: oauth.issuer_url.replace(/\/$/, ""),
+    authority: oauth.issuer.replace(/\/$/, ""),
     client_id: oauth.client_id,
     redirect_uri: callbackUrl(config),
     response_type: "code",
@@ -42,8 +42,8 @@ export async function authenticate(config, onReady) {
     return;
   }
   const oauth = config.oauth[0];
-  if (!oauth.issuer_url || !oauth.client_id) {
-    throw new Error("OAuth requires issuer_url and client_id");
+  if (!oauth.issuer || !oauth.client_id) {
+    throw new Error("OAuth requires issuer and client_id");
   }
 
   const userManager = getManager(config, oauth);

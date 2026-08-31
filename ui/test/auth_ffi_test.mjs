@@ -55,7 +55,7 @@ assert.equal(manager, undefined);
 const config = {
   base_path: "/ui",
   oauth: new Some({
-    issuer_url: "https://id.example/",
+    issuer: "https://id.example/",
     client_id: "wfx-ui",
     scope: "openid profile",
   }),

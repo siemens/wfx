@@ -223,11 +223,11 @@ OAuth authentication for the built-in UI is configured with these parameters:
 
 | Parameter           | Description                       |
 |:--------------------|:----------------------------------|
-| `--oauth-issuer-url` | OpenID Connect issuer URL         |
+| `--oauth-issuer`     | OpenID Connect issuer             |
 | `--oauth-client-id`  | OAuth client ID                   |
 | `--oauth-scope`      | OAuth scopes requested by the UI (default: `openid email profile`) |
 
-Set both `--oauth-issuer-url` and `--oauth-client-id` to enable OAuth. Register the public UI URL ending
+Set both `--oauth-issuer` and `--oauth-client-id` to enable OAuth. Register the public UI URL ending
 in `/ui/` as the redirect URL at the identity provider. As with other options, equivalent `WFX_OAUTH_*`
 environment variables and configuration file keys are supported.
 

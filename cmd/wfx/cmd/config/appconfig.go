@@ -91,9 +91,9 @@ type CORSOpts struct {
 }
 
 type OAuthOpts struct {
-	IssuerURL string
-	ClientID  string
-	Scope     string
+	Issuer   string
+	ClientID string
+	Scope    string
 }
 
 type Scheme int
@@ -262,7 +262,7 @@ func (cfg *AppConfig) Reload() bool {
 		ok = false
 	}
 
-	cfg.oauthOpts.IssuerURL = cfg.k.String(OAuthIssuerURLFlag)
+	cfg.oauthOpts.Issuer = cfg.k.String(OAuthIssuerFlag)
 	cfg.oauthOpts.ClientID = cfg.k.String(OAuthClientIDFlag)
 	cfg.oauthOpts.Scope = cfg.k.String(OAuthScopeFlag)
 

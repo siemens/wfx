@@ -22,9 +22,9 @@ func main() {
 		WfxURL:   "http://127.0.0.1:8081/api/wfx/v1",
 		BasePath: "",
 		OAuth: ui.OAuthSettings{
-			IssuerURL: config.DefaultOAuthIssuerURL,
-			ClientID:  config.DefaultOAuthClientID,
-			Scope:     config.DefaultOAuthScope,
+			Issuer:   config.DefaultOAuthIssuer,
+			ClientID: config.DefaultOAuthClientID,
+			Scope:    config.DefaultOAuthScope,
 		},
 	}); err != nil {
 		panic(err)

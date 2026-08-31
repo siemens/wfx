@@ -79,7 +79,7 @@ func TestNewAppConfig_CORSWildcardOriginWithCredentials(t *testing.T) {
 func TestOAuthOpts(t *testing.T) {
 	flags := NewFlagset()
 	require.NoError(t, flags.Parse([]string{
-		"--" + OAuthIssuerURLFlag, "https://id.example",
+		"--oauth-issuer", "https://id.example",
 		"--" + OAuthClientIDFlag, "wfx-ui",
 	}))
 	cfg, err := NewAppConfig(flags)
@@ -87,9 +87,9 @@ func TestOAuthOpts(t *testing.T) {
 	t.Cleanup(cfg.Stop)
 
 	assert.Equal(t, OAuthOpts{
-		IssuerURL: "https://id.example",
-		ClientID:  "wfx-ui",
-		Scope:     "openid email profile",
+		Issuer:   "https://id.example",
+		ClientID: "wfx-ui",
+		Scope:    "openid email profile",
 	}, cfg.OAuthOpts())
 }
 
