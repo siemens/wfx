@@ -72,6 +72,10 @@
       packages = [
         pkgs.reuse
         pkgs.biome
+        pkgs.syft
+        pkgs.cyclonedx-gomod
+        pkgs.cosign
+        pkgs.buildah
       ];
     };
   };
