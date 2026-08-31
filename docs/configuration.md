@@ -231,9 +231,9 @@ Set both `--oauth-issuer` and `--oauth-client-id` to enable OAuth. Register the 
 in `/ui/` as the redirect URL at the identity provider. As with other options, equivalent `WFX_OAUTH_*`
 environment variables and configuration file keys are supported.
 
-The UI renews expiring access tokens with a refresh token when the identity provider issues one, otherwise
-it starts a new authorization flow. Add the provider's refresh-token scope (often `offline_access`) to
-`--oauth-scope` when required.
+Automatic token refresh requires a refresh token. Add the identity provider's offline-access scope
+(usually `offline_access`) to `--oauth-scope` so the provider issues one; otherwise the UI must start a
+new authorization flow when the access token expires.
 
 ## File Server
 

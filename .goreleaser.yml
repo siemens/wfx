@@ -181,6 +181,8 @@ archives:
     formats: ["tar.zst"]
     files:
       - LICENSE
+      - src: ui/README.md
+        dst: README.md
       - src: ui/dist/app.js
         dst: app.js
       - src: ui/dist/app.css
