@@ -32,23 +32,13 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: dist-linux-amd64
-          path: |
-            dist/*amd64*
-            dist/*x86_64*
-            dist/*SHA256SUMS
-            dist/artifacts.json
-            dist/metadata.json
+          path: dist/*amd64*/
           retention-days: 5
       - name: Upload Linux ARM64 artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: dist-linux-arm64
-          path: |
-            dist/*arm64*
-            dist/*aarch64*
-            dist/*SHA256SUMS
-            dist/artifacts.json
-            dist/metadata.json
+          path: dist/*arm64*/
           retention-days: 5
       - name: Upload UI artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
