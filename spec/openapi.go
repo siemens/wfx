@@ -13,6 +13,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/goccy/go-yaml"
 )
@@ -44,9 +45,15 @@ func init() {
 	// NOTE: this is the fallback handler for *any* route that isn't matched otherwise
 	Handlers["GET /"] = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/" {
-			scheme := "http"
-			if r.TLS != nil {
-				scheme = "https"
+			scheme := strings.ToLower(r.Header.Get("X-Forwarded-Proto"))
+			switch scheme {
+			case "http", "https":
+			// valid, keep
+			default:
+				scheme = "http"
+				if r.TLS != nil {
+					scheme = "https"
+				}
 			}
 			w.Header().Set("Link", fmt.Sprintf(`<%s://%s%s>; rel="service-desc"`, scheme, r.Host, specEndpoint))
 			w.WriteHeader(http.StatusNoContent)
