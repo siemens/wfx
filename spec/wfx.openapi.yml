@@ -1219,6 +1219,7 @@ components:
       maxItems: 16
       items:
         type: string
+        pattern: "^[A-Za-z0-9_.:/@-]+$"
         example: EUROPE_WEST
 
     CheckerResult:
@@ -1294,6 +1295,7 @@ components:
       description: Filter jobs belonging to a specific client with clientId
       schema:
         type: string
+        pattern: "^[A-Za-z0-9_.:/@-]+$"
     workflow:
       name: workflow
       x-go-name: paramWorkflow
