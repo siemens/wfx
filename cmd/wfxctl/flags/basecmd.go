@@ -9,6 +9,7 @@ package flags
  */
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
@@ -234,7 +235,7 @@ func (b *BaseCmd) CreateHTTPClient() (*http.Client, error) {
 		log.Info().Msg("Using unix-domain socket transport")
 		return &http.Client{
 			Transport: &http.Transport{
-				Dial: func(_, _ string) (net.Conn, error) {
+				DialContext: func(_ context.Context, _, _ string) (net.Conn, error) {
 					conn, err := net.DialUnix("unix", nil, addr)
 					return conn, fault.Wrap(err)
 				},
