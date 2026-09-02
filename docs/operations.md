@@ -36,6 +36,12 @@ The northbound API is used to create jobs and execute server-side state transiti
 API is used for client-side transitions.
 
 The complete [wfx API specification](../spec/wfx.openapi.yml) is accessible at runtime via the `/api/wfx/v1/openapi.json` endpoint.
+As defined by [RFC 8631](https://www.rfc-editor.org/rfc/rfc8631), wfx makes this endpoint discoverable by returning a `Link` header with the `service-desc` relation on `GET /`:
+
+```http
+Link: <https://wfx.example.com/api/wfx/v1/openapi.json>; rel="service-desc"
+```
+
 Clients may inspect this specification at run-time so to obey the various limits imposed, e.g, for parameter value ranges and array lengths.
 
 ### Job Events
@@ -81,6 +87,9 @@ Below is a high-level overview of how the communication flow operates:
 **Note**: To prevent the connection from being closed due to inactivity (e.g., when no job events occur), periodic keep-alive events are sent during such idle periods.
 This ensures that the connection remains open, preventing closure by proxies, the kernel, or other entities since it may not be possible to control all involved parties.
 The keep-alive events are technically comments (as defined in the SSE specification) and must be ignored by clients.
+
+**Note**: Reverse proxies and API gateways in front of `/jobs/events` must stream responses without buffering; otherwise, events may be delayed until the proxy buffer fills (`wfx` sends `X-Accel-Buffering: no`, but not every proxy honors this header).
+Also, the proxy idle timeout must exceed the SSE keep-alive interval.
 
 #### Event Format Specification
 

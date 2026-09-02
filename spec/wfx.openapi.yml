@@ -23,6 +23,9 @@ tags:
     description: All northbound API endpoints
 paths:
   /health:
+    servers:
+      - url: /
+      - url: /api/wfx/v1
     get:
       tags:
         - southbound
@@ -68,7 +71,13 @@ paths:
                 $ref: "#/components/schemas/CheckerResult"
 
   /version:
+    servers:
+      - url: /
+      - url: /api/wfx/v1
     get:
+      tags:
+        - southbound
+        - northbound
       summary: Query wfx's version information
       description: Query wfx's version information
       x-cli-name: version
@@ -99,6 +108,7 @@ paths:
   /workflows:
     get:
       tags:
+        - workflows
         - southbound
         - northbound
       summary: List available workflows
@@ -122,6 +132,7 @@ paths:
                 $ref: "#/components/schemas/PaginatedWorkflowList"
     post:
       tags:
+        - workflows
         - northbound
       summary: Add a new workflow
       description: Add a new workflow
@@ -161,6 +172,7 @@ paths:
   /workflows/{name}:
     get:
       tags:
+        - workflows
         - southbound
         - northbound
       summary: Get specific workflow's details
@@ -204,6 +216,7 @@ paths:
                   - "<<": workflowNotFoundError
     delete:
       tags:
+        - workflows
         - northbound
       summary: Delete a specific workflow
       description: Delete a specific workflow
@@ -237,6 +250,7 @@ paths:
   /jobs:
     get:
       tags:
+        - jobs
         - southbound
         - northbound
       summary: List available jobs
@@ -287,6 +301,7 @@ paths:
                   - "<<": invalidRequestError
     post:
       tags:
+        - jobs
         - northbound
       summary: Add a new job
       description: Add a new job
@@ -325,6 +340,7 @@ paths:
   /jobs/events:
     get:
       tags:
+        - jobs
         - southbound
         - northbound
       summary: Subscribe to job-related events such as status updates
@@ -403,6 +419,7 @@ paths:
   /jobs/{id}:
     get:
       tags:
+        - jobs
         - southbound
         - northbound
       summary: Get specific job's details
@@ -447,6 +464,7 @@ paths:
                   - "<<": jobNotFoundError
     delete:
       tags:
+        - jobs
         - northbound
       summary: Delete a specific job
       description: Delete a specific job
@@ -480,6 +498,7 @@ paths:
   /jobs/{id}/status:
     get:
       tags:
+        - jobs
         - southbound
         - northbound
       summary: Get specific job's status
@@ -514,6 +533,7 @@ paths:
                   - "<<": jobNotFoundError
     put:
       tags:
+        - jobs
         - southbound
         - northbound
       summary: Modify specific job's status
@@ -567,6 +587,7 @@ paths:
   /jobs/{id}/definition:
     get:
       tags:
+        - jobs
         - southbound
         - northbound
       summary: Get specific job's definition
@@ -603,6 +624,7 @@ paths:
                   - "<<": jobNotFoundError
     put:
       tags:
+        - jobs
         - southbound
         - northbound
       summary: Modify specific job's definition
@@ -660,6 +682,7 @@ paths:
   /jobs/{id}/tags:
     get:
       tags:
+        - jobs
         - southbound
         - northbound
       summary: Get specific job's tags
@@ -694,6 +717,7 @@ paths:
                   - "<<": jobNotFoundError
     post:
       tags:
+        - jobs
         - northbound
       summary: Add a tag to a specific job
       description: Add a tag to a specific job
@@ -750,6 +774,7 @@ paths:
 
     delete:
       tags:
+        - jobs
         - northbound
       summary: Delete a tag from a specific job
       description: Delete a tag from a specific job
