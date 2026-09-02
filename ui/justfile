@@ -15,6 +15,7 @@ test:
     export LC_TIME=C
     export TZ=UTC
     gleam test
+    npm test
 
 integration-test:
     # By using Google Chrome, Playwright does not attempt to install the browser itself, allowing it to work on non-Ubuntu systems as well.

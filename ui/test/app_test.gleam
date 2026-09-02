@@ -21,7 +21,11 @@ import wfx
 import app
 import view
 
-const cfg = config.Config(wfx_url: "http://localhost", base_path: "/ui")
+const cfg = config.Config(
+  wfx_url: "http://localhost",
+  base_path: "/ui",
+  oauth: None,
+)
 
 pub fn main() -> Nil {
   gleeunit.main()

@@ -217,6 +217,24 @@ For example, to enable CORS headers:
 wfx --cors-enabled --cors-allowed-origins https://wfx-ui.company.cloud
 ```
 
+## UI OAuth
+
+OAuth authentication for the built-in UI is configured with these parameters:
+
+| Parameter           | Description                       |
+|:--------------------|:----------------------------------|
+| `--oauth-issuer`     | OpenID Connect issuer             |
+| `--oauth-client-id`  | OAuth client ID                   |
+| `--oauth-scope`      | OAuth scopes requested by the UI (default: `openid email profile`) |
+
+Set both `--oauth-issuer` and `--oauth-client-id` to enable OAuth. Register the public UI URL ending
+in `/ui/` as the redirect URL at the identity provider. As with other options, equivalent `WFX_OAUTH_*`
+environment variables and configuration file keys are supported.
+
+Automatic token refresh requires a refresh token. Add the identity provider's offline-access scope
+(usually `offline_access`) to `--oauth-scope` so the provider issues one; otherwise the UI must start a
+new authorization flow when the access token expires.
+
 ## File Server
 
 wfx comes with a built-in file server that serves artifacts at `http://<wfx host:{client,mgmt} port>/download/`.

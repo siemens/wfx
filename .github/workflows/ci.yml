@@ -246,7 +246,9 @@ jobs:
 
       # Gleam
       - name: Test
-        run: gleam test
+        run: |
+          gleam test
+          npm test
         working-directory: ui
       - name: Format
         run: gleam format --check src test
