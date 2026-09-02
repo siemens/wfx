@@ -28,6 +28,8 @@ jobs:
       - run: sudo .ci/setup-build.sh
       - name: Build Snapshot Release for Linux
         run: /usr/bin/env CC=$(pwd)/.ci/zcc goreleaser release --clean --snapshot
+        env:
+          WFX_STATIC_LDFLAGS: "-linkmode external -extldflags '-static'"
       - name: Upload Linux AMD64 artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -63,6 +65,7 @@ jobs:
       - run: /usr/bin/env CC="$(pwd)/.ci/zcc" goreleaser build --clean --single-target --snapshot
         env:
           GOOS: windows
+          WFX_STATIC_LDFLAGS: "-linkmode external -extldflags '-static'"
 
   build-contrib:
     name: Build Contrib

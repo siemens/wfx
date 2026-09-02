@@ -20,7 +20,7 @@ builds:
       - -trimpath
       - -mod=readonly
     ldflags:
-      - -s -w -linkmode external -extldflags '-static'
+      - -s -w {{ envOrDefault "WFX_STATIC_LDFLAGS" "" }}
       - -X github.com/siemens/wfx/cmd/wfx/metadata.Version={{.Version}}
       - -X github.com/siemens/wfx/cmd/wfx/metadata.Commit={{.Commit}}
     env:
@@ -49,7 +49,7 @@ builds:
       - -trimpath
       - -mod=readonly
     ldflags:
-      - -s -w -linkmode external -extldflags '-static'
+      - -s -w {{ envOrDefault "WFX_STATIC_LDFLAGS" "" }}
       - -X github.com/siemens/wfx/cmd/wfx/metadata.Version={{.Version}}
       - -X github.com/siemens/wfx/cmd/wfx/metadata.Commit={{.Commit}}
     env:
@@ -81,7 +81,7 @@ builds:
       - -trimpath
       - -mod=readonly
     ldflags:
-      - -s -w -linkmode external -extldflags '-static'
+      - -s -w {{ envOrDefault "WFX_STATIC_LDFLAGS" "" }}
       - -X github.com/siemens/wfx/cmd/wfxctl/metadata.Version={{.Version}}
       - -X github.com/siemens/wfx/cmd/wfxctl/metadata.Commit={{.Commit}}
     env:
@@ -108,7 +108,7 @@ builds:
       - -trimpath
       - -mod=readonly
     ldflags:
-      - -s -w -linkmode external -extldflags '-static'
+      - -s -w {{ envOrDefault "WFX_STATIC_LDFLAGS" "" }}
       - -X github.com/siemens/wfx/cmd/wfx-viewer/metadata.Version={{.Version}}
       - -X github.com/siemens/wfx/cmd/wfx-viewer/metadata.Commit={{.Commit}}
     env:

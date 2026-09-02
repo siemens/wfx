@@ -10,10 +10,10 @@ THISDIR := justfile_directory()
 DOCKER := env_var_or_default("DOCKER", "docker")
 
 build:
-    env CC={{ THISDIR }}/.ci/zcc goreleaser build --id wfx --id wfxctl --clean --single-target --snapshot
+    goreleaser build --id wfx --id wfxctl --clean --single-target --snapshot
 
 build-wfx-with-ui:
-    env CC={{ THISDIR }}/.ci/zcc goreleaser build --id wfx-with-ui --snapshot
+    goreleaser build --id wfx-with-ui --snapshot --clean --single-target
 
 build-contrib:
     #!/usr/bin/env bash

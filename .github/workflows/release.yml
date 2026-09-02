@@ -70,6 +70,7 @@ jobs:
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WFX_STATIC_LDFLAGS: "-linkmode external -extldflags '-static'"
 
       - name: Upload snapshot dist
         if: "!startsWith(github.event.ref, 'refs/tags/v')"
