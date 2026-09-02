@@ -19,6 +19,7 @@ import (
 	"strings"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/siemens/wfx/api"
 	"github.com/siemens/wfx/cmd/wfx/cmd/config"
@@ -36,14 +37,121 @@ func TestNewServerCollection(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestCORSConfigurableOrigins(t *testing.T) {
+func TestCORSNorthboundOnly(t *testing.T) {
+	dbMock := persistence.NewHealthyMockStorage(t)
+	dbMock.EXPECT().QueryJobs(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(new(genAPI.PaginatedJobList), nil).Twice()
+	wfx := api.NewWfxServer(dbMock)
+
+	flags := config.NewFlagset()
+	require.NoError(t, flags.Parse([]string{"--" + config.CORSEnabledFlag}))
+	cfg, err := config.NewAppConfig(flags)
+	require.NoError(t, err)
+	t.Cleanup(cfg.Stop)
+
+	sc, err := NewServerCollection(cfg, wfx, dbMock)
+	require.NoError(t, err)
+
+	for _, tc := range []struct {
+		name     string
+		handler  http.Handler
+		expected string
+	}{
+		{name: "north", handler: sc.North.Handler, expected: "*"},
+		{name: "south", handler: sc.South.Handler},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			rec := httptest.NewRecorder()
+			req := httptest.NewRequest(http.MethodGet, "/api/wfx/v1/jobs", nil)
+			req.Header.Set("Origin", "https://example.com")
+			tc.handler.ServeHTTP(rec, req)
+
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, tc.expected, rec.Header().Get("Access-Control-Allow-Origin"))
+		})
+	}
+}
+
+func TestCORSReload(t *testing.T) {
+	dbMock := persistence.NewHealthyMockStorage(t)
+	wfx := api.NewWfxServer(dbMock)
+
+	cfgFile := path.Join(t.TempDir(), "config.yaml")
+	writeConfig := func(contents string) {
+		// Replace atomically so the watcher never reloads between truncate and write.
+		tmpFile := cfgFile + ".tmp"
+		require.NoError(t, os.WriteFile(tmpFile, []byte(contents), 0o600))
+		require.NoError(t, os.Rename(tmpFile, cfgFile))
+	}
+	writeConfig("cors-enabled: false\n")
+	flags := config.NewFlagset()
+	require.NoError(t, flags.Parse([]string{"--" + config.ConfigFlag, cfgFile}))
+	cfg, err := config.NewAppConfig(flags)
+	require.NoError(t, err)
+	t.Cleanup(cfg.Stop)
+
+	sc, err := NewServerCollection(cfg, wfx, dbMock)
+	require.NoError(t, err)
+
+	corsOrigin := func(origin string) string {
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest(http.MethodOptions, "/api/wfx/v1/jobs", nil)
+		req.Header.Set("Origin", origin)
+		req.Header.Set("Access-Control-Request-Method", http.MethodGet)
+		sc.North.Handler.ServeHTTP(rec, req)
+		return rec.Header().Get("Access-Control-Allow-Origin")
+	}
+
+	assert.Empty(t, corsOrigin("https://one.example"))
+	writeConfig("cors-enabled: true\ncors-allowed-origins: [https://one.example]\n")
+	require.Eventually(t, func() bool {
+		return corsOrigin("https://one.example") == "https://one.example"
+	}, 5*time.Second, 10*time.Millisecond)
+
+	writeConfig("cors-enabled: true\ncors-allowed-origins: [https://two.example]\n")
+	require.Eventually(t, func() bool {
+		return corsOrigin("https://one.example") == "" && corsOrigin("https://two.example") == "https://two.example"
+	}, 5*time.Second, 10*time.Millisecond)
+
+	writeConfig("cors-enabled: false\n")
+	require.Eventually(t, func() bool {
+		return corsOrigin("https://two.example") == ""
+	}, 5*time.Second, 10*time.Millisecond)
+}
+
+func TestCORSDisabledByDefault(t *testing.T) {
 	dbMock := persistence.NewHealthyMockStorage(t)
 	dbMock.EXPECT().QueryJobs(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(new(genAPI.PaginatedJobList), nil)
 	wfx := api.NewWfxServer(dbMock)
 
-	f := config.NewFlagset()
-	_ = f.Parse([]string{"--" + config.CORSAllowedOriginsFlag, "https://example.com"})
-	cfg, err := config.NewAppConfig(f)
+	flags := config.NewFlagset()
+	require.NoError(t, flags.Parse(nil))
+	cfg, err := config.NewAppConfig(flags)
+	require.NoError(t, err)
+	t.Cleanup(cfg.Stop)
+
+	sc, err := NewServerCollection(cfg, wfx, dbMock)
+	require.NoError(t, err)
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/api/wfx/v1/jobs", nil)
+	req.Header.Set("Origin", "https://example.com")
+	sc.North.Handler.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Empty(t, rec.Header().Get("Access-Control-Allow-Origin"))
+}
+
+func TestCORSConfigurableOrigins(t *testing.T) {
+	dbMock := persistence.NewHealthyMockStorage(t)
+	dbMock.EXPECT().QueryJobs(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(new(genAPI.PaginatedJobList), nil).Twice()
+	wfx := api.NewWfxServer(dbMock)
+
+	flags := config.NewFlagset()
+	require.NoError(t, flags.Parse([]string{
+		"--" + config.CORSEnabledFlag,
+		"--" + config.CORSAllowedOriginsFlag, "https://example.com",
+	}))
+	cfg, err := config.NewAppConfig(flags)
 	require.NoError(t, err)
 	t.Cleanup(cfg.Stop)
 
@@ -55,16 +163,15 @@ func TestCORSConfigurableOrigins(t *testing.T) {
 		expected string
 	}{
 		{origin: "https://example.com", expected: "https://example.com"},
-		{origin: "https://evil.example.com", expected: ""},
+		{origin: "https://evil.example.com"},
 	} {
 		rec := httptest.NewRecorder()
 		req := httptest.NewRequest(http.MethodGet, "/api/wfx/v1/jobs", nil)
 		req.Header.Set("Origin", tc.origin)
 		sc.North.Handler.ServeHTTP(rec, req)
 
-		result := rec.Result()
-		assert.Equal(t, http.StatusOK, result.StatusCode)
-		assert.Equal(t, tc.expected, result.Header.Get("Access-Control-Allow-Origin"))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Equal(t, tc.expected, rec.Header().Get("Access-Control-Allow-Origin"))
 	}
 }
 
@@ -72,9 +179,12 @@ func TestCORSPreflightAllowedMethods(t *testing.T) {
 	dbMock := persistence.NewHealthyMockStorage(t)
 	wfx := api.NewWfxServer(dbMock)
 
-	f := config.NewFlagset()
-	_ = f.Parse([]string{"--" + config.CORSAllowedMethodsFlag, "GET"})
-	cfg, err := config.NewAppConfig(f)
+	flags := config.NewFlagset()
+	require.NoError(t, flags.Parse([]string{
+		"--" + config.CORSEnabledFlag,
+		"--" + config.CORSAllowedMethodsFlag, http.MethodGet,
+	}))
+	cfg, err := config.NewAppConfig(flags)
 	require.NoError(t, err)
 	t.Cleanup(cfg.Stop)
 
@@ -84,14 +194,11 @@ func TestCORSPreflightAllowedMethods(t *testing.T) {
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodOptions, "/api/wfx/v1/jobs", nil)
 	req.Header.Set("Origin", "https://example.com")
-	req.Header.Set("Access-Control-Request-Method", "DELETE")
+	req.Header.Set("Access-Control-Request-Method", http.MethodDelete)
 	sc.North.Handler.ServeHTTP(rec, req)
 
-	// disallowed method in preflight: cors middleware answers without CORS headers,
-	// so the browser rejects the actual request
-	result := rec.Result()
-	assert.Empty(t, result.Header.Get("Access-Control-Allow-Origin"))
-	assert.Empty(t, result.Header.Get("Access-Control-Allow-Methods"))
+	assert.Empty(t, rec.Header().Get("Access-Control-Allow-Origin"))
+	assert.Empty(t, rec.Header().Get("Access-Control-Allow-Methods"))
 }
 
 func TestCORSAllowCredentials(t *testing.T) {
@@ -99,45 +206,45 @@ func TestCORSAllowCredentials(t *testing.T) {
 	dbMock.EXPECT().QueryJobs(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(new(genAPI.PaginatedJobList), nil)
 	wfx := api.NewWfxServer(dbMock)
 
-	f := config.NewFlagset()
-	_ = f.Parse([]string{
+	flags := config.NewFlagset()
+	require.NoError(t, flags.Parse([]string{
+		"--" + config.CORSEnabledFlag,
 		"--" + config.CORSAllowedOriginsFlag, "https://example.com",
 		"--" + config.CORSAllowCredentialsFlag,
-	})
-	cfg, err := config.NewAppConfig(f)
+	}))
+	cfg, err := config.NewAppConfig(flags)
 	require.NoError(t, err)
 	t.Cleanup(cfg.Stop)
 
 	sc, err := NewServerCollection(cfg, wfx, dbMock)
 	require.NoError(t, err)
 
-	// actual request
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/api/wfx/v1/jobs", nil)
 	req.Header.Set("Origin", "https://example.com")
 	sc.North.Handler.ServeHTTP(rec, req)
-	result := rec.Result()
-	assert.Equal(t, http.StatusOK, result.StatusCode)
-	assert.Equal(t, "true", result.Header.Get("Access-Control-Allow-Credentials"))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, "true", rec.Header().Get("Access-Control-Allow-Credentials"))
 
-	// preflight request
 	rec = httptest.NewRecorder()
 	req = httptest.NewRequest(http.MethodOptions, "/api/wfx/v1/jobs", nil)
 	req.Header.Set("Origin", "https://example.com")
 	req.Header.Set("Access-Control-Request-Method", http.MethodDelete)
 	sc.North.Handler.ServeHTTP(rec, req)
-	result = rec.Result()
-	assert.Equal(t, http.StatusNoContent, result.StatusCode)
-	assert.Equal(t, "true", result.Header.Get("Access-Control-Allow-Credentials"))
+	assert.Equal(t, http.StatusNoContent, rec.Code)
+	assert.Equal(t, "true", rec.Header().Get("Access-Control-Allow-Credentials"))
 }
 
 func TestCORSMaxAge(t *testing.T) {
 	dbMock := persistence.NewHealthyMockStorage(t)
 	wfx := api.NewWfxServer(dbMock)
 
-	f := config.NewFlagset()
-	_ = f.Parse([]string{"--" + config.CORSMaxAgeFlag, "30s"})
-	cfg, err := config.NewAppConfig(f)
+	flags := config.NewFlagset()
+	require.NoError(t, flags.Parse([]string{
+		"--" + config.CORSEnabledFlag,
+		"--" + config.CORSMaxAgeFlag, "30s",
+	}))
+	cfg, err := config.NewAppConfig(flags)
 	require.NoError(t, err)
 	t.Cleanup(cfg.Stop)
 
@@ -150,17 +257,16 @@ func TestCORSMaxAge(t *testing.T) {
 	req.Header.Set("Access-Control-Request-Method", http.MethodGet)
 	sc.North.Handler.ServeHTTP(rec, req)
 
-	assert.Equal(t, "30", rec.Result().Header.Get("Access-Control-Max-Age"))
+	assert.Equal(t, "30", rec.Header().Get("Access-Control-Max-Age"))
 }
 
 func TestCORSMaxAgeDisabled(t *testing.T) {
 	dbMock := persistence.NewHealthyMockStorage(t)
 	wfx := api.NewWfxServer(dbMock)
 
-	// default: no --cors-max-age flag, header must be omitted
-	f := config.NewFlagset()
-	_ = f.Parse(nil)
-	cfg, err := config.NewAppConfig(f)
+	flags := config.NewFlagset()
+	require.NoError(t, flags.Parse([]string{"--" + config.CORSEnabledFlag}))
+	cfg, err := config.NewAppConfig(flags)
 	require.NoError(t, err)
 	t.Cleanup(cfg.Stop)
 
@@ -173,16 +279,16 @@ func TestCORSMaxAgeDisabled(t *testing.T) {
 	req.Header.Set("Access-Control-Request-Method", http.MethodGet)
 	sc.North.Handler.ServeHTTP(rec, req)
 
-	assert.Empty(t, rec.Result().Header.Get("Access-Control-Max-Age"))
+	assert.Empty(t, rec.Header().Get("Access-Control-Max-Age"))
 }
 
-func TestCORSDefaultAllowsAnyHeader(t *testing.T) {
+func TestCORSPreflight(t *testing.T) {
 	dbMock := persistence.NewHealthyMockStorage(t)
 	wfx := api.NewWfxServer(dbMock)
 
-	f := config.NewFlagset()
-	_ = f.Parse([]string{})
-	cfg, err := config.NewAppConfig(f)
+	flags := config.NewFlagset()
+	require.NoError(t, flags.Parse([]string{"--" + config.CORSEnabledFlag}))
+	cfg, err := config.NewAppConfig(flags)
 	require.NoError(t, err)
 	t.Cleanup(cfg.Stop)
 
@@ -196,9 +302,9 @@ func TestCORSDefaultAllowsAnyHeader(t *testing.T) {
 	req.Header.Set("Access-Control-Request-Headers", "Authorization")
 	sc.North.Handler.ServeHTTP(rec, req)
 
-	result := rec.Result()
-	assert.Equal(t, "*", result.Header.Get("Access-Control-Allow-Origin"))
-	assert.Contains(t, strings.ToLower(result.Header.Get("Access-Control-Allow-Headers")), "authorization")
+	assert.Equal(t, http.StatusNoContent, rec.Code)
+	assert.Equal(t, "*", rec.Header().Get("Access-Control-Allow-Origin"))
+	assert.Contains(t, rec.Header().Get("Access-Control-Allow-Headers"), "Authorization")
 }
 
 func TestCreateServer_UseMiddlewares(t *testing.T) {

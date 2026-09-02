@@ -61,6 +61,7 @@ const (
 	SSEPingIntervalFlag  = "sse-ping-interval"
 	SSEGraceIntervalFlag = "sse-grace-interval"
 
+	CORSEnabledFlag          = "cors-enabled"
 	CORSAllowedOriginsFlag   = "cors-allowed-origins"
 	CORSAllowedMethodsFlag   = "cors-allowed-methods"
 	CORSAllowedHeadersFlag   = "cors-allowed-headers"
@@ -86,9 +87,6 @@ const (
 	DefaultJQFilterMaxResponseSize = 16 << 20 // 16 MiB
 )
 
-// mirrors the defaults of cors.AllowAll()
-var defaultCORSAllowedMethods = []string{"GET", "HEAD", "POST", "PUT", "PATCH", "DELETE"}
-
 func NewFlagset() *pflag.FlagSet {
 	f := pflag.NewFlagSet("wfx", pflag.ExitOnError)
 
@@ -100,8 +98,9 @@ func NewFlagset() *pflag.FlagSet {
 	f.Duration(SSEPingIntervalFlag, DefaultSSEPingInterval, "interval to send periodic keep-alive messages to prevent server-sent events connections from being closed due to inactivity")
 	f.Duration(SSEGraceIntervalFlag, DefaultSSEGraceInterval, "interval after which non-responsive subscribers are dropped")
 
+	f.Bool(CORSEnabledFlag, false, "add CORS headers to northbound API responses")
 	f.StringSlice(CORSAllowedOriginsFlag, []string{"*"}, "one or multiple origins allowed to make cross-origin requests")
-	f.StringSlice(CORSAllowedMethodsFlag, defaultCORSAllowedMethods, "one or multiple methods allowed when making cross-origin requests")
+	f.StringSlice(CORSAllowedMethodsFlag, strings.Split("GET,HEAD,POST,PUT,PATCH,DELETE", ","), "one or multiple methods allowed when making cross-origin requests")
 	f.StringSlice(CORSAllowedHeadersFlag, []string{"*"}, "one or multiple headers allowed when making cross-origin requests")
 	f.Bool(CORSAllowCredentialsFlag, false, "allow cookies and HTTP authentication to be included in cross-origin requests; requires explicit allowed origins")
 	f.Duration(CORSMaxAgeFlag, 0, "how long the results of preflight requests may be cached by browsers; zero omits the Access-Control-Max-Age header (browsers use their default), a negative value disables preflight caching")
