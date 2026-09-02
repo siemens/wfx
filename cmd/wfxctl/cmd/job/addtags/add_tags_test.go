@@ -13,7 +13,6 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"testing"
 
 	"github.com/siemens/wfx/cmd/wfxctl/flags"
@@ -35,9 +34,7 @@ func TestAddTags(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	u, _ := url.Parse(ts.URL)
-	t.Setenv("WFX_MGMT_HOST", u.Hostname())
-	t.Setenv("WFX_MGMT_PORT", u.Port())
+	t.Setenv("WFX_HOST", ts.URL)
 
 	cmd := NewCommand()
 	cmd.SetArgs([]string{

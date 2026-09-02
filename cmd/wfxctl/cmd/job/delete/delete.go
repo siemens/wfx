@@ -25,7 +25,7 @@ func NewCommand() *cobra.Command {
 		TraverseChildren: true,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			baseCmd := flags.NewBaseCmd(cmd.Flags())
-			client := errutil.Must(baseCmd.CreateMgmtClient())
+			client := errutil.Must(baseCmd.CreateClient())
 			resp, err := client.DeleteJobsId(cmd.Context(), baseCmd.ID)
 			if err != nil {
 				return fault.Wrap(err)

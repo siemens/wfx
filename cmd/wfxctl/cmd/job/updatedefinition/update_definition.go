@@ -34,7 +34,7 @@ wfxctl job update-definition
 			if id == "" {
 				return errors.New("job id missing")
 			}
-			client := errutil.Must(baseCmd.CreateMgmtClient())
+			client := errutil.Must(baseCmd.CreateClient())
 			resp, err := client.PutJobsIdDefinitionWithBody(cmd.Context(), id, nil, "application/json", bufio.NewReader(cmd.InOrStdin()))
 			if err != nil {
 				return fault.Wrap(err)

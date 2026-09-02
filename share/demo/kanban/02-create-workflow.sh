@@ -13,7 +13,9 @@ clear
 
 echo "# waiting for wfx..."
 while true; do
-    UP_COUNT=$(wfxctl health | grep -c up)
+    UP_COUNT=0
+    wfxctl --host http://localhost:8080 health | grep -q $'wfx\tup' && UP_COUNT=$((UP_COUNT+1))
+    wfxctl --host http://localhost:8081 health | grep -q $'wfx\tup' && UP_COUNT=$((UP_COUNT+1))
     if [[ "$UP_COUNT" -ge 2 ]]; then
         break
     fi

@@ -106,16 +106,7 @@ wfxctl job events --job-id=1 --job-id=2 --client-id=foo
 			}
 			transport := SSETransport{sseClient: sse.DefaultClient, out: cmd.OutOrStdout()}
 
-			var server string
-			swagger := errutil.Must(api.GetSpec())
-			basePath := errutil.Must(swagger.Servers.BasePath())
-			if baseCmd.EnableTLS {
-				server = fmt.Sprintf("https://%s:%d%s", baseCmd.TLSHost, baseCmd.TLSPort, basePath)
-			} else {
-				server = fmt.Sprintf("http://%s:%d%s", baseCmd.Host, baseCmd.Port, basePath)
-			}
-
-			client, err := api.NewClient(server, api.WithHTTPClient(transport))
+			client, err := baseCmd.CreateClient(api.WithHTTPClient(transport))
 			if err != nil {
 				return fault.Wrap(err)
 			}

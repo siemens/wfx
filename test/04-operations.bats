@@ -22,7 +22,7 @@ teardown() {
   local i=0
   while [[ $i -lt 30 ]]; do
     RC=0
-    wfxctl --client-unix-socket "$BATS_TEST_TMPDIR/wfx-client.sock" version || RC=$?
+    wfxctl --host "unix://$BATS_TEST_TMPDIR/wfx-client.sock" version || RC=$?
     if [[ $RC -eq 0 ]]; then
         break
     fi
