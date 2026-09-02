@@ -67,6 +67,8 @@
         pkgs.hugo
         pkgs.lychee
         pkgs.python3
+        pkgs.nodejs_latest
+        pkgs.go
       ];
     };
 

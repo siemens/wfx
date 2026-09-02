@@ -29,7 +29,7 @@ jobs:
         run: git config --global safe.directory '*'
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
-          node-version: lts/*
+          node-version: latest
       - run: .ci/setup-pages.sh
       - run: .ci/check-links.py
         continue-on-error: true

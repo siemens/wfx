@@ -40,8 +40,8 @@ pages:
     rm -rf public hugo/public
     pushd hugo
     make clean && make -j`nproc`
-    npm install postcss postcss-cli autoprefixer
-    hugo --minify
+    npm ci
+    npm run hugo -- --minify
     popd
     mv hugo/public .
     go tool -modfile="{{ THISDIR }}/tools/go.mod" github.com/wjdp/htmltest

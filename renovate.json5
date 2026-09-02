@@ -75,19 +75,10 @@
       ],
     },
 
-    // separate PR for pages as hugo often has breaking changes
-    {
-      matchFileNames: ["hugo/go.mod"],
-      matchDepTypes: ["indirect"],
-      enabled: true,
-    },
     {
       groupName: "pages dependencies",
       groupSlug: "all-pages",
-      matchPackageNames: [
-        "/github.com/google/docsy/", // docsy and hugo must be compatible with each other
-        "/gohugoio/hugo/",
-      ],
+      matchFileNames: ["hugo/package.json", "hugo/package-lock.json"],
     },
     // group all lock file maintenance updates into a single MR
     {
