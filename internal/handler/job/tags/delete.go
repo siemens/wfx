@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 	"github.com/go-openapi/strfmt"
 	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/internal/handler/job/events"
@@ -26,14 +27,12 @@ func Delete(ctx context.Context, storage persistence.Storage, jobID string, tags
 
 	job, err := storage.GetJob(ctx, jobID, persistence.FetchParams{History: false})
 	if err != nil {
-		contextLogger.Err(err).Msg("Failed to get job from storage")
-		return nil, fault.Wrap(err)
+		return nil, fault.Wrap(err, fmsg.With("failed to get job from storage"))
 	}
 
 	updatedJob, err := storage.UpdateJob(ctx, job, persistence.JobUpdate{DelTags: &tags})
 	if err != nil {
-		contextLogger.Err(err).Msg("Failed to delete tags to job")
-		return nil, fault.Wrap(err)
+		return nil, fault.Wrap(err, fmsg.With("failed to delete tags from job"))
 	}
 
 	go func() {

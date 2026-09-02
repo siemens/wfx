@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 	"github.com/golang-migrate/migrate/v4/database/sqlite3"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"github.com/rs/zerolog"
@@ -44,8 +45,7 @@ func (instance *SQLite) Initialize(dsn string) error {
 	log.Debug().Str("dsn", dsn).Msgf("Connecting to SQLite at %q", dsn)
 	drv, err := sql.Open(dialect.SQLite, dsn)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed opening connection to SQLite")
-		return fault.Wrap(err)
+		return fault.Wrap(err, fmsg.With("failed opening connection to SQLite"))
 	}
 	client := ent.NewClient(ent.Driver(drv), ent.Log(func(v ...any) {
 		log.Logger.Trace().Str("component", "entgo").Msg(fmt.Sprint(v...))

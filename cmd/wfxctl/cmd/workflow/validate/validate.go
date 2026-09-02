@@ -9,7 +9,6 @@ package validate
  */
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -52,7 +51,7 @@ wfxctl workflow validate wfx.workflow.dau.direct.yml
 				allWorkflows = append(allWorkflows, wf)
 			} else {
 				if n == 0 {
-					return errors.New("workflow must be provided either via file or stdin")
+					return fault.New("workflow must be provided either via file or stdin")
 				}
 				for _, fname := range args {
 					b, err := os.ReadFile(fname)

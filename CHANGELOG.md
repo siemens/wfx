@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Apply reloaded SSE ping and grace intervals to new job event connections
 - CORS is registered globally now, thereby adding support for the HTTP OPTIONS method
+- Log error stacks once at process boundaries and prevent internal error details from leaking in HTTP 500 responses
 
 ## [0.6.0] - 2026-06-03
 

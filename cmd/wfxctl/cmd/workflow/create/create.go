@@ -10,7 +10,6 @@ package create
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -92,7 +91,7 @@ EOF
 func readWorkflows(args []string, r io.Reader) ([]api.Workflow, error) {
 	n := len(args)
 	if n == 0 {
-		return nil, errors.New("workflow must ge given either via file or stdin")
+		return nil, fault.New("workflow must ge given either via file or stdin")
 	}
 	allWorkflows := make([]api.Workflow, 0, len(args))
 	if n == 1 && args[0] == "-" {

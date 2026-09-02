@@ -10,9 +10,9 @@ package entgo
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 	"github.com/Southclaws/fault/ftag"
 	"github.com/siemens/wfx/generated/ent/workflow"
 	"github.com/siemens/wfx/middleware/logging"
@@ -27,11 +27,10 @@ func (db Database) DeleteWorkflow(ctx context.Context, name string) error {
 		Exec(ctx)
 	log.Debug().Int("count", count).Str("name", name).Msgf("Deleted %d row(s) for workflow %q", count, name)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to delete workflow")
-		return fault.Wrap(err)
+		return fault.Wrap(err, fmsg.With("failed to delete workflow"))
 	}
 	if count <= 0 {
-		return fault.Wrap(fmt.Errorf("workflow with name %s not found", name), ftag.With(ftag.NotFound))
+		return fault.Wrap(fault.Newf("workflow with name %s not found", name), ftag.With(ftag.NotFound))
 	}
 	return nil
 }

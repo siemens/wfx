@@ -50,7 +50,7 @@ var validator = func(out io.Writer) sse.ResponseValidator {
 				}
 			}
 		}
-		return fmt.Errorf("received HTTP status code: %d", r.StatusCode)
+		return fault.Newf("received HTTP status code: %d", r.StatusCode)
 	}
 }
 

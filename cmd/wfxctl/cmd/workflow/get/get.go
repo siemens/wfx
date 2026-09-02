@@ -9,8 +9,6 @@ package get
  */
 
 import (
-	"errors"
-
 	"github.com/Southclaws/fault"
 	"github.com/spf13/cobra"
 
@@ -29,7 +27,7 @@ func NewCommand() *cobra.Command {
 			baseCmd := flags.NewBaseCmd(cmd.Flags())
 			name := baseCmd.Name
 			if name == "" {
-				return errors.New("workflow name missing")
+				return fault.New("workflow name missing")
 			}
 			client := errutil.Must(baseCmd.CreateClient())
 			resp, err := client.GetWorkflowsName(cmd.Context(), name, nil)

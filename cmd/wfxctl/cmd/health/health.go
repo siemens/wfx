@@ -53,7 +53,7 @@ func NewCommand() *cobra.Command {
 			case colorNever:
 				useColor = false
 			default:
-				return fmt.Errorf("unsupported color mode: %s", b.ColorMode)
+				return fault.Newf("unsupported color mode: %s", b.ColorMode)
 			}
 
 			endpoint := Endpoint{
@@ -71,7 +71,7 @@ func NewCommand() *cobra.Command {
 				return fault.Wrap(err)
 			}
 			if endpoint.Response.JSON200 == nil || endpoint.Response.JSON200.Status != api.Up {
-				return fmt.Errorf("wfx is not healthy")
+				return fault.New("wfx is not healthy")
 			}
 			return nil
 		},

@@ -9,7 +9,9 @@ package server
  */
 
 import (
+	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -21,6 +23,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Southclaws/fault"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/siemens/wfx/api"
 	"github.com/siemens/wfx/cmd/wfx/cmd/config"
 	genAPI "github.com/siemens/wfx/generated/api"
@@ -332,6 +337,41 @@ func TestCreateServer_UseMiddlewares(t *testing.T) {
 	assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
 
 	assert.True(t, myMWCalled.Load())
+}
+
+type failingServer struct {
+	genAPI.StrictServerInterface
+	err error
+}
+
+func (server failingServer) GetHealth(context.Context, genAPI.GetHealthRequestObject) (genAPI.GetHealthResponseObject, error) {
+	return nil, server.err
+}
+
+func TestCreateServer_InternalErrorIsLoggedWithoutLeaking(t *testing.T) {
+	var logs bytes.Buffer
+	originalLogger := log.Logger
+	originalMarshaler := zerolog.ErrorStackMarshaler
+	t.Cleanup(func() {
+		log.Logger = originalLogger
+		zerolog.ErrorStackMarshaler = originalMarshaler //nolint:reassign // restore global test state
+	})
+	log.Logger = zerolog.New(&logs)
+	zerolog.ErrorStackMarshaler = func(err error) any { return fault.Flatten(err) } //nolint:reassign // configure global test state
+
+	underlying := "database password rejected"
+	server, err := createServer(new(config.AppConfig), failingServer{err: fault.Wrap(errors.New(underlying))}, http.NewServeMux(), nil, nil)
+	require.NoError(t, err)
+
+	rec := httptest.NewRecorder()
+	server.Handler.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/health", nil))
+
+	assert.Equal(t, http.StatusInternalServerError, rec.Code)
+	assert.Equal(t, "Internal Server Error\n", rec.Body.String())
+	assert.NotContains(t, rec.Body.String(), underlying)
+	assert.Contains(t, logs.String(), underlying)
+	assert.Contains(t, logs.String(), `"stack"`)
+	assert.Contains(t, logs.String(), "server_collection_test.go")
 }
 
 func TestOpenAPIJSON(t *testing.T) {

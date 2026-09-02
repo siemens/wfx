@@ -13,7 +13,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -191,23 +190,23 @@ func (b *BaseCmd) SortParam() (*api.SortEnum, error) {
 	if sortRaw == "desc" {
 		return &desc, nil
 	}
-	return nil, fmt.Errorf("invalid sort value: %s", sortRaw)
+	return nil, fault.Newf("invalid sort value: %s", sortRaw)
 }
 
 func (b *BaseCmd) CreateHTTPClient() (*http.Client, error) {
 	u, err := url.Parse(b.Host)
 	if err != nil {
-		return nil, errors.New("invalid host URL")
+		return nil, fault.New("invalid host URL")
 	}
 	switch u.Scheme {
 	case "http", "https":
 		if u.Host == "" {
 			u.User = nil
-			return nil, fmt.Errorf("host missing from %q", u.String())
+			return nil, fault.Newf("host missing from %q", u.String())
 		}
 	case "unix":
 		if u.Host != "" || u.Path == "" {
-			return nil, fmt.Errorf("unix host must have form unix:///path/to/socket")
+			return nil, fault.New("unix host must have form unix:///path/to/socket")
 		}
 		return &http.Client{
 			Transport: &http.Transport{
@@ -219,7 +218,7 @@ func (b *BaseCmd) CreateHTTPClient() (*http.Client, error) {
 			Timeout: time.Second * 10,
 		}, nil
 	default:
-		return nil, fmt.Errorf("unsupported host scheme %q (want http, https, or unix)", u.Scheme)
+		return nil, fault.Newf("unsupported host scheme %q (want http, https, or unix)", u.Scheme)
 	}
 
 	tlsConfig := new(tls.Config)
@@ -309,9 +308,9 @@ func (b *BaseCmd) ProcessResponse(resp *http.Response, w io.Writer) error {
 			errutil.ProcessErrorResponse(w, errorResponse)
 		}
 		if len(body) == 0 {
-			return fmt.Errorf("empty body, HTTP status %d", statusCode)
+			return fault.Newf("empty body, HTTP status %d", statusCode)
 		}
-		return fmt.Errorf("error: %s", string(body))
+		return fault.Newf("error: %s", string(body))
 	}
 	return nil
 }
@@ -356,7 +355,7 @@ func dumpFiltered(payload []byte, filter string, rawOutput bool, w io.Writer) er
 			if s, ok := v.(string); ok {
 				fmt.Fprintf(w, "%s\n", s)
 			} else {
-				return errors.New("value is not a string. try disabling raw output mode")
+				return fault.New("value is not a string. try disabling raw output mode")
 			}
 		} else {
 			encoder := json.NewEncoder(w)

@@ -10,7 +10,6 @@ package httpclient
 
 import (
 	"context"
-	"errors"
 	"net/http"
 	"strings"
 
@@ -23,7 +22,7 @@ import (
 func parseHeader(header string) (string, string, error) {
 	name, value, found := strings.Cut(header, ":")
 	if !found || !httpguts.ValidHeaderFieldName(name) || !httpguts.ValidHeaderFieldValue(value) {
-		return "", "", errors.New("invalid header, expected format 'Name: Value'")
+		return "", "", fault.New("invalid header, expected format 'Name: Value'")
 	}
 	return name, strings.Trim(value, " \t"), nil
 }

@@ -9,8 +9,6 @@ package updatestatus
  */
 
 import (
-	"errors"
-
 	"github.com/Southclaws/fault"
 	"github.com/spf13/cobra"
 
@@ -31,7 +29,7 @@ wfxctl job update-status --id=8ea1e9d7-28e6-4f1f-b444-a8d2d1ad7618 --client-id=c
 			baseCmd := flags.NewBaseCmd(cmd.Flags())
 			id := baseCmd.ID
 			if id == "" {
-				return errors.New("id missing")
+				return fault.New("id missing")
 			}
 			clientID := baseCmd.ClientID
 			progress := int32(baseCmd.Progress)

@@ -10,10 +10,10 @@ package job
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 	"github.com/Southclaws/fault/ftag"
 	"github.com/go-openapi/strfmt"
 	"github.com/siemens/wfx/generated/api"
@@ -30,14 +30,13 @@ func CreateJob(ctx context.Context, storage persistence.Storage, request *api.Jo
 
 	wf, err := storage.GetWorkflow(ctx, request.Workflow)
 	if err != nil {
-		contextLogger.Error().Msg("Failed to get workflow from storage")
-		return nil, fault.Wrap(err)
+		return nil, fault.Wrap(err, fmsg.With("failed to get workflow from storage"))
 	}
 
 	initial := workflow.FindInitialState(wf)
 	if initial == nil {
 		// should be caught by workflow validation
-		return nil, errors.New("workflow has no initial state")
+		return nil, fault.New("workflow has no initial state")
 	}
 	initialState := workflow.FollowImmediateTransitions(wf, *initial)
 
@@ -59,8 +58,7 @@ func CreateJob(ctx context.Context, storage persistence.Storage, request *api.Jo
 
 	createdJob, err := storage.CreateJob(ctx, &job)
 	if err != nil {
-		contextLogger.Error().Err(err).Msg("Failed to persist job")
-		return nil, fault.Wrap(err, ftag.With(ftag.Internal))
+		return nil, fault.Wrap(err, fmsg.With("failed to persist job"), ftag.With(ftag.Internal))
 	}
 
 	go func() {

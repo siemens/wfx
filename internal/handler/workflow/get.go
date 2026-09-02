@@ -12,6 +12,7 @@ import (
 	"context"
 
 	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 	"github.com/Southclaws/fault/ftag"
 	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/middleware/logging"
@@ -25,10 +26,8 @@ func GetWorkflow(ctx context.Context, storage persistence.Storage, name string) 
 	if err != nil {
 		if ftag.Get(err) == ftag.NotFound {
 			log.Debug().Msgf("Workflow %q not found", name)
-		} else {
-			log.Error().Err(err).Msgf("Failed to get workflow %q from storage", name)
 		}
-		return nil, fault.Wrap(err)
+		return nil, fault.Wrap(err, fmsg.Withf("failed to get workflow %q from storage", name))
 	}
 	log.Debug().Msgf("Found workflow %q", name)
 	return workflow, nil

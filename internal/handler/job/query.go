@@ -13,8 +13,8 @@ import (
 	"strings"
 
 	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 	"github.com/siemens/wfx/generated/api"
-	"github.com/siemens/wfx/middleware/logging"
 	"github.com/siemens/wfx/persistence"
 )
 
@@ -25,8 +25,6 @@ func QueryJobs(
 	paginationParams persistence.PaginationParams,
 	sort *string,
 ) (*api.PaginatedJobList, error) {
-	log := logging.LoggerFromCtx(ctx)
-
 	var sortParams persistence.SortParams
 	if sort != nil {
 		sortParams = parseSortParam(*sort)
@@ -34,8 +32,7 @@ func QueryJobs(
 
 	jobs, err := storage.QueryJobs(ctx, filterParams, sortParams, paginationParams)
 	if err != nil {
-		log.Err(err).Msg("Failed to query jobs")
-		return nil, fault.Wrap(err)
+		return nil, fault.Wrap(err, fmsg.With("failed to query jobs"))
 	}
 	return jobs, nil
 }

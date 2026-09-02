@@ -10,7 +10,6 @@ package updatedefinition
 
 import (
 	"bufio"
-	"errors"
 
 	"github.com/Southclaws/fault"
 	"github.com/spf13/cobra"
@@ -32,7 +31,7 @@ wfxctl job update-definition
 			baseCmd := flags.NewBaseCmd(cmd.Flags())
 			id := baseCmd.ID
 			if id == "" {
-				return errors.New("job id missing")
+				return fault.New("job id missing")
 			}
 			client := errutil.Must(baseCmd.CreateClient())
 			resp, err := client.PutJobsIdDefinitionWithBody(cmd.Context(), id, nil, "application/json", bufio.NewReader(cmd.InOrStdin()))

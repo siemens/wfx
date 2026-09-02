@@ -17,6 +17,7 @@ import (
 	"strings"
 
 	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 )
 
 type credential struct {
@@ -44,9 +45,9 @@ func getCredential(ctx context.Context, helper string, u *url.URL) (credential, 
 	if err != nil {
 		message := strings.TrimSpace(stderr.String())
 		if message != "" {
-			return credential{}, fmt.Errorf("credential helper failed: %s: %w", message, err)
+			return credential{}, fault.Wrap(err, fmsg.Withf("credential helper failed: %s", message))
 		}
-		return credential{}, fmt.Errorf("credential helper failed: %w", err)
+		return credential{}, fault.Wrap(err, fmsg.With("credential helper failed"))
 	}
 
 	var result credential
@@ -57,7 +58,7 @@ func getCredential(ctx context.Context, helper string, u *url.URL) (credential, 
 		}
 		key, value, found := strings.Cut(line, "=")
 		if !found {
-			return credential{}, fmt.Errorf("invalid response from credential helper: expected key=value")
+			return credential{}, fault.New("invalid response from credential helper: expected key=value")
 		}
 		switch key {
 		case "username":
@@ -77,14 +78,14 @@ func (c credential) authorization() (string, error) {
 	switch {
 	case c.authType != "" && c.authCredential != "":
 		if strings.ContainsAny(c.authType+c.authCredential, "\r\n") {
-			return "", fmt.Errorf("invalid credential helper response")
+			return "", fault.New("invalid credential helper response")
 		}
 		return c.authType + " " + c.authCredential, nil
 	case c.hasUsername && c.hasPassword:
 		value := base64.StdEncoding.EncodeToString([]byte(c.username + ":" + c.password))
 		return "Basic " + value, nil
 	default:
-		return "", fmt.Errorf("credential helper returned no complete credential")
+		return "", fault.New("credential helper returned no complete credential")
 	}
 }
 
