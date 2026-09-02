@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CORS headers will only be set for northbound responses (and never for the southbound API).
 - wfxctl now uses a single `--host` parameter defaulting to the northbound API. This replaces the previous separate northbound/southbound host, port, TLS, and Unix socket parameters.
 - Job definition updates through the southbound API are no longer allowed
+- Reject client IDs and tags containing characters outside `[A-Za-z0-9_.:/@-]` so they can be used in HTTP headers and URLs without encoding
 
 ### Added
 
@@ -23,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - UI: display wfx JSON error messages, hiding other response bodies
 - wfxctl: new global `--header` flag to add custom HTTP headers, e.g. `--header 'Authorization: Bearer $TOKEN'` (similar to curl's `-H` option, may be given multiple times)
 - wfxctl: support Git-style credential helper plugins through `--credential-helper`
+- Optional `X-Client-Id` header for restricting southbound job listing/event streaming/retrieval/updates to a client ID; deployments may set it at a trusted gateway to enforce client isolation
 
 ### Changed
 

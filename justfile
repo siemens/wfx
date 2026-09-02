@@ -13,7 +13,7 @@ build:
     env CC={{ THISDIR }}/.ci/zcc goreleaser build --id wfx --id wfxctl --clean --single-target --snapshot
 
 build-wfx-with-ui:
-    env CC={{ THISDIR }}/.ci/zcc goreleaser build --id wfx-with-ui --snapshot
+    env CC={{ THISDIR }}/.ci/zcc goreleaser build --id wfx-with-ui --snapshot --clean --single-target
 
 build-contrib:
     #!/usr/bin/env bash
@@ -77,15 +77,15 @@ lint:
     done
 
 # Format code
-format:
-    #!/usr/bin/env bash
-    set -eux
-    mapfile -d '' -t files < <(fd -0 '\.go$')
-    if ((${#files[@]})); then
-        go tool -modfile="{{ THISDIR }}/tools/go.mod" mvdan.cc/gofumpt -l -w -- "${files[@]}"
-    fi
+format: _format-go
     biome format
     just --fmt --unstable
+
+_format-go:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    FD=$(command -v fd || command -v fdfind)
+    "$FD" '\.go$' -X go tool -modfile="{{ THISDIR }}/tools/go.mod" mvdan.cc/gofumpt -l -w --
 
 _generate-openapi:
     #!/bin/sh
@@ -116,6 +116,7 @@ _generate-flatbuffers:
 
 # Generate code
 generate: _generate-openapi _generate-ent _generate-mockery _generate-flatbuffers
+    just _format-go
 
 # Start PostgreSQL container
 postgres-start:

@@ -32,11 +32,12 @@ repos:
       - id: commitizen
   - repo: local
     hooks:
-      - id: gofumpt
-        name: gofumpt
-        entry: go tool -modfile=tools/go.mod mvdan.cc/gofumpt -l -w
+      - id: format-go
+        name: format Go code
+        entry: just _format-go
         language: system
         types: [go]
+        pass_filenames: false
       - id: just-fmt
         name: just fmt
         entry: just --fmt --unstable

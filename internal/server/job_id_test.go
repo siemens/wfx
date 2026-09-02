@@ -40,6 +40,38 @@ func TestJobGetId(t *testing.T) {
 	}
 }
 
+func TestJobGetIDClientIDHeader(t *testing.T) {
+	db := newInMemoryDB(t)
+	north, south := createNorthAndSouth(t, db)
+	job := persistJob(t, db)
+	jobPath := fmt.Sprintf("/api/wfx/v1/jobs/%s", job.ID)
+
+	apitest.New().
+		Handler(north).
+		Get(jobPath).
+		Header("X-Client-Id", "other").
+		Expect(t).
+		Status(http.StatusOK).
+		End()
+
+	apitest.New().
+		Handler(south).
+		Get(jobPath).
+		Header("X-Client-Id", job.ClientID).
+		Expect(t).
+		Status(http.StatusOK).
+		End()
+
+	apitest.New().
+		Handler(south).
+		Get(jobPath).
+		Header("X-Client-Id", "other").
+		Expect(t).
+		Status(http.StatusNotFound).
+		Assert(jsonpath.Equal(`$.errors[0].code`, "wfx.jobNotFound")).
+		End()
+}
+
 func TestJobGetIdFilter(t *testing.T) {
 	db := newInMemoryDB(t)
 	north, south := createNorthAndSouth(t, db)

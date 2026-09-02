@@ -259,16 +259,59 @@ wfxctl version
 
 To assist a secure deployment, both, the northbound operator/management interface and the southbound client interface, are isolated from each other by being bound to distinct ports so that, e.g., a firewall can be used to steer and restrict access.
 
-While this separation provides a basic level of security, it doesn't prevent clients interfering with each other:
-For example, there is no mechanism in place to prevent a client `A` from updating the jobs of another client `B`.
-This is a deliberate design choice following the Unix philosophy of "Make each program do one thing well".
-It allows for flexible integration of wfx into existing or new infrastructure.
-Existing infrastructure most probably has request authentication and authorization measures in place.
-For new infrastructure, such a feature is likely better provided by specialized components/services supporting the overall deployment security architecture.
+While this separation provides a basic level of security, it doesn't prevent clients interfering with each other by
+default. For example, without additional controls, client `A` can update jobs belonging to client `B`.
 
-Thus, for productive deployments, a deployment along the lines of the following figure is recommended with an _API
-Gateway_ subsuming the discussed security requirements and performing access steering with regard to, e.g., client
-access.
+A trusted API gateway can prevent this by authenticating each southbound client and ensuring that the `X-Client-Id`
+header contains that client's authenticated ID before forwarding the request to wfx. wfx uses this optional header for
+these southbound operations:
+
+- `GET /jobs` returns only jobs whose `clientId` matches the header. Supplying a different `clientId` query parameter
+  returns HTTP 400 with error code `wfx.clientIDMismatch`.
+- `GET /jobs/events` emits only events whose job `clientId` matches the header.
+- `GET /jobs/{id}`, `GET /jobs/{id}/status`, `GET /jobs/{id}/definition`, and `GET /jobs/{id}/tags` return HTTP 404 if the job's `clientId` does not match the header.
+- `PUT /jobs/{id}/status` returns HTTP 404 unless both the job and status body `clientId` match the header.
+
+The header has no effect on the northbound API. It is not an authentication mechanism: because it is optional and a
+caller can otherwise choose its value, wfx only enforces client isolation when trusted infrastructure supplies it.
+
+For example, a gateway can require clients to send both a JWT and their client ID:
+
+```http
+Authorization: Bearer <JWT with client_id claim "client-42">
+X-Client-Id: client-42
+```
+
+After validating the JWT, the gateway extracts the `client_id` claim, rejects the request if `X-Client-Id` is missing or
+does not equal the claim, and forwards the request to wfx. The gateway should overwrite the header with the validated
+claim before forwarding it, so a client-controlled value can never reach wfx:
+
+```text
+claim = validate_jwt(request.headers["Authorization"]).claims["client_id"]
+if request.headers["X-Client-Id"] is missing: reject request
+if request.headers["X-Client-Id"] != claim: reject request
+request.headers["X-Client-Id"] = claim
+forward request to wfx
+```
+
+Note that clients don't need to send the `X-Client-Id` if the gateway injects it directly from the validated JWT claim instead:
+
+```text
+claim = validate_jwt(request.headers["Authorization"]).claims["client_id"]
+request.headers["X-Client-Id"] = claim
+forward request to wfx
+```
+
+In both cases, the gateway must reject missing or invalid JWTs and missing `client_id` claims. It must also replace,
+rather than preserve, any client-supplied `X-Client-Id` header.
+
+A custom [wfx plugin](#plugins) can perform the same validation and header injection without an API gateway. Configure it
+for the southbound API with `--client-plugins-dir`. The plugin receives the complete request and can either reject it or
+return a modified request containing the trusted `X-Client-Id`. As with a gateway, the plugin must validate the client's
+credentials, reject missing or invalid identity claims, and replace rather than trust any client-supplied `X-Client-Id`.
+
+For productive deployments using an API gateway, a deployment along the lines of the following figure is recommended,
+with the gateway handling authentication and authorization and setting the trusted client identity header.
 
 ```txt
 ┌──────────────────┐

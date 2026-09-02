@@ -263,6 +263,7 @@ paths:
       x-cli-name: list-jobs
       parameters:
         - $ref: "#/components/parameters/responseFilter"
+        - $ref: "#/components/parameters/clientIDHeader"
         - $ref: "#/components/parameters/limit"
         - $ref: "#/components/parameters/offset"
         - $ref: "#/components/parameters/sort"
@@ -351,6 +352,7 @@ paths:
           data: {"clientId":"example_client","state":"INSTALLING"}\n\n
       x-cli-hidden: true
       parameters:
+        - $ref: "#/components/parameters/clientIDHeader"
         - name: clientIds
           in: query
           description: Subscribe to events whose clientID matches one of the given clientIds (comma-separated). This is a filter.
@@ -427,6 +429,7 @@ paths:
       x-cli-name: get-job
       parameters:
         - $ref: "#/components/parameters/responseFilter"
+        - $ref: "#/components/parameters/clientIDHeader"
         - name: id
           in: path
           description: Job ID
@@ -506,6 +509,7 @@ paths:
       x-cli-name: get-job-status
       parameters:
         - $ref: "#/components/parameters/responseFilter"
+        - $ref: "#/components/parameters/clientIDHeader"
         - name: id
           in: path
           description: Job ID
@@ -541,6 +545,7 @@ paths:
       x-cli-name: modify-job-status
       parameters:
         - $ref: "#/components/parameters/responseFilter"
+        - $ref: "#/components/parameters/clientIDHeader"
         - name: id
           in: path
           description: Job ID
@@ -595,6 +600,7 @@ paths:
       x-cli-name: get-job-definition
       parameters:
         - $ref: "#/components/parameters/responseFilter"
+        - $ref: "#/components/parameters/clientIDHeader"
         - name: id
           in: path
           description: Job ID
@@ -691,6 +697,7 @@ paths:
       x-cli-name: get-job-tags
       parameters:
         - $ref: "#/components/parameters/responseFilter"
+        - $ref: "#/components/parameters/clientIDHeader"
         - name: id
           in: path
           description: Job ID
@@ -1219,6 +1226,7 @@ components:
       maxItems: 16
       items:
         type: string
+        pattern: "^[A-Za-z0-9_.:/@-]+$"
         example: EUROPE_WEST
 
     CheckerResult:
@@ -1294,6 +1302,7 @@ components:
       description: Filter jobs belonging to a specific client with clientId
       schema:
         type: string
+        pattern: "^[A-Za-z0-9_.:/@-]+$"
     workflow:
       name: workflow
       x-go-name: paramWorkflow
@@ -1359,6 +1368,15 @@ components:
       required: false
       schema:
         type: string
+    clientIDHeader:
+      name: X-Client-Id
+      x-go-name: XClientID
+      in: header
+      description: Restrict southbound access to jobs belonging to this client ID
+      required: false
+      schema:
+        type: string
+        minLength: 1
     pagination:
       name: pagination
       x-go-name: paramPagination

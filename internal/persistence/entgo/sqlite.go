@@ -55,6 +55,7 @@ func (instance *SQLite) Initialize(dsn string) error {
 		// log queries
 		client = client.Debug()
 	}
+	addClientIDInterceptor(client)
 
 	log.Debug().Msg("Connected to SQLite")
 	instance.Database = Database{client: client}

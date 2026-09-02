@@ -24,6 +24,12 @@ var JobNotFound = api.Error{
 	Message: "Job ID was not found",
 }
 
+var ClientIDMismatch = api.Error{
+	Code:    "wfx.clientIDMismatch",
+	Logref:  "cd9e8244c4fc40eaad126a2269efcb86",
+	Message: "Client ID does not match X-Client-Id header",
+}
+
 var WorkflowNotFound = api.Error{
 	Code:    "wfx.workflowNotFound",
 	Logref:  "c452719774086b6e803bb8f6ecea9899",

@@ -29,6 +29,7 @@ func NewNorthboundServer(wfx api.StrictServerInterface) NorthboundServer {
 
 //revive:disable:var-naming
 func (north NorthboundServer) GetJobs(ctx context.Context, request api.GetJobsRequestObject) (api.GetJobsResponseObject, error) {
+	request.Params.XClientID = nil
 	resp, err := north.wfx.GetJobs(ctx, request)
 	if err != nil {
 		return nil, fault.Wrap(err)
@@ -45,6 +46,7 @@ func (north NorthboundServer) PostJobs(ctx context.Context, request api.PostJobs
 }
 
 func (north NorthboundServer) GetJobsEvents(ctx context.Context, request api.GetJobsEventsRequestObject) (api.GetJobsEventsResponseObject, error) {
+	request.Params.XClientID = nil
 	resp, err := north.wfx.GetJobsEvents(ctx, request)
 	if err != nil {
 		return nil, fault.Wrap(err)
@@ -61,6 +63,7 @@ func (north NorthboundServer) DeleteJobsId(ctx context.Context, request api.Dele
 }
 
 func (north NorthboundServer) GetJobsId(ctx context.Context, request api.GetJobsIdRequestObject) (api.GetJobsIdResponseObject, error) {
+	request.Params.XClientID = nil
 	resp, err := north.wfx.GetJobsId(ctx, request)
 	if err != nil {
 		return nil, fault.Wrap(err)
@@ -69,6 +72,7 @@ func (north NorthboundServer) GetJobsId(ctx context.Context, request api.GetJobs
 }
 
 func (north NorthboundServer) GetJobsIdDefinition(ctx context.Context, request api.GetJobsIdDefinitionRequestObject) (api.GetJobsIdDefinitionResponseObject, error) {
+	request.Params.XClientID = nil
 	resp, err := north.wfx.GetJobsIdDefinition(ctx, request)
 	if err != nil {
 		return nil, fault.Wrap(err)
@@ -85,6 +89,7 @@ func (north NorthboundServer) PutJobsIdDefinition(ctx context.Context, request a
 }
 
 func (north NorthboundServer) GetJobsIdStatus(ctx context.Context, request api.GetJobsIdStatusRequestObject) (api.GetJobsIdStatusResponseObject, error) {
+	request.Params.XClientID = nil
 	resp, err := north.wfx.GetJobsIdStatus(ctx, request)
 	if err != nil {
 		return nil, fault.Wrap(err)
@@ -93,6 +98,7 @@ func (north NorthboundServer) GetJobsIdStatus(ctx context.Context, request api.G
 }
 
 func (north NorthboundServer) PutJobsIdStatus(ctx context.Context, request api.PutJobsIdStatusRequestObject) (api.PutJobsIdStatusResponseObject, error) {
+	request.Params.XClientID = nil
 	resp, err := north.wfx.PutJobsIdStatus(context.WithValue(ctx, wfxAPI.EligibleKey, api.WFX), request)
 	if err != nil {
 		return nil, fault.Wrap(err)
@@ -109,6 +115,7 @@ func (north NorthboundServer) DeleteJobsIdTags(ctx context.Context, request api.
 }
 
 func (north NorthboundServer) GetJobsIdTags(ctx context.Context, request api.GetJobsIdTagsRequestObject) (api.GetJobsIdTagsResponseObject, error) {
+	request.Params.XClientID = nil
 	resp, err := north.wfx.GetJobsIdTags(ctx, request)
 	if err != nil {
 		return nil, fault.Wrap(err)
