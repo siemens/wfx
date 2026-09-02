@@ -390,6 +390,26 @@ func TestTopLevelNotFound(t *testing.T) {
 	assert.Equal(t, strings.HasSuffix(result.Header.Get("Link"), `/api/wfx/v1/openapi.json>; rel="service-desc"`), true)
 }
 
+func TestTopLevelUsesForwardedProtocol(t *testing.T) {
+	mux := createMux(new(config.AppConfig), "/api/wfx/v1", false)
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set("X-Forwarded-Proto", "https")
+	mux.ServeHTTP(rec, req)
+
+	assert.Equal(t, `<https://example.com/api/wfx/v1/openapi.json>; rel="service-desc"`, rec.Header().Get("Link"))
+}
+
+func TestTopLevelRejectsInvalidForwardedProtocol(t *testing.T) {
+	mux := createMux(new(config.AppConfig), "/api/wfx/v1", false)
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set("X-Forwarded-Proto", "javascript")
+	mux.ServeHTTP(rec, req)
+
+	assert.Equal(t, `<http://example.com/api/wfx/v1/openapi.json>; rel="service-desc"`, rec.Header().Get("Link"))
+}
+
 func TestDownloadRedirect(t *testing.T) {
 	mux := createMux(new(config.AppConfig), "/api/wfx/v1", false)
 	rec := httptest.NewRecorder()
