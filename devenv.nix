@@ -37,7 +37,7 @@
         pkgs.gnumake
         pkgs.gnused
 
-        pkgs.go
+        pkgs.go_latest
         pkgs.go-tools
         pkgs.gofumpt
         pkgs.gopls
@@ -68,7 +68,7 @@
         pkgs.lychee
         pkgs.python3
         pkgs.nodejs_latest
-        pkgs.go
+        pkgs.go_latest
       ];
     };
 
