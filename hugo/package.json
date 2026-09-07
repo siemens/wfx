@@ -19,7 +19,6 @@
     "color-name": "^1.1.4",
     "colorjs.io": "^0.7.1",
     "dependency-graph": "^1.0.0",
-    "docsy": "^0.17.0",
     "electron-to-chromium": "^1.5.402",
     "emoji-regex": "^8.0.0",
     "escalade": "^3.2.0",
