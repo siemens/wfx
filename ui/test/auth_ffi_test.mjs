@@ -118,7 +118,7 @@ assert.deepEqual(auth.currentUser(), ["", "", ""]);
 const callbackUser = {
   access_token: "callback",
   expired: false,
-  state: "https://wfx.example/ui/jobs",
+  state: "https://wfx.example/ui/#/jobs",
 };
 manager.signinRedirectCallback.mock.mockImplementationOnce(
   async () => callbackUser,

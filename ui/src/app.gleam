@@ -58,53 +58,20 @@ pub fn init(cfg: Config) -> #(Model, Effect(Msg)) {
   let model =
     model.Model(..model.new(wfx_url: wfx_url, base_path: cfg.base_path), user:)
 
-  let #(route, initial_eff) =
+  let route =
     initial_uri
-    |> result.map(fn(uri) {
-      #(
-        uri.path_segments(remove_prefix(uri.path, cfg.base_path)),
-        uri.query
-          |> option.map(uri.parse_query)
-          |> option.map(option.from_result)
-          |> option.flatten
-          |> option.unwrap([]),
-      )
-    })
-    |> fn(path) {
-      case path {
-        Ok(#(["jobs"], query)) -> {
-          let page = int_from_query(query, "page") |> option.unwrap(1)
-          let limit =
-            int_from_query(query, "limit") |> option.unwrap(model.default_limit)
-          #(
-            model.RouteJobs(page: page, limit: limit),
-            get_jobs(wfx_url: model.wfx_url, page: page, limit: limit),
-          )
-        }
-        Ok(#(["jobs", id], _)) -> #(
-          model.RouteJobDetails(id: id),
-          get_single_job(wfx_url: model.wfx_url, id: id, history: True),
-        )
-        Ok(#(["workflows"], query)) -> {
-          let page = int_from_query(query, "page") |> option.unwrap(1)
-          let limit =
-            int_from_query(query, "limit") |> option.unwrap(model.default_limit)
-          #(
-            model.RouteWorkflows(page: page, limit: limit),
-            get_workflows(wfx_url: model.wfx_url, page: page, limit: limit),
-          )
-        }
-        Ok(#(["workflows", name], _)) -> #(
-          model.RouteWorkflowDetails(name),
-          get_single_workflow(wfx_url: model.wfx_url, name: name),
-        )
-        // fallback to jobs overview
-        _ -> #(
-          model.RouteJobs(page: 1, limit: model.default_limit),
-          get_jobs(wfx_url: model.wfx_url, page: 1, limit: model.default_limit),
-        )
-      }
-    }
+    |> result.map(route_from_uri)
+    |> result.unwrap(model.RouteJobs(page: 1, limit: model.default_limit))
+  let initial_eff = case route {
+    model.RouteJobs(page, limit) ->
+      get_jobs(wfx_url: model.wfx_url, page: page, limit: limit)
+    model.RouteJobDetails(id) ->
+      get_single_job(wfx_url: model.wfx_url, id: id, history: True)
+    model.RouteWorkflows(page, limit) ->
+      get_workflows(wfx_url: model.wfx_url, page: page, limit: limit)
+    model.RouteWorkflowDetails(name) ->
+      get_single_workflow(wfx_url: model.wfx_url, name: name)
+  }
 
   // subscribe to all job events because we want to be informed about new jobs and updates for those new jobs
   let event_source =
@@ -114,43 +81,47 @@ pub fn init(cfg: Config) -> #(Model, Effect(Msg)) {
   #(
     model,
     effect.batch([
-      modem.init(on_url_change(_, model.base_path)),
+      modem.init(on_url_change),
       initial_eff,
       event_source |> option.map(get_job_events) |> option.unwrap(effect.none()),
     ]),
   )
 }
 
-fn on_url_change(uri: Uri, base_path: String) -> Msg {
-  case
-    uri.path_segments(remove_prefix(uri.path, base_path)),
-    uri.query
+fn on_url_change(uri: Uri) -> Msg {
+  msg.DocumentChangedRoute(route_from_uri(uri))
+}
+
+fn route_from_uri(uri: Uri) -> model.Route {
+  let route_uri = case uri.fragment {
+    Some(fragment) ->
+      uri.parse(fragment)
+      |> result.unwrap(uri.Uri(..uri, path: "", query: None))
+    None -> uri.Uri(..uri, path: "", query: None)
+  }
+  let query =
+    route_uri.query
     |> option.map(uri.parse_query)
     |> option.map(option.from_result)
     |> option.flatten
     |> option.unwrap([])
-  {
+
+  case uri.path_segments(route_uri.path), query {
     ["jobs"], query ->
-      msg.DocumentChangedRoute(model.RouteJobs(
+      model.RouteJobs(
         page: int_from_query(query, "page") |> option.unwrap(1),
         limit: int_from_query(query, "limit")
           |> option.unwrap(model.default_limit),
-      ))
-    ["jobs", id], _ -> msg.DocumentChangedRoute(model.RouteJobDetails(id: id))
+      )
+    ["jobs", id], _ -> model.RouteJobDetails(id: id)
     ["workflows"], query ->
-      msg.DocumentChangedRoute(model.RouteWorkflows(
+      model.RouteWorkflows(
         page: int_from_query(query, "page") |> option.unwrap(1),
         limit: int_from_query(query, "limit")
           |> option.unwrap(model.default_limit),
-      ))
-    ["workflows", name], _ ->
-      msg.DocumentChangedRoute(model.RouteWorkflowDetails(name: name))
-    _, _ ->
-      // fallback to jobs overview
-      msg.DocumentChangedRoute(model.RouteJobs(
-        page: 1,
-        limit: model.default_limit,
-      ))
+      )
+    ["workflows", name], _ -> model.RouteWorkflowDetails(name: name)
+    _, _ -> model.RouteJobs(page: 1, limit: model.default_limit)
   }
 }
 
@@ -457,11 +428,4 @@ pub fn get_job_events(source: events.JobsEventSource) -> Effect(Msg) {
     })
     Nil
   })
-}
-
-fn remove_prefix(s: String, prefix: String) -> String {
-  case string.starts_with(s, prefix) {
-    True -> string.drop_start(s, string.length(prefix))
-    False -> s
-  }
 }

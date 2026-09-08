@@ -117,7 +117,7 @@ fn view_app(model: Model) -> Element(Msg) {
               }),
             ],
             [
-              a([href(model.base_path <> "/jobs")], [text("Jobs")]),
+              a([href(model.base_path <> "/#/jobs")], [text("Jobs")]),
             ],
           ),
           div(
@@ -128,7 +128,7 @@ fn view_app(model: Model) -> Element(Msg) {
               }),
             ],
             [
-              a([href(model.base_path <> "/workflows")], [
+              a([href(model.base_path <> "/#/workflows")], [
                 text("Workflows"),
               ]),
             ],
@@ -304,7 +304,7 @@ fn view_paginated_jobs(
         td([class(class_table_row <> " font-mono")], [
           a(
             [
-              href(base_path <> "/jobs/" <> job.id),
+              href(base_path <> "/#/jobs/" <> job.id),
               class(class_link),
             ],
             [
@@ -318,7 +318,7 @@ fn view_paginated_jobs(
         td([class(class_table_row)], [
           a(
             [
-              href(base_path <> "/workflows/" <> job.workflow.name),
+              href(base_path <> "/#/workflows/" <> job.workflow.name),
               class(class_link),
             ],
             [
@@ -377,7 +377,7 @@ fn view_paginated_jobs(
           ]),
           keyed.tbody([], list.map(jobs.content, view_job_row)),
           create_pagination(
-            base_path <> "/jobs",
+            base_path <> "/#/jobs",
             jobs.pagination,
             list.length(th_elements),
           ),
@@ -418,7 +418,7 @@ fn view_paginated_workflows(
                       td([class(class_table_row)], [
                         a(
                           [
-                            href(base_path <> "/workflows/" <> workflow.name),
+                            href(base_path <> "/#/workflows/" <> workflow.name),
                             class(class_link),
                           ],
                           [
@@ -434,7 +434,7 @@ fn view_paginated_workflows(
                 }),
             ),
             create_pagination(
-              base_path <> "/workflows",
+              base_path <> "/#/workflows",
               workflows.pagination,
               list.length(th_elements),
             ),

@@ -1,5 +1,5 @@
 ---
-version: 1.4.1
+version: 2.0.2
 title: Empty Paginated Jobs
 file: ./test/app_test.gleam
 test_name: start_empty_test
@@ -16,12 +16,12 @@ test_name: start_empty_test
   </nav>
   <div class="flex justify-center">
     <div class="px-4 py-2 cursor-pointer text-blue-600 border-b-2 border-blue-600 font-semibold">
-      <a href="/ui/jobs">
+      <a href="/ui/#/jobs">
         Jobs
       </a>
     </div>
     <div class="px-4 py-2 cursor-pointer text-gray-600 hover:text-blue-600">
-      <a href="/ui/workflows">
+      <a href="/ui/#/workflows">
         Workflows
       </a>
     </div>

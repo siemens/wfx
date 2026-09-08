@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Report failing JQ response filters as HTTP 400 (`wfx.invalidResponseFilter`) instead of 500
+- ui: switch to hash-based navigation
 
 ### Fixed
 
