@@ -16,6 +16,8 @@ builds:
   - id: wfx
     binary: wfx
     main: ./cmd/wfx
+    tags:
+      - '!ui' # ensure we build without ui support (overriding GOFLAGS= variable which might be set locally)
     flags:
       - -trimpath
       - -mod=readonly
