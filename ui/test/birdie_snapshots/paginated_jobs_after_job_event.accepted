@@ -1,5 +1,5 @@
 ---
-version: 1.4.1
+version: 2.0.2
 title: Paginated Jobs After Job Event
 file: ./test/app_test.gleam
 test_name: given_jobs_when_wfx_sends_job_event_then_jobs_are_updated_test
@@ -16,12 +16,12 @@ test_name: given_jobs_when_wfx_sends_job_event_then_jobs_are_updated_test
   </nav>
   <div class="flex justify-center">
     <div class="px-4 py-2 cursor-pointer text-blue-600 border-b-2 border-blue-600 font-semibold">
-      <a href="/ui/jobs">
+      <a href="/ui/#/jobs">
         Jobs
       </a>
     </div>
     <div class="px-4 py-2 cursor-pointer text-gray-600 hover:text-blue-600">
-      <a href="/ui/workflows">
+      <a href="/ui/#/workflows">
         Workflows
       </a>
     </div>
@@ -57,7 +57,7 @@ test_name: given_jobs_when_wfx_sends_job_event_then_jobs_are_updated_test
         <tbody>
           <tr data-lustre-key="1" class="text-left odd:bg-white even:bg-gray-100">
             <td class="px-4 py-2 text-left font-mono">
-              <a class="text-blue-500 hover:text-blue-700 underline" href="/ui/jobs/1">
+              <a class="text-blue-500 hover:text-blue-700 underline" href="/ui/#/jobs/1">
                 1
               </a>
             </td>
@@ -65,7 +65,7 @@ test_name: given_jobs_when_wfx_sends_job_event_then_jobs_are_updated_test
               john_doe
             </td>
             <td class="px-4 py-2 text-left">
-              <a class="text-blue-500 hover:text-blue-700 underline" href="/ui/workflows/workflow.test">
+              <a class="text-blue-500 hover:text-blue-700 underline" href="/ui/#/workflows/workflow.test">
                 workflow.test
               </a>
             </td>

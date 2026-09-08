@@ -119,7 +119,7 @@ test("workflow details", async ({ page }) => {
   const name = workflow.name as string;
 
   // Open workflow details page
-  await page.goto(`${uiBaseUrl}/workflows/${name}`);
+  await page.goto(`${uiBaseUrl}/#/workflows/${name}`);
 
   // Check for SVG
 
@@ -147,7 +147,7 @@ test("job details", async ({ page }) => {
   const jobId = job.id as string;
 
   // Open job details page
-  await page.goto(`${uiBaseUrl}/jobs/${jobId}`);
+  await page.goto(`${uiBaseUrl}/#/jobs/${jobId}`);
 
   // Check for SVG
 

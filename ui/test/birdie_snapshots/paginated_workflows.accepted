@@ -1,5 +1,5 @@
 ---
-version: 1.4.1
+version: 2.0.2
 title: Paginated Workflows
 file: ./test/app_test.gleam
 test_name: given_app_when_view_workflows_then_workflow_table_shown_test
@@ -16,12 +16,12 @@ test_name: given_app_when_view_workflows_then_workflow_table_shown_test
   </nav>
   <div class="flex justify-center">
     <div class="px-4 py-2 cursor-pointer text-gray-600 hover:text-blue-600">
-      <a href="/ui/jobs">
+      <a href="/ui/#/jobs">
         Jobs
       </a>
     </div>
     <div class="px-4 py-2 cursor-pointer text-blue-600 border-b-2 border-blue-600 font-semibold">
-      <a href="/ui/workflows">
+      <a href="/ui/#/workflows">
         Workflows
       </a>
     </div>
@@ -42,7 +42,7 @@ test_name: given_app_when_view_workflows_then_workflow_table_shown_test
         <tbody>
           <tr data-lustre-key="workflow.test" class="text-left odd:bg-white even:bg-gray-100">
             <td class="px-4 py-2 text-left">
-              <a class="text-blue-500 hover:text-blue-700 underline" href="/ui/workflows/workflow.test">
+              <a class="text-blue-500 hover:text-blue-700 underline" href="/ui/#/workflows/workflow.test">
                 workflow.test
               </a>
             </td>
