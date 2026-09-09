@@ -28,18 +28,6 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@1f40c72289eff860ee54a304f1438e3cff362e0a # v4.3.0
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
-      - name: Login to GitHub Container Registry
-        if: startsWith(github.event.ref, 'refs/tags/v')
-        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
       - uses: ./.github/actions/setup-ui
       - uses: ./.github/actions/setup-build
 
@@ -71,6 +59,57 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WFX_STATIC_LDFLAGS: "-linkmode external -extldflags '-static'"
+
+      - name: Stage container source
+        run: |
+          echo "IMAGE_CREATED=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_ENV"
+
+          # Sanitize ref and compute tags
+          CLEAN_REF=$(echo "${{ github.ref_name }}" | tr '/' '-')
+          echo "IMAGE_VERSION=$CLEAN_REF" >> "$GITHUB_ENV"
+
+          TAGS="$CLEAN_REF"
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            TAGS="$TAGS latest"
+          fi
+          echo "IMAGE_TAGS=$TAGS" >> "$GITHUB_ENV"
+
+          mkdir -p source
+          cp Dockerfile source/
+          for arch in amd64 arm64; do
+            mkdir -p "source/dist/${arch}"
+            cp -v -p "dist/wfx_linux_${arch}"*/wfx "source/dist/${arch}/wfx"
+          done
+
+      - name: Build containers
+        id: build_image_multiarch
+        uses: redhat-actions/buildah-build@719e3c40d8af9790c23eca13f7daa339f2867034 # v3.1.0
+        with:
+          image: ${{ github.repository }}
+          tags: ${{ env.IMAGE_TAGS }}
+          platforms: linux/amd64,linux/arm64
+          labels: |
+            org.opencontainers.image.created=${{ env.IMAGE_CREATED }}
+            org.opencontainers.image.name=wfx
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ env.IMAGE_VERSION }}
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.licenses=Apache-2.0
+            org.opencontainers.image.title=wfx
+            org.opencontainers.image.description=a lightweight, general-purpose workflow executor
+          context: ./source
+          containerfiles: |
+            ./source/Dockerfile
+
+      - name: Push to registry
+        if: github.event_name != 'pull_request'
+        uses: redhat-actions/push-to-registry@94ade333c38ecc0e60e94785125d9a52ca423b37 # v3
+        with:
+          image: ${{ steps.build_image_multiarch.outputs.image }}
+          tags: ${{ steps.build_image_multiarch.outputs.tags }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload snapshot dist
         if: "!startsWith(github.event.ref, 'refs/tags/v')"
