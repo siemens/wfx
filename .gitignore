@@ -12,6 +12,7 @@ cmd/wfx-loadtest/wfx-loadtest
 /public
 /result
 /dist
+/source
 /files
 coverage*
 *.log
