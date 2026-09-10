@@ -13,4 +13,4 @@ COPY dist/${TARGETARCH}/wfx /usr/bin/wfx
 
 EXPOSE 8080 8081
 
-ENTRYPOINT ["wfx", "--mgmt-host=0.0.0.0"]
+ENTRYPOINT ["wfx", "--mgmt-host=http://0.0.0.0:8081"]

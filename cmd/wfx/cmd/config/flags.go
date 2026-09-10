@@ -35,20 +35,10 @@ const (
 	SimpleFileServerFlag = "simple-fileserver"
 
 	ClientHostFlag       = "client-host"
-	ClientPortFlag       = "client-port"
-	ClientTLSHostFlag    = "client-tls-host"
-	ClientTLSPortFlag    = "client-tls-port"
-	ClientUnixSocketFlag = "client-unix-socket"
 	ClientPluginsDirFlag = "client-plugins-dir"
+	MgmtHostFlag         = "mgmt-host"
+	MgmtPluginsDirFlag   = "mgmt-plugins-dir"
 
-	MgmtHostFlag       = "mgmt-host"
-	MgmtPortFlag       = "mgmt-port"
-	MgmtTLSHostFlag    = "mgmt-tls-host"
-	MgmtTLSPortFlag    = "mgmt-tls-port"
-	MgmtUnixSocketFlag = "mgmt-unix-socket"
-	MgmtPluginsDirFlag = "mgmt-plugins-dir"
-
-	SchemeFlag                  = "scheme"
 	KeepAliveFlag               = "keep-alive"
 	MaxHeaderSizeFlag           = "max-header-size"
 	CleanupTimeoutFlag          = "cleanup-timeout"
@@ -81,6 +71,9 @@ const (
 	PreferedStorage   = "sqlite"
 	SqliteDefaultOpts = "file:wfx.db?_fk=1&_journal=WAL"
 
+	DefaultClientHost = "http://0.0.0.0:8080"
+	DefaultMgmtHost   = "http://127.0.0.1:8081"
+
 	// should be "short enough", i.e. shorter than the timeout for closing
 	// connections due to inactivity (e.g. by the kernel in its default setting or
 	// some reverse proxy)
@@ -100,7 +93,6 @@ func NewFlagset() *pflag.FlagSet {
 
 	f.BoolP(VersionFlag, "v", false, "version for wfx")
 	f.StringSlice(ConfigFlag, DefaultConfigFiles(), "path to one or more .yaml config files")
-	f.StringSlice(SchemeFlag, []string{"http"}, "the listeners to enable, this can be repeated and defaults to the schemes in the swagger spec")
 	f.Duration(CleanupTimeoutFlag, 10*time.Second, "grace period for which to wait before killing idle connections")
 	f.Duration(GracefulTimeoutFlag, 15*time.Second, "grace period for which to wait before shutting down the server")
 	f.Duration(SSEPingIntervalFlag, DefaultSSEPingInterval, "interval to send periodic keep-alive messages to prevent server-sent events connections from being closed due to inactivity")
@@ -129,18 +121,10 @@ func NewFlagset() *pflag.FlagSet {
 	f.String(TLSKeyFlag, "", "the private key file to use for secure connections (without passphrase)")
 	f.String(TLSCaFlag, "", "the certificate authority certificate file to be used with mutual TLS auth")
 
-	f.String(ClientHostFlag, "0.0.0.0", "the IP to listen on")
-	f.Int(ClientPortFlag, 8080, "the port to listen on for insecure connections")
-	f.String(ClientTLSHostFlag, "0.0.0.0", "the IP to listen on")
-	f.Int(ClientTLSPortFlag, 8443, "the port to listen on for secure connections, defaults to a random value")
-	f.String(ClientUnixSocketFlag, "/tmp/wfx-client.sock", "the unix domain socket to use")
+	f.StringSlice(ClientHostFlag, []string{DefaultClientHost}, "southbound listen URL (http://host:port, https://host:port, or unix:///path); may be given multiple times to enable multiple schemes")
 	f.String(ClientPluginsDirFlag, "", "directory containing client plugins")
 
-	f.String(MgmtHostFlag, "127.0.0.1", "management host")
-	f.Int(MgmtPortFlag, 8081, "management port")
-	f.String(MgmtTLSHostFlag, "127.0.0.1", "management TLS host")
-	f.Int(MgmtTLSPortFlag, 8444, "TLS management port")
-	f.String(MgmtUnixSocketFlag, "/tmp/wfx-mgmt.sock", "the unix domain socket to use")
+	f.StringSlice(MgmtHostFlag, []string{DefaultMgmtHost}, "northbound listen URL (http://host:port, https://host:port, or unix:///path); may be given multiple times to enable multiple schemes")
 	f.String(MgmtPluginsDirFlag, "", "directory containing management plugins")
 
 	{

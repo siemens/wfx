@@ -67,6 +67,72 @@ func TestNewAppConfigNegativeJQLimit(t *testing.T) {
 	}
 }
 
+func TestNewAppConfig_ListenURLs(t *testing.T) {
+	flags := NewFlagset()
+	require.NoError(t, flags.Parse([]string{
+		"--" + ClientHostFlag, "http://127.0.0.1:18080",
+		"--" + ClientHostFlag, "https://0.0.0.0:18443",
+		"--" + MgmtHostFlag, "unix:///tmp/wfx-mgmt.sock",
+	}))
+
+	cfg, err := NewAppConfig(flags)
+	require.NoError(t, err)
+	t.Cleanup(cfg.Stop)
+
+	assert.Equal(t, []ListenAddr{
+		{Network: "tcp", Addr: "127.0.0.1:18080"},
+		{Network: "tcp", Addr: "0.0.0.0:18443", TLS: true},
+	}, cfg.ClientHosts())
+	assert.Equal(t, []ListenAddr{{Network: "unix", Addr: "/tmp/wfx-mgmt.sock"}}, cfg.MgmtHosts())
+}
+
+func TestNewAppConfig_InvalidListenURL(t *testing.T) {
+	flags := NewFlagset()
+	require.NoError(t, flags.Parse([]string{"--" + ClientHostFlag, "ftp://localhost:21"}))
+
+	cfg, err := NewAppConfig(flags)
+	assert.Nil(t, cfg)
+	assert.Error(t, err)
+}
+
+func TestNewAppConfig_ListenURLsFromYAML(t *testing.T) {
+	cfgFile, err := os.CreateTemp("", "config.yaml")
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = os.Remove(cfgFile.Name()) })
+	_, err = cfgFile.WriteString("client-host:\n  - http://127.0.0.1:18080\n  - https://127.0.0.1:18443\nmgmt-host: unix:///tmp/wfx-mgmt.sock\n")
+	require.NoError(t, err)
+	require.NoError(t, cfgFile.Close())
+
+	flags := NewFlagset()
+	require.NoError(t, flags.Parse([]string{"--" + ConfigFlag, cfgFile.Name()}))
+	cfg, err := NewAppConfig(flags)
+	require.NoError(t, err)
+	t.Cleanup(cfg.Stop)
+
+	assert.Equal(t, []ListenAddr{
+		{Network: "tcp", Addr: "127.0.0.1:18080"},
+		{Network: "tcp", Addr: "127.0.0.1:18443", TLS: true},
+	}, cfg.ClientHosts())
+	assert.Equal(t, []ListenAddr{{Network: "unix", Addr: "/tmp/wfx-mgmt.sock"}}, cfg.MgmtHosts())
+}
+
+func TestNewAppConfig_ListenURLsFromEnv(t *testing.T) {
+	t.Setenv("WFX_CLIENT_HOST", "http://127.0.0.1:18080,https://127.0.0.1:18443")
+	t.Setenv("WFX_MGMT_HOST", "unix:///tmp/wfx-mgmt.sock")
+
+	flags := NewFlagset()
+	require.NoError(t, flags.Parse(nil))
+	cfg, err := NewAppConfig(flags)
+	require.NoError(t, err)
+	t.Cleanup(cfg.Stop)
+
+	assert.Equal(t, []ListenAddr{
+		{Network: "tcp", Addr: "127.0.0.1:18080"},
+		{Network: "tcp", Addr: "127.0.0.1:18443", TLS: true},
+	}, cfg.ClientHosts())
+	assert.Equal(t, []ListenAddr{{Network: "unix", Addr: "/tmp/wfx-mgmt.sock"}}, cfg.MgmtHosts())
+}
+
 func TestNewAppConfig_CORSWildcardOriginWithCredentials(t *testing.T) {
 	flags := NewFlagset()
 	_ = flags.Parse([]string{"--" + CORSAllowCredentialsFlag})

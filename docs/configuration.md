@@ -153,11 +153,12 @@ wfx currently supports the following network communication channels:
 - `https`: HTTP over TLS (Transport Layer Security)
 - `unix`: Unix-domain sockets
 
-With the `--scheme` configuration option, one or multiple from the preceding list are enabled.
+`--client-host` and `--mgmt-host` take fully-qualified listen URLs and may be repeated to enable multiple listeners.
 For instance, to use wfx in HTTPS-only mode:
 
 ```bash
-wfx --scheme=https \
+wfx --client-host=https://0.0.0.0:8443 \
+    --mgmt-host=https://127.0.0.1:8444 \
     --tls-certificate=localhost/cert.pem \
     --tls-key=localhost/key.pem
 ```
@@ -165,9 +166,10 @@ wfx --scheme=https \
 To enable both, HTTP and HTTPS, simultaneously, bound to different hosts:
 
 ```bash
-wfx --scheme=http,https \
-    --client-host=localhost \
-    --client-tls-host=0.0.0.0 \
+wfx --client-host=http://localhost:8080 \
+    --client-host=https://0.0.0.0:8443 \
+    --mgmt-host=http://127.0.0.1:8081 \
+    --mgmt-host=https://127.0.0.1:8444 \
     --tls-certificate=localhost/cert.pem \
     --tls-key=localhost/key.pem
 ```
@@ -175,27 +177,19 @@ wfx --scheme=http,https \
 To exclusively use Unix-domain sockets:
 
 ```bash
-wfx --scheme unix \
-    --client-unix-socket /tmp/wfx-client.sock \
-    --mgmt-unix-socket /tmp/wfx-mgmt.sock
+wfx --client-host unix:///tmp/wfx-client.sock \
+    --mgmt-host unix:///tmp/wfx-mgmt.sock
 ```
 
 The following connectivity parameters are available:
 
-| Parameter           | Description                                                                       |
-| :------------------ | :-------------------------------------------------------------------------------- |
-| `--scheme`          | One or multiple communication schemes to be used for client-server communication. |
-| `--client-host`     | The address to listen on for client HTTP requests                                 |
-| `--client-port`     | The port to listen on for client HTTP requests                                    |
-| `--client-tls-host` | Same as `--client-host` but for HTTP over TLS                                     |
-| `--client-tls-port` | Same as `--client-port` but for HTTP over TLS                                     |
-| `--mgmt-host`       | The address to listen on for wfx management / operator HTTP requests              |
-| `--mgmt-port`       | The port to listen on for wfx management /operator HTTP requests                  |
-| `--mgmt-tls-host`   | Same as `--mgmt-host` but for HTTP over TLS                                       |
-| `--mgmt-tls-port`   | Same as `--mgmt-port` but for HTTP over TLS                                       |
-| `--tls-certificate` | The location of the TLS certificate file                                          |
-| `--tls-key`         | The location of the TLS key file                                                  |
-| `--tls-ca`          | The certificate authority certificate file for mutual TLS authentication          |
+| Parameter           | Description                                                                                          |
+| :------------------ | :--------------------------------------------------------------------------------------------------- |
+| `--client-host`     | Southbound listen URL (`http://host:port`, `https://host:port`, or `unix:///path`); may be repeated |
+| `--mgmt-host`       | Northbound listen URL (`http://host:port`, `https://host:port`, or `unix:///path`); may be repeated |
+| `--tls-certificate` | The location of the TLS certificate file                                                             |
+| `--tls-key`         | The location of the TLS key file                                                                     |
+| `--tls-ca`          | The certificate authority certificate file for mutual TLS authentication                             |
 
 ## Cross-Origin Resource Sharing (CORS)
 

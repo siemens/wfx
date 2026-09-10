@@ -11,7 +11,6 @@ package server
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net"
 	"net/http"
 	"sync"
@@ -139,96 +138,52 @@ func NewServerCollection(cfg *config.AppConfig, wfx api.StrictServerInterface, s
 
 func (sc *ServerCollection) Start() error {
 	cfg := sc.cfg
-	schemes := cfg.Schemes()
 	// check for socket-based activation; order of sockets: south, north
 	systemdListeners, _ := activation.Listeners()
-	if len(systemdListeners) > 0 {
-		// perform sanity checks
-		if len(systemdListeners) != 2 {
-			return fault.New("systemd socket-based activation requires two sockets")
-		}
-		if len(schemes) != 1 || schemes[0] != config.SchemeUnix {
-			return fault.New("systemd socket-based activation only supports unix scheme")
-		}
+	if len(systemdListeners) > 0 && len(systemdListeners) != 2 {
+		return fault.New("systemd socket-based activation requires two sockets")
 	}
 
 	var g errgroup.Group
-	for _, scheme := range schemes {
-		var northListener, southListener net.Listener
-		if len(systemdListeners) > 0 {
-			log.Debug().Msg("Using sockets provided by systemd")
-			southListener, northListener = systemdListeners[0], systemdListeners[1]
-		} else {
+	start := func(name string, srv *http.Server, ln net.Listener, useTLS bool) {
+		log.Info().
+			Bool("tls", useTLS).
+			Str("addr", ln.Addr().String()).
+			Msgf("Starting %s server", name)
+		g.Go(func() error {
+			defer log.Debug().Msgf("%s goroutine finished", name)
 			var err error
-			northSettings := ListenerSettings{
-				Host:    cfg.MgmtHost(),
-				Port:    cfg.MgmtPort(),
-				TLSHost: cfg.MgmtTLSHost(),
-				TLSPort: cfg.MgmtTLSPort(),
-				UDSPath: cfg.MgmtUnixSocket(),
+			if useTLS {
+				err = srv.ServeTLS(ln, cfg.TLSCertificate(), cfg.TLSKey())
+			} else {
+				err = srv.Serve(ln)
 			}
-			northListener, err = createListener(scheme, northSettings)
-			if err != nil {
-				return fault.Wrap(err)
+			if err != nil && !errors.Is(err, http.ErrServerClosed) {
+				return fault.Wrap(err, fmsg.With(name+" server encountered an error"))
 			}
+			return nil
+		})
+	}
 
-			southSettings := ListenerSettings{
-				Host:    cfg.ClientHost(),
-				Port:    cfg.ClientPort(),
-				TLSHost: cfg.ClientTLSHost(),
-				TLSPort: cfg.ClientTLSPort(),
-				UDSPath: cfg.ClientUnixSocket(),
-			}
-			southListener, err = createListener(scheme, southSettings)
+	if len(systemdListeners) > 0 {
+		log.Debug().Msg("Using sockets provided by systemd")
+		start("southbound", sc.South, systemdListeners[0], false)
+		start("northbound", sc.North, systemdListeners[1], false)
+	} else {
+		for _, addr := range cfg.MgmtHosts() {
+			ln, err := createListener(addr)
 			if err != nil {
 				return fault.Wrap(err)
 			}
+			start("northbound", sc.North, ln, addr.TLS)
 		}
-
-		isTLS := scheme == config.SchemeHTTPS
-		log.Info().
-			Bool("tls", isTLS).
-			Str("scheme", scheme.String()).
-			Str("addr", northListener.Addr().String()).
-			Msg("Starting northbound server")
-		g.Go(func() error {
-			defer func() {
-				log.Debug().Msg("Northbound goroutine finished")
-			}()
-
-			var err error
-			if isTLS {
-				err = sc.North.ServeTLS(northListener, cfg.TLSCertificate(), cfg.TLSKey())
-			} else {
-				err = sc.North.Serve(northListener)
+		for _, addr := range cfg.ClientHosts() {
+			ln, err := createListener(addr)
+			if err != nil {
+				return fault.Wrap(err)
 			}
-			if err != nil && !errors.Is(err, http.ErrServerClosed) {
-				return fault.Wrap(err, fmsg.With("northbound server encountered an error"))
-			}
-			return nil
-		})
-
-		log.Info().
-			Bool("tls", isTLS).
-			Str("scheme", scheme.String()).
-			Str("addr", southListener.Addr().String()).
-			Msg("Starting southbound server")
-		g.Go(func() error {
-			defer func() {
-				log.Debug().Msg("Southbound goroutine finished")
-			}()
-
-			var err error
-			if isTLS {
-				err = sc.South.ServeTLS(southListener, cfg.TLSCertificate(), cfg.TLSKey())
-			} else {
-				err = sc.South.Serve(southListener)
-			}
-			if err != nil && !errors.Is(err, http.ErrServerClosed) {
-				return fault.Wrap(err, fmsg.With("southbound server encountered an error"))
-			}
-			return nil
-		})
+			start("southbound", sc.South, ln, addr.TLS)
+		}
 	}
 
 	if len(sc.pluginErrors) > 0 {
@@ -347,31 +302,9 @@ func createPluginMiddlewares(pluginDir string) ([]*plugin.Middleware, error) {
 	return pluginMWs, nil
 }
 
-type ListenerSettings struct {
-	Host    string
-	Port    int
-	TLSHost string
-	TLSPort int
-	UDSPath string
-}
-
-func createListener(scheme config.Scheme, settings ListenerSettings) (net.Listener, error) {
-	var network, addr string
-	switch scheme {
-	case config.SchemeUnix:
-		network = "unix"
-		addr = settings.UDSPath
-	case config.SchemeHTTP:
-		network = "tcp"
-		addr = fmt.Sprintf("%s:%d", settings.Host, settings.Port)
-	case config.SchemeHTTPS:
-		network = "tcp"
-		addr = fmt.Sprintf("%s:%d", settings.TLSHost, settings.TLSPort)
-	default:
-		return nil, fault.Newf("unsupported scheme: %s", scheme)
-	}
-	contextLogger := log.With().Str("network", network).Str("addr", addr).Str("scheme", scheme.String()).Logger()
-	ln, err := net.Listen(network, addr)
+func createListener(addr config.ListenAddr) (net.Listener, error) {
+	contextLogger := log.With().Str("network", addr.Network).Str("addr", addr.Addr).Bool("tls", addr.TLS).Logger()
+	ln, err := net.Listen(addr.Network, addr.Addr)
 	if err != nil {
 		return nil, fault.Wrap(err)
 	}

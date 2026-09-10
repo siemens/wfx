@@ -49,9 +49,8 @@ func TestUDS(t *testing.T) {
 	cmd.SetArgs([]string{
 		"--log-level=debug",
 		"--storage-opt=file:wfx?mode=memory&cache=shared&_fk=1",
-		"--scheme=unix",
-		"--client-unix-socket", clientSocket,
-		"--mgmt-unix-socket", mgmtSocket,
+		"--client-host", "unix://" + clientSocket,
+		"--mgmt-host", "unix://" + mgmtSocket,
 	})
 	ctx, cancel := context.WithCancel(context.Background())
 	cmd.SetContext(ctx)
@@ -98,7 +97,8 @@ func TestTLSOnly(t *testing.T) {
 	cmd.SetArgs([]string{
 		"--log-level=debug",
 		"--storage-opt=file:wfx?mode=memory&cache=shared&_fk=1",
-		"--scheme=https",
+		"--client-host", "https://" + testHost + ":8443",
+		"--mgmt-host", "https://127.0.0.1:8444",
 		"--tls-certificate", pubkey,
 		"--tls-key", privkey,
 	})
@@ -120,12 +120,10 @@ func TestTLSOnly(t *testing.T) {
 		Timeout: time.Second * 10,
 	}
 
-	f := config.NewFlagset()
-
 	var upCount int
 	tlsEndpoints := []string{
-		fmt.Sprintf("https://%s:%s", testHost, f.Lookup(config.ClientTLSPortFlag).DefValue),
-		fmt.Sprintf("https://%s:%s", f.Lookup(config.MgmtTLSHostFlag).DefValue, f.Lookup(config.MgmtTLSPortFlag).DefValue),
+		fmt.Sprintf("https://%s:8443", testHost),
+		"https://127.0.0.1:8444",
 	}
 	for i := 0; i < 30; i++ {
 		upCount = 0
@@ -147,8 +145,8 @@ func TestTLSOnly(t *testing.T) {
 	}
 
 	insecureEndpoints := []string{
-		fmt.Sprintf("http://%s:%s", testHost, f.Lookup(config.ClientPortFlag).DefValue),
-		fmt.Sprintf("http://%s:%s", f.Lookup(config.MgmtHostFlag).DefValue, f.Lookup(config.MgmtPortFlag).DefValue),
+		fmt.Sprintf("http://%s:8080", testHost),
+		"http://127.0.0.1:8081",
 	}
 	for _, endpoint := range insecureEndpoints {
 		resp, err := httpClient.Get(fmt.Sprintf("%s/health", endpoint))
@@ -171,8 +169,10 @@ func TestTLSMixedMode(t *testing.T) {
 	cmd.SetArgs([]string{
 		"--log-level=debug",
 		"--storage-opt=file:wfx?mode=memory&cache=shared&_fk=1",
-		"--scheme=http",
-		"--scheme=https",
+		"--client-host", "http://" + testHost + ":8080",
+		"--client-host", "https://" + testHost + ":8443",
+		"--mgmt-host", "http://127.0.0.1:8081",
+		"--mgmt-host", "https://127.0.0.1:8444",
 		"--tls-certificate", pubkey,
 		"--tls-key", privkey,
 	})
@@ -194,14 +194,12 @@ func TestTLSMixedMode(t *testing.T) {
 		Timeout: time.Second * 10,
 	}
 
-	f := config.NewFlagset()
-
 	var upCount int
 	endpoints := []string{
-		fmt.Sprintf("http://%s:%s", testHost, f.Lookup(config.ClientPortFlag).DefValue),
-		fmt.Sprintf("https://%s:%s", testHost, f.Lookup(config.ClientTLSPortFlag).DefValue),
-		fmt.Sprintf("http://%s:%s", f.Lookup(config.MgmtHostFlag).DefValue, f.Lookup(config.MgmtPortFlag).DefValue),
-		fmt.Sprintf("https://%s:%s", f.Lookup(config.MgmtTLSHostFlag).DefValue, f.Lookup(config.MgmtTLSPortFlag).DefValue),
+		fmt.Sprintf("http://%s:8080", testHost),
+		fmt.Sprintf("https://%s:8443", testHost),
+		"http://127.0.0.1:8081",
+		"https://127.0.0.1:8444",
 	}
 	t.Logf("Endpoints: %v", endpoints)
 	for i := 0; i < 30; i++ {
@@ -311,10 +309,7 @@ func TestAPI(t *testing.T) {
 		_ = tmpFile.Close()
 		t.Cleanup(func() { _ = os.Remove(tmpFile.Name()) })
 
-		t.Setenv("WFX_CLIENT_HOST", "localhost")
-		t.Setenv("WFX_CLIENT_PORT", "8080")
-		t.Setenv("WFX_MGMT_HOST", "localhost")
-		t.Setenv("WFX_MGMT_PORT", "8081")
+		t.Setenv("WFX_HOST", "http://localhost:8081")
 
 		wfxctl := cmd.NewCommand()
 		wfxctl.SetArgs([]string{"workflow", "create", tmpFile.Name()})

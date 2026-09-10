@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - wfxctl now uses a single `--host` parameter defaulting to the northbound API. This replaces the previous separate northbound/southbound host, port, TLS, and Unix socket parameters.
 - Job definition updates through the southbound API are no longer allowed
 - Reject client IDs and tags containing characters outside `[A-Za-z0-9_.:/@-]` so they can be used in HTTP headers and URLs without encoding
+- wfx `--client-host` and `--mgmt-host` now take fully-qualified listen URLs (`http://host:port`, `https://host:port`, `unix:///path`) and may be given multiple times to enable multiple schemes. This replaces `--scheme`, `--client-port`, `--client-tls-host`, `--client-tls-port`, `--client-unix-socket`, `--mgmt-port`, `--mgmt-tls-host`, `--mgmt-tls-port`, and `--mgmt-unix-socket`.
 
 ### Added
 

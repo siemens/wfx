@@ -17,7 +17,7 @@ teardown() {
   systemd-socket-activate \
     --listen "$BATS_TEST_TMPDIR/wfx-client.sock" \
     --listen "$BATS_TEST_TMPDIR/wfx-mgmt.sock" \
-    wfx --scheme unix &
+    wfx --client-host "unix://$BATS_TEST_TMPDIR/wfx-client.sock" --mgmt-host "unix://$BATS_TEST_TMPDIR/wfx-mgmt.sock" &
   local RC
   local i=0
   while [[ $i -lt 30 ]]; do
