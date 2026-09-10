@@ -9,8 +9,10 @@ package config
  */
 
 import (
+	"io"
 	"os"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -131,6 +133,43 @@ func TestNewAppConfig_ListenURLsFromEnv(t *testing.T) {
 		{Network: "tcp", Addr: "127.0.0.1:18443", TLS: true},
 	}, cfg.ClientHosts())
 	assert.Equal(t, []ListenAddr{{Network: "unix", Addr: "/tmp/wfx-mgmt.sock"}}, cfg.MgmtHosts())
+}
+
+func TestNewAppConfig_UnknownOptionWarn(t *testing.T) {
+	t.Setenv("WFX_FOO", "bar")
+	t.Setenv("WFX_Mixed_Case", "x")
+
+	cfgFile, err := os.CreateTemp("", "config.yaml")
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = os.Remove(cfgFile.Name()) })
+	_, err = cfgFile.WriteString("unknown-file-opt: 42\n")
+	require.NoError(t, err)
+	require.NoError(t, cfgFile.Close())
+
+	flags := NewFlagset()
+	require.NoError(t, flags.Parse([]string{"--" + ConfigFlag, cfgFile.Name()}))
+
+	oldStderr := os.Stderr
+	r, w, err := os.Pipe()
+	require.NoError(t, err)
+	os.Stderr = w
+
+	cfg, err := NewAppConfig(flags)
+
+	_ = w.Close()
+	os.Stderr = oldStderr
+
+	require.NoError(t, err)
+	t.Cleanup(cfg.Stop)
+
+	var buf strings.Builder
+	_, _ = io.Copy(&buf, r)
+	_ = r.Close()
+
+	out := buf.String()
+	assert.Contains(t, out, "WARN: Ignoring unknown config option 'WFX_FOO' from env\n")
+	assert.Contains(t, out, "WARN: Ignoring unknown config option 'WFX_Mixed_Case' from env\n")
+	assert.Contains(t, out, "WARN: Ignoring unknown config option 'unknown-file-opt' from file\n")
 }
 
 func TestNewAppConfig_CORSWildcardOriginWithCredentials(t *testing.T) {
