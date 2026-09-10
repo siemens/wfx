@@ -10,6 +10,8 @@ package config
 
 import (
 	"fmt"
+	"net"
+	"net/url"
 	"os"
 	"slices"
 	"strings"
@@ -40,7 +42,6 @@ type AppConfig struct {
 	storage          string
 	storageOpts      string
 	gracefulTimeout  time.Duration
-	schemes          []Scheme
 	simpleFileServer string
 
 	ssePingInterval  time.Duration
@@ -61,19 +62,17 @@ type AppConfig struct {
 	tlsCertificate   string
 	tlsKey           string
 
-	clientHost       string
-	clientPort       int
-	clientTLSHost    string
-	clientTLSPort    int
-	clientUnixSocket string
+	clientHosts      []ListenAddr
 	clientPluginsDir string
 
-	mgmtHost       string
-	mgmtPort       int
-	mgmtTLSHost    string
-	mgmtTLSPort    int
-	mgmtUnixSocket string
+	mgmtHosts      []ListenAddr
 	mgmtPluginsDir string
+}
+
+type ListenAddr struct {
+	Network string
+	Addr    string
+	TLS     bool
 }
 
 type JQOpts struct {
@@ -94,18 +93,6 @@ type OAuthOpts struct {
 	Issuer   string
 	ClientID string
 	Scope    string
-}
-
-type Scheme int
-
-const (
-	SchemeHTTP Scheme = iota
-	SchemeHTTPS
-	SchemeUnix
-)
-
-func (scheme Scheme) String() string {
-	return []string{"http", "https", "unix"}[scheme]
 }
 
 func NewAppConfig(flags *pflag.FlagSet) (*AppConfig, error) {
@@ -144,7 +131,11 @@ func NewAppConfig(flags *pflag.FlagSet) (*AppConfig, error) {
 		Prefix: "WFX_",
 		TransformFunc: func(k string, v string) (string, any) {
 			// WFX_LOG_LEVEL becomes log-level
-			return strings.ReplaceAll(strings.ToLower(strings.TrimPrefix(k, "WFX_")), "_", "-"), v
+			key := strings.ReplaceAll(strings.ToLower(strings.TrimPrefix(k, "WFX_")), "_", "-")
+			if key == ClientHostFlag || key == MgmtHostFlag {
+				return key, splitListenURLs(v)
+			}
+			return key, v
 		},
 	})
 	if err := k.Load(envProvider, nil, mergeFn); err != nil {
@@ -225,12 +216,6 @@ func (cfg *AppConfig) GracefulTimeout() time.Duration {
 	return cfg.gracefulTimeout
 }
 
-func (cfg *AppConfig) Schemes() []Scheme {
-	cfg.mutex.RLock()
-	defer cfg.mutex.RUnlock()
-	return cfg.schemes
-}
-
 func (cfg *AppConfig) SimpleFileserver() string {
 	cfg.mutex.RLock()
 	defer cfg.mutex.RUnlock()
@@ -266,23 +251,6 @@ func (cfg *AppConfig) Reload() bool {
 	cfg.oauthOpts.ClientID = cfg.k.String(OAuthClientIDFlag)
 	cfg.oauthOpts.Scope = cfg.k.String(OAuthScopeFlag)
 
-	if schemes := cfg.k.Strings(SchemeFlag); len(schemes) > 0 {
-		cfg.schemes = make([]Scheme, 0, len(schemes))
-		for _, s := range schemes {
-			switch s {
-			case "http":
-				cfg.schemes = append(cfg.schemes, SchemeHTTP)
-			case "https":
-				cfg.schemes = append(cfg.schemes, SchemeHTTPS)
-			case "unix":
-				cfg.schemes = append(cfg.schemes, SchemeUnix)
-			default:
-				log.Error().Str("scheme", s).Msgf("Unknown scheme %q", s)
-				ok = false
-			}
-		}
-	}
-
 	cfg.tlsCACertificate = cfg.k.String(TLSCaFlag)
 	cfg.tlsCertificate = cfg.k.String(TLSCertificateFlag)
 	cfg.tlsKey = cfg.k.String(TLSKeyFlag)
@@ -303,19 +271,21 @@ func (cfg *AppConfig) Reload() bool {
 	cfg.cleanupTimeout = cfg.k.Duration(CleanupTimeoutFlag)
 	cfg.keepAlive = cfg.k.Bool(KeepAliveFlag)
 
-	cfg.mgmtHost = cfg.k.String(MgmtHostFlag)
-	cfg.mgmtPort = cfg.k.Int(MgmtPortFlag)
-	cfg.mgmtTLSHost = cfg.k.String(MgmtTLSHostFlag)
-	cfg.mgmtTLSPort = cfg.k.Int(MgmtTLSPortFlag)
-	cfg.mgmtUnixSocket = cfg.k.String(MgmtUnixSocketFlag)
 	cfg.mgmtPluginsDir = cfg.k.String(MgmtPluginsDirFlag)
-
-	cfg.clientHost = cfg.k.String(ClientHostFlag)
-	cfg.clientPort = cfg.k.Int(ClientPortFlag)
-	cfg.clientTLSHost = cfg.k.String(ClientTLSHostFlag)
-	cfg.clientTLSPort = cfg.k.Int(ClientTLSPortFlag)
-	cfg.clientUnixSocket = cfg.k.String(ClientUnixSocketFlag)
 	cfg.clientPluginsDir = cfg.k.String(ClientPluginsDirFlag)
+
+	if addrs, err := parseListenURLs(hostValues(cfg.k, MgmtHostFlag)); err != nil {
+		log.Error().Err(err).Msgf("Invalid %s", MgmtHostFlag)
+		ok = false
+	} else {
+		cfg.mgmtHosts = addrs
+	}
+	if addrs, err := parseListenURLs(hostValues(cfg.k, ClientHostFlag)); err != nil {
+		log.Error().Err(err).Msgf("Invalid %s", ClientHostFlag)
+		ok = false
+	} else {
+		cfg.clientHosts = addrs
+	}
 
 	lvlString := cfg.k.String(LogLevelFlag)
 	if lvl, err := zerolog.ParseLevel(lvlString); err != nil {
@@ -392,34 +362,10 @@ func (cfg *AppConfig) TLSKey() string {
 	return cfg.tlsKey
 }
 
-func (cfg *AppConfig) ClientHost() string {
+func (cfg *AppConfig) ClientHosts() []ListenAddr {
 	cfg.mutex.RLock()
 	defer cfg.mutex.RUnlock()
-	return cfg.clientHost
-}
-
-func (cfg *AppConfig) ClientPort() int {
-	cfg.mutex.RLock()
-	defer cfg.mutex.RUnlock()
-	return cfg.clientPort
-}
-
-func (cfg *AppConfig) ClientTLSHost() string {
-	cfg.mutex.RLock()
-	defer cfg.mutex.RUnlock()
-	return cfg.clientTLSHost
-}
-
-func (cfg *AppConfig) ClientTLSPort() int {
-	cfg.mutex.RLock()
-	defer cfg.mutex.RUnlock()
-	return cfg.clientTLSPort
-}
-
-func (cfg *AppConfig) ClientUnixSocket() string {
-	cfg.mutex.RLock()
-	defer cfg.mutex.RUnlock()
-	return cfg.clientUnixSocket
+	return slices.Clone(cfg.clientHosts)
 }
 
 func (cfg *AppConfig) ClientPluginsDir() string {
@@ -428,34 +374,10 @@ func (cfg *AppConfig) ClientPluginsDir() string {
 	return cfg.clientPluginsDir
 }
 
-func (cfg *AppConfig) MgmtHost() string {
+func (cfg *AppConfig) MgmtHosts() []ListenAddr {
 	cfg.mutex.RLock()
 	defer cfg.mutex.RUnlock()
-	return cfg.mgmtHost
-}
-
-func (cfg *AppConfig) MgmtPort() int {
-	cfg.mutex.RLock()
-	defer cfg.mutex.RUnlock()
-	return cfg.mgmtPort
-}
-
-func (cfg *AppConfig) MgmtTLSHost() string {
-	cfg.mutex.RLock()
-	defer cfg.mutex.RUnlock()
-	return cfg.mgmtTLSHost
-}
-
-func (cfg *AppConfig) MgmtTLSPort() int {
-	cfg.mutex.RLock()
-	defer cfg.mutex.RUnlock()
-	return cfg.mgmtTLSPort
-}
-
-func (cfg *AppConfig) MgmtUnixSocket() string {
-	cfg.mutex.RLock()
-	defer cfg.mutex.RUnlock()
-	return cfg.mgmtUnixSocket
+	return slices.Clone(cfg.mgmtHosts)
 }
 
 func (cfg *AppConfig) MgmtPluginsDir() string {
@@ -508,4 +430,67 @@ func (cfg *AppConfig) InitStorage() (persistence.Storage, error) {
 	}
 	log.Info().Str("name", name).Msgf("Initialized storage %q", name)
 	return storage, nil
+}
+
+func hostValues(k *koanf.Koanf, key string) []string {
+	if strs := k.Strings(key); len(strs) > 0 {
+		return strs
+	}
+	if s := k.String(key); s != "" {
+		return splitListenURLs(s)
+	}
+	return nil
+}
+
+func splitListenURLs(v string) []string {
+	parts := strings.Split(v, ",")
+	out := make([]string, 0, len(parts))
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p != "" {
+			out = append(out, p)
+		}
+	}
+	return out
+}
+
+func parseListenURLs(raw []string) ([]ListenAddr, error) {
+	addrs := make([]ListenAddr, 0, len(raw))
+	for _, s := range raw {
+		addr, err := parseListenURL(s)
+		if err != nil {
+			return nil, fault.Wrap(err)
+		}
+		addrs = append(addrs, addr)
+	}
+	return addrs, nil
+}
+
+func parseListenURL(raw string) (ListenAddr, error) {
+	u, err := url.Parse(raw)
+	if err != nil {
+		return ListenAddr{}, fault.Newf("invalid listen URL %q", raw)
+	}
+	switch u.Scheme {
+	case "http", "https":
+		if u.Hostname() == "" {
+			return ListenAddr{}, fault.Newf("host missing from %q", raw)
+		}
+		port := u.Port()
+		if port == "" {
+			return ListenAddr{}, fault.Newf("port missing from %q", raw)
+		}
+		return ListenAddr{
+			Network: "tcp",
+			Addr:    net.JoinHostPort(u.Hostname(), port),
+			TLS:     u.Scheme == "https",
+		}, nil
+	case "unix":
+		if u.Host != "" || u.Path == "" {
+			return ListenAddr{}, fault.New("unix host must have form unix:///path/to/socket")
+		}
+		return ListenAddr{Network: "unix", Addr: u.Path}, nil
+	default:
+		return ListenAddr{}, fault.Newf("unsupported host scheme %q (want http, https, or unix)", u.Scheme)
+	}
 }

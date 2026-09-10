@@ -21,6 +21,30 @@ func TestDefaultConfigFiles(t *testing.T) {
 	assert.NotEmpty(t, fnames)
 }
 
+func TestHostFlags(t *testing.T) {
+	flags := NewFlagset()
+	require.NoError(t, flags.Parse([]string{
+		"--" + ClientHostFlag, "https://0.0.0.0:8443",
+		"--" + ClientHostFlag, "unix:///tmp/wfx-client.sock",
+		"--" + MgmtHostFlag, "http://127.0.0.1:8081",
+	}))
+
+	clientHosts, err := flags.GetStringSlice(ClientHostFlag)
+	require.NoError(t, err)
+	assert.Equal(t, []string{"https://0.0.0.0:8443", "unix:///tmp/wfx-client.sock"}, clientHosts)
+
+	mgmtHosts, err := flags.GetStringSlice(MgmtHostFlag)
+	require.NoError(t, err)
+	assert.Equal(t, []string{"http://127.0.0.1:8081"}, mgmtHosts)
+
+	for _, removed := range []string{
+		"scheme", "client-port", "client-tls-host", "client-tls-port", "client-unix-socket",
+		"mgmt-port", "mgmt-tls-host", "mgmt-tls-port", "mgmt-unix-socket",
+	} {
+		assert.Nil(t, flags.Lookup(removed))
+	}
+}
+
 func TestJQFilterTimeoutFlag(t *testing.T) {
 	flags := NewFlagset()
 	require.NoError(t, flags.Parse([]string{"--" + JQFilterTimeoutFlag, "5s"}))
