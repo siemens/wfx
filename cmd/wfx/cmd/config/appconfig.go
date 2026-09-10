@@ -102,17 +102,26 @@ func NewAppConfig(flags *pflag.FlagSet) (*AppConfig, error) {
 		knownOptions[flag.Name] = true
 	})
 
-	mergeFn := koanf.WithMergeFunc(func(src, dest map[string]any) error {
-		// merge src into dest
-		for k, v := range src {
-			if _, exists := knownOptions[k]; !exists {
-				fmt.Fprintf(os.Stderr, "WARN: Ignoring unknown config option '%s'", k)
-				continue
+	envNames := make(map[string]string)
+	mergeFn := func(source string) koanf.Option {
+		return koanf.WithMergeFunc(func(src, dest map[string]any) error {
+			// merge src into dest
+			for k, v := range src {
+				if _, exists := knownOptions[k]; !exists {
+					opt := k
+					if source == "env" {
+						if orig, ok := envNames[k]; ok {
+							opt = orig
+						}
+					}
+					fmt.Fprintf(os.Stderr, "WARN: Ignoring unknown config option '%s' from %s\n", opt, source)
+					continue
+				}
+				dest[k] = v
 			}
-			dest[k] = v
-		}
-		return nil
-	})
+			return nil
+		})
+	}
 
 	// Load the config files provided in the commandline and set up file watches
 	cFiles, _ := flags.GetStringSlice(ConfigFlag)
@@ -120,7 +129,7 @@ func NewAppConfig(flags *pflag.FlagSet) (*AppConfig, error) {
 	for _, fname := range cFiles {
 		if _, err := os.Stat(fname); err == nil {
 			fp := file.Provider(fname)
-			if err := k.Load(fp, yaml.Parser(), mergeFn); err != nil {
+			if err := k.Load(fp, yaml.Parser(), mergeFn("file")); err != nil {
 				return nil, fault.Wrap(err)
 			}
 			fileProviders = append(fileProviders, fp)
@@ -132,13 +141,14 @@ func NewAppConfig(flags *pflag.FlagSet) (*AppConfig, error) {
 		TransformFunc: func(k string, v string) (string, any) {
 			// WFX_LOG_LEVEL becomes log-level
 			key := strings.ReplaceAll(strings.ToLower(strings.TrimPrefix(k, "WFX_")), "_", "-")
+			envNames[key] = k
 			if key == ClientHostFlag || key == MgmtHostFlag {
 				return key, splitListenURLs(v)
 			}
 			return key, v
 		},
 	})
-	if err := k.Load(envProvider, nil, mergeFn); err != nil {
+	if err := k.Load(envProvider, nil, mergeFn("env")); err != nil {
 		fmt.Fprintln(os.Stderr, "ERROR: Could not load env variables")
 	}
 	if err := k.Load(posflag.Provider(flags, ".", k), nil); err != nil {
@@ -158,7 +168,7 @@ func NewAppConfig(flags *pflag.FlagSet) (*AppConfig, error) {
 			if err != nil {
 				return
 			}
-			if err := k.Load(fp, yaml.Parser(), mergeFn); err == nil {
+			if err := k.Load(fp, yaml.Parser(), mergeFn("file")); err == nil {
 				if ok := cfg.Reload(); !ok {
 					log.Error().Err(err).Msg("Failed to reload config")
 				}
