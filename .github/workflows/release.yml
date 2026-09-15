@@ -161,7 +161,7 @@ jobs:
       - name: Log in to ghcr.io
         uses: redhat-actions/podman-login@4c93cb1ea36b10156ea541570dc69bc04dffe10e # v1.1.2
         with:
-          registry: ghcr.io/${{ github.repository_owner }}
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
@@ -174,6 +174,10 @@ jobs:
           registry: ghcr.io
 
       - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+      - name: Log in cosign to ghcr.io
+        run: cosign login ghcr.io --username "${{ github.actor }}" --password-stdin <<< "$GITHUB_TOKEN"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Attest SBOM per architecture
         env:
           IMAGE: ghcr.io/${{ steps.build_image_multiarch.outputs.image }}
