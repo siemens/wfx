@@ -76,7 +76,7 @@
   },
   "devDependencies": {
     "@docsy/theme": "0.17.0",
-    "sass-embedded": "1.104.0"
+    "sass-embedded": "1.104.1"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
