@@ -7,40 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [0.7.0] - 2026-09-15
+
+This release includes major changes, including multiple breaking configuration and API updates. Please read this changelog carefully before upgrading.
+
 ### Breaking
 
-- CORS is off by default as it is typically not needed to serve the UI (same origin). It can optionally be enabled via the `--cors-enabled` flag.
-- CORS headers will only be set for northbound responses (and never for the southbound API).
-- wfxctl now uses a single `--host` parameter defaulting to the northbound API. This replaces the previous separate northbound/southbound host, port, TLS, and Unix socket parameters.
-- Job definition updates through the southbound API are no longer allowed
-- Reject client IDs and tags containing characters outside `[A-Za-z0-9_.:/@-]` so they can be used in HTTP headers and URLs without encoding
-- wfx `--client-host` and `--mgmt-host` now take fully-qualified listen URLs (`http://host:port`, `https://host:port`, `unix:///path`) and may be given multiple times to enable multiple schemes. This replaces `--scheme`, `--client-port`, `--client-tls-host`, `--client-tls-port`, `--client-unix-socket`, `--mgmt-port`, `--mgmt-tls-host`, `--mgmt-tls-port`, and `--mgmt-unix-socket`.
+- CORS is off by default as it is typically not needed to serve the UI (same origin). It can optionally be enabled via the `--cors-enabled` flag ([588509c](https://github.com/siemens/wfx/commit/588509ccb116f1f0e9af0a8e31470638936e5b0a)).
+- CORS headers will only be set for northbound responses (and never for the southbound API) ([588509c](https://github.com/siemens/wfx/commit/588509ccb116f1f0e9af0a8e31470638936e5b0a)).
+- wfxctl now uses a single `--host` parameter defaulting to the northbound API. This replaces the previous separate northbound/southbound host, port, TLS, and Unix socket parameters ([07bc77d](https://github.com/siemens/wfx/commit/07bc77dafd6a8ebeda41bc00acc2a9cd7a3de177)).
+- Job definition updates through the southbound API are no longer allowed ([1ef55ea](https://github.com/siemens/wfx/commit/1ef55eaa165944cf1f535bdd6bdef9895f147989)).
+- Reject client IDs and tags containing characters outside `[A-Za-z0-9_.:/@-]` so they can be used in HTTP headers and URLs without encoding ([eb4bf59](https://github.com/siemens/wfx/commit/eb4bf593171f7608c8751b72b9d9be9c6cdaed04)).
+- wfx `--client-host` and `--mgmt-host` now take fully-qualified listen URLs (`http://host:port`, `https://host:port`, `unix:///path`) and may be given multiple times to enable multiple schemes. This replaces `--scheme`, `--client-port`, `--client-tls-host`, `--client-tls-port`, `--client-unix-socket`, `--mgmt-port`, `--mgmt-tls-host`, `--mgmt-tls-port`, and `--mgmt-unix-socket` ([c404429](https://github.com/siemens/wfx/commit/c404429bc33d8d3af5f73c3b54744dcc6b13c4d4)).
 
 ### Added
 
-- `--jq-filter-timeout` to limit the execution time of JQ response filters (default: 30s, `0` disables the limit)
-- `--jq-filter-max-response-size` to limit the size of a JQ response filter result (default: 16 MiB, `0` disables the limit)
-- Configurable CORS headers for northbound API
-- UI: add fallback configuration using default local WFX management API
-- UI: display wfx JSON error messages, hiding other response bodies
-- wfxctl: new global `--header` flag to add custom HTTP headers, e.g. `--header 'Authorization: Bearer $TOKEN'` (similar to curl's `-H` option, may be given multiple times)
-- wfxctl: support Git-style credential helper plugins through `--credential-helper`
-- Optional `X-Client-Id` header for restricting southbound job listing/event streaming/retrieval/updates to a client ID; deployments may set it at a trusted gateway to enforce client isolation
-- Generate SBOMs for container images
-- Use cyclonedx-gomod to generate higher-quality CycloneDX SBOMs for Go
-- Upload attested SBOMs into OCI registry
+- `--jq-filter-timeout` to limit the execution time of JQ response filters (default: 30s, `0` disables the limit) ([032d1b4](https://github.com/siemens/wfx/commit/032d1b407aed7f3e30a16192bcbb4156fa07a714))
+- `--jq-filter-max-response-size` to limit the size of a JQ response filter result (default: 16 MiB, `0` disables the limit) ([032d1b4](https://github.com/siemens/wfx/commit/032d1b407aed7f3e30a16192bcbb4156fa07a714))
+- Configurable CORS headers for northbound API ([0559ad9](https://github.com/siemens/wfx/commit/0559ad9ff625a6b00c93ab684c72f232b115d04a))
+- UI: add fallback configuration using default local WFX management API ([fd510af](https://github.com/siemens/wfx/commit/fd510af0c1ab2ce8ef6c6cfaaea949d6611984a3))
+- UI: display wfx JSON error messages, hiding other response bodies ([5320546](https://github.com/siemens/wfx/commit/5320546cc2fe788252c0e7293428e8733bfbe429))
+- wfxctl: new global `--header` flag to add custom HTTP headers, e.g. `--header 'Authorization: Bearer $TOKEN'` (similar to curl's `-H` option, may be given multiple times) ([07bc77d](https://github.com/siemens/wfx/commit/07bc77dafd6a8ebeda41bc00acc2a9cd7a3de177))
+- wfxctl: support Git-style credential helper plugins through `--credential-helper` ([0366c45](https://github.com/siemens/wfx/commit/0366c4597abefb276a7edeb445586e23fda6bc06))
+- Optional `X-Client-Id` header for restricting southbound job listing/event streaming/retrieval/updates to a client ID; deployments may set it at a trusted gateway to enforce client isolation ([34e39f6](https://github.com/siemens/wfx/commit/34e39f69cdbe54a8c528da772283086590315d55))
+- Generate SBOMs for container images ([49b08c6](https://github.com/siemens/wfx/commit/49b08c6102791779c93cf27a39978ed987389ec2))
+- Use cyclonedx-gomod to generate higher-quality CycloneDX SBOMs for Go ([49b08c6](https://github.com/siemens/wfx/commit/49b08c6102791779c93cf27a39978ed987389ec2))
+- Upload attested SBOMs into OCI registry ([49b08c6](https://github.com/siemens/wfx/commit/49b08c6102791779c93cf27a39978ed987389ec2))
 
 ### Changed
 
-- Report failing JQ response filters as HTTP 400 (`wfx.invalidResponseFilter`) instead of 500
-- ui: switch to hash-based navigation
+- Report failing JQ response filters as HTTP 400 (`wfx.invalidResponseFilter`) instead of 500 ([032d1b4](https://github.com/siemens/wfx/commit/032d1b407aed7f3e30a16192bcbb4156fa07a714))
+- ui: switch to hash-based navigation ([4c6beef](https://github.com/siemens/wfx/commit/4c6beef56878e6a5689cc33a1279e0f1b60c59d0))
 
 ### Fixed
 
-- Apply reloaded SSE ping and grace intervals to new job event connections
-- CORS is registered globally now, thereby adding support for the HTTP OPTIONS method
-- Log error stacks once at process boundaries and prevent internal error details from leaking in HTTP 500 responses
-- Honor `X-Forwarded-Proto` when generating the OpenAPI discovery link
+- Apply reloaded SSE ping and grace intervals to new job event connections ([f6182ac](https://github.com/siemens/wfx/commit/f6182ac4df55376a275b7605ba696a292ee81f88))
+- CORS is registered globally now, thereby adding support for the HTTP OPTIONS method ([f563273](https://github.com/siemens/wfx/commit/f563273c42dc8aae127617501a408079a9dae83e))
+- Log error stacks once at process boundaries and prevent internal error details from leaking in HTTP 500 responses ([dc7da15](https://github.com/siemens/wfx/commit/dc7da1595a7c2e809461ff1752ec7707849b4736))
+- Honor `X-Forwarded-Proto` when generating the OpenAPI discovery link ([4fed0a5](https://github.com/siemens/wfx/commit/4fed0a58d230cc1dae067fc8ef641d50c2b2e339))
 
 ## [0.6.0] - 2026-06-03
 
@@ -206,4 +210,5 @@ Initial release of wfx.
 [0.4.1]: https://github.com/siemens/wfx/releases/tag/v0.4.1
 [0.5.0]: https://github.com/siemens/wfx/releases/tag/v0.5.0
 [0.6.0]: https://github.com/siemens/wfx/releases/tag/v0.6.0
-[unreleased]: https://github.com/siemens/wfx/compare/v0.6.0...HEAD
+[0.7.0]: https://github.com/siemens/wfx/releases/tag/v0.7.0
+[unreleased]: https://github.com/siemens/wfx/compare/v0.7.0...HEAD
