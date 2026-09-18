@@ -28,6 +28,14 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+
+      - name: Check CHANGELOG
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          . .ci/packages/versions.env
+          pip install --quiet "tree-sitter==${TREE_SITTER_VERSION}" "tree-sitter-markdown==${TREE_SITTER_MARKDOWN_VERSION}"
+          .ci/check-changelog.py
+
       - uses: ./.github/actions/setup-ui
       - uses: ./.github/actions/setup-build
 

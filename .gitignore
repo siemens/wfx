@@ -27,3 +27,5 @@ coverage*
 .devenv*
 devenv.local.nix
 devenv.local.yaml
+__pycache__
+.pytest_cache

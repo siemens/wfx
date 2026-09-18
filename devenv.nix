@@ -76,6 +76,10 @@
         pkgs.cyclonedx-gomod
         pkgs.cosign
         pkgs.buildah
+        pkgs.tree-sitter
+        pkgs.python3Packages.tree-sitter
+        pkgs.python3Packages.tree-sitter-markdown
+        pkgs.python3Packages.pytest
       ];
     };
   };
