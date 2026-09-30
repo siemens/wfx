@@ -25,6 +25,7 @@ import (
 	"github.com/Southclaws/fault"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/getkin/kin-openapi/routers/gorillamux"
+	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/siemens/wfx/api"
@@ -563,4 +564,47 @@ func TestDownload_NotFound(t *testing.T) {
 	mux.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/download/", nil))
 	result := rec.Result()
 	assert.Equal(t, http.StatusNotFound, result.StatusCode)
+}
+
+func TestRequestIDResponses(t *testing.T) {
+	db := newInMemoryDB(t)
+	north, south := createNorthAndSouth(t, db, "--cors-enabled")
+	ids := make(map[string]bool)
+	for name, handler := range map[string]http.Handler{"north": north, "south": south} {
+		for _, tc := range []struct {
+			method string
+			path   string
+			status int
+		}{
+			{http.MethodGet, "/version", http.StatusOK},
+			{http.MethodGet, "/api/wfx/v1/version", http.StatusOK},
+			{http.MethodGet, "/api/wfx/v1/jobs?offset=invalid", http.StatusBadRequest},
+			{http.MethodGet, "/api/wfx/v1/jobs/missing", http.StatusNotFound},
+			{http.MethodGet, "/api/wfx/v1/missing", http.StatusNotFound},
+			{http.MethodPost, "/api/wfx/v1/version", http.StatusMethodNotAllowed},
+			{http.MethodOptions, "/api/wfx/v1/jobs", http.StatusNoContent},
+		} {
+			t.Run(name+tc.method+tc.path, func(t *testing.T) {
+				req := httptest.NewRequest(tc.method, tc.path, nil)
+				req.Header.Set("X-Request-ID", "caller-provided")
+				req.Header.Set("Origin", "https://example.com")
+				req.Header.Set("Access-Control-Request-Method", http.MethodGet)
+				rec := httptest.NewRecorder()
+				handler.ServeHTTP(rec, req)
+				if name == "south" && tc.method == http.MethodOptions {
+					assert.Equal(t, http.StatusMethodNotAllowed, rec.Code)
+				} else {
+					assert.Equal(t, tc.status, rec.Code)
+				}
+				id := rec.Result().Header.Get("X-Request-ID")
+				_, err := uuid.Parse(id)
+				require.NoError(t, err)
+				assert.False(t, ids[id])
+				ids[id] = true
+				if name == "north" && tc.method != http.MethodOptions {
+					assert.Equal(t, "X-Request-Id", rec.Result().Header.Get("Access-Control-Expose-Headers"))
+				}
+			})
+		}
+	}
 }
