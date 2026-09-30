@@ -13,12 +13,17 @@ import (
 	"errors"
 	"net"
 	"net/http"
+	"net/url"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"
 	"github.com/coreos/go-systemd/v22/activation"
+	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/getkin/kin-openapi/routers"
+	"github.com/getkin/kin-openapi/routers/gorillamux"
 	nethttpmiddleware "github.com/oapi-codegen/nethttp-middleware"
 	"github.com/rs/cors"
 	"github.com/rs/zerolog/log"
@@ -34,7 +39,17 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-var getSpec = sync.OnceValues(api.GetSpec)
+var getSpec = sync.OnceValues(func() (*openapi3.T, error) {
+	swag, err := api.GetSpec()
+	if err != nil {
+		return nil, fault.Wrap(err)
+	}
+	// Legacy object examples are JSON strings; validate structure and refs only.
+	if err := swag.Validate(context.Background(), openapi3.DisableExamplesValidation()); err != nil {
+		return nil, fault.Wrap(err)
+	}
+	return swag, nil
+})
 
 type ServerCollection struct {
 	once    sync.Once
@@ -48,7 +63,10 @@ type ServerCollection struct {
 }
 
 func NewServerCollection(cfg *config.AppConfig, wfx api.StrictServerInterface, storage persistence.Storage) (*ServerCollection, error) {
-	swag, _ := getSpec()
+	swag, err := getSpec()
+	if err != nil {
+		return nil, fault.Wrap(err)
+	}
 	validator := nethttpmiddleware.OapiRequestValidatorWithOptions(swag,
 		&nethttpmiddleware.Options{SilenceServersWarning: true})
 	logMW := logging.NewLoggingMiddleware()
@@ -261,7 +279,10 @@ func (sc *ServerCollection) Stop() {
 }
 
 func createServer(cfg *config.AppConfig, ssi api.StrictServerInterface, router *http.ServeMux, baseMWs []api.MiddlewareFunc, pluginMWs []*plugin.Middleware) (*http.Server, error) {
-	swag, _ := getSpec()
+	swag, err := getSpec()
+	if err != nil {
+		return nil, fault.Wrap(err)
+	}
 	basePath := errutil.Must(swag.Servers.BasePath())
 	strictHandler := api.NewStrictHandlerWithOptions(ssi, nil, api.StrictHTTPServerOptions{
 		ResponseErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request, err error) {
@@ -280,8 +301,66 @@ func createServer(cfg *config.AppConfig, ssi api.StrictServerInterface, router *
 	for _, mw := range pluginMWs {
 		handler = mw.Middleware()(handler)
 	}
+	queryRouter, err := gorillamux.NewRouter(swag)
+	if err != nil {
+		return nil, fault.Wrap(err)
+	}
+	handler = caseInsensitiveQuery(handler, queryRouter)
 	server, err := NewHTTPServer(cfg, handler)
 	return server, fault.Wrap(err)
+}
+
+// caseInsensitiveQuery normalizes incoming query parameter keys to the exact casing defined in the OpenAPI spec for the
+// matched operation.
+//
+// NOTE: Keys cannot simply be lowercased: OpenAPI validation (openapi3filter) and downstream Go struct binders are
+// case-sensitive. Lowercasing would break schema checks and field binding when specs define camelCase/PascalCase
+// parameters (e.g., "pageSize").
+func caseInsensitiveQuery(next http.Handler, router routers.Router) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// find matching OpenAPI operation to look up its canonical parameter schema
+		route, _, err := router.FindRoute(r)
+		if err != nil {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		if _, err := url.ParseQuery(r.URL.RawQuery); err != nil {
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			return
+		}
+
+		// map lowercase parameter names to their canonical spec casing
+		names := make(map[string]string)
+		for _, parameters := range []openapi3.Parameters{route.PathItem.Parameters, route.Operation.Parameters} {
+			for _, parameter := range parameters {
+				if parameter.Value.In == openapi3.ParameterInQuery {
+					name := parameter.Value.Name
+					names[strings.ToLower(name)] = name
+				}
+			}
+		}
+
+		changed := false
+		parts := strings.Split(r.URL.RawQuery, "&")
+		for i, part := range parts {
+			key, value, hasValue := strings.Cut(part, "=")
+			key, _ = url.QueryUnescape(key)
+			if name, ok := names[strings.ToLower(key)]; ok && key != name {
+				// Rewrite only key name to canonical spec casing; preserve value and order
+				parts[i] = url.QueryEscape(name)
+				if hasValue {
+					parts[i] += "=" + value
+				}
+				changed = true
+			}
+		}
+		if changed {
+			r = r.Clone(r.Context())
+			r.URL.RawQuery = strings.Join(parts, "&")
+		}
+		next.ServeHTTP(w, r)
+	})
 }
 
 func createPluginMiddlewares(pluginDir string) ([]*plugin.Middleware, error) {
