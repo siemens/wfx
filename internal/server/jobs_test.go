@@ -59,6 +59,14 @@ func TestGetJobs(t *testing.T) {
 					Assert(jsonpath.Len(`$.content`, 0)).
 					Status(http.StatusOK).
 					End()
+				apitest.New().
+					Handler(handler).
+					Get("/api/wfx/v1/jobs").
+					Query("GrOuP", "CLOSED").
+					Expect(t).
+					Assert(jsonpath.Len(`$.content`, 0)).
+					Status(http.StatusOK).
+					End()
 			})
 			t.Run("Pagination", func(t *testing.T) {
 				apitest.New().

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Changed
+
+- Treat URL query parameter names case-insensitively by normalizing them to the canonical casing defined in the OpenAPI specification
+
 ## [0.7.0] - 2026-09-15
 
 This release includes major changes, including multiple breaking configuration and API updates. Please read this changelog carefully before upgrading.
