@@ -30,6 +30,7 @@ import (
 	"github.com/siemens/wfx/cmd/wfx/cmd/config"
 	"github.com/siemens/wfx/cmd/wfxctl/errutil"
 	"github.com/siemens/wfx/generated/api"
+	"github.com/siemens/wfx/internal/gron"
 	"github.com/siemens/wfx/internal/handler/job/events"
 	"github.com/siemens/wfx/middleware/logging"
 	"github.com/siemens/wfx/middleware/plugin"
@@ -305,7 +306,7 @@ func createServer(cfg *config.AppConfig, ssi api.StrictServerInterface, router *
 	if err != nil {
 		return nil, fault.Wrap(err)
 	}
-	handler = caseInsensitiveQuery(handler, queryRouter)
+	handler = gron.Middleware(caseInsensitiveQuery(handler, queryRouter))
 	server, err := NewHTTPServer(cfg, handler)
 	return server, fault.Wrap(err)
 }

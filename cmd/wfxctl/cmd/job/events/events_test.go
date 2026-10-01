@@ -18,6 +18,55 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestSSETransportWriteEventGron(t *testing.T) {
+	var out bytes.Buffer
+	transport := SSETransport{out: &out, format: "gron"}
+
+	assert.NoError(t, transport.writeEvent(`{"id":"1","action":"UPDATE_STATUS"}`))
+	assert.Equal(t, "json = {};\njson.action = \"UPDATE_STATUS\";\njson.id = \"1\";\n\n", out.String())
+}
+
+func TestSubscribeJobStatusGron(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		payload string
+		output  string
+		error   string
+	}{
+		{
+			name:    "two events",
+			payload: "data: {\"id\":\"1\"}\n\n: keepalive\n\ndata: {\"id\":\"2\"}\n\n",
+			output:  "json = {};\njson.id = \"1\";\n\njson = {};\njson.id = \"2\";\n\n",
+			error:   "connection to server lost",
+		},
+		{
+			name:    "invalid payload",
+			payload: "data: invalid\n\ndata: {\"id\":\"2\"}\n\n",
+			error:   "invalid character",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			var accept string
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				accept = r.Header.Get("Accept")
+				w.Header().Set("Content-Type", "text/event-stream")
+				_, _ = w.Write([]byte(tc.payload))
+			}))
+			t.Cleanup(ts.Close)
+			t.Setenv("WFX_HOST", ts.URL)
+			t.Setenv("WFX_FORMAT", "gron")
+
+			var out bytes.Buffer
+			cmd := NewCommand()
+			cmd.SetOut(&out)
+			cmd.SetErr(&bytes.Buffer{})
+			assert.ErrorContains(t, cmd.Execute(), tc.error)
+			assert.Equal(t, "text/event-stream", accept)
+			assert.Equal(t, tc.output, out.String())
+		})
+	}
+}
+
 func TestSubscribeJobStatus(t *testing.T) {
 	const expectedPath = "/api/wfx/v1/jobs/events"
 	var actualPath string
