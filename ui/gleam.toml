@@ -32,6 +32,6 @@ plinth = ">= 0.9.3 and < 1.0.0"
 
 [dev-dependencies]
 gleeunit = "== 1.11.0"
-lustre_dev_tools = "== 2.3.6"
+lustre_dev_tools = "== 2.4.0"
 simplifile = "== 2.7.0"
 birdie = "== 2.0.2"
