@@ -259,3 +259,23 @@ func TestNewBaseCmd_EnvHostAndHeaders(t *testing.T) {
 	assert.Equal(t, "https://example.com:1234", b.Host)
 	assert.Equal(t, []string{"Authorization: Bearer token"}, b.Headers)
 }
+
+func TestProcessResponseRequestID(t *testing.T) {
+	for _, body := range []string{"", "plain error", `{"errors":[{"code":"bad","message":"bad request","logref":"legacy"}]}`} {
+		t.Run(body, func(t *testing.T) {
+			rec := httptest.NewRecorder()
+			rec.Header().Set("X-Request-ID", "server-id")
+			rec.WriteHeader(http.StatusBadRequest)
+			_, _ = rec.WriteString(body)
+			var out bytes.Buffer
+			err := new(BaseCmd).ProcessResponse(rec.Result(), &out)
+			assert.ErrorContains(t, err, `X-Request-ID: "server-id"`)
+		})
+	}
+	rec := httptest.NewRecorder()
+	rec.Header().Set("X-Request-ID", "server-id")
+	_, _ = rec.WriteString(`{"ok":true}`)
+	var out bytes.Buffer
+	require.NoError(t, new(BaseCmd).ProcessResponse(rec.Result(), &out))
+	assert.NotContains(t, out.String(), "server-id")
+}

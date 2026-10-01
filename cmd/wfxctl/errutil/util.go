@@ -11,7 +11,10 @@ package errutil
 import (
 	"fmt"
 	"io"
+	"net/http"
 
+	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 	"github.com/rs/zerolog/log"
 	"github.com/siemens/wfx/generated/api"
 )
@@ -23,6 +26,15 @@ func ProcessErrorResponse(w io.Writer, resp api.ErrorResponse) {
 			fmt.Fprintf(w, "ERROR: %s (code=%s, logref=%s)\n", msg.Message, msg.Code, msg.Logref)
 		}
 	}
+}
+
+func WithRequestID(err error, resp *http.Response) error {
+	if err != nil && resp != nil {
+		if id := resp.Header.Get("X-Request-ID"); id != "" {
+			return fault.Wrap(err, fmsg.Withf("X-Request-ID: %q", id))
+		}
+	}
+	return err
 }
 
 // Must is a utility function that takes a value and an error as parameters and returns the value if the error is nil.

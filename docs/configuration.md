@@ -191,9 +191,17 @@ The following connectivity parameters are available:
 | `--tls-key`         | The location of the TLS key file                                                                     |
 | `--tls-ca`          | The certificate authority certificate file for mutual TLS authentication                             |
 
+## Request correlation
+
+Each request gets a fresh UUID in the `X-Request-ID` response header, including
+error responses and SSE handshakes. The same UUID appears in request logs as
+`reqID`. Caller-provided request IDs are ignored. `wfxctl` includes the response
+ID when reporting HTTP or SSE errors.
+
 ## Cross-Origin Resource Sharing (CORS)
 
 CORS headers are disabled by default and never applied to the southbound API.
+When enabled, CORS exposes `X-Request-ID` to browser clients.
 The following parameters control CORS for the northbound API:
 
 | Parameter                  | Description                                                                                                                                                                       |
