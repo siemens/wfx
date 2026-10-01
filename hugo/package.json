@@ -20,7 +20,7 @@
     "colorjs.io": "^0.7.1",
     "dependency-graph": "^1.0.0",
     "electron-to-chromium": "^1.5.402",
-    "emoji-regex": "^10.0.0",
+    "emoji-regex": "^11.0.0",
     "escalade": "^3.2.0",
     "fill-range": "^7.1.1",
     "fraction.js": "^5.3.4",
@@ -76,7 +76,7 @@
   },
   "devDependencies": {
     "@docsy/theme": "0.17.0",
-    "sass-embedded": "1.104.1"
+    "sass-embedded": "1.105.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
