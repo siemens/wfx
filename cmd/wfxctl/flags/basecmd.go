@@ -9,12 +9,14 @@ package flags
  */
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime"
 	"net"
 	"net/http"
 	"net/url"
@@ -34,6 +36,7 @@ import (
 	"github.com/siemens/wfx/cmd/wfxctl/errutil"
 	"github.com/siemens/wfx/cmd/wfxctl/httpclient"
 	"github.com/siemens/wfx/generated/api"
+	"github.com/siemens/wfx/internal/gron"
 	"github.com/spf13/pflag"
 )
 
@@ -53,6 +56,7 @@ const (
 	LogLevelFlag         = "log-level"
 	MessageFlag          = "message"
 	OffsetFlag           = "offset"
+	FormatFlag           = "format"
 	ProgressFlag         = "progress"
 	RawFlag              = "raw"
 	SortFlag             = "sort"
@@ -72,6 +76,7 @@ type BaseCmd struct {
 	Filter string
 	// Strip quotes to make output usable in shell scripts
 	RawOutput bool
+	Format    string
 	ColorMode string
 
 	ID               string
@@ -162,6 +167,7 @@ func NewBaseCmd(f *pflag.FlagSet) BaseCmd {
 		JobIDs:           k.Strings(JobIDFlag),
 		Offset:           k.Int64(OffsetFlag),
 		RawOutput:        k.Bool(RawFlag),
+		Format:           k.String(FormatFlag),
 		Sort:             k.String(SortFlag),
 		TLSCa:            k.String(TLSCaFlag),
 		Tags:             tags,
@@ -267,6 +273,9 @@ func (b *BaseCmd) ServerRedacted() string {
 }
 
 func (b *BaseCmd) CreateClient(opts ...api.ClientOption) (*api.Client, error) {
+	if b.Format != "" && b.Format != "json" && b.Format != "gron" {
+		return nil, fault.Newf("unsupported output format: %s", b.Format)
+	}
 	server := b.server()
 	log.Debug().Msgf("Creating client for %q", b.ServerRedacted())
 	httpClient, err := b.CreateHTTPClient()
@@ -276,6 +285,14 @@ func (b *BaseCmd) CreateClient(opts ...api.ClientOption) (*api.Client, error) {
 	editor, err := httpclient.RequestEditor(b.Headers, b.CredentialHelper)
 	if err != nil {
 		return nil, fault.Wrap(err)
+	}
+	if b.Format == "gron" && b.Filter == "" {
+		opts = append(opts, api.WithRequestEditorFn(func(_ context.Context, req *http.Request) error {
+			if req.Header.Get("Accept") == "" {
+				req.Header.Set("Accept", "application/gron")
+			}
+			return nil
+		}))
 	}
 	opts = append([]api.ClientOption{api.WithHTTPClient(httpClient), api.WithRequestEditorFn(editor)}, opts...)
 	client, err := api.NewClient(server, opts...)
@@ -299,10 +316,24 @@ func (b *BaseCmd) ProcessResponse(resp *http.Response, w io.Writer) error {
 	statusCode := resp.StatusCode
 	switch statusCode {
 	case http.StatusOK, http.StatusCreated, http.StatusNoContent:
-		if err := b.dumpResponse(w, body); err != nil {
+		contentType, _, _ := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if strings.EqualFold(contentType, "application/gron") {
+			if b.Filter != "" {
+				return fault.New("cannot apply filter to application/gron response")
+			}
+			if _, err := w.Write(body); err != nil {
+				return fault.Wrap(err)
+			}
+		} else if err := b.dumpResponse(w, body); err != nil {
 			return fault.Wrap(err)
 		}
 	default:
+		if contentType, _, _ := mime.ParseMediaType(resp.Header.Get("Content-Type")); strings.EqualFold(contentType, "application/gron") {
+			if _, err := w.Write(body); err != nil {
+				return fault.Wrap(err)
+			}
+			return fault.Newf("HTTP status %d", statusCode)
+		}
 		var errorResponse api.ErrorResponse
 		if err := json.Unmarshal(body, &errorResponse); err == nil {
 			errutil.ProcessErrorResponse(w, errorResponse)
@@ -319,8 +350,11 @@ func (b *BaseCmd) dumpResponse(w io.Writer, payload []byte) error {
 	if len(payload) == 0 {
 		return nil
 	}
+	if b.Format == "gron" && b.Filter == "" {
+		return fault.Wrap(gron.Encode(w, bytes.NewReader(payload)))
+	}
 	if b.Filter != "" {
-		return fault.Wrap(dumpFiltered(payload, b.Filter, b.RawOutput, w))
+		return fault.Wrap(dumpFiltered(payload, b.Filter, b.RawOutput, b.Format, w))
 	}
 	var body any
 	if err := json.Unmarshal(payload, &body); err != nil {
@@ -331,7 +365,7 @@ func (b *BaseCmd) dumpResponse(w io.Writer, payload []byte) error {
 	return fault.Wrap(encoder.Encode(body))
 }
 
-func dumpFiltered(payload []byte, filter string, rawOutput bool, w io.Writer) error {
+func dumpFiltered(payload []byte, filter string, rawOutput bool, format string, w io.Writer) error {
 	query, err := gojq.Parse(filter)
 	if err != nil {
 		return fault.Wrap(err)
@@ -351,13 +385,22 @@ func dumpFiltered(payload []byte, filter string, rawOutput bool, w io.Writer) er
 			return fault.Wrap(err)
 		}
 
-		if rawOutput {
+		switch {
+		case rawOutput:
 			if s, ok := v.(string); ok {
 				fmt.Fprintf(w, "%s\n", s)
 			} else {
 				return fault.New("value is not a string. try disabling raw output mode")
 			}
-		} else {
+		case format == "gron":
+			payload, err := json.Marshal(v)
+			if err != nil {
+				return fault.Wrap(err)
+			}
+			if err := gron.Encode(w, bytes.NewReader(payload)); err != nil {
+				return fault.Wrap(err)
+			}
+		default:
 			encoder := json.NewEncoder(w)
 			encoder.SetIndent("", "  ")
 			if err := encoder.Encode(v); err != nil {
