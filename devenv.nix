@@ -34,7 +34,7 @@
         pkgs.gnused
 
         pkgs.go_latest
-        pkgs.go-tools
+        (pkgs.go-tools.override { buildGoModule = pkgs.buildGo127Module; })
         pkgs.gofumpt
         pkgs.gopls
         pkgs.reftools
