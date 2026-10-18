@@ -227,6 +227,58 @@ It's the client's responsibility to handle the filtered response properly ― wh
 Filters are executed with a time limit (`--jq-filter-timeout`, default 30s; `0` disables the limit) and their result is capped by `--jq-filter-max-response-size` (default 16 MiB; `0` disables the limit).
 A filter which is invalid, fails at runtime, times out or exceeds the size limit results in an HTTP 400 response with error code `wfx.invalidResponseFilter`; no partial response body is ever emitted.
 
+### Gron Responses
+
+Clients can request [gron](https://github.com/tomnomnom/gron)-style assignment output for JSON API responses by setting the `Accept: application/gron` HTTP header.
+SSE job events are a special case: the server must send `Content-Type: text/event-stream`, so a different output format such as gron cannot be negotiated via `Accept`.
+Instead, `wfxctl job events --format gron` performs the gron transformation client-side on each event payload.
+In gron format, object properties use dot notation, array items use numeric indices, and keys containing special characters use bracket notation.
+This flattens JSON into discrete lines, making data easy to grep, diff, inspect, or process with standard UNIX tools.
+For example, this is a gron response:
+
+```
+json = {};
+json.state = "PROGRESS";
+```
+
+**Example 1**: Parse lines into keys and values using bash
+
+```bash
+curl -sSf http://localhost:8080/api/wfx/v1/jobs/c5e64c93-e5d1-4b16-9b88-095fab9d8702/status \
+  -H 'Accept: application/gron' |
+while IFS= read -r line; do
+    [[ "$line" != *" = "* ]] && continue
+    key="${line%% = *}"
+    value="${line#* = }"
+    value="${value%;}"
+
+    # Skip empty object/array declarations
+    [[ "$value" == "{}" || "$value" == "[]" ]] && continue
+
+    printf 'key=%s value=%s\n' "$key" "$value"
+done
+```
+This snippet assumes property names contain no spaces. Values retain gron syntax, including quoted strings.
+
+**Example 2**: Convert gron to JSON
+
+Use [gron](https://github.com/tomnomnom/gron) to convert gron to JSON:
+
+```sh
+curl -sSf http://localhost:8080/api/wfx/v1/jobs/1/status \
+  -H 'Accept: application/gron' |
+  grep 'json.state' |
+  gron --ungron
+```
+
+**Example 3**: Request gron format using wfxctl
+
+In `wfxctl`, request this format using `--format gron`:
+
+```bash
+wfxctl job get-status --id 1 --format gron
+```
+
 ### Health Check
 
 wfx includes an internal health check service that's accessible at `/health`, e.g., via

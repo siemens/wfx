@@ -125,14 +125,69 @@ func TestDumpFilter(t *testing.T) {
 	err := b.dumpResponse(&buf, payload)
 	assert.NoError(t, err)
 	assert.JSONEq(t, "\"1\"", buf.String())
+
+	b.Format = "gron"
+	buf.Reset()
+	assert.NoError(t, b.dumpResponse(&buf, payload))
+	assert.Equal(t, "json = \"1\";\n", buf.String())
 }
 
 func TestDumpFilterRaw(t *testing.T) {
 	payload := []byte("{\n  \"foo\": \"bar\",\n  \"id\": \"1\"\n}\n")
 	var buf bytes.Buffer
-	err := dumpFiltered(payload, ".id", true, &buf)
+	err := dumpFiltered(payload, ".id", true, "json", &buf)
 	assert.NoError(t, err)
 	assert.JSONEq(t, "1", buf.String())
+}
+
+func TestGronFormat(t *testing.T) {
+	const gronPayload = `json.state = "PROGRESS";
+`
+	var accept string
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		accept = r.Header.Get("Accept")
+		if accept == "application/gron" {
+			w.Header().Set("Content-Type", "application/gron")
+			_, _ = w.Write([]byte(gronPayload))
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"state":"PROGRESS"}`))
+	}))
+	defer ts.Close()
+
+	b := NewBaseCmd(pflag.NewFlagSet("wfx", pflag.ExitOnError))
+	b.Host = ts.URL
+	b.Format = "gron"
+	client, err := b.CreateClient()
+	require.NoError(t, err)
+	resp, err := client.GetJobsIdStatus(context.Background(), "1", nil)
+	require.NoError(t, err)
+	var output bytes.Buffer
+	require.NoError(t, b.ProcessResponse(resp, &output))
+	assert.Equal(t, "application/gron", accept)
+	assert.Equal(t, gronPayload, output.String())
+
+	b.Headers = []string{"Accept: application/json"}
+	client, err = b.CreateClient()
+	require.NoError(t, err)
+	resp, err = client.GetJobsIdStatus(context.Background(), "1", nil)
+	require.NoError(t, err)
+	output.Reset()
+	require.NoError(t, b.ProcessResponse(resp, &output))
+	assert.Equal(t, "application/json", accept)
+	assert.Equal(t, "json = {};\njson.state = \"PROGRESS\";\n", output.String())
+
+	b.Headers = nil
+	b.Filter = ".state"
+	client, err = b.CreateClient()
+	require.NoError(t, err)
+	resp, err = client.GetJobsIdStatus(context.Background(), "1", nil)
+	require.NoError(t, err)
+	output.Reset()
+	require.NoError(t, b.ProcessResponse(resp, &output))
+	assert.Empty(t, accept)
+	assert.Equal(t, "json = \"PROGRESS\";\n", output.String())
 }
 
 func TestProcessResponse(t *testing.T) {
@@ -180,6 +235,18 @@ func TestProcessResponse_ErrorResponse(t *testing.T) {
 	b := NewBaseCmd(pflag.NewFlagSet("wfx", pflag.ExitOnError))
 	err := b.ProcessResponse(resp, buf)
 	assert.Error(t, err)
+}
+
+func TestProcessResponse_GronError(t *testing.T) {
+	recorder := httptest.NewRecorder()
+	recorder.Header().Set("Content-Type", "application/gron")
+	recorder.WriteHeader(http.StatusBadRequest)
+	_, _ = recorder.WriteString("json.errors[0].message = \"bad request\";\n")
+	var output bytes.Buffer
+	b := NewBaseCmd(pflag.NewFlagSet("wfx", pflag.ExitOnError))
+	err := b.ProcessResponse(recorder.Result(), &output)
+	require.EqualError(t, err, "HTTP status 400")
+	assert.Equal(t, "json.errors[0].message = \"bad request\";\n", output.String())
 }
 
 func TestSortParam_Asc(t *testing.T) {

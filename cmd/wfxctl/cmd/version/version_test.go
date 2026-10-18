@@ -9,6 +9,7 @@ package version
  */
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -18,6 +19,25 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func TestVersionGron(t *testing.T) {
+	var accept string
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		accept = r.Header.Get("Accept")
+		w.Header().Set("Content-Type", "application/gron")
+		_, _ = w.Write([]byte("json.version = \"0.0.0\";\n"))
+	}))
+	defer ts.Close()
+	t.Setenv("WFX_HOST", ts.URL)
+	t.Setenv("WFX_FORMAT", "gron")
+
+	cmd := NewCommand()
+	var output bytes.Buffer
+	cmd.SetOut(&output)
+	require.NoError(t, cmd.Execute())
+	assert.Equal(t, "application/gron", accept)
+	assert.Equal(t, "json.version = \"0.0.0\";\n", output.String())
+}
 
 func TestVersion(t *testing.T) {
 	const expectedPath = "/api/wfx/v1/version"

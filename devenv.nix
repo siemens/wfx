@@ -39,6 +39,7 @@
         pkgs.gopls
         pkgs.reftools
         pkgs.golangci-lint
+        pkgs.gron
       ];
     };
 

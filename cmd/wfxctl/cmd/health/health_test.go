@@ -44,6 +44,42 @@ func TestNewCommand_RequestError(t *testing.T) {
 	require.Error(t, cmd.Execute())
 }
 
+func TestNewCommand_Gron(t *testing.T) {
+	var accept string
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		accept = r.Header.Get("Accept")
+		w.Header().Set("Content-Type", "application/gron")
+		_, _ = w.Write([]byte("json.status = \"up\";\n"))
+	}))
+	defer ts.Close()
+	t.Setenv("WFX_HOST", ts.URL)
+	t.Setenv("WFX_FORMAT", "gron")
+
+	var output bytes.Buffer
+	cmd := NewCommand()
+	cmd.SetOut(&output)
+	require.NoError(t, cmd.Execute())
+	assert.Equal(t, "application/gron", accept)
+	assert.Equal(t, "json.status = \"up\";\n", output.String())
+}
+
+func TestNewCommand_GronDown(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/gron")
+		w.WriteHeader(http.StatusServiceUnavailable)
+		_, _ = w.Write([]byte("json.status = \"down\";\n"))
+	}))
+	defer ts.Close()
+	t.Setenv("WFX_HOST", ts.URL)
+	t.Setenv("WFX_FORMAT", "gron")
+
+	var output bytes.Buffer
+	cmd := NewCommand()
+	cmd.SetOut(&output)
+	require.ErrorContains(t, cmd.Execute(), "wfx is not healthy")
+	assert.Equal(t, "json.status = \"down\";\n", output.String())
+}
+
 func TestNewCommand_Up(t *testing.T) {
 	var actualPath string
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

@@ -7,4 +7,4 @@
 set -euo pipefail
 
 apt-get update -q
-apt-get install -q -y --no-install-recommends bats jq systemd
+apt-get install -q -y --no-install-recommends bats gron jq systemd

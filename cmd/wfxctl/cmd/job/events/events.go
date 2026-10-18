@@ -9,6 +9,7 @@ package events
  */
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -24,6 +25,7 @@ import (
 	"github.com/siemens/wfx/cmd/wfxctl/errutil"
 	"github.com/siemens/wfx/cmd/wfxctl/flags"
 	"github.com/siemens/wfx/generated/api"
+	"github.com/siemens/wfx/internal/gron"
 )
 
 var validator = func(out io.Writer) sse.ResponseValidator {
@@ -57,18 +59,41 @@ var validator = func(out io.Writer) sse.ResponseValidator {
 type SSETransport struct {
 	sseClient *sse.Client
 	out       io.Writer
+	format    string
+}
+
+func (t SSETransport) writeEvent(data string) error {
+	if t.format == "gron" {
+		if err := gron.Encode(t.out, strings.NewReader(data)); err != nil {
+			return fault.Wrap(err)
+		}
+		_, err := io.WriteString(t.out, "\n")
+		return fault.Wrap(err)
+	}
+	_, err := io.WriteString(t.out, data+"\n")
+	return fault.Wrap(err)
 }
 
 // Do implements the runtime.ClientTransport interface.
 func (t SSETransport) Do(req *http.Request) (*http.Response, error) {
-	conn := t.sseClient.NewConnection(req)
+	ctx, cancel := context.WithCancel(req.Context())
+	defer cancel()
+	conn := t.sseClient.NewConnection(req.WithContext(ctx))
+	var writeErr error
 	unsubscribe := conn.SubscribeMessages(func(event sse.Event) {
-		_, _ = t.out.Write([]byte(event.Data))
-		_, _ = t.out.Write([]byte("\n"))
+		if writeErr == nil {
+			writeErr = t.writeEvent(event.Data)
+			if writeErr != nil {
+				cancel()
+			}
+		}
 	})
 	defer unsubscribe()
 
 	err := conn.Connect()
+	if writeErr != nil {
+		return nil, fault.Wrap(writeErr)
+	}
 	if err != nil {
 		log.Error().Msg(err.Error())
 		return nil, fault.Wrap(err)
@@ -104,7 +129,7 @@ wfxctl job events --job-id=1 --job-id=2 --client-id=foo
 			sseClient.OnRetry = func(_ error, sleep time.Duration) {
 				fmt.Fprintf(cmd.ErrOrStderr(), "SSE connection lost. Attempting to reconnect in %v...\n", sleep)
 			}
-			transport := SSETransport{sseClient: sse.DefaultClient, out: cmd.OutOrStdout()}
+			transport := SSETransport{sseClient: sse.DefaultClient, out: cmd.OutOrStdout(), format: baseCmd.Format}
 
 			client, err := baseCmd.CreateClient(api.WithHTTPClient(transport))
 			if err != nil {
