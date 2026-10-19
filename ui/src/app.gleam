@@ -17,8 +17,8 @@ import gleam/string_tree
 import gleam/uri.{type Uri}
 import lustre
 import lustre/effect.{type Effect}
-import mermaid
 import modem
+import pele
 import plinth/browser/clipboard
 import plinth/javascript/console
 import rsvp
@@ -164,11 +164,11 @@ pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
                 ..model,
                 workflow: Some(model.Workflow(
                   response: Ok(workflow),
-                  mermaid_diagram: None,
+                  diagram: None,
                   copied_to_clipboard: False,
                 )),
               ),
-              mermaid.get_workflow_diagram(workflow),
+              pele.get_workflow_diagram(workflow),
             )
             _ -> #(
               model,
@@ -233,12 +233,12 @@ pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
         workflow: Some(model.Workflow(
           response: response
             |> result.map_error(fn(err) { model.RsvpError(err) }),
-          mermaid_diagram: None,
+          diagram: None,
           copied_to_clipboard: False,
         )),
       ),
       case response {
-        Ok(workflow) -> mermaid.get_workflow_diagram(workflow)
+        Ok(workflow) -> pele.get_workflow_diagram(workflow)
         Error(_) -> log_error_response(response)
       },
     )
@@ -249,12 +249,12 @@ pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
         job: Some(model.Job(
           response: response
             |> result.map_error(fn(err) { model.RsvpError(err) }),
-          mermaid_diagram: None,
+          diagram: None,
           copied_to_clipboard: False,
         )),
       ),
       case response {
-        Ok(job) -> mermaid.get_job_diagram(job)
+        Ok(job) -> pele.get_job_diagram(job)
         Error(_) -> log_error_response(response)
       },
     )
@@ -280,7 +280,7 @@ pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
             |> option.flatten
             |> option.map(fn(x) { x.state })
           #(new_model, case new_job, old_state != new_state {
-            Some(job), True -> mermaid.get_job_diagram(job)
+            Some(job), True -> pele.get_job_diagram(job)
             _, _ -> effect.none()
           })
         }
@@ -289,24 +289,24 @@ pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
           #(model, effect.none())
         }
       }
-    msg.MermaidGeneratedJobDiagram(diagram) ->
+    msg.PeleGeneratedJobDiagram(diagram) ->
       case model.job {
         Some(job_model) -> #(
           Model(
             ..model,
-            job: Some(model.Job(..job_model, mermaid_diagram: Some(diagram))),
+            job: Some(model.Job(..job_model, diagram: Some(diagram))),
           ),
           effect.none(),
         )
         None -> #(model, effect.none())
       }
-    msg.MermaidGeneratedWorklowDiagram(diagram) ->
+    msg.PeleGeneratedWorkflowDiagram(diagram) ->
       case model.workflow {
         Some(workflow_model) -> #(
           Model(
             ..model,
             workflow: Some(
-              model.Workflow(..workflow_model, mermaid_diagram: Some(diagram)),
+              model.Workflow(..workflow_model, diagram: Some(diagram)),
             ),
           ),
           effect.none(),

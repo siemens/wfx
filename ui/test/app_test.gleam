@@ -19,6 +19,7 @@ import rsvp
 import wfx
 
 import app
+import pele
 import view
 
 const cfg = config.Config(
@@ -29,6 +30,44 @@ const cfg = config.Config(
 
 pub fn main() -> Nil {
   gleeunit.main()
+}
+
+pub fn workflow_diagram_source_escapes_labels_and_maps_transitions_test() {
+  let workflow =
+    wfx.Workflow(
+      name: "test",
+      description: None,
+      states: [
+        wfx.State(name: "A & \"B\"", description: None),
+        wfx.State(name: "DONE", description: None),
+      ],
+      groups: None,
+      transitions: [
+        wfx.Transition(
+          from: "A & \"B\"",
+          to: "DONE",
+          description: None,
+          eligible: wfx.EligibleClient,
+          action: None,
+        ),
+        wfx.Transition(
+          from: "A & \"B\"",
+          to: "DONE",
+          description: None,
+          eligible: wfx.EligibleWfx,
+          action: None,
+        ),
+      ],
+    )
+  let source = pele.workflow_diagram_source(workflow)
+
+  assert string.contains(
+    source,
+    "state \"A &amp; &quot;B&quot;\" as S0\n    state \"DONE\" as S1",
+  )
+  assert string.contains(source, "[*] --> S0")
+  assert string.contains(source, "S0 --> S1:CLIENT\n    S0 --> S1:WFX")
+  assert string.contains(source, "S1 --> [*]")
 }
 
 pub fn start_empty_test() {

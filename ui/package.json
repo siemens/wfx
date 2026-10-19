@@ -1,10 +1,10 @@
 {
   "scripts": {
-    "test": "node --experimental-test-module-mocks --no-warnings test/auth_ffi_test.mjs"
+    "test": "node --experimental-test-module-mocks --no-warnings test/auth_ffi_test.mjs && node test/pele_ffi_test.mjs"
   },
   "dependencies": {
     "highlight.js": "^11.11.1",
-    "mermaid": "^12.0.0",
-    "oidc-client-ts": "^3.5.0"
+    "oidc-client-ts": "^3.5.0",
+    "pele": "^1.6.0"
   }
 }

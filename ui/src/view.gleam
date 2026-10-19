@@ -597,12 +597,9 @@ fn view_single_workflow(model: model.Workflow) -> Element(Msg) {
     Ok(workflow) -> {
       div([class("flex flex-col justify-center items-center")], [
         h1([class("text-xl font-bold")], [text(workflow.name)]),
-        case model.mermaid_diagram {
+        case model.diagram {
           None -> p([], [text("Rendering...")])
-          Some(html) ->
-            html.pre([class("mermaid mb-4")], [
-              element.unsafe_raw_html("", "mermaid", [], html),
-            ])
+          Some(svg) -> element.unsafe_raw_html("", "div", [class("mb-4")], svg)
         },
         html.h2([class("text-xl font-bold")], [text("JSON")]),
         render_code(
@@ -706,12 +703,10 @@ fn view_single_job(model: model.Job) -> Element(Msg) {
         ]),
         div([class("mb-4")], [
           html.h2([class("text-xl font-bold")], [text(job.workflow.name)]),
-          case model.mermaid_diagram {
+          case model.diagram {
             None -> p([], [text("Rendering...")])
-            Some(html) ->
-              html.pre([class("mermaid mb-4")], [
-                element.unsafe_raw_html("", "mermaid", [], html),
-              ])
+            Some(svg) ->
+              element.unsafe_raw_html("", "div", [class("mb-4")], svg)
           },
         ]),
         html.h2([class("text-xl font-bold")], [text("JSON")]),
