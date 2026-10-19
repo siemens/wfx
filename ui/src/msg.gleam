@@ -16,8 +16,8 @@ pub type Msg {
   DocumentChangedRoute(model.Route)
   CopyToClipboard(String)
 
-  MermaidGeneratedWorklowDiagram(String)
-  MermaidGeneratedJobDiagram(String)
+  PeleGeneratedWorkflowDiagram(String)
+  PeleGeneratedJobDiagram(String)
 
   WfxSentJobs(Result(wfx.PaginatedJobList, rsvp.Error(String)))
   WfxSentWorkflows(Result(wfx.PaginatedWorkflowList, rsvp.Error(String)))

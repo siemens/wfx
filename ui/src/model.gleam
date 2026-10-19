@@ -51,7 +51,7 @@ pub type PaginatedJobs {
 pub type Job {
   Job(
     response: Result(wfx.Job, ApiError),
-    mermaid_diagram: Option(String),
+    diagram: Option(String),
     copied_to_clipboard: Bool,
   )
 }
@@ -63,7 +63,7 @@ pub type PaginatedWorkflows {
 pub type Workflow {
   Workflow(
     response: Result(wfx.Workflow, ApiError),
-    mermaid_diagram: Option(String),
+    diagram: Option(String),
     copied_to_clipboard: Bool,
   )
 }
