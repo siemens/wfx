@@ -5,7 +5,9 @@
 contentDir = "content"
 defaultContentLanguage = "en"
 defaultContentLanguageInSubdir = false
-relativeURLs = true
+baseURL = "https://siemens.github.io/wfx/"
+relativeURLs = false
+canonifyURLs = true
 
 theme = '@docsy/theme'
 themesDir = "node_modules"
