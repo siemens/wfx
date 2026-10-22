@@ -19,6 +19,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/siemens/wfx/generated/api"
 	"github.com/siemens/wfx/internal/handler/job"
 	"github.com/siemens/wfx/internal/handler/job/events"
@@ -117,10 +118,20 @@ func TestJobEventsSubscribe(t *testing.T) {
 
 			assert.Contains(t, response, "HTTP/1.1 200")
 			assert.Contains(t, response, "Content-Type: text/event-stream")
+			header, _, _ := strings.Cut(response, "\r\n\r\n")
+			var requestID string
+			for _, line := range strings.Split(header, "\r\n") {
+				if value, ok := strings.CutPrefix(line, "X-Request-Id: "); ok {
+					requestID = value
+				}
+			}
+			_, err = uuid.Parse(requestID)
+			require.NoError(t, err)
 			if tc.corsOrigin == "" {
 				assert.NotContains(t, response, "Access-Control-Allow-Origin")
 			} else {
 				assert.Contains(t, response, "Access-Control-Allow-Origin: "+tc.corsOrigin)
+				assert.Contains(t, response, "Access-Control-Expose-Headers: X-Request-Id")
 			}
 
 			lines := strings.Split(response, "\r\n")
@@ -128,9 +139,9 @@ func TestJobEventsSubscribe(t *testing.T) {
 			for _, line := range lines {
 				t.Logf(">> %s", line)
 			}
-			expectedLines := 7
+			expectedLines := 8
 			if tc.corsOrigin != "" {
-				expectedLines += 2
+				expectedLines += 3
 			}
 			assert.Len(t, lines, expectedLines)
 

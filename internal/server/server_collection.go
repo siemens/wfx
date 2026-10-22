@@ -69,10 +69,7 @@ func NewServerCollection(cfg *config.AppConfig, wfx api.StrictServerInterface, s
 	}
 	validator := nethttpmiddleware.OapiRequestValidatorWithOptions(swag,
 		&nethttpmiddleware.Options{SilenceServersWarning: true})
-	logMW := logging.NewLoggingMiddleware()
-
-	// LIFO
-	middlewares := []api.MiddlewareFunc{validator, logMW}
+	middlewares := []api.MiddlewareFunc{validator}
 
 	pluginMWs := make([]*plugin.Middleware, 0)
 	pluginErrors := make([]<-chan error, 0)
@@ -96,7 +93,7 @@ func NewServerCollection(cfg *config.AppConfig, wfx api.StrictServerInterface, s
 	// CORS must wrap the whole server: preflight (OPTIONS) requests match no
 	// route of our mux, so a per-route middleware would never see them.
 	northHandler := northServer.Handler
-	northServer.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	northServer.Handler = logging.NewLoggingMiddleware()(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		r.Header.Del("X-Client-Id")
 		corsOpts := cfg.CORSOpts()
 		if !corsOpts.Enabled {
@@ -107,10 +104,11 @@ func NewServerCollection(cfg *config.AppConfig, wfx api.StrictServerInterface, s
 			AllowedOrigins:   corsOpts.AllowedOrigins,
 			AllowedMethods:   corsOpts.AllowedMethods,
 			AllowedHeaders:   corsOpts.AllowedHeaders,
+			ExposedHeaders:   []string{"X-Request-ID"},
 			AllowCredentials: corsOpts.AllowCredentials,
 			MaxAge:           corsOpts.MaxAge,
 		}).Handler(northHandler).ServeHTTP(w, r)
-	})
+	}))
 
 	southPluginMWs, err := createPluginMiddlewares(cfg.ClientPluginsDir())
 	if err != nil {
@@ -138,12 +136,12 @@ func NewServerCollection(cfg *config.AppConfig, wfx api.StrictServerInterface, s
 		return nil, fault.Wrap(err)
 	}
 	southHandler := southServer.Handler
-	southServer.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	southServer.Handler = logging.NewLoggingMiddleware()(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if clientID := r.Header.Get("X-Client-Id"); clientID != "" {
 			r = r.WithContext(persistence.WithClientID(r.Context(), clientID))
 		}
 		southHandler.ServeHTTP(w, r)
-	})
+	}))
 	return &ServerCollection{
 		cfg:          cfg,
 		storage:      storage,

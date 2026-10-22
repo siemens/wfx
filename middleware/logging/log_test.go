@@ -9,7 +9,9 @@ package logging
  */
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -17,9 +19,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestLog(t *testing.T) {
@@ -92,4 +96,39 @@ func TestPeekBody_ReadFailure(t *testing.T) {
 	}))
 	rec := httptest.NewRecorder()
 	handler.ServeHTTP(rec, r)
+}
+
+func TestRequestID(t *testing.T) {
+	var logs bytes.Buffer
+	previous := log.Logger
+	log.Logger = zerolog.New(&logs).Level(zerolog.DebugLevel)
+	t.Cleanup(func() { log.Logger = previous })
+	handler := NewLoggingMiddleware()(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		logger := LoggerFromCtx(r.Context())
+		logger.Info().Msg("handler")
+		w.WriteHeader(http.StatusBadRequest)
+	}))
+	ids := make(map[string]bool)
+	for range 2 {
+		logs.Reset()
+		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req.Header.Set("X-Request-ID", "caller-provided")
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+		id := rec.Result().Header.Get("X-Request-ID")
+		parsed, err := uuid.Parse(id)
+		require.NoError(t, err)
+		assert.Equal(t, uuid.Version(4), parsed.Version())
+		assert.False(t, ids[id])
+		ids[id] = true
+		decoder := json.NewDecoder(&logs)
+		count := 0
+		for decoder.More() {
+			var entry map[string]any
+			require.NoError(t, decoder.Decode(&entry))
+			assert.Equal(t, id, entry["reqID"])
+			count++
+		}
+		assert.Equal(t, 3, count)
+	}
 }
