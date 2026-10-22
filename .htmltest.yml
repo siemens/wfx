@@ -4,6 +4,8 @@
 ---
 DirectoryPath: "public"
 IgnoreURLs:
+  - '^https://siemens.github.io/wfx/js/(main\.min|plugins/[^/]+)\.[0-9a-f]{64}\.js$'
+  - '^https://siemens.github.io/wfx/scss/main\.min\.[0-9a-f]{64}\.css$'
   - "^https://github.com/siemens/wfx.*"
   - "^http://127.0.0.1.*"
   - "^http://localhost.*"

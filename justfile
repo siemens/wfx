@@ -45,7 +45,7 @@ pages:
     popd
     mv hugo/public .
     go tool -modfile="{{ THISDIR }}/tools/go.mod" github.com/wjdp/htmltest
-    lychee public
+    lychee --exclude '^https://siemens\.github\.io/wfx/js/(main\.min|plugins/[^/]+)\.[0-9a-f]{64}\.js$' --exclude '^https://siemens\.github\.io/wfx/scss/main\.min\.[0-9a-f]{64}\.css$' public
 
 # Serve docs
 docs-serve:
