@@ -75,8 +75,8 @@
     "yargs-parser": "^22.0.0"
   },
   "devDependencies": {
-    "@docsy/theme": "0.17.0",
-    "sass-embedded": "1.105.0"
+    "@docsy/theme": "0.18.0",
+    "sass-embedded": "1.105.2"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
