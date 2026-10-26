@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update container image to account for the compromised eMudhra intermediate CAs ([DSA 6572-1](https://lists.debian.org/debian-security-announce/2026/msg00487.html)) ([1412480]( https://github.com/siemens/wfx/commit/1412480d4936fe659c3f096018aee322d11dfc96))
 - UI: replace Mermaid.js with Pele for workflow and job diagrams, improving rendering speed and reducing transitive dependencies ([1267b14](https://github.com/siemens/wfx/commit/1267b14d7491ac3f1d6fbbcd9f1ffcb963f87f03))
 
+### Added
+
+- Add per-request `X-Request-ID` response headers and include IDs in `wfxctl` HTTP/SSE errors
+
 ## [0.7.0] - 2026-09-15
 
 This release includes major changes, including multiple breaking configuration and API updates. Please read this changelog carefully before upgrading.

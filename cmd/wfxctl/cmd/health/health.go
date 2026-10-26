@@ -19,6 +19,7 @@ import (
 	"github.com/mattn/go-isatty"
 	"github.com/spf13/cobra"
 
+	"github.com/siemens/wfx/cmd/wfxctl/errutil"
 	"github.com/siemens/wfx/cmd/wfxctl/flags"
 	"github.com/siemens/wfx/generated/api"
 )
@@ -71,7 +72,7 @@ func NewCommand() *cobra.Command {
 				return fault.Wrap(err)
 			}
 			if endpoint.Response.JSON200 == nil || endpoint.Response.JSON200.Status != api.Up {
-				return fault.New("wfx is not healthy")
+				return errutil.WithRequestID(fault.New("wfx is not healthy"), endpoint.Response.HTTPResponse)
 			}
 			return nil
 		},

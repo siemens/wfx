@@ -293,7 +293,8 @@ func (b *BaseCmd) CreateClientWithResponses(opts ...api.ClientOption) (*api.Clie
 	return &api.ClientWithResponses{ClientInterface: client}, nil
 }
 
-func (b *BaseCmd) ProcessResponse(resp *http.Response, w io.Writer) error {
+func (b *BaseCmd) ProcessResponse(resp *http.Response, w io.Writer) (err error) {
+	defer func() { err = errutil.WithRequestID(err, resp) }()
 	body, _ := io.ReadAll(resp.Body)
 	_ = resp.Body.Close()
 	statusCode := resp.StatusCode

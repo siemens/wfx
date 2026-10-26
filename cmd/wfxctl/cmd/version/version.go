@@ -11,6 +11,7 @@ package version
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/Southclaws/fault"
 	"github.com/spf13/cobra"
@@ -32,6 +33,10 @@ func NewCommand() *cobra.Command {
 			if err != nil {
 				return fault.Wrap(err)
 			}
+			if resp.StatusCode != http.StatusOK {
+				return baseCmd.ProcessResponse(resp, cmd.OutOrStdout())
+			}
+			defer func() { _ = resp.Body.Close() }()
 			var versionResp api.GetVersion200JSONResponse
 			if err := json.NewDecoder(resp.Body).Decode(&versionResp); err != nil {
 				return fault.Wrap(err)
