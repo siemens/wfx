@@ -59,6 +59,7 @@ func ValidateWorkflow(workflow *api.Workflow) error {
 
 	// build a graph from the transitions
 	g := graph.New(numStates)
+	hasIncoming := make([]bool, numStates)
 
 	// (from, to) -> [client, wfx]
 	transitions := make(map[edge]([]api.EligibleEnum))
@@ -85,6 +86,7 @@ func ValidateWorkflow(workflow *api.Workflow) error {
 		if from != to {
 			// we allow trivial loops
 			g.Add(from, to)
+			hasIncoming[to] = true
 		}
 	}
 
@@ -114,22 +116,21 @@ func ValidateWorkflow(workflow *api.Workflow) error {
 
 	dfsResult := dfs(g)
 
-	{
-		// Workflow should have exactly one initial state.
-		var initialStates []string
-		for v, parent := range dfsResult.Prev {
-			if parent == noParent {
-				initialStates = append(initialStates, workflow.States[v].Name)
-			}
-		}
-		if len(initialStates) != 1 {
-			return fault.New("workflow must have exactly one INITIAL state")
-		}
-	}
-
 	for _, cycle := range dfsResult.Cycles {
 		return fault.Newf("workflow contains cycle from %s to %s",
 			workflow.States[cycle.From].Name, workflow.States[cycle.To].Name)
+	}
+
+	// An initial state has no incoming non-self transition, independently
+	// of the order in which DFS visits the states.
+	initialStates := 0
+	for _, incoming := range hasIncoming {
+		if !incoming {
+			initialStates++
+		}
+	}
+	if initialStates != 1 {
+		return fault.New("workflow must have exactly one INITIAL state")
 	}
 
 	return nil
