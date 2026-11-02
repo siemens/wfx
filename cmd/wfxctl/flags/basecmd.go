@@ -137,10 +137,6 @@ func NewBaseCmd(f *pflag.FlagSet) BaseCmd {
 		log.Fatal().Err(err).Msg("Failed to load flags")
 	}
 
-	log.Logger = zerolog.New(zerolog.ConsoleWriter{
-		Out:        os.Stderr,
-		TimeFormat: time.Stamp,
-	}).With().Timestamp().Logger()
 	if lvl, err := zerolog.ParseLevel(k.String(LogLevelFlag)); err == nil {
 		zerolog.SetGlobalLevel(lvl)
 	}
