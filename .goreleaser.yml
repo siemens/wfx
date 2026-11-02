@@ -17,7 +17,7 @@ builds:
     binary: wfx
     main: ./cmd/wfx
     tags:
-      - '!ui' # ensure we build without ui support (overriding GOFLAGS= variable which might be set locally)
+      - "!ui" # ensure we build without ui support (overriding GOFLAGS= variable which might be set locally)
     flags:
       - -trimpath
       - -mod=readonly
@@ -382,7 +382,19 @@ sboms:
       - wfx-viewer
     artifacts: binary
     cmd: cyclonedx-gomod
-    args: ["app", "-main", "./cmd/{{ .Binary }}", "-licenses", "-packages", "-std", "-json", "-output", "$document", "../"]
+    args:
+      [
+        "app",
+        "-main",
+        "./cmd/{{ .Binary }}",
+        "-licenses",
+        "-packages",
+        "-std",
+        "-json",
+        "-output",
+        "$document",
+        "../",
+      ]
     env:
       - GOARCH={{ .Arch }}
       - GOOS={{ .Os }}

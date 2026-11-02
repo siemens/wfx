@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 # Author: Michael Adler <michael.adler@siemens.com>
-FROM gcr.io/distroless/static-debian13:nonroot@sha256:d4df213e27178b79e05ee2bdf8a23d8c54baab3b5a0dc083b039ad9929fa4219
+FROM gcr.io/distroless/static-debian13:nonroot@sha256:336e53e9941facdb69b755e6fd2c63f5400abd3b1ba47bb17ebafc2b1547cebd
 
 # amd64, arm64
 ARG TARGETARCH

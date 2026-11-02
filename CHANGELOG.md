@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Treat URL query parameter names case-insensitively by normalizing them to the canonical casing defined in the OpenAPI specification ([093bc7d](https://github.com/siemens/wfx/commit/093bc7dfbfa9d6429a646fe946ce00f8a3c08f47))
-- Update container image to account for the compromised eMudhra intermediate CAs ([DSA 6572-1](https://lists.debian.org/debian-security-announce/2026/msg00487.html)) ([1412480]( https://github.com/siemens/wfx/commit/1412480d4936fe659c3f096018aee322d11dfc96))
+- Update container image to account for the compromised eMudhra intermediate CAs ([DSA 6572-1](https://lists.debian.org/debian-security-announce/2026/msg00487.html)) ([1412480](https://github.com/siemens/wfx/commit/1412480d4936fe659c3f096018aee322d11dfc96))
 - UI: replace Mermaid.js with Pele for workflow and job diagrams, improving rendering speed and reducing transitive dependencies ([1267b14](https://github.com/siemens/wfx/commit/1267b14d7491ac3f1d6fbbcd9f1ffcb963f87f03))
 
 ## [0.7.0] - 2026-09-15

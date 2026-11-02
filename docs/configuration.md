@@ -183,13 +183,13 @@ wfx --client-host unix:///tmp/wfx-client.sock \
 
 The following connectivity parameters are available:
 
-| Parameter           | Description                                                                                          |
-| :------------------ | :--------------------------------------------------------------------------------------------------- |
+| Parameter           | Description                                                                                         |
+| :------------------ | :-------------------------------------------------------------------------------------------------- |
 | `--client-host`     | Southbound listen URL (`http://host:port`, `https://host:port`, or `unix:///path`); may be repeated |
 | `--mgmt-host`       | Northbound listen URL (`http://host:port`, `https://host:port`, or `unix:///path`); may be repeated |
-| `--tls-certificate` | The location of the TLS certificate file                                                             |
-| `--tls-key`         | The location of the TLS key file                                                                     |
-| `--tls-ca`          | The certificate authority certificate file for mutual TLS authentication                             |
+| `--tls-certificate` | The location of the TLS certificate file                                                            |
+| `--tls-key`         | The location of the TLS key file                                                                    |
+| `--tls-ca`          | The certificate authority certificate file for mutual TLS authentication                            |
 
 ## Cross-Origin Resource Sharing (CORS)
 
@@ -197,8 +197,8 @@ CORS headers are disabled by default and never applied to the southbound API.
 The following parameters control CORS for the northbound API:
 
 | Parameter                  | Description                                                                                                                                                                       |
-|:---------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `--cors-enabled`           | Add CORS headers to northbound API responses; disabled by default                                                                                                                  |
+| :------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--cors-enabled`           | Add CORS headers to northbound API responses; disabled by default                                                                                                                 |
 | `--cors-allowed-origins`   | One or multiple origins allowed to make cross-origin requests; defaults to `*` (any origin)                                                                                       |
 | `--cors-allowed-methods`   | One or multiple methods allowed when making cross-origin requests; defaults to `GET,HEAD,POST,PUT,PATCH,DELETE`                                                                   |
 | `--cors-allowed-headers`   | One or multiple headers allowed when making cross-origin requests; defaults to `*` (any header)                                                                                   |
@@ -219,7 +219,7 @@ wfx --cors-enabled --cors-allowed-origins https://wfx-ui.company.cloud
 OAuth authentication for the built-in UI is configured with these parameters:
 
 | Parameter           | Description                                                        |
-|:--------------------|:-------------------------------------------------------------------|
+| :------------------ | :----------------------------------------------------------------- |
 | `--oauth-issuer`    | OpenID Connect issuer                                              |
 | `--oauth-client-id` | OAuth client ID                                                    |
 | `--oauth-scope`     | OAuth scopes requested by the UI (default: `openid email profile`) |

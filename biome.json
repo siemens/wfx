@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.4.13/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.6.4/schema.json",
   "formatter": {
     "enabled": true,
     "indentStyle": "space",
@@ -16,5 +16,8 @@
     "clientKind": "git",
     "useIgnoreFile": true,
     "root": "."
+  },
+  "files": {
+    "includes": ["!test/test_helper/**"]
   }
 }
