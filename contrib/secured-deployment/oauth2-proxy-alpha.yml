@@ -32,10 +32,6 @@ injectResponseHeaders:
     values:
       - claimSource:
           claim: groups
-  - name: X-Wfx-OIDC-Client-Id
-    values:
-      - claimSource:
-          claim: client_id
 
 providers:
   - id: authelia

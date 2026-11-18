@@ -23,8 +23,6 @@ key = serialization.load_pem_private_key(
     (ROOT / "state/certs/oidc-key.pem").read_bytes(), password=None
 )
 tls = ssl.create_default_context(cafile=str(ROOT / "state/certs/ca.pem"))
-# Local bootstrap certificate omits Authority Key Identifier.
-tls.verify_flags &= ~ssl.VERIFY_X509_STRICT
 getaddrinfo = socket.getaddrinfo
 socket.getaddrinfo = lambda host, *args, **kwargs: getaddrinfo(
     "127.0.0.1" if host.endswith(".localhost") else host, *args, **kwargs
@@ -69,9 +67,11 @@ def expect(label, bearer, expected, method="GET"):
             actual = response.status
     except urllib.error.HTTPError as error:
         actual = error.code
-    print(f"{label}: HTTP {actual}")
-    if actual != expected:
-        raise SystemExit(f"{label}: expected HTTP {expected}")
+    if actual == expected:
+        print(f"✅ OK: {label} (HTTP {actual})")
+        return
+    print(f"❌ FAILED: {label} (expected HTTP {expected}, got HTTP {actual})")
+    raise SystemExit(1)
 
 
 expect(
@@ -79,22 +79,27 @@ expect(
     token("wfx-ui", [], ["read:jobs", "write:jobs"]),
     403,
 )
-expect("admin group without scope", token("wfx-ui", ["wfx"], []), 403)
-expect("admin group with read scope", token("wfx-ui", ["wfx"], ["read:jobs"]), 200)
+expect("admin group without scope", token("wfx-ui", ["wfx-admin"], []), 403)
+expect("admin group with read scope", token("wfx-ui", ["wfx-admin"], ["read:jobs"]), 200)
 expect(
-    "wfxctl client credential",
+    "wfxctl without admin group",
     token("wfxctl", [], ["read:jobs", "write:jobs"]),
+    403,
+)
+expect(
+    "wfxctl user with admin group",
+    token("wfxctl", ["wfx-admin"], ["read:jobs", "write:jobs"]),
     200,
 )
 expect(
     "read-only admin cannot POST",
-    token("wfx-ui", ["wfx"], ["read:jobs"]),
+    token("wfx-ui", ["wfx-admin"], ["read:jobs"]),
     403,
     method="POST",
 )
 expect(
     "write-scoped admin reaches POST handler",
-    token("wfx-ui", ["wfx"], ["write:jobs"]),
+    token("wfx-ui", ["wfx-admin"], ["write:jobs"]),
     400,
     method="POST",
 )

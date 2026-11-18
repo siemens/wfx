@@ -14,7 +14,7 @@ users:
     password: $pbkdf2-sha512$310000$uduEXocdmEIF9jVAzwde8A$XrDgMjmOduR5FIXzf3DBACZ.UX27tyK8WHHemaHVJ84yanS3a/j8hkm/tiqp4XJUmkfc4CmUD8MBskiYV9lbuw
     email: wfx-admin@local
     picture: https://wfx-mgmt.localhost:8443/ui/logo.svg
-    groups: [wfx]
+    groups: [wfx-admin]
 
   # One user per device; bootstrap.py generates the passwords.
   wfx-client-1:

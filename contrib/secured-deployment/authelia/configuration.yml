@@ -46,6 +46,10 @@ identity_providers:
     lifespans:
       access_token: '5 minute'
       refresh_token: '1 hour'
+      custom:
+        # Rotation issues a fresh refresh token on each use, so this is the idle timeout for CLI sessions.
+        long_lived_cli:
+          refresh_token: '90d'
     jwks:
       - key_id: wfx
         key: |
@@ -102,26 +106,36 @@ identity_providers:
         authorization_policy: one_factor
         consent_mode: implicit
 
-      # Admin CLI's non-interactive northbound access: client credentials and a state-held secret avoid user sign-in; scopes and audience limit API access.
+      # CLI uses device authorization so northbound requests carry the signed-in user's groups and scopes.
       - client_id: wfxctl
         client_name: wfxctl
-        client_secret: '{{ secret "@STATE@/wfxctl-client-secret-digest" }}'
+        public: true
+        lifespan: long_lived_cli
         audience:
           - wfx-northbound-api
         requested_audience_mode: implicit
         scopes:
+          - openid
+          - offline_access
+          - groups
           - read:jobs
           - write:jobs
         grant_types:
-          - client_credentials
-        token_endpoint_auth_method: client_secret_post
+          - urn:ietf:params:oauth:grant-type:device_code
+          - refresh_token
+        token_endpoint_auth_method: none
         access_token_signed_response_alg: RS256
+        # RFC 9068 mode: required for groups and other custom access-token claims
+        access_token_signed_response_key_id: wfx
+        claims_policy: wfx
+        authorization_policy: one_factor
 
       # Shared public device client: device code suits headless sign-in; refresh tokens support later use. Southbound audience is limited to devices.
       # Signed user wfx_client_id identifies each device; client_id is shared. One factor is used because device accounts have password-only sign-in.
       - client_id: wfx-devices
         client_name: wfx devices
         public: true
+        lifespan: long_lived_cli
         audience:
           - wfx-southbound-api
         requested_audience_mode: implicit

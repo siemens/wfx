@@ -38,17 +38,6 @@ browser:
     Press <ctrl-c> to quit..."
     exec firefox --no-remote --profile "$profile" https://wfx-mgmt.localhost:8443/ui/
 
-_get-token CLIENT_ID SECRET_FILE AUD:
-    @oauth2c https://authelia.localhost:8443 \
-      --client-id {{ CLIENT_ID }} \
-      --client-secret "$(cat state/{{ SECRET_FILE }})" \
-      --grant-type client_credentials \
-      --auth-method client_secret_post \
-      --audience {{ AUD }} \
-      --scopes read:jobs,write:jobs \
-      --tls-root-ca state/certs/ca.pem \
-      --silent
-
 # Device code enrollment is interactive on first use; afterwards the stored
 # refresh token is used headlessly. Delete state/<device>-tokens.json to re-enroll.
 _get-device-token DEVICE:
@@ -81,9 +70,6 @@ _get-device-token DEVICE:
     printf '%s\n' "$result" | jq -e .access_token >/dev/null
     printf '%s\n' "$result" > "$tokens"
     printf '%s\n' "$result"
-
-get-wfx-admin-tokens:
-    @just _get-token wfxctl wfxctl-client-secret wfx-northbound-api
 
 get-wfx-client-1-tokens:
     @just _get-device-token wfx-client-1

@@ -78,20 +78,16 @@ if not secrets_file.is_file():
 else:
     logger.debug("%s already exists, skipping", secrets_file.name)
 
-client_credentials = (
-    "oauth2-client-secret",
-    "wfxctl-client-secret",
-)
-for name in client_credentials:
-    secret_path = state / name
-    digest_path = state / f"{name}-digest"
-    if not (secret_path.is_file() and digest_path.is_file()):
-        logger.info("Generating secret for %s", name)
-        secret_val = random_base64(32)
-        write_private(secret_path, secret_val)
-        write_private(digest_path, f"{password_digest(secret_val)}\n")
-    else:
-        logger.debug("Secret %s already exists, skipping", name)
+name = "oauth2-client-secret"
+secret_path = state / name
+digest_path = state / f"{name}-digest"
+if not (secret_path.is_file() and digest_path.is_file()):
+    logger.info("Generating secret for %s", name)
+    secret_val = random_base64(32)
+    write_private(secret_path, secret_val)
+    write_private(digest_path, f"{password_digest(secret_val)}\n")
+else:
+    logger.debug("Secret %s already exists, skipping", name)
 
 # One Authelia user per device. The password is only needed for the interactive
 # device-code enrollment; tokens are refreshed headlessly afterwards.
@@ -129,6 +125,8 @@ def check_certs(certs_dir, cert_files):
             return False
         if not (leaf_cert.not_valid_before_utc <= now <= leaf_cert.not_valid_after_utc):
             return False
+        # Certs from older bootstraps lack key identifiers and fail strict verification.
+        leaf_cert.extensions.get_extension_for_class(x509.AuthorityKeyIdentifier)
         ca_pubkey = ca_cert.public_key()
         ca_pubkey.verify(
             leaf_cert.signature,
@@ -179,6 +177,7 @@ if not ca_valid:
         .not_valid_before(now)
         .not_valid_after(expiry)
         .add_extension(x509.BasicConstraints(ca=True, path_length=None), critical=True)
+        .add_extension(x509.SubjectKeyIdentifier.from_public_key(ca_key.public_key()), critical=False)
         .add_extension(
             x509.KeyUsage(
                 digital_signature=False,
@@ -209,6 +208,7 @@ if not ca_valid:
         .serial_number(x509.random_serial_number())
         .not_valid_before(now)
         .not_valid_after(expiry)
+        .add_extension(x509.AuthorityKeyIdentifier.from_issuer_public_key(ca_key.public_key()), critical=False)
         .add_extension(
             x509.SubjectAlternativeName([
                 x509.DNSName("wfx-mgmt.localhost"),
@@ -272,7 +272,6 @@ logger.info("Setting file permissions")
 for path in (
     "secrets.env", "users.yml",
     "oauth2-client-secret", "oauth2-client-secret-digest",
-    "wfxctl-client-secret", "wfxctl-client-secret-digest",
     *(f"{name}-{suffix}" for name in devices for suffix in ("password", "password-digest")),
 ):
     (state / path).chmod(0o600)
