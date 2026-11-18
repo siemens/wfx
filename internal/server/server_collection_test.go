@@ -30,6 +30,7 @@ import (
 	"github.com/siemens/wfx/api"
 	"github.com/siemens/wfx/cmd/wfx/cmd/config"
 	genAPI "github.com/siemens/wfx/generated/api"
+	"github.com/siemens/wfx/internal/gron"
 	"github.com/siemens/wfx/persistence"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -421,7 +422,7 @@ func TestCORSPreflight(t *testing.T) {
 
 func TestCreateServer_UseMiddlewares(t *testing.T) {
 	dbMock := persistence.NewHealthyMockStorage(t)
-	dbMock.EXPECT().QueryJobs(context.Background(), mock.Anything, mock.Anything, mock.Anything).Return(new(genAPI.PaginatedJobList), nil)
+	dbMock.EXPECT().QueryJobs(context.Background(), mock.Anything, mock.Anything, mock.Anything).Return(new(genAPI.PaginatedJobList), nil).Twice()
 	wfx := api.NewWfxServer(dbMock)
 
 	var myMWCalled atomic.Bool
@@ -442,6 +443,13 @@ func TestCreateServer_UseMiddlewares(t *testing.T) {
 	server.Handler.ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
+
+	gronResponse := httptest.NewRecorder()
+	gronReq := httptest.NewRequest(http.MethodGet, "/api/wfx/v1/jobs", nil)
+	gronReq.Header.Set("Accept", "application/gron")
+	gron.Middleware(server.Handler).ServeHTTP(gronResponse, gronReq)
+	assert.Equal(t, "application/gron", gronResponse.Header().Get("Content-Type"))
+	assert.Contains(t, gronResponse.Body.String(), "json = {};\n")
 
 	assert.True(t, myMWCalled.Load())
 }

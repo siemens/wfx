@@ -52,6 +52,7 @@ Tip: Shell completion is available for Bash, Fish and Zsh. See wfxctl completion
 	f.String(flags.CredentialHelperFlag, "", "credential helper to invoke for HTTP authentication (wfxctl-credential-<name>, or path containing '/')")
 
 	f.String(flags.FilterFlag, "", "output filter (jq-expression). example: '.id'")
+	f.String(flags.FormatFlag, "json", "output format: json, gron")
 	f.Bool(flags.RawFlag, false, "output raw strings, not JSON texts; use --filter to select a single entity")
 
 	f.String(flags.LogLevelFlag, "info", fmt.Sprintf("set log level. one of: %s,%s,%s,%s,%s,%s,%s",

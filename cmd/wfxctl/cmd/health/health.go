@@ -12,6 +12,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 
 	"github.com/Southclaws/fault"
@@ -54,6 +55,25 @@ func NewCommand() *cobra.Command {
 				useColor = false
 			default:
 				return fault.Newf("unsupported color mode: %s", b.ColorMode)
+			}
+
+			if b.Format == "gron" {
+				cmd.SilenceUsage = true
+				client, err := b.CreateClient()
+				if err != nil {
+					return fault.Wrap(err)
+				}
+				resp, err := client.GetHealth(cmd.Context())
+				if err != nil {
+					return fault.Wrap(err)
+				}
+				if err := b.ProcessResponse(resp, cmd.OutOrStdout()); err != nil {
+					if resp.StatusCode == http.StatusServiceUnavailable {
+						return fault.New("wfx is not healthy")
+					}
+					return fault.Wrap(err)
+				}
+				return nil
 			}
 
 			endpoint := Endpoint{

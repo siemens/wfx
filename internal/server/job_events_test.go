@@ -117,6 +117,7 @@ func TestJobEventsSubscribe(t *testing.T) {
 
 			assert.Contains(t, response, "HTTP/1.1 200")
 			assert.Contains(t, response, "Content-Type: text/event-stream")
+			assert.Contains(t, response, "Vary: Accept")
 			if tc.corsOrigin == "" {
 				assert.NotContains(t, response, "Access-Control-Allow-Origin")
 			} else {
@@ -128,7 +129,7 @@ func TestJobEventsSubscribe(t *testing.T) {
 			for _, line := range lines {
 				t.Logf(">> %s", line)
 			}
-			expectedLines := 7
+			expectedLines := 8
 			if tc.corsOrigin != "" {
 				expectedLines += 2
 			}

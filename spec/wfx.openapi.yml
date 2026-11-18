@@ -53,6 +53,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CheckerResult"
+            application/gron:
+              schema:
+                $ref: "#/components/schemas/CheckerResult"
         "503":
           description: Some (or all) systems are down
           headers:
@@ -69,7 +72,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CheckerResult"
-
+            application/gron:
+              schema:
+                $ref: "#/components/schemas/CheckerResult"
   /version:
     servers:
       - url: /
@@ -104,7 +109,22 @@ paths:
                     type: string
                     example: "v1"
                     x-go-type-skip-optional-pointer: true
-
+            application/gron:
+              schema:
+                type: object
+                properties:
+                  version:
+                    type: string
+                    example: 0.3.1
+                    x-go-type-skip-optional-pointer: true
+                  commit:
+                    type: string
+                    example: 25f4dd3f9828553c9e437a24f7fa451ae60916f2
+                    x-go-type-skip-optional-pointer: true
+                  apiVersion:
+                    type: string
+                    example: "v1"
+                    x-go-type-skip-optional-pointer: true
   /workflows:
     get:
       tags:
@@ -128,6 +148,9 @@ paths:
           description: A list of workflows
           content:
             application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedWorkflowList"
+            application/gron:
               schema:
                 $ref: "#/components/schemas/PaginatedWorkflowList"
     post:
@@ -156,10 +179,20 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Workflow"
+            application/gron:
+              schema:
+                $ref: "#/components/schemas/Workflow"
         "400":
           description: Bad Request
           content:
             application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": workflowNotUniqueError
+                  - "<<": workflowInvalidError
+            application/gron:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
@@ -196,6 +229,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Workflow"
+            application/gron:
+              schema:
+                $ref: "#/components/schemas/Workflow"
         "400":
           description: If request is invalid
           content:
@@ -205,10 +241,22 @@ paths:
               example:
                 errors:
                   - "<<": invalidRequestError
+            application/gron:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": invalidRequestError
         "404":
           description: Not Found
           content:
             application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": workflowNotFoundError
+            application/gron:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
@@ -246,7 +294,12 @@ paths:
               example:
                 errors:
                   - "<<": workflowNotFoundError
-
+            application/gron:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": workflowNotFoundError
   /jobs:
     get:
       tags:
@@ -285,16 +338,28 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+            application/gron:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "200":
           description: A paginated job list.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/PaginatedJobList"
+            application/gron:
+              schema:
+                $ref: "#/components/schemas/PaginatedJobList"
         "400":
           description: If request is invalid
           content:
             application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": invalidRequestError
+            application/gron:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
@@ -326,10 +391,19 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Job"
+            application/gron:
+              schema:
+                $ref: "#/components/schemas/Job"
         "400":
           description: Bad Request
           content:
             application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": invalidRequestError
+            application/gron:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
@@ -409,10 +483,22 @@ paths:
               example:
                 errors:
                   - "<<": jobTerminalStateError
+            application/gron:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": jobTerminalStateError
         "404":
           description: Not Found
           content:
             application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": jobNotFoundError
+            application/gron:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
@@ -447,6 +533,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Job"
+            application/gron:
+              schema:
+                $ref: "#/components/schemas/Job"
         "400":
           description: Bad Request
           content:
@@ -456,10 +545,22 @@ paths:
               example:
                 errors:
                   - "<<": invalidRequestError
+            application/gron:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": invalidRequestError
         "404":
           description: Not Found
           content:
             application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": jobNotFoundError
+            application/gron:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
@@ -497,7 +598,12 @@ paths:
               example:
                 errors:
                   - "<<": workflowNotFoundError
-
+            application/gron:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": workflowNotFoundError
   /jobs/{id}/status:
     get:
       tags:
@@ -526,10 +632,19 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/JobStatus"
+            application/gron:
+              schema:
+                $ref: "#/components/schemas/JobStatus"
         "404":
           description: Not Found
           content:
             application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": jobNotFoundError
+            application/gron:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
@@ -569,6 +684,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/JobStatus"
+            application/gron:
+              schema:
+                $ref: "#/components/schemas/JobStatus"
         "400":
           description: Bad Request
           content:
@@ -578,10 +696,22 @@ paths:
               example:
                 errors:
                   - "<<": invalidRequestError
+            application/gron:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": invalidRequestError
         "404":
           description: Not Found
           content:
             application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": jobNotFoundError
+            application/gron:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
@@ -619,10 +749,21 @@ paths:
                 type: object
                 example: |
                   { "userDefined": {} }
+            application/gron:
+              schema:
+                type: object
+                example: |
+                  { "userDefined": {} }
         "404":
           description: Not Found
           content:
             application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": jobNotFoundError
+            application/gron:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
@@ -664,10 +805,21 @@ paths:
                 type: object
                 example: |
                   { "userDefined": {} }
+            application/gron:
+              schema:
+                type: object
+                example: |
+                  { "userDefined": {} }
         "400":
           description: Bad Request
           content:
             application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": invalidRequestError
+            application/gron:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
@@ -679,6 +831,12 @@ paths:
           description: Not Found
           content:
             application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": jobNotFoundError
+            application/gron:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
@@ -714,10 +872,19 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/TagList"
+            application/gron:
+              schema:
+                $ref: "#/components/schemas/TagList"
         "404":
           description: Not Found
           content:
             application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": jobNotFoundError
+            application/gron:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
@@ -758,10 +925,19 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/TagList"
+            application/gron:
+              schema:
+                $ref: "#/components/schemas/TagList"
         "400":
           description: Bad Request
           content:
             application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": invalidRequestError
+            application/gron:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
@@ -773,6 +949,12 @@ paths:
           description: Not Found
           content:
             application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": jobNotFoundError
+            application/gron:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
@@ -815,10 +997,19 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/TagList"
+            application/gron:
+              schema:
+                $ref: "#/components/schemas/TagList"
         "400":
           description: Bad Request
           content:
             application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": invalidRequestError
+            application/gron:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
@@ -830,6 +1021,12 @@ paths:
           description: Not Found
           content:
             application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                errors:
+                  - "<<": jobNotFoundError
+            application/gron:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:

@@ -32,6 +32,9 @@ func NewCommand() *cobra.Command {
 			if err != nil {
 				return fault.Wrap(err)
 			}
+			if baseCmd.Format == "gron" {
+				return fault.Wrap(baseCmd.ProcessResponse(resp, cmd.OutOrStdout()))
+			}
 			var versionResp api.GetVersion200JSONResponse
 			if err := json.NewDecoder(resp.Body).Decode(&versionResp); err != nil {
 				return fault.Wrap(err)
