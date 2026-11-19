@@ -68,7 +68,7 @@ jobs:
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          WFX_STATIC_LDFLAGS: "-linkmode external -extldflags '-static'"
+          WFX_STATIC_LDFLAGS: "-linkmode external -extldflags '-static -Wl,--strip-all'"
 
       - name: Stage container source
         run: |

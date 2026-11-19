@@ -29,7 +29,16 @@ jobs:
       - name: Build Snapshot Release for Linux
         run: /usr/bin/env CC=$(pwd)/.ci/zcc goreleaser release --clean --snapshot
         env:
-          WFX_STATIC_LDFLAGS: "-linkmode external -extldflags '-static'"
+          WFX_STATIC_LDFLAGS: "-linkmode external -extldflags '-static -Wl,--strip-all'"
+      - name: Verify Linux binaries are stripped
+        run: |
+          for binary in dist/*_linux_*/wfx dist/*_linux_*/wfxctl dist/*_linux_*/wfx-viewer; do
+            [[ -f "$binary" ]] || continue
+            if ! file "$binary" | grep -q 'stripped$'; then
+              echo "$binary is not stripped"
+              exit 1
+            fi
+          done
       - name: Upload Linux AMD64 artifacts
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
