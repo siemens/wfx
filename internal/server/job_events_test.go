@@ -26,6 +26,7 @@ import (
 	"github.com/siemens/wfx/internal/handler/workflow"
 	"github.com/siemens/wfx/middleware/sse"
 	"github.com/siemens/wfx/workflow/dau"
+	"github.com/steinfletcher/apitest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -153,4 +154,16 @@ func TestJobEventsSubscribe(t *testing.T) {
 			wg.Wait()
 		})
 	}
+}
+
+func TestJobEventsRejectInvalidClientIDs(t *testing.T) {
+	north, _ := createNorthAndSouth(t, newInMemoryDB(t))
+
+	apitest.New().
+		Handler(north).
+		Get("/api/wfx/v1/jobs/events").
+		Query("clientIds", "client1,client?2").
+		Expect(t).
+		Status(http.StatusBadRequest).
+		End()
 }
