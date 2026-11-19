@@ -118,6 +118,21 @@ func TestPutJobsIDStatusClientIDHeader(t *testing.T) {
 	}
 }
 
+func TestPutJobsIDStatusInvalidClientID(t *testing.T) {
+	db := newInMemoryDB(t)
+	north, _ := createNorthAndSouth(t, db)
+	job := persistJob(t, db)
+
+	apitest.New().
+		Handler(north).
+		Put(fmt.Sprintf("/api/wfx/v1/jobs/%s/status", job.ID)).
+		Body(`{"clientId":"client?42","state":"INSTALL"}`).
+		ContentType("application/json").
+		Expect(t).
+		Status(http.StatusBadRequest).
+		End()
+}
+
 func TestPutJobsIDStatusHandlerNotFound(t *testing.T) {
 	north, south := createNorthAndSouth(t, newInMemoryDB(t))
 	handlers := []http.Handler{north, south}

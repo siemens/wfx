@@ -185,6 +185,7 @@ definitions:
         type: string
         description: Create job for the given client ID
         example: client42
+        pattern: &clientIDPattern "^[A-Za-z0-9_.:/@-]+$"
         x-nullable: false
       workflow:
         type: string
@@ -221,6 +222,7 @@ definitions:
         x-nullable: false
         example: client42
         description: Client which sent the status update
+        pattern: *clientIDPattern
       progress:
         description: Current job progress percentage
         type: number
@@ -260,6 +262,7 @@ definitions:
       clientId:
         type: string
         example: client42
+        pattern: *clientIDPattern
         x-nullable: false
       workflow:
         $ref: "#/definitions/Workflow"
@@ -370,6 +373,7 @@ parameters:
     description: Filter jobs belonging to a specific client with clientId
     required: false
     type: string
+    pattern: *clientIDPattern
   clientIDHeader:
     name: X-Client-Id
     in: header
@@ -377,6 +381,7 @@ parameters:
     required: false
     type: string
     minLength: 1
+    pattern: *clientIDPattern
   workflow:
     name: workflow
     in: query
@@ -696,6 +701,7 @@ paths:
           description: The job's clientId must be one of these clientIds (comma-separated).
           required: false
           type: string
+          pattern: "^[A-Za-z0-9_.:/@-]+(,[A-Za-z0-9_.:/@-]+)*$"
         - name: jobIds
           in: query
           description: The job's id must be one of these ids (comma-separated).

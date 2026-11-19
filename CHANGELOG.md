@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Strip Linux release binaries after cgo linking to remove lingering debug information and symbols
 
+### Fixed
+
+- Validate client IDs across job creation, status updates, scoping headers, and event filters, rejecting values outside `[A-Za-z0-9_.:/@-]`
+
 ## [0.8.0] - 2026-10-22
 
 ### Changed

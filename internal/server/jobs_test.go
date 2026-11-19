@@ -232,6 +232,39 @@ func TestCreateJob_Invalid(t *testing.T) {
 	assert.Len(t, jobs.Content, 0)
 }
 
+func TestCreateJob_InvalidClientID(t *testing.T) {
+	db := newInMemoryDB(t)
+	north, _ := createNorthAndSouth(t, db)
+
+	wf, err := workflow.CreateWorkflow(t.Context(), db, dau.DirectWorkflow())
+	require.NoError(t, err)
+
+	for _, invalidCharacter := range []string{" ", "?", "#", "%", "+", "\\", "\r", "\n", "é"} {
+		t.Run(fmt.Sprintf("%q", invalidCharacter), func(t *testing.T) {
+			apitest.New().
+				Handler(north).
+				Post("/api/wfx/v1/jobs").
+				Body(fmt.Sprintf(`{"clientId":%q,"workflow":%q}`, "client"+invalidCharacter+"42", wf.Name)).
+				ContentType("application/json").
+				Expect(t).
+				Status(http.StatusBadRequest).
+				End()
+		})
+	}
+}
+
+func TestGetJobs_InvalidClientIDHeader(t *testing.T) {
+	_, south := createNorthAndSouth(t, newInMemoryDB(t))
+
+	apitest.New().
+		Handler(south).
+		Get("/api/wfx/v1/jobs").
+		Header("X-Client-Id", "client?42").
+		Expect(t).
+		Status(http.StatusBadRequest).
+		End()
+}
+
 func TestCreateJob_SouthNotAllowed(t *testing.T) {
 	db := newInMemoryDB(t)
 	_, south := createNorthAndSouth(t, db)
