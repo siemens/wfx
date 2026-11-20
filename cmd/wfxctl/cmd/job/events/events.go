@@ -44,11 +44,7 @@ var validator = func(out io.Writer) sse.ResponseValidator {
 			if err := json.Unmarshal(b, errResp); err != nil {
 				return fault.Wrap(err)
 			}
-			if errResp.Errors != nil {
-				for _, msg := range *errResp.Errors {
-					fmt.Fprintf(out, "ERROR: %s (code=%s, logref=%s)\n", msg.Message, msg.Code, msg.Logref)
-				}
-			}
+			errutil.ProcessErrorResponse(out, *errResp)
 		}
 		return fault.Newf("received HTTP status code: %d", r.StatusCode)
 	}
@@ -61,7 +57,24 @@ type SSETransport struct {
 
 // Do implements the runtime.ClientTransport interface.
 func (t SSETransport) Do(req *http.Request) (*http.Response, error) {
-	conn := t.sseClient.NewConnection(req)
+	client := *t.sseClient
+	var response *http.Response
+	validate := client.ResponseValidator
+	if validate == nil {
+		validate = sse.DefaultValidator
+	}
+	client.ResponseValidator = func(resp *http.Response) error {
+		response = resp
+		return validate(resp)
+	}
+	onRetry := client.OnRetry
+	client.OnRetry = func(err error, sleep time.Duration) {
+		if onRetry != nil {
+			onRetry(errutil.WithRequestID(err, response), sleep)
+		}
+		response = nil
+	}
+	conn := client.NewConnection(req)
 	unsubscribe := conn.SubscribeMessages(func(event sse.Event) {
 		_, _ = t.out.Write([]byte(event.Data))
 		_, _ = t.out.Write([]byte("\n"))
@@ -70,6 +83,7 @@ func (t SSETransport) Do(req *http.Request) (*http.Response, error) {
 
 	err := conn.Connect()
 	if err != nil {
+		err = errutil.WithRequestID(err, response)
 		log.Error().Msg(err.Error())
 		return nil, fault.Wrap(err)
 	}
@@ -92,7 +106,7 @@ wfxctl job events --job-id=1 --job-id=2 --client-id=foo
 			httpClient.Timeout = 0
 
 			// use sane defaults (e.g. auto reconnect) from the default client
-			sseClient := sse.DefaultClient
+			sseClient := *sse.DefaultClient
 			sseClient.HTTPClient = httpClient
 			sseClient.ResponseValidator = validator(cmd.ErrOrStderr())
 
@@ -101,10 +115,10 @@ wfxctl job events --job-id=1 --job-id=2 --client-id=foo
 				sseClient.Backoff.MaxRetries = -1
 			}
 
-			sseClient.OnRetry = func(_ error, sleep time.Duration) {
-				fmt.Fprintf(cmd.ErrOrStderr(), "SSE connection lost. Attempting to reconnect in %v...\n", sleep)
+			sseClient.OnRetry = func(err error, sleep time.Duration) {
+				fmt.Fprintf(cmd.ErrOrStderr(), "SSE connection lost: %v. Attempting to reconnect in %v...\n", err, sleep)
 			}
-			transport := SSETransport{sseClient: sse.DefaultClient, out: cmd.OutOrStdout()}
+			transport := SSETransport{sseClient: &sseClient, out: cmd.OutOrStdout()}
 
 			client, err := baseCmd.CreateClient(api.WithHTTPClient(transport))
 			if err != nil {

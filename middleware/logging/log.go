@@ -33,6 +33,7 @@ func NewLoggingMiddleware() func(http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()
 			reqID := uuid.New().String()
+			w.Header().Set("X-Request-ID", reqID)
 			var path string
 			if r.URL != nil {
 				path = r.URL.Path
